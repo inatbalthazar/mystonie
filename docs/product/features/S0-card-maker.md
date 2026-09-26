@@ -38,8 +38,11 @@ A single-page web tool: search a movie or series, pick one of 3 templates, optio
 - `metadataBase`, favicon + app icon (placeholder until the designer's logo), a default OG image for `/` (Latin-safe, `@vercel/og` or static PNG), `robots.txt`, `sitemap.xml` with `en` + `th` alternates.
 - **As built:** dark tokens sit in `@media (prefers-color-scheme: dark)` in `globals.css` (no JS, no flash) and `viewport.themeColor` follows the theme. The site origin comes from `siteUrl()` in `src/lib/site.ts`: `NEXT_PUBLIC_SITE_URL`, else Vercel's production domain, else `localhost:3000`. The placeholder Stonie mark is `src/app/icon.svg`; `apple-icon.tsx` (180px) and `opengraph-image.tsx` (1200×630, English copy from `en.json`, shared by every locale) render it to PNG with `next/og` at build time. To swap in the designer's logo, replace `icon.svg` (or drop in `icon.png` / `apple-icon.png` / `opengraph-image.png` files and delete the `.tsx` generators). Those generated routes have no file extension, so `src/proxy.ts` excludes them by name. New public pages must be added to `src/app/sitemap.ts`.
 
+### First screen (as built)
+`src/app/[locale]/page.tsx` loads trending on the server (`trendingTitles()`, revalidated hourly; empty if TMDB is unavailable) and passes 12 titles to `src/components/title-picker.tsx`. That client component debounces search (250 ms, ≥ 2 chars, aborts stale requests), shows a 3-column poster grid at 360px, and on pick fetches `/api/titles/tmdb/{kind}/{id}` into a details panel. The card editor replaces that panel.
+
 ## Acceptance criteria
-- [ ] Typing "stranger" shows *Stranger Things* with a poster before the word is complete.
+- [x] Typing "stranger" shows *Stranger Things* with a poster before the word is complete (first result for "strang", verified 2026-09-26).
 - [ ] All 3 templates render at both sizes with no layout overflow for long titles (60+ chars) and long reviews.
 - [ ] A Thai, Korean and Japanese review renders correctly on the PNG.
 - [ ] Share opens the native share sheet with the image on iOS Safari and Android Chrome. Download works on desktop.

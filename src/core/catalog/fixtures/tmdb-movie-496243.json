@@ -1,0 +1,17 @@
+{
+  "adult": false,
+  "genres": [
+    { "id": 35, "name": "Comedy" },
+    { "id": 53, "name": "Thriller" },
+    { "id": 18, "name": "Drama" }
+  ],
+  "id": 496243,
+  "imdb_id": "tt6751668",
+  "original_language": "ko",
+  "original_title": "기생충",
+  "poster_path": "/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
+  "release_date": "2019-05-30",
+  "runtime": 133,
+  "status": "Released",
+  "title": "Parasite"
+}

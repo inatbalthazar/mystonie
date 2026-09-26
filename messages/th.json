@@ -3,7 +3,21 @@
     "description": "Strava สำหรับซีรีส์และหนังที่คุณดูจบ"
   },
   "Home": {
-    "tagline": "ดูจบแล้ว? Mystonie เลย"
+    "tagline": "ดูจบแล้ว? Mystonie เลย",
+    "intro": "เปลี่ยนซีรีส์และหนังที่คุณดูจบให้เป็นงานศิลป์ที่อยากแชร์",
+    "searchLabel": "ค้นหาหนังและซีรีส์",
+    "searchPlaceholder": "เพิ่งดูอะไรจบ?",
+    "searching": "กำลังค้นหา…",
+    "noResults": "ไม่พบ “{query}”",
+    "searchError": "ค้นหาไม่ได้ตอนนี้ ลองใหม่อีกครั้ง",
+    "rateLimited": "ช้าลงนิดนึง แล้วลองใหม่",
+    "trendingTitle": "มาแรงสัปดาห์นี้",
+    "titleMeta": "{kind, select, movie {หนัง} series {ซีรีส์} other {เรื่อง}}{year, select, none {} other { · {year}}}",
+    "seriesStats": "{episodes} ตอน · {seasons} ซีซัน",
+    "movieStats": "{minutes, plural, =0 {ไม่ทราบความยาว} other {# นาที}}",
+    "detailsError": "โหลดรายละเอียดไม่ได้",
+    "cardComingSoon": "เครื่องทำการ์ดกำลังจะมา",
+    "clearPick": "ล้างการเลือก"
   },
   "LocaleSwitcher": {
     "label": "ภาษา"
@@ -11,5 +25,8 @@
   "NotFound": {
     "title": "ไม่พบหน้านี้",
     "backHome": "กลับหน้าแรก"
+  },
+  "Attribution": {
+    "tmdb": "ผลิตภัณฑ์นี้ใช้ TMDB API แต่ไม่ได้รับการรับรองจาก TMDB"
   }
 }

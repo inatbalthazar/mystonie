@@ -1,6 +1,6 @@
 -- pgTAP tests for the stage 0 schema. Run with `pnpm db:test` (local stack must be running).
 begin;
-select plan(15);
+select plan(16);
 
 -- RLS is on for every stage 0 table.
 select ok((select relrowsecurity from pg_class where oid = 'public.titles'::regclass), 'titles has RLS');
@@ -17,8 +17,11 @@ select isnt((select updated_at from public.titles where external_id = '66732'), 
   'updated_at is server-stamped');
 
 select throws_ok(
-  $$insert into public.titles (kind, source, external_id, name) values ('movie', 'tmdb', '66732', 'dup')$$,
-  '23505', null, 'titles are unique per (source, external_id)');
+  $$insert into public.titles (kind, source, external_id, name) values ('series', 'tmdb', '66732', 'dup')$$,
+  '23505', null, 'titles are unique per (source, kind, external_id)');
+select lives_ok(
+  $$insert into public.titles (kind, source, external_id, name) values ('movie', 'tmdb', '66732', 'A movie')$$,
+  'a movie and a series may share a TMDB id');
 
 select throws_ok(
   $$insert into public.waitlist (email, consent_at) values ('Someone@Example.com', now())$$,
@@ -26,7 +29,7 @@ select throws_ok(
 
 -- Anonymous visitors (browser with the anon key).
 set local role anon;
-select is((select count(*)::int from public.titles), 1, 'anon can read titles');
+select is((select count(*)::int from public.titles), 2, 'anon can read titles');
 select throws_ok(
   $$insert into public.titles (kind, source, external_id, name) values ('movie', 'tmdb', '1', 'x')$$,
   '42501', null, 'anon cannot write titles');
@@ -40,7 +43,7 @@ select throws_ok($$select public.rate_limit_hit('x', 60, 1)$$, '42501', null, 'a
 set local role authenticated;
 update public.titles set name = 'hacked';
 reset role;
-select is((select name from public.titles where external_id = '66732'), 'Stranger Things (2016)',
+select is((select name from public.titles where kind = 'series' and external_id = '66732'), 'Stranger Things (2016)',
   'authenticated cannot update titles (RLS filters every row)');
 
 -- Rate limiter: allows up to max hits per window, then refuses.

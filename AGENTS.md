@@ -37,7 +37,7 @@ Instructions for AI coding agents (Claude Code, Codex, Cursor, …) working in t
 | `src/lib/` | Small app helpers (`utils.ts` → `cn`, `site.ts` → site URL). Not for domain logic, which goes in `src/core` |
 | `src/cards/` | Card templates (`templates/*`, each = component + metadata) and the PNG renderer |
 | `src/core/` | Pure TS: types, zod schemas, catalog normalizers, stats, formatting, import parsers (+ `*.test.ts`) |
-| `src/data/` | Supabase clients and typed queries (no React) |
+| `src/data/` | Server-side data access, no React: Supabase clients, typed queries (`database.types.ts` from `pnpm db:types`), external API clients (`tmdb.ts`) |
 | `messages/` | next-intl messages (`en.json`, `th.json`) |
 | `supabase/migrations/` | SQL schema, RLS, triggers, seeds |
 
@@ -72,6 +72,7 @@ pnpm db:start                      # start local Postgres/Auth/Studio (prints UR
 pnpm db:reset                      # rebuild the local DB from supabase/migrations
 pnpm db:test                       # pgTAP tests in supabase/tests/database
 pnpm db:new <name>                 # new migration file
+pnpm db:types                      # regenerate src/data/database.types.ts after a migration
 pnpm db:stop
 ```
 Never apply migrations to the remote project unless the owner asks.

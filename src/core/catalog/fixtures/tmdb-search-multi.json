@@ -1,0 +1,70 @@
+{
+  "page": 1,
+  "results": [
+    {
+      "adult": false,
+      "backdrop_path": "/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
+      "id": 66732,
+      "name": "Stranger Things",
+      "original_name": "Stranger Things",
+      "overview": "When a young boy vanishes, a small town uncovers a mystery involving secret experiments, terrifying supernatural forces, and one strange little girl.",
+      "poster_path": "/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+      "media_type": "tv",
+      "original_language": "en",
+      "genre_ids": [18, 10765, 9648],
+      "popularity": 312.5,
+      "first_air_date": "2016-07-15",
+      "vote_average": 8.6,
+      "vote_count": 19000,
+      "origin_country": ["US"]
+    },
+    {
+      "adult": false,
+      "id": 1068115,
+      "title": "Stranger Things: The First Shadow",
+      "original_title": "Stranger Things: The First Shadow",
+      "poster_path": null,
+      "media_type": "movie",
+      "original_language": "en",
+      "genre_ids": [],
+      "release_date": "",
+      "popularity": 1.2
+    },
+    {
+      "adult": false,
+      "id": 1236,
+      "name": "Stranger Person",
+      "original_name": "Stranger Person",
+      "media_type": "person",
+      "known_for_department": "Acting",
+      "profile_path": "/abc.jpg"
+    },
+    {
+      "adult": false,
+      "id": 96162,
+      "name": "Stranger",
+      "original_name": "비밀의 숲",
+      "poster_path": "/eurBC6ixt7ZkGqCWxQf3qKCK1Xd.jpg",
+      "media_type": "tv",
+      "original_language": "ko",
+      "first_air_date": "2017-06-10"
+    },
+    {
+      "adult": true,
+      "id": 999,
+      "title": "Adult title",
+      "original_title": "Adult title",
+      "media_type": "movie",
+      "release_date": "2020-01-01"
+    },
+    {
+      "adult": false,
+      "id": 12,
+      "title": "   ",
+      "media_type": "movie"
+    },
+    "not an object"
+  ],
+  "total_pages": 1,
+  "total_results": 7
+}

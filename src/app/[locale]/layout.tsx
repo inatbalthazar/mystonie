@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { LocaleSwitcher } from "@/components/locale-switcher";
+import { TmdbAttribution } from "@/components/tmdb-attribution";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
 import "../globals.css";
@@ -50,8 +51,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider>
           {children}
-          <footer className="flex justify-center p-4">
+          <footer className="flex flex-col items-center gap-3 p-4">
             <LocaleSwitcher />
+            <TmdbAttribution />
           </footer>
         </NextIntlClientProvider>
       </body>

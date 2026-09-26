@@ -4,7 +4,7 @@
 
 | Stage | Provider | Used for | Auth / env | Terms & notes |
 |---|---|---|---|---|
-| 0 | **TMDB** | search (`/search/multi`), `/trending/all/week` (first screen), details, seasons/episodes, images, `/trending`, localized titles, `/watch/providers` (stage 2) | `TMDB_API_TOKEN` | Free for non-commercial use with **attribution** (logo + notice). **A commercial agreement is required once Mystonie earns money (before Pro launch).** Movie/TV data comes from TMDB, not IMDb ([ADR 0001](../decisions/0001-tmdb-instead-of-imdb.md)). |
+| 0 | **TMDB** | search (`/search/movie` + `/search/tv`, merged by popularity), `/trending/all/week` (first screen), details, seasons/episodes, images, `/trending`, localized titles, `/watch/providers` (stage 2) | `TMDB_API_TOKEN` | Free for non-commercial use with **attribution** (logo + notice). **A commercial agreement is required once Mystonie earns money (before Pro launch).** Movie/TV data comes from TMDB, not IMDb ([ADR 0001](../decisions/0001-tmdb-instead-of-imdb.md)). |
 | 2 | **DoesTheDogDie** | content-warning topics + yes/no community votes per title | `DTDD_API_KEY` | Verify the current endpoints, rate limits, attribution and commercial terms in DTDD's API docs before building. Record them here. Cache ≥ 7 days. Credit + link back on every warning block ([ADR 0009](../decisions/0009-content-warnings-from-dtdd-first.md)). |
 | 2 | **Google Books** | book search, cover, page count | `GOOGLE_BOOKS_API_KEY` | Page counts are sometimes missing, so handle null. |
 | 2 | **AniList** (GraphQL) | manga, manhwa, webtoons (volumes, chapters, covers) | none | Rate-limited (check current limits). Cache aggressively. Jikan (MAL) is the fallback. |
@@ -12,6 +12,17 @@
 | 2 | **Stripe** | Pro subscription | `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` | Entitlements come only from verified webhooks. |
 | any | **PostHog**, **Sentry** | analytics, errors | `NEXT_PUBLIC_POSTHOG_KEY`, `SENTRY_DSN` | PostHog cookieless mode. |
 | later | RAWG + HowLongToBeat | games | – | HLTB has no official API. Use a cached server job only ([ADR 0005](../decisions/0005-hltb-via-edge-function-cache.md)). |
+
+## Our catalog routes (stage 0)
+Implemented in `src/app/api/`, TMDB client in `src/data/tmdb.ts`, normalizers in `src/core/catalog/tmdb.ts` (fixture tests). Caching, limits and language: [ADR 0012](../decisions/0012-catalog-api-caching-and-limits.md).
+
+| Route | Returns | Rate limit (per IP hash) |
+|---|---|---|
+| `GET /api/search?q=` (2–100 chars) | `{ results: SearchResult[] }`, movies + series, top 20 by TMDB popularity | 60/min |
+| `GET /api/trending` | `{ results: SearchResult[] }`, `/trending/all/week` | 30/min |
+| `GET /api/titles/tmdb/{movie\|series}/{id}` | `{ title: Title }`, cached in `titles` for 7 days | 30/min |
+
+Errors are JSON `{ error }`: `400 invalid_query`, `404 not_found`, `429 rate_limited` (with `Retry-After`), `502 catalog_error`, `503 catalog_unavailable` (no `TMDB_API_TOKEN`). Attribution (logo + notice) is in the site footer (`src/components/tmdb-attribution.tsx`, logo in `public/attribution/`).
 
 ## Normalized search result (`src/core/catalog`)
 ```ts
@@ -22,7 +33,8 @@ type SearchResult = {
   name: string;
   originalName?: string;
   year?: number;
-  imageUrl?: string;
-  subtitle?: string; // e.g. network, author, "Anime · 2023"
+  originalLanguage?: string;
+  imageUrl?: string; // small poster (TMDB w342)
 };
 ```
+The UI composes any subtitle ("Series · 2016") from `kind` + `year` through next-intl. A picked title is a `Title` (same file, mirrors the `titles` table).

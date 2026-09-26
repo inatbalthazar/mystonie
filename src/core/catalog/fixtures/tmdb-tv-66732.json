@@ -1,0 +1,22 @@
+{
+  "adult": false,
+  "backdrop_path": "/56v2KjBlU4XaOv9rVYEQypROD7P.jpg",
+  "episode_run_time": [],
+  "first_air_date": "2016-07-15",
+  "genres": [
+    { "id": 18, "name": "Drama" },
+    { "id": 10765, "name": "Sci-Fi & Fantasy" },
+    { "id": 9648, "name": "Mystery" }
+  ],
+  "id": 66732,
+  "in_production": false,
+  "last_episode_to_air": { "id": 5000000, "episode_number": 8, "season_number": 5, "runtime": 128 },
+  "name": "Stranger Things",
+  "number_of_episodes": 42,
+  "number_of_seasons": 5,
+  "original_language": "en",
+  "original_name": "Stranger Things",
+  "poster_path": "/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+  "status": "Ended",
+  "type": "Scripted"
+}

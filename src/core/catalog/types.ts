@@ -1,0 +1,33 @@
+export type CatalogSource = "tmdb" | "google_books" | "anilist";
+export type TitleKind = "movie" | "series" | "book" | "manga";
+
+/** One row in search results or the trending list. */
+export type SearchResult = {
+  source: CatalogSource;
+  externalId: string;
+  kind: TitleKind;
+  name: string;
+  originalName?: string;
+  originalLanguage?: string;
+  year?: number;
+  /** Small poster, ready for a result list. */
+  imageUrl?: string;
+};
+
+/** A picked title with the details a card needs. Mirrors the `titles` table. */
+export type Title = {
+  source: CatalogSource;
+  externalId: string;
+  kind: TitleKind;
+  name: string;
+  originalName: string | null;
+  originalLanguage: string | null;
+  year: number | null;
+  /** Provider-relative path; build sized URLs with e.g. `tmdbImageUrl`. */
+  posterPath: string | null;
+  genres: string[];
+  /** Movie runtime, or the typical episode runtime for a series. */
+  runtimeMin: number | null;
+  episodeCount: number | null;
+  seasonCount: number | null;
+};

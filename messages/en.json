@@ -5,7 +5,21 @@
   },
   "Home": {
     "title": "Mystonie",
-    "tagline": "Finished it? Mystonie it."
+    "tagline": "Finished it? Mystonie it.",
+    "intro": "Turn the shows and movies you finish into artwork worth sharing.",
+    "searchLabel": "Search movies and series",
+    "searchPlaceholder": "What did you just finish?",
+    "searching": "Searching…",
+    "noResults": "Nothing found for “{query}”.",
+    "searchError": "Search isn't working right now. Try again in a moment.",
+    "rateLimited": "Slow down a little, then try again.",
+    "trendingTitle": "Trending this week",
+    "titleMeta": "{kind, select, movie {Movie} series {Series} other {Title}}{year, select, none {} other { · {year}}}",
+    "seriesStats": "{episodes, plural, one {# episode} other {# episodes}} · {seasons, plural, one {# season} other {# seasons}}",
+    "movieStats": "{minutes, plural, =0 {Runtime unknown} other {# min}}",
+    "detailsError": "Couldn't load the details.",
+    "cardComingSoon": "Card maker coming next.",
+    "clearPick": "Clear selection"
   },
   "LocaleSwitcher": {
     "label": "Language"
@@ -13,5 +27,8 @@
   "NotFound": {
     "title": "Page not found",
     "backHome": "Back to home"
+  },
+  "Attribution": {
+    "tmdb": "This product uses the TMDB API but is not endorsed or certified by TMDB."
   }
 }
