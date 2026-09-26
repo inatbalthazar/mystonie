@@ -44,6 +44,9 @@ Instructions for AI coding agents (Claude Code, Codex, Cursor, …) working in t
 ## Stack
 Next.js 16 (App Router, Turbopack, TypeScript strict) · Tailwind CSS 4 · shadcn/ui (Base UI, [ADR 0010](docs/decisions/0010-scaffold-baseline.md)) · Motion · next-intl · Supabase (Postgres, Auth, Storage, pg_cron) · Recharts · modern-screenshot (card export) · PostHog (cookieless) · Sentry · Stripe (stage 2) · Vitest · Playwright · pnpm · Vercel.
 
+## CI
+GitHub Actions (`.github/workflows/ci.yml`) runs `lint`, `typecheck`, `test` and the pgTAP DB tests on every push to `main` and every PR. Keep it green; run the same commands locally before pushing.
+
 ## Conventions
 - DB `snake_case`, TS `camelCase`. Map between them in `src/data`.
 - Tests next to code (`*.test.ts`). RLS policies get SQL tests.

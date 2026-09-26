@@ -38,3 +38,25 @@ describe("src/core boundary rule", () => {
     expect(await boundaryErrors(code, "src/components/x.ts")).toEqual([]);
   });
 });
+
+describe("no hard-coded copy rule", () => {
+  async function literalErrors(code: string, filePath: string) {
+    const [result] = await eslint.lintText(code, { filePath });
+    return result.messages.filter((m) => m.ruleId === "react/jsx-no-literals").length;
+  }
+
+  it("rejects visible text written directly in JSX", async () => {
+    expect(await literalErrors('export const A = () => <p>Finished it?</p>;\n', "src/app/x.tsx")).toBe(1);
+    expect(await literalErrors('export const A = () => <p>{"Finished it?"}</p>;\n', "src/app/x.tsx")).toBe(1);
+  });
+
+  it("allows translated text, props and separators", async () => {
+    const code =
+      'declare const t: (k: string) => string;\nexport const A = () => <p className="text-sm">{t("a")} · {t("b")}</p>;\n';
+    expect(await literalErrors(code, "src/components/x.tsx")).toBe(0);
+  });
+
+  it("does not apply to shadcn primitives", async () => {
+    expect(await literalErrors("export const A = () => <span>Close</span>;\n", "src/components/ui/x.tsx")).toBe(0);
+  });
+});
