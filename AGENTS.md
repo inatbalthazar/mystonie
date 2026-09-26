@@ -63,7 +63,15 @@ pnpm dlx shadcn@latest add <name>  # add a shadcn/ui component
 ```
 If `pnpm typecheck` fails inside `.next/dev/types` after moving or deleting routes, delete `.next` (stale dev-server types).
 
-Supabase commands (`supabase start` · `supabase db reset` · `supabase migration new <name>`) are added by the Supabase init task.
+Database (local Supabase, needs Docker Desktop running; the CLI is a devDependency):
+```
+pnpm db:start                      # start local Postgres/Auth/Studio (prints URLs + keys for .env.local)
+pnpm db:reset                      # rebuild the local DB from supabase/migrations
+pnpm db:test                       # pgTAP tests in supabase/tests/database
+pnpm db:new <name>                 # new migration file
+pnpm db:stop
+```
+Never apply migrations to the remote project unless the owner asks.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

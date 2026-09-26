@@ -14,7 +14,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress (add branch name) · 🧑 
 ## Stage 0: Mystonie Card (3–4 weeks) · [spec](product/features/S0-card-maker.md)
 - [x] **Scaffold:** Next.js (App Router, TS strict, `src/`) + Tailwind + shadcn/ui + pnpm at the **repo root**. `create-next-app` refuses non-empty folders, so scaffold into a temp dir and merge (keep existing docs, AGENTS.md, CLAUDE.md, README.md, .gitignore). Add ESLint rule: no React/Next/DOM/Supabase imports in `src/core`. Add Vitest. ([ADR 0006](decisions/0006-single-nextjs-app.md), [ADR 0010](decisions/0010-scaffold-baseline.md))
 - [x] next-intl with `en` default + `th`, locale routing, language switcher, `messages/en.json` + `th.json`. ([i18n](architecture/i18n.md), [ADR 0007](decisions/0007-english-first-global.md))
-- [ ] Supabase init + first migration: `updated_at` trigger fn, `titles`, `waitlist` (with `consent_at`), `rate_limits`, RLS. ([data model](architecture/data-model.md))
+- [x] Supabase init + first migration: `updated_at` trigger fn, `titles`, `waitlist` (with `consent_at`), `rate_limits`, RLS. ([data model](architecture/data-model.md))
 - [ ] GitHub Actions CI (lint, typecheck, test) + Vercel project with preview deploys per PR. Pin Node 24 (`engines`). Add a lint rule against hard-coded JSX strings.
 - [ ] Site basics: theme follows system (dark mode), `metadataBase`, placeholder favicon/app icon, default OG image, `robots.txt`, `sitemap.xml`.
 - [ ] `/api/search` + `/api/trending`: TMDB multi search (movie + tv) and weekly trending, normalizer in `src/core/catalog` (fixture tests), cache chosen titles, rate limit, TMDB attribution.

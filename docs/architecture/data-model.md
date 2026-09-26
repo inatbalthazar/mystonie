@@ -12,9 +12,11 @@ Postgres on Supabase. This is a draft. The source of truth becomes `supabase/mig
 
 | Table | Columns | RLS |
 |---|---|---|
-| `titles` | `id`, `kind` (`movie`/`series`; later `book`/`manga`), `source` (`tmdb`; later `google_books`/`anilist`), `external_id`, `name`, `original_name`, `original_language`, `year`, `poster_path`, `palette jsonb`, `genres text[]`, `runtime_min`, `episode_count`, `season_count`, `raw jsonb`, `fetched_at` | Read: everyone. Write: server only. Unique (`source`, `external_id`). |
-| `waitlist` | `id`, `email` unique, `locale`, `source` (utm / `ref`), `consent_at`, `unsubscribed_at`, `created_at` | Insert via our route handler only (honeypot + rate limit). Read: server only. |
-| `rate_limits` | `key` (e.g. `search:<ip-hash>`), `window_start`, `count` | Server only. Used by `/api/search` and the waitlist route. |
+| `titles` | `id`, `kind` (`movie`/`series`; later `book`/`manga`), `source` (`tmdb`; later `google_books`/`anilist`), `external_id`, `name`, `original_name`, `original_language`, `year`, `poster_path`, `palette jsonb`, `genres text[]`, `runtime_min`, `episode_count`, `season_count`, `raw jsonb`, `fetched_at`, `created_at`, `updated_at` | Read: everyone. Write: server only. Unique (`source`, `external_id`). |
+| `waitlist` | `id`, `email` unique, `locale`, `source` (utm / `ref`), `consent_at`, `unsubscribed_at`, `created_at`, `updated_at`. Email stored lower-cased. | Insert via our route handler only (honeypot + rate limit). Read: server only. |
+| `rate_limits` | `key` (e.g. `search:<ip-hash>`), `window_start`, `count` | Server only. Fixed windows via `rate_limit_hit(key, window_seconds, max)` (returns false when over the limit); `rate_limits_prune()` drops windows older than a day. Not executable by `anon`/`authenticated`. |
+
+Implemented in `supabase/migrations/20260926000000_stage0_titles_waitlist.sql`, tested in `supabase/tests/database/stage0.test.sql`. `set_updated_at()` is the shared trigger for every table with `updated_at`.
 
 ## Stage 1
 
