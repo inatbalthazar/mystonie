@@ -1,0 +1,17 @@
+{
+  "Metadata": {
+    "title": "Mystonie",
+    "description": "Strava for the shows and movies you finish."
+  },
+  "Home": {
+    "title": "Mystonie",
+    "tagline": "Finished it? Mystonie it."
+  },
+  "LocaleSwitcher": {
+    "label": "Language"
+  },
+  "NotFound": {
+    "title": "Page not found",
+    "backHome": "Back to home"
+  }
+}

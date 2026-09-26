@@ -1,0 +1,15 @@
+{
+  "Metadata": {
+    "description": "Strava สำหรับซีรีส์และหนังที่คุณดูจบ"
+  },
+  "Home": {
+    "tagline": "ดูจบแล้ว? Mystonie เลย"
+  },
+  "LocaleSwitcher": {
+    "label": "ภาษา"
+  },
+  "NotFound": {
+    "title": "ไม่พบหน้านี้",
+    "backHome": "กลับหน้าแรก"
+  }
+}
