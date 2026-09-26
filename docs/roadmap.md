@@ -17,7 +17,7 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress (add branch name) · 🧑 
 - [x] Supabase init + first migration: `updated_at` trigger fn, `titles`, `waitlist` (with `consent_at`), `rate_limits`, RLS. ([data model](architecture/data-model.md))
 - [x] GitHub Actions CI (lint, typecheck, test + pgTAP DB tests) in `.github/workflows/ci.yml`. Vercel project `mystonie` created (Node 24). Pin Node 24 (`engines`). Lint rule against hard-coded JSX strings (`react/jsx-no-literals`).
 - [ ] 🧑 Connect the Vercel project to the GitHub repo (Vercel → mystonie → Settings → Git → Connect `inatbalthazar/mystonie`), so pushes to `main` deploy production and every PR gets a preview URL. Then make the CI checks required on `main` (GitHub → Settings → Branches).
-- [ ] Site basics: theme follows system (dark mode), `metadataBase`, placeholder favicon/app icon, default OG image, `robots.txt`, `sitemap.xml`.
+- [x] Site basics: theme follows system (dark mode), `metadataBase`, placeholder favicon/app icon, default OG image, `robots.txt`, `sitemap.xml`.
 - [ ] `/api/search` + `/api/trending`: TMDB multi search (movie + tv) and weekly trending, normalizer in `src/core/catalog` (fixture tests), cache chosen titles, rate limit, TMDB attribution.
 - [ ] First screen: example cards + "Trending this week" chips, search-as-you-type UI with poster cards.
 - [ ] Card system: template registry in `src/cards`, **Ticket / Polaroid / Bold Stats** at 9:16 and 4:5, palette from poster, Noto fallback fonts loaded only when needed. Browser PNG export (pre-rendered). Playwright screenshot tests for long titles and Thai/KR/JP reviews. Agents build v0 templates from the design direction; the designer's versions replace them. ([ADR 0008](decisions/0008-client-side-card-rendering.md))

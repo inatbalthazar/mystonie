@@ -3,7 +3,7 @@
 Instructions for AI coding agents (Claude Code, Codex, Cursor, …) working in this repo.
 
 ## Project
-**Mystonie** ("my stone", from *Milestone*; mascot: Stonie, [ADR 0011](docs/decisions/0011-name-mystonie.md)) is *Strava for the shows and movies you finish*. Users log what they watch (episode by episode) and get beautiful, shareable artwork with their stats. Global product: **English-first**, Thai as an optional locale. Folder `Mystro`, GitHub `inatbalthazar/Mysto` (pre-rename name), deploy on Vercel `inatbalthazars-projects`. Built by a **solo founder**: keep things simple, small and cheap.
+**Mystonie** ("my stone", from *Milestone*; mascot: Stonie, [ADR 0011](docs/decisions/0011-name-mystonie.md)) is *Strava for the shows and movies you finish*. Users log what they watch (episode by episode) and get beautiful, shareable artwork with their stats. Global product: **English-first**, Thai as an optional locale. Folder `mystonie`, GitHub `inatbalthazar/mystonie`, deploy on Vercel `inatbalthazars-projects` (project `mystonie`). Built by a **solo founder**: keep things simple, small and cheap.
 
 **Status:** Stage 0 in progress. The Next.js app is scaffolded at the repo root. The next task is the first unchecked item of **Stage 0** in [docs/roadmap.md](docs/roadmap.md).
 
@@ -34,7 +34,7 @@ Instructions for AI coding agents (Claude Code, Codex, Cursor, …) working in t
 | `src/app/api/` | Route handlers: search proxy, warnings, recaps, Stripe webhook |
 | `src/components/` | Shared UI (shadcn/ui primitives in `ui/`) |
 | `src/i18n/` | next-intl setup: `routing.ts` (locales), `navigation.ts` (locale-aware `Link`, `useRouter`), `request.ts` (messages + English fallback) |
-| `src/lib/` | Small UI helpers (`utils.ts` → `cn`). Not for domain logic, which goes in `src/core` |
+| `src/lib/` | Small app helpers (`utils.ts` → `cn`, `site.ts` → site URL). Not for domain logic, which goes in `src/core` |
 | `src/cards/` | Card templates (`templates/*`, each = component + metadata) and the PNG renderer |
 | `src/core/` | Pure TS: types, zod schemas, catalog normalizers, stats, formatting, import parsers (+ `*.test.ts`) |
 | `src/data/` | Supabase clients and typed queries (no React) |
