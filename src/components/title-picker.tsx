@@ -4,8 +4,10 @@ import { XIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState } from "react";
+import { CardStudio } from "@/cards/card-studio";
+import { tmdbImageUrl } from "@/core/catalog/tmdb";
 import type { SearchResult, Title } from "@/core/catalog/types";
-import { cn } from "@/lib/utils";
+import type { CardData } from "@/core/cards/types";
 
 const DEBOUNCE_MS = 250;
 const MIN_CHARS = 2;
@@ -19,7 +21,7 @@ type SearchState =
 type Picked = { result: SearchResult; title?: Title; failed?: boolean };
 
 /** First-screen search-as-you-type + trending chips. Picking a title loads its details. */
-export function TitlePicker({ trending }: { trending: SearchResult[] }) {
+export function TitlePicker({ trending, host }: { trending: SearchResult[]; host: string }) {
   const t = useTranslations("Home");
   const inputId = useId();
   const [query, setQuery] = useState("");
@@ -89,7 +91,7 @@ export function TitlePicker({ trending }: { trending: SearchResult[] }) {
       </div>
 
       <div ref={pickedRef} className="scroll-mt-4">
-        {picked && <PickedTitle picked={picked} onClear={() => setPicked(null)} />}
+        {picked && <PickedTitle picked={picked} host={host} onClear={() => setPicked(null)} />}
       </div>
 
       {showResults ? (
@@ -115,7 +117,7 @@ export function TitlePicker({ trending }: { trending: SearchResult[] }) {
                     className="flex min-h-11 items-center gap-2 rounded-full border border-border py-1 pr-4 pl-1 text-sm hover:bg-accent"
                   >
                     {r.imageUrl ? (
-                      <Image src={r.imageUrl} alt="" width={28} height={42} unoptimized className="h-9 w-6 rounded-full object-cover" />
+                      <Image src={r.imageUrl} alt="" width={28} height={42} unoptimized crossOrigin="anonymous" className="h-9 w-6 rounded-full object-cover" />
                     ) : (
                       <span className="h-9 w-6 rounded-full bg-muted" />
                     )}
@@ -137,7 +139,7 @@ function PosterButton({ result, onPick }: { result: SearchResult; onPick: (r: Se
     <button type="button" onClick={() => onPick(result)} className="flex w-full flex-col gap-1 text-left">
       <span className="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-muted">
         {result.imageUrl && (
-          <Image src={result.imageUrl} alt="" fill unoptimized sizes="(min-width: 640px) 25vw, 33vw" className="object-cover" />
+          <Image src={result.imageUrl} alt="" fill unoptimized crossOrigin="anonymous" sizes="(min-width: 640px) 25vw, 33vw" className="object-cover" />
         )}
       </span>
       <span className="line-clamp-2 text-sm font-medium">{result.name}</span>
@@ -148,32 +150,49 @@ function PosterButton({ result, onPick }: { result: SearchResult; onPick: (r: Se
   );
 }
 
-function PickedTitle({ picked, onClear }: { picked: Picked; onClear: () => void }) {
+/** Today's local calendar date as `YYYY-MM-DD` (the default "finished" date). */
+function today(): string {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+}
+
+function cardData(result: SearchResult, title?: Title): CardData {
+  return {
+    kind: result.kind,
+    name: result.name,
+    year: result.year,
+    posterUrl: title?.posterPath ? tmdbImageUrl(title.posterPath, "w780") : result.imageUrl,
+    genres: title?.genres,
+    runtimeMin: title?.runtimeMin,
+    episodeCount: title?.episodeCount,
+    seasonCount: title?.seasonCount,
+    finishedOn: today(),
+  };
+}
+
+function PickedTitle({ picked, host, onClear }: { picked: Picked; host: string; onClear: () => void }) {
   const t = useTranslations("Home");
   const { result, title, failed } = picked;
+  const loading = !title && !failed;
   return (
-    <section className={cn("flex gap-4 rounded-2xl border border-border p-4", !title && !failed && "animate-pulse")}>
-      <span className="relative aspect-[2/3] w-20 shrink-0 overflow-hidden rounded-md bg-muted">
-        {result.imageUrl && <Image src={result.imageUrl} alt="" fill unoptimized sizes="80px" className="object-cover" />}
-      </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-1">
-        <h2 className="font-semibold">{result.name}</h2>
-        <p className="text-sm text-muted-foreground">
-          {t("titleMeta", { kind: result.kind, year: result.year ?? "none" })}
-        </p>
-        {title && (
+    <section className="flex flex-col gap-4 rounded-2xl border border-border p-4">
+      <div className="flex items-start gap-3">
+        <div className="flex min-w-0 flex-1 flex-col gap-1">
+          <h2 className="font-semibold">{result.name}</h2>
           <p className="text-sm text-muted-foreground">
-            {title.kind === "series"
-              ? t("seriesStats", { episodes: title.episodeCount ?? 0, seasons: title.seasonCount ?? 0 })
-              : t("movieStats", { minutes: title.runtimeMin ?? 0 })}
+            {t("titleMeta", { kind: result.kind, year: result.year ?? "none" })}
           </p>
-        )}
-        {failed && <p className="text-sm text-destructive">{t("detailsError")}</p>}
-        <p className="mt-auto text-sm">{t("cardComingSoon")}</p>
+          {failed && <p className="text-sm text-destructive">{t("detailsError")}</p>}
+        </div>
+        <button type="button" onClick={onClear} aria-label={t("clearPick")} className="flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-accent">
+          <XIcon className="size-5" />
+        </button>
       </div>
-      <button type="button" onClick={onClear} aria-label={t("clearPick")} className="flex size-11 shrink-0 items-center justify-center self-start rounded-full hover:bg-accent">
-        <XIcon className="size-5" />
-      </button>
+      {loading ? (
+        <div className="mx-auto aspect-[9/16] w-full max-w-sm animate-pulse rounded-xl bg-muted" />
+      ) : (
+        <CardStudio data={cardData(result, title)} paletteSource={result.imageUrl} host={host} />
+      )}
     </section>
   );
 }

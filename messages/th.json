@@ -13,10 +13,7 @@
     "rateLimited": "ช้าลงนิดนึง แล้วลองใหม่",
     "trendingTitle": "มาแรงสัปดาห์นี้",
     "titleMeta": "{kind, select, movie {หนัง} series {ซีรีส์} other {เรื่อง}}{year, select, none {} other { · {year}}}",
-    "seriesStats": "{episodes} ตอน · {seasons} ซีซัน",
-    "movieStats": "{minutes, plural, =0 {ไม่ทราบความยาว} other {# นาที}}",
     "detailsError": "โหลดรายละเอียดไม่ได้",
-    "cardComingSoon": "เครื่องทำการ์ดกำลังจะมา",
     "clearPick": "ล้างการเลือก"
   },
   "LocaleSwitcher": {
@@ -28,5 +25,34 @@
   },
   "Attribution": {
     "tmdb": "ผลิตภัณฑ์นี้ใช้ TMDB API แต่ไม่ได้รับการรับรองจาก TMDB"
+  },
+  "Card": {
+    "finished": "ดูจบแล้ว",
+    "finishedOn": "ดูจบ {date}",
+    "admitOne": "บัตรเข้าชม",
+    "kind": "{kind, select, movie {หนัง} series {ซีรีส์} other {เรื่อง}}",
+    "episodes": "ตอน",
+    "seasons": "ซีซัน",
+    "hours": "ชั่วโมง",
+    "minutes": "นาที",
+    "rating": "คะแนน",
+    "watchTime": "เวลาดู",
+    "date": "วันที่",
+    "templates": {
+      "ticket": "ตั๋ว",
+      "polaroid": "โพลารอยด์",
+      "boldStats": "ตัวเลขใหญ่"
+    },
+    "sizes": {
+      "story": "สตอรี่ 9:16",
+      "feed": "โพสต์ 4:5"
+    },
+    "template": "แบบการ์ด",
+    "size": "ขนาด",
+    "download": "ดาวน์โหลด",
+    "preparing": "กำลังเตรียมรูป…",
+    "examples": "เลือกสไตล์",
+    "sampleTitle": "เรื่องโปรดเรื่องต่อไปของคุณ",
+    "sampleReview": "ดูไม่หยุดเลย"
   }
 }

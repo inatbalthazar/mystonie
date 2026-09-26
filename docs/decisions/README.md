@@ -16,6 +16,7 @@ One file per decision: `NNNN-short-slug.md`, numbered in order. Write one whenev
 | [0010](0010-scaffold-baseline.md) | Scaffold baseline: Next.js 16, shadcn/ui on Base UI, Vitest | **Accepted** |
 | [0011](0011-name-mystonie.md) | Product name Mystonie, mascot Stonie | **Accepted** |
 | [0012](0012-catalog-api-caching-and-limits.md) | Catalog API: title identity, English titles, caching, rate limits | **Accepted** |
+| [0013](0013-card-rendering-details.md) | Card system: modern-screenshot, lazy Noto fonts, palette, layout tests | **Accepted** |
 
 ## Template
 ```md

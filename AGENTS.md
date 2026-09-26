@@ -61,6 +61,7 @@ pnpm lint                          # ESLint (incl. the src/core purity rule)
 pnpm typecheck                     # next typegen + tsc --noEmit
 pnpm test                          # Vitest, all *.test.ts
 pnpm test src/core/stats           # single file or folder
+pnpm test:e2e                      # Playwright card tests (needs pnpm dev + TMDB token; uses installed Chrome)
 pnpm build                         # production build
 pnpm dlx shadcn@latest add <name>  # add a shadcn/ui component
 ```

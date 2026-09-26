@@ -41,10 +41,16 @@ A single-page web tool: search a movie or series, pick one of 3 templates, optio
 ### First screen (as built)
 `src/app/[locale]/page.tsx` loads trending on the server (`trendingTitles()`, revalidated hourly; empty if TMDB is unavailable) and passes 12 titles to `src/components/title-picker.tsx`. That client component debounces search (250 ms, ≥ 2 chars, aborts stale requests), shows a 3-column poster grid at 360px, and on pick fetches `/api/titles/tmdb/{kind}/{id}` into a details panel. The card editor replaces that panel.
 
+### Card system (as built)
+- `src/core/cards/`: `CardData`, sizes, palette from poster pixels, script detection, watch time (unit-tested).
+- `src/cards/`: `registry.tsx` (`TEMPLATES`, `CardTemplate`), `templates/` (Ticket, Polaroid, Bold Stats), shared `parts.tsx` (root, poster, title sizing, stars, stats, footer), `card-preview.tsx` (scales the export-size card), `export.ts` (`renderCardPng`, `usePrerenderedCard`, `downloadBlob`), `card-studio.tsx` (template/size switch + Download), `example-cards.tsx` (first screen, top 3 trending titles with real stats).
+- Stats: movies show runtime in minutes; series show total hours (runtime × episodes), episodes and seasons. Unknown values are left out.
+- `/card-lab` (development only) renders every template × size × hard case for `pnpm test:e2e`. Decisions: [ADR 0013](../../decisions/0013-card-rendering-details.md).
+
 ## Acceptance criteria
 - [x] Typing "stranger" shows *Stranger Things* with a poster before the word is complete (first result for "strang", verified 2026-09-26).
-- [ ] All 3 templates render at both sizes with no layout overflow for long titles (60+ chars) and long reviews.
-- [ ] A Thai, Korean and Japanese review renders correctly on the PNG.
+- [x] All 3 templates render at both sizes with no layout overflow for long titles (60+ chars) and long reviews (`e2e/cards.spec.ts`).
+- [x] A Thai, Korean and Japanese review renders correctly on the PNG (exported and checked 2026-09-26).
 - [ ] Share opens the native share sheet with the image on iOS Safari and Android Chrome. Download works on desktop.
 - [ ] Waitlist emails are stored in Supabase (`waitlist` table, unique email).
 - [ ] Lighthouse mobile performance ≥ 90 on the card page (Noto KR/JP not downloaded when the card has only Latin/Thai text).

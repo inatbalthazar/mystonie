@@ -15,10 +15,7 @@
     "rateLimited": "Slow down a little, then try again.",
     "trendingTitle": "Trending this week",
     "titleMeta": "{kind, select, movie {Movie} series {Series} other {Title}}{year, select, none {} other { · {year}}}",
-    "seriesStats": "{episodes, plural, one {# episode} other {# episodes}} · {seasons, plural, one {# season} other {# seasons}}",
-    "movieStats": "{minutes, plural, =0 {Runtime unknown} other {# min}}",
     "detailsError": "Couldn't load the details.",
-    "cardComingSoon": "Card maker coming next.",
     "clearPick": "Clear selection"
   },
   "LocaleSwitcher": {
@@ -30,5 +27,35 @@
   },
   "Attribution": {
     "tmdb": "This product uses the TMDB API but is not endorsed or certified by TMDB."
+  },
+  "Card": {
+    "finished": "Finished",
+    "finishedOn": "Finished {date}",
+    "admitOne": "Admit one",
+    "kind": "{kind, select, movie {Movie} series {Series} other {Title}}",
+    "episodes": "{count, plural, one {episode} other {episodes}}",
+    "seasons": "{count, plural, one {season} other {seasons}}",
+    "hours": "hours",
+    "minutes": "min",
+    "rating": "Rating",
+    "watchTime": "Watch time",
+    "date": "Date",
+    "templates": {
+      "ticket": "Ticket",
+      "polaroid": "Polaroid",
+      "boldStats": "Bold Stats"
+    },
+    "sizes": {
+      "story": "Story 9:16",
+      "feed": "Post 4:5"
+    },
+    "template": "Template",
+    "size": "Size",
+    "download": "Download",
+    "preparing": "Preparing image…",
+    "examples": "Pick a style",
+    "sampleTitle": "Your next favourite",
+    "brand": "mystonie",
+    "sampleReview": "Couldn't stop watching."
   }
 }
