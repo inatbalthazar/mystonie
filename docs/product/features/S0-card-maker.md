@@ -43,15 +43,25 @@ A single-page web tool: search a movie or series, pick one of 3 templates, optio
 
 ### Card system (as built)
 - `src/core/cards/`: `CardData`, sizes, palette from poster pixels, script detection, watch time (unit-tested).
-- `src/cards/`: `registry.tsx` (`TEMPLATES`, `CardTemplate`), `templates/` (Ticket, Polaroid, Bold Stats), shared `parts.tsx` (root, poster, title sizing, stars, stats, footer), `card-preview.tsx` (scales the export-size card), `export.ts` (`renderCardPng`, `usePrerenderedCard`, `downloadBlob`), `card-studio.tsx` (template/size switch + Download), `example-cards.tsx` (first screen, top 3 trending titles with real stats).
+- `src/cards/`: `registry.tsx` (`TEMPLATES`, `CardTemplate`), `templates/` (Ticket, Polaroid, Bold Stats), shared `parts.tsx` (root, poster, title sizing, stars, stats, footer), `card-preview.tsx` (scales the export-size card), `export.ts` (`renderCardPng`, `usePrerenderedCard`, `downloadBlob`), `card-studio.tsx` (the editor, see below), `example-cards.tsx` (first screen, top 3 trending titles with real stats).
 - Stats: movies show runtime in minutes; series show total hours (runtime × episodes), episodes and seasons. Unknown values are left out.
 - `/card-lab` (development only) renders every template × size × hard case for `pnpm test:e2e`. Decisions: [ADR 0013](../../decisions/0013-card-rendering-details.md).
+
+### Card editor (as built)
+`src/cards/card-studio.tsx`, fed by the picked-title panel (remounted per title, so edits don't carry over):
+- **Template:** buttons, or swipe the preview left/right (≥ 40 px, mostly horizontal; `touch-action: pan-y` keeps vertical scrolling). Order wraps.
+- **Size:** Story 9:16 / Post 4:5.
+- **Rating:** 5 star buttons. A tap sets that many stars, tapping the same star again toggles a half star (4 → 3.5 → 4); a clear button removes it. No rating = no stars on the card.
+- **Review:** one line, max 80 **visible characters** counted by grapheme (`Intl.Segmenter`), so Thai marks and emoji count once. Newlines become spaces; blank = no review.
+- **Date:** native `<input type="date">` (the browser localizes the picker), default today, no future dates. The card prints it with next-intl in the page locale.
+- **Share / Download:** the PNG is pre-rendered 400 ms after the last change. Share builds the `File` and calls `navigator.share({ files, url })` synchronously in the click; `url` is the current page with `?ref=card&tpl=<id>` (`cardShareUrl`). If the browser can't share files with a URL it shares the file alone; if it can't share files at all the Share button is hidden and Download is the primary action. A cancelled share does nothing; any other share error falls back to Download.
+- Pure helpers (rating steps, review clamp, share URL, template cycle) live in `src/core/cards/edit.ts` with unit tests. `e2e/editor.spec.ts` drives the whole flow with a mocked `navigator.share` and checks the payload and that the share starts during the click.
 
 ## Acceptance criteria
 - [x] Typing "stranger" shows *Stranger Things* with a poster before the word is complete (first result for "strang", verified 2026-09-26).
 - [x] All 3 templates render at both sizes with no layout overflow for long titles (60+ chars) and long reviews (`e2e/cards.spec.ts`).
 - [x] A Thai, Korean and Japanese review renders correctly on the PNG (exported and checked 2026-09-26).
-- [ ] Share opens the native share sheet with the image on iOS Safari and Android Chrome. Download works on desktop.
+- [ ] Share opens the native share sheet with the image on iOS Safari and Android Chrome (🧑 real-device check pending; payload and click timing covered by `e2e/editor.spec.ts`). Download works on desktop (verified 2026-09-26, Chrome).
 - [ ] Waitlist emails are stored in Supabase (`waitlist` table, unique email).
 - [ ] Lighthouse mobile performance ≥ 90 on the card page (Noto KR/JP not downloaded when the card has only Latin/Thai text).
 - [ ] First screen shows example cards and at least 8 trending titles; tapping one opens its card.

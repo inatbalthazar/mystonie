@@ -7,6 +7,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { CardStudio } from "@/cards/card-studio";
 import { tmdbImageUrl } from "@/core/catalog/tmdb";
 import type { SearchResult, Title } from "@/core/catalog/types";
+import { localDateString } from "@/core/cards/edit";
 import type { CardData } from "@/core/cards/types";
 
 const DEBOUNCE_MS = 250;
@@ -150,12 +151,6 @@ function PosterButton({ result, onPick }: { result: SearchResult; onPick: (r: Se
   );
 }
 
-/** Today's local calendar date as `YYYY-MM-DD` (the default "finished" date). */
-function today(): string {
-  const d = new Date();
-  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
-}
-
 function cardData(result: SearchResult, title?: Title): CardData {
   return {
     kind: result.kind,
@@ -166,7 +161,7 @@ function cardData(result: SearchResult, title?: Title): CardData {
     runtimeMin: title?.runtimeMin,
     episodeCount: title?.episodeCount,
     seasonCount: title?.seasonCount,
-    finishedOn: today(),
+    finishedOn: localDateString(new Date()),
   };
 }
 
@@ -191,7 +186,7 @@ function PickedTitle({ picked, host, onClear }: { picked: Picked; host: string; 
       {loading ? (
         <div className="mx-auto aspect-[9/16] w-full max-w-sm animate-pulse rounded-xl bg-muted" />
       ) : (
-        <CardStudio data={cardData(result, title)} paletteSource={result.imageUrl} host={host} />
+        <CardStudio key={`${result.kind}-${result.externalId}`} data={cardData(result, title)} paletteSource={result.imageUrl} host={host} />
       )}
     </section>
   );

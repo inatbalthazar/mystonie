@@ -53,6 +53,16 @@
     "preparing": "กำลังเตรียมรูป…",
     "examples": "เลือกสไตล์",
     "sampleTitle": "เรื่องโปรดเรื่องต่อไปของคุณ",
-    "sampleReview": "ดูไม่หยุดเลย"
+    "sampleReview": "ดูไม่หยุดเลย",
+    "share": "แชร์",
+    "swipeHint": "ปัดการ์ดเพื่อเปลี่ยนแบบ",
+    "rateStars": "{count} ดาว",
+    "ratingValue": "{rating} / 5",
+    "clearRating": "ล้างคะแนน",
+    "ratingHint": "แตะดาวเดิมอีกครั้งเพื่อให้ครึ่งดาว",
+    "review": "รีวิวสั้นๆ หนึ่งบรรทัด",
+    "reviewPlaceholder": "คิดยังไงกับเรื่องนี้?",
+    "reviewCount": "{count}/{max}",
+    "finishedDate": "ดูจบวันที่"
   }
 }

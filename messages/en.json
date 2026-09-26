@@ -56,6 +56,16 @@
     "examples": "Pick a style",
     "sampleTitle": "Your next favourite",
     "brand": "mystonie",
-    "sampleReview": "Couldn't stop watching."
+    "sampleReview": "Couldn't stop watching.",
+    "share": "Share",
+    "swipeHint": "Swipe the card to change style",
+    "rateStars": "{count, plural, one {# star} other {# stars}}",
+    "ratingValue": "{rating} / 5",
+    "clearRating": "Clear rating",
+    "ratingHint": "Tap a star again for a half star.",
+    "review": "One-line review",
+    "reviewPlaceholder": "What did you think?",
+    "reviewCount": "{count}/{max}",
+    "finishedDate": "Finished on"
   }
 }
