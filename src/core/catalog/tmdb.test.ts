@@ -2,7 +2,16 @@ import { describe, expect, it } from "vitest";
 import movie from "./fixtures/tmdb-movie-496243.json";
 import search from "./fixtures/tmdb-search-multi.json";
 import tv from "./fixtures/tmdb-tv-66732.json";
-import { mergeTmdbSearch, normalizeTmdbDetails, normalizeTmdbList, tmdbImageUrl, tmdbMediaType } from "./tmdb";
+import {
+  mergeTmdbSearch,
+  normalizeTmdbDetails,
+  normalizeTmdbList,
+  normalizeTmdbSeason,
+  tmdbImageUrl,
+  tmdbMediaType,
+  tmdbSeasonNumbers,
+  tmdbSeriesEnded,
+} from "./tmdb";
 
 describe("normalizeTmdbList", () => {
   const results = normalizeTmdbList(search);
@@ -114,5 +123,53 @@ describe("helpers", () => {
     expect(tmdbImageUrl("/a.jpg", "w780")).toBe("https://image.tmdb.org/t/p/w780/a.jpg");
     expect(tmdbMediaType("series")).toBe("tv");
     expect(tmdbMediaType("movie")).toBe("movie");
+  });
+});
+
+describe("seasons", () => {
+  it("normalizes a season's episodes", async () => {
+    const season = (await import("./fixtures/tmdb-tv-66732-season-1.json")).default;
+    const episodes = normalizeTmdbSeason(season);
+    expect(episodes).toHaveLength(8);
+    expect(episodes[0]).toEqual({
+      season: 1,
+      episode: 1,
+      name: "Chapter One: The Vanishing of Will Byers",
+      runtimeMin: 48,
+      airDate: "2016-07-15",
+    });
+  });
+
+  it("drops episodes from other seasons and bad dates", () => {
+    expect(
+      normalizeTmdbSeason({
+        season_number: 2,
+        episodes: [
+          { season_number: 2, episode_number: 2, name: "", runtime: 0, air_date: "soon" },
+          { season_number: 1, episode_number: 1 },
+          { season_number: 2, episode_number: 1, runtime: 45, air_date: "2026-01-01" },
+        ],
+      }),
+    ).toEqual([
+      { season: 2, episode: 1, name: null, runtimeMin: 45, airDate: "2026-01-01" },
+      { season: 2, episode: 2, name: null, runtimeMin: null, airDate: null },
+    ]);
+    expect(normalizeTmdbSeason({ season_number: 0, episodes: [] })).toEqual([]);
+  });
+
+  it("lists numbered seasons with episodes, and whether the series ended", () => {
+    const details = {
+      status: "Ended",
+      seasons: [
+        { season_number: 0, episode_count: 3 },
+        { season_number: 2, episode_count: 9 },
+        { season_number: 1, episode_count: 8 },
+        { season_number: 3, episode_count: 0 },
+      ],
+    };
+    expect(tmdbSeasonNumbers(details)).toEqual([1, 2]);
+    expect(tmdbSeriesEnded(details)).toBe(true);
+    expect(tmdbSeriesEnded({ status: "Returning Series" })).toBe(false);
+    expect(tmdbSeasonNumbers(null)).toEqual([]);
   });
 });

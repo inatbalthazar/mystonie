@@ -2,15 +2,29 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-/* Theme follows the OS for now. Stage 1 adds a manual toggle in Settings (switch this to a class/attribute variant then). */
-@custom-variant dark (@media (prefers-color-scheme: dark));
+/* Theme: the OS setting, unless Settings → Theme saved light or dark (`<html data-theme>`, set before first
+   paint from the preferences cookie by THEME_SCRIPT in src/lib/prefs.ts). */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:not([data-theme="light"], [data-theme="light"] *)) {
+      @slot;
+    }
+  }
+}
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
-  --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-bricolage);
+  --font-display: var(--font-bricolage);
+  --font-hand: var(--font-caveat);
+  --color-brand: var(--brand);
+  --color-brand-foreground: var(--brand-foreground);
+  --color-brand-soft: var(--brand-soft);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -51,73 +65,83 @@
 
 :root {
   color-scheme: light dark;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
+  /* Mystonie: warm paper neutrals + one brand colour (stamp coral). Posters bring the rest of the colour. */
+  --background: oklch(0.985 0.005 80);
+  --foreground: oklch(0.21 0.012 55);
   --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
+  --card-foreground: oklch(0.21 0.012 55);
   --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
+  --popover-foreground: oklch(0.21 0.012 55);
+  --primary: oklch(0.21 0.012 55);
+  --primary-foreground: oklch(0.985 0.005 80);
+  --secondary: oklch(0.955 0.008 80);
+  --secondary-foreground: oklch(0.21 0.012 55);
+  --muted: oklch(0.955 0.008 80);
+  --muted-foreground: oklch(0.5 0.015 60);
+  --accent: oklch(0.94 0.012 80);
+  --accent-foreground: oklch(0.21 0.012 55);
+  --brand: oklch(0.57 0.19 35);
+  --brand-foreground: oklch(1 0 0);
+  --brand-soft: oklch(0.95 0.035 45);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.87 0 0);
-  --chart-2: oklch(0.556 0 0);
-  --chart-3: oklch(0.439 0 0);
-  --chart-4: oklch(0.371 0 0);
-  --chart-5: oklch(0.269 0 0);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --border: oklch(0.9 0.01 80);
+  --input: oklch(0.87 0.012 80);
+  --ring: oklch(0.57 0.19 35);
+  --chart-1: oklch(0.57 0.19 35);
+  --chart-2: oklch(0.7 0.14 75);
+  --chart-3: oklch(0.6 0.1 180);
+  --chart-4: oklch(0.5 0.12 260);
+  --chart-5: oklch(0.45 0.02 60);
+  --radius: 0.75rem;
+  --sidebar: oklch(0.975 0.006 80);
+  --sidebar-foreground: oklch(0.21 0.012 55);
+  --sidebar-primary: oklch(0.21 0.012 55);
+  --sidebar-primary-foreground: oklch(0.985 0.005 80);
+  --sidebar-accent: oklch(0.94 0.012 80);
+  --sidebar-accent-foreground: oklch(0.21 0.012 55);
+  --sidebar-border: oklch(0.9 0.01 80);
+  --sidebar-ring: oklch(0.57 0.19 35);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: oklch(0.145 0 0);
-    --foreground: oklch(0.985 0 0);
-    --card: oklch(0.205 0 0);
-    --card-foreground: oklch(0.985 0 0);
-    --popover: oklch(0.205 0 0);
-    --popover-foreground: oklch(0.985 0 0);
-    --primary: oklch(0.922 0 0);
-    --primary-foreground: oklch(0.205 0 0);
-    --secondary: oklch(0.269 0 0);
-    --secondary-foreground: oklch(0.985 0 0);
-    --muted: oklch(0.269 0 0);
-    --muted-foreground: oklch(0.708 0 0);
-    --accent: oklch(0.269 0 0);
-    --accent-foreground: oklch(0.985 0 0);
+/* A saved theme also sets the colour scheme of form controls and scrollbars. */
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+:root {
+  @variant dark {
+    --background: oklch(0.17 0.008 60);
+    --foreground: oklch(0.96 0.008 80);
+    --card: oklch(0.21 0.009 60);
+    --card-foreground: oklch(0.96 0.008 80);
+    --popover: oklch(0.21 0.009 60);
+    --popover-foreground: oklch(0.96 0.008 80);
+    --primary: oklch(0.96 0.008 80);
+    --primary-foreground: oklch(0.17 0.008 60);
+    --secondary: oklch(0.25 0.009 60);
+    --secondary-foreground: oklch(0.96 0.008 80);
+    --muted: oklch(0.25 0.009 60);
+    --muted-foreground: oklch(0.73 0.012 70);
+    --accent: oklch(0.27 0.01 60);
+    --accent-foreground: oklch(0.96 0.008 80);
+    --brand: oklch(0.7 0.17 38);
+    --brand-foreground: oklch(0.17 0.008 60);
+    --brand-soft: oklch(0.26 0.04 40);
     --destructive: oklch(0.704 0.191 22.216);
     --border: oklch(1 0 0 / 10%);
-    --input: oklch(1 0 0 / 15%);
-    --ring: oklch(0.556 0 0);
-    --chart-1: oklch(0.87 0 0);
-    --chart-2: oklch(0.556 0 0);
-    --chart-3: oklch(0.439 0 0);
-    --chart-4: oklch(0.371 0 0);
-    --chart-5: oklch(0.269 0 0);
-    --sidebar: oklch(0.205 0 0);
-    --sidebar-foreground: oklch(0.985 0 0);
-    --sidebar-primary: oklch(0.488 0.243 264.376);
-    --sidebar-primary-foreground: oklch(0.985 0 0);
-    --sidebar-accent: oklch(0.269 0 0);
-    --sidebar-accent-foreground: oklch(0.985 0 0);
+    --input: oklch(1 0 0 / 16%);
+    --ring: oklch(0.7 0.17 38);
+    --sidebar: oklch(0.21 0.009 60);
+    --sidebar-foreground: oklch(0.96 0.008 80);
+    --sidebar-primary: oklch(0.7 0.17 38);
+    --sidebar-primary-foreground: oklch(0.17 0.008 60);
+    --sidebar-accent: oklch(0.27 0.01 60);
+    --sidebar-accent-foreground: oklch(0.96 0.008 80);
     --sidebar-border: oklch(1 0 0 / 10%);
-    --sidebar-ring: oklch(0.556 0 0);
+    --sidebar-ring: oklch(0.7 0.17 38);
   }
 }
 
@@ -130,5 +154,22 @@
   }
   html {
     @apply font-sans;
+  }
+}
+/* Celebration (S1 share artwork): the FINISHED stamp lands, then the card rises into place.
+   Used with motion-safe: so prefers-reduced-motion shows them still. */
+@theme {
+  --animate-stamp: stamp-in 520ms cubic-bezier(0.2, 1.4, 0.4, 1) both;
+  --animate-rise: rise-in 480ms cubic-bezier(0.2, 0.9, 0.3, 1) 220ms both;
+
+  @keyframes stamp-in {
+    0% { opacity: 0; transform: scale(2.4) rotate(-14deg); }
+    60% { opacity: 1; transform: scale(0.94) rotate(-7deg); }
+    100% { opacity: 1; transform: scale(1) rotate(-8deg); }
+  }
+
+  @keyframes rise-in {
+    from { opacity: 0; transform: translateY(24px) scale(0.97); }
+    to { opacity: 1; transform: none; }
   }
 }

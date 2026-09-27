@@ -1,23 +1,16 @@
 "use client";
 
-import { XIcon } from "lucide-react";
+import { FlameIcon, SearchIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { CardStudio } from "@/cards/card-studio";
 import { tmdbImageUrl } from "@/core/catalog/tmdb";
 import type { SearchResult, Title } from "@/core/catalog/types";
 import { localDateString } from "@/core/cards/edit";
 import type { CardData } from "@/core/cards/types";
-
-const DEBOUNCE_MS = 250;
-const MIN_CHARS = 2;
-
-type SearchState =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "done"; query: string; results: SearchResult[] }
-  | { status: "error"; rateLimited: boolean };
+import { MIN_SEARCH_CHARS, PosterButton, SearchStatus, useTitleSearch } from "./title-search";
+import { WaitlistForm } from "./waitlist-form";
 
 type Picked = { result: SearchResult; title?: Title; failed?: boolean };
 
@@ -26,31 +19,11 @@ export function TitlePicker({ trending, host }: { trending: SearchResult[]; host
   const t = useTranslations("Home");
   const inputId = useId();
   const [query, setQuery] = useState("");
-  const [search, setSearch] = useState<SearchState>({ status: "idle" });
+  const search = useTitleSearch(query);
   const [picked, setPicked] = useState<Picked | null>(null);
   const pickedRef = useRef<HTMLDivElement>(null);
 
   const q = query.trim();
-
-  useEffect(() => {
-    if (q.length < MIN_CHARS) return;
-    const controller = new AbortController();
-    const timer = setTimeout(async () => {
-      setSearch({ status: "loading" });
-      try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal });
-        if (!res.ok) return setSearch({ status: "error", rateLimited: res.status === 429 });
-        const body = (await res.json()) as { results: SearchResult[] };
-        setSearch({ status: "done", query: q, results: body.results });
-      } catch {
-        if (!controller.signal.aborted) setSearch({ status: "error", rateLimited: false });
-      }
-    }, DEBOUNCE_MS);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [q]);
 
   async function pick(result: SearchResult) {
     setPicked({ result });
@@ -66,7 +39,7 @@ export function TitlePicker({ trending, host }: { trending: SearchResult[]; host
     }
   }
 
-  const showResults = q.length >= MIN_CHARS;
+  const showResults = q.length >= MIN_SEARCH_CHARS;
 
   return (
     <div className="flex w-full max-w-2xl flex-col gap-6">
@@ -74,21 +47,20 @@ export function TitlePicker({ trending, host }: { trending: SearchResult[]; host
         <label htmlFor={inputId} className="sr-only">
           {t("searchLabel")}
         </label>
-        <input
-          id={inputId}
-          type="search"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
-          placeholder={t("searchPlaceholder")}
-          autoComplete="off"
-          enterKeyHint="search"
-          className="h-12 w-full rounded-xl border border-input bg-background px-4 text-base outline-none focus-visible:ring-3 focus-visible:ring-ring/50"
-        />
-        <p aria-live="polite" className="min-h-5 text-sm text-muted-foreground">
-          {showResults && search.status === "loading" && t("searching")}
-          {showResults && search.status === "error" && (search.rateLimited ? t("rateLimited") : t("searchError"))}
-          {showResults && search.status === "done" && search.results.length === 0 && t("noResults", { query: search.query })}
-        </p>
+        <div className="relative">
+          <SearchIcon aria-hidden className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-muted-foreground" />
+          <input
+            id={inputId}
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder={t("searchPlaceholder")}
+            autoComplete="off"
+            enterKeyHint="search"
+            className="h-14 w-full rounded-2xl border border-input bg-card pr-4 pl-12 text-base shadow-sm outline-none placeholder:text-muted-foreground focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-ring/20"
+          />
+        </div>
+        <SearchStatus query={query} search={search} />
       </div>
 
       <div ref={pickedRef} className="scroll-mt-4">
@@ -108,14 +80,17 @@ export function TitlePicker({ trending, host }: { trending: SearchResult[]; host
       ) : (
         trending.length > 0 && (
           <section className="flex flex-col gap-3">
-            <h2 className="text-sm font-medium text-muted-foreground">{t("trendingTitle")}</h2>
+            <h2 className="flex items-center gap-1.5 text-sm font-semibold">
+              <FlameIcon aria-hidden className="size-4 text-brand" />
+              {t("trendingTitle")}
+            </h2>
             <ul className="flex flex-wrap gap-2">
               {trending.map((r) => (
                 <li key={`${r.kind}-${r.externalId}`}>
                   <button
                     type="button"
                     onClick={() => pick(r)}
-                    className="flex min-h-11 items-center gap-2 rounded-full border border-border py-1 pr-4 pl-1 text-sm hover:bg-accent"
+                    className="flex min-h-11 items-center gap-2 rounded-full border border-border bg-card py-1 pr-4 pl-1 text-sm font-medium shadow-xs transition-colors hover:border-brand/50 hover:bg-brand-soft"
                   >
                     {r.imageUrl ? (
                       <Image src={r.imageUrl} alt="" width={28} height={42} unoptimized crossOrigin="anonymous" className="h-9 w-6 rounded-full object-cover" />
@@ -130,24 +105,10 @@ export function TitlePicker({ trending, host }: { trending: SearchResult[]; host
           </section>
         )
       )}
-    </div>
-  );
-}
 
-function PosterButton({ result, onPick }: { result: SearchResult; onPick: (r: SearchResult) => void }) {
-  const t = useTranslations("Home");
-  return (
-    <button type="button" onClick={() => onPick(result)} className="flex w-full flex-col gap-1 text-left">
-      <span className="relative aspect-[2/3] w-full overflow-hidden rounded-lg bg-muted">
-        {result.imageUrl && (
-          <Image src={result.imageUrl} alt="" fill unoptimized crossOrigin="anonymous" sizes="(min-width: 640px) 25vw, 33vw" className="object-cover" />
-        )}
-      </span>
-      <span className="line-clamp-2 text-sm font-medium">{result.name}</span>
-      <span className="text-xs text-muted-foreground">
-        {t("titleMeta", { kind: result.kind, year: result.year ?? "none" })}
-      </span>
-    </button>
+      {/* Once a title is picked, the card editor asks after Share / Download instead. */}
+      {!picked && <WaitlistForm placement="home" />}
+    </div>
   );
 }
 
@@ -170,10 +131,10 @@ function PickedTitle({ picked, host, onClear }: { picked: Picked; host: string; 
   const { result, title, failed } = picked;
   const loading = !title && !failed;
   return (
-    <section className="flex flex-col gap-4 rounded-2xl border border-border p-4">
+    <section className="flex flex-col gap-5 rounded-3xl border border-border bg-card p-4 shadow-sm sm:p-6">
       <div className="flex items-start gap-3">
         <div className="flex min-w-0 flex-1 flex-col gap-1">
-          <h2 className="font-semibold">{result.name}</h2>
+          <h2 className="font-display text-2xl leading-tight font-extrabold tracking-[-0.02em]">{result.name}</h2>
           <p className="text-sm text-muted-foreground">
             {t("titleMeta", { kind: result.kind, year: result.year ?? "none" })}
           </p>

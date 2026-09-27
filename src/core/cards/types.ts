@@ -23,9 +23,68 @@ export type CardData = {
   /** 0.5–5 in half steps. */
   rating?: number | null;
   review?: string | null;
-  /** Local calendar date the user finished it, `YYYY-MM-DD`. */
+  /** Local calendar date the user finished it (or logged the episode), `YYYY-MM-DD`. */
   finishedOn: string;
+  /** Set on a Progress card: the episode just logged and how far along the series is. */
+  progress?: CardProgress | null;
+  /** Set on a Weekly Recap card: the week's totals and collage. `kind`, `name` and `posterUrl` are the top title's. */
+  recap?: CardRecap | null;
+  /** Printed in the footer (`@username`) of saved cards. The server sets it, never the browser. */
+  username?: string | null;
+  /** What the user chose to leave off the card. */
+  hide?: CardHideable[];
 };
+
+/** Things a user can hide on a card (S1 share artwork: "hide username or any stat"). */
+export const CARD_HIDEABLE = ["username", "time", "episodes", "seasons"] as const;
+export type CardHideable = (typeof CARD_HIDEABLE)[number];
+
+export type CardProgress = {
+  season: number;
+  episode: number;
+  /** Aired episodes logged, out of `total` aired. */
+  watched: number;
+  total: number;
+  /** Watched time so far, minutes. */
+  watchedMin: number | null;
+  /** A milestone crossed by this log (25/50/75 %), else null. */
+  milestone: Milestone | null;
+};
+
+export const MILESTONES = [25, 50, 75] as const;
+export type Milestone = (typeof MILESTONES)[number];
+
+/** Stats page periods (S1 stats). A recap card with a `period` is a "Share stats" card. */
+export const STATS_PERIODS = ["week", "month", "year", "all"] as const;
+export type StatsPeriod = (typeof STATS_PERIODS)[number];
+
+/**
+ * A week of watching (Weekly Recap, ADR 0025; also what `weekly_recaps.stats` holds), or a stats period
+ * (`kind: "stats"` cards from the stats page, ADR 0026).
+ */
+export type CardRecap = {
+  /** Set on stats cards only; a weekly recap has none. */
+  period?: StatsPeriod;
+  /** First and last local dates, `YYYY-MM-DD` (a weekly recap: a Monday and the Sunday after it). */
+  from: string;
+  to: string;
+  minutes: number;
+  episodes: number;
+  /** Titles finished that week. */
+  finished: number;
+  /** Titles watched that week (finished, or with episodes logged). */
+  titleCount: number;
+  /** Most watched first, at most `RECAP_COLLAGE_MAX`: the poster collage. */
+  titles: RecapCollageTitle[];
+};
+
+export type RecapCollageTitle = { name: string; kind: TitleKind; posterUrl: string | null };
+
+export const RECAP_COLLAGE_MAX = 4;
+
+/** What a saved card is: `cards.kind`. */
+export const CARD_KINDS = ["finish", "progress", "sticker", "weekly_recap", "stats"] as const;
+export type CardKind = (typeof CARD_KINDS)[number];
 
 /** Card colours, all as `#rrggbb`. `text` and `muted` meet contrast on `background`. */
 export type Palette = {

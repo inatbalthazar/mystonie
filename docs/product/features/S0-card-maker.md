@@ -27,7 +27,7 @@ A single-page web tool: search a movie or series, pick one of 3 templates, optio
 - **Pre-render the PNG** whenever the preview settles (debounced after template / size / text changes) and keep the `Blob` ready. The Share button must call `navigator.share({ files, url })` synchronously in the click handler: iOS Safari rejects a share that starts after an async render (`NotAllowedError`). Fall back to Download when `navigator.canShare({ files })` is false.
 - The share payload includes `url` = site URL with `?ref=card&tpl=<template>` so visits from shared cards are attributable (the link printed on the PNG can't be tapped). The landing page records `ref` / `tpl` in the `$pageview` event and in `waitlist.source`.
 - Poster images load with `crossOrigin="anonymous"` (TMDB images send `Access-Control-Allow-Origin: *`, verified 2026-09-24) so palette extraction and export don't taint the canvas.
-- **Fonts:** the brand fonts load normally. Noto Sans Thai / KR / JP load **only when the review or title contains that script** (dynamic `FontFace` or `unicode-range`), and export waits for `document.fonts.ready`.
+- **Fonts:** the brand fonts load normally. Noto Sans Thai / KR / JP load **only when the review or title contains that script** (dynamic `FontFace` or `unicode-range`), and export waits for `document.fonts.ready`. As built: Thai through `unicode-range`; the KR/JP CSS itself is imported on demand ([ADR 0018](../../decisions/0018-lazy-cjk-font-css.md)).
 
 ### Abuse & privacy
 - `/api/search`, `/api/trending` and the waitlist route are rate-limited per hashed IP (`rate_limits` table, salted hash with `IP_HASH_SALT`, no raw IPs stored).
@@ -45,7 +45,7 @@ A single-page web tool: search a movie or series, pick one of 3 templates, optio
 - `src/core/cards/`: `CardData`, sizes, palette from poster pixels, script detection, watch time (unit-tested).
 - `src/cards/`: `registry.tsx` (`TEMPLATES`, `CardTemplate`), `templates/` (Ticket, Polaroid, Bold Stats), shared `parts.tsx` (root, poster, title sizing, stars, stats, footer), `card-preview.tsx` (scales the export-size card), `export.ts` (`renderCardPng`, `usePrerenderedCard`, `downloadBlob`), `card-studio.tsx` (the editor, see below), `example-cards.tsx` (first screen, top 3 trending titles with real stats).
 - Stats: movies show runtime in minutes; series show total hours (runtime × episodes), episodes and seasons. Unknown values are left out.
-- `/card-lab` (development only) renders every template × size × hard case for `pnpm test:e2e`. Decisions: [ADR 0013](../../decisions/0013-card-rendering-details.md).
+- `/card-lab` (development only) renders every template × size × hard case for `pnpm test:e2e`. Decisions: [ADR 0013](../../decisions/0013-card-rendering-details.md). Templates are v1 of the agent-made design system ([ADR 0017](../../decisions/0017-design-system-v1.md)): FINISHED stamp, display type, hand-written polaroid captions.
 
 ### Card editor (as built)
 `src/cards/card-studio.tsx`, fed by the picked-title panel (remounted per title, so edits don't carry over):
@@ -57,16 +57,26 @@ A single-page web tool: search a movie or series, pick one of 3 templates, optio
 - **Share / Download:** the PNG is pre-rendered 400 ms after the last change. Share builds the `File` and calls `navigator.share({ files, url })` synchronously in the click; `url` is the current page with `?ref=card&tpl=<id>` (`cardShareUrl`). If the browser can't share files with a URL it shares the file alone; if it can't share files at all the Share button is hidden and Download is the primary action. A cancelled share does nothing; any other share error falls back to Download.
 - Pure helpers (rating steps, review clamp, share URL, template cycle) live in `src/core/cards/edit.ts` with unit tests. `e2e/editor.spec.ts` drives the whole flow with a mocked `navigator.share` and checks the payload and that the share starts during the click.
 
+### Waitlist and legal pages (as built)
+- `src/components/waitlist-form.tsx`: email + hidden honeypot (`website`) + consent line with a Privacy link. Shown on the first screen until a title is picked, and in the card editor after Share / Download. Success replaces the form with "You're on the list".
+- `POST /api/waitlist` (`src/app/api/waitlist/route.ts`) → `{ ok: true }` · `400 invalid_email` · `429 rate_limited` (5 per 10 min per IP hash) · `503 unavailable` (no Supabase). Validation in `src/core/waitlist.ts` (unit-tested), insert in `src/data/waitlist.ts`. Duplicates and honeypot hits answer `{ ok: true }`. `source` = `placement=home|after_card` + landing `ref`/`tpl`/`utm_*`.
+- `/privacy` and `/terms` (`src/components/legal-page.tsx`), linked in the footer and listed in the sitemap. Text is English only in `messages/en.json`; contact and "last updated" date in `src/lib/legal.ts`. Decisions: [ADR 0014](../../decisions/0014-waitlist-and-legal-pages.md).
+
+### Analytics, errors, uptime (as built)
+- Events (`src/core/analytics.ts`): `card_created {kind, tpl}` when the editor opens for a title · `template_switched {tpl, via: button|swipe}` · `size_switched {size}` · `card_shared {tpl, size}` after the share sheet succeeds · `card_downloaded {tpl, size, fallback}` · `waitlist_joined {placement}`. Every event and `$pageview` carries `ref` / `tpl` from the landing URL. Pass-criterion query: share rate = cards with `card_shared` or `card_downloaded` ÷ `card_created`.
+- PostHog loads after the page is idle, cookieless, through `/ingest`; Sentry (errors only, no personal data) the same way through `/monitoring`. Both are off without their env keys and Sentry is off in development.
+- `GET /api/health` → `{ ok, db }` 200/503, polled by an external uptime monitor and a daily Vercel cron. Decisions: [ADR 0015](../../decisions/0015-analytics-errors-uptime.md).
+
 ## Acceptance criteria
 - [x] Typing "stranger" shows *Stranger Things* with a poster before the word is complete (first result for "strang", verified 2026-09-26).
 - [x] All 3 templates render at both sizes with no layout overflow for long titles (60+ chars) and long reviews (`e2e/cards.spec.ts`).
 - [x] A Thai, Korean and Japanese review renders correctly on the PNG (exported and checked 2026-09-26).
 - [ ] Share opens the native share sheet with the image on iOS Safari and Android Chrome (🧑 real-device check pending; payload and click timing covered by `e2e/editor.spec.ts`). Download works on desktop (verified 2026-09-26, Chrome).
-- [ ] Waitlist emails are stored in Supabase (`waitlist` table, unique email).
-- [ ] Lighthouse mobile performance ≥ 90 on the card page (Noto KR/JP not downloaded when the card has only Latin/Thai text).
+- [x] Waitlist emails are stored in Supabase (`waitlist` table, unique email). Verified on local Supabase 2026-09-26: lower-cased, duplicate kept its first locale/source, re-subscribe works. Production needs the Supabase project.
+- [x] Lighthouse mobile performance ≥ 90 on the card page (Noto KR/JP not downloaded when the card has only Latin/Thai text). Local production build 2026-09-26: `/` 94–95 over 5 runs (FCP 0.8 s, LCP 3.0–3.1 s, TBT 30–100 ms, CLS 0, SI 0.9 s), `/th` 93. Before: 86–88. Neither the KR/JP fonts nor their CSS load on the first screen (`e2e/cards.spec.ts`).
 - [ ] First screen shows example cards and at least 8 trending titles; tapping one opens its card.
 - [ ] Shared URL carries `ref=card&tpl=…`, and a visit with it shows up in PostHog with those properties.
-- [ ] Rapid repeated calls to `/api/search` from one client get `429`; a filled honeypot is silently dropped.
+- [x] Rapid repeated calls to `/api/search` from one client get `429`; a filled honeypot is silently dropped (both verified locally 2026-09-26; waitlist also returns `429` on the 6th try in 10 min).
 - [ ] Pasting the site URL into X / Discord / LINE shows the OG preview.
 - [ ] Dark mode: the page and editor are readable with the OS in dark mode.
 - [ ] The events above show up in PostHog.

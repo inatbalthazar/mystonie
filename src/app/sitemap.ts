@@ -4,7 +4,7 @@ import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
 
 // Public, indexable pages. Add new ones here as they ship.
-const pages = ["/"] as const;
+const pages = ["/", "/privacy", "/terms"] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = siteUrl();

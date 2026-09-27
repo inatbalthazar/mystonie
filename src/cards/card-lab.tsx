@@ -5,7 +5,8 @@ import { CARD_DIMENSIONS, type CardSize } from "@/core/cards/types";
 import { renderCardPng } from "./export";
 import { CardPreview } from "./card-preview";
 import { CARD_FIXTURES } from "./fixtures";
-import { TEMPLATES } from "./registry";
+import { templatesFor } from "@/core/cards/templates";
+import type { TemplateId } from "./registry";
 import { usePosterPalette } from "./use-poster-palette";
 import type { CardData } from "@/core/cards/types";
 
@@ -34,7 +35,7 @@ export function CardLab({ host }: { host: string }) {
         <section key={f.id} className="flex flex-col gap-2">
           <h2 className="font-mono text-sm">{f.id}</h2>
           <div className="flex flex-wrap items-start gap-4">
-            {TEMPLATES.flatMap(({ id }) =>
+            {[...templatesFor(f.data.recap ? "weekly_recap" : f.data.progress ? "progress" : "finish"), ...templatesFor("sticker")].flatMap((id) =>
               (Object.keys(CARD_DIMENSIONS) as CardSize[]).map((size) => (
                 <div key={`${id}-${size}`} data-testid={`${f.id}.${id}.${size}`} className="w-[216px]">
                   <LabCard template={id} size={size} data={f.data} host={host} />
@@ -48,7 +49,7 @@ export function CardLab({ host }: { host: string }) {
   );
 }
 
-function LabCard(props: { template: (typeof TEMPLATES)[number]["id"]; size: CardSize; data: CardData; host: string }) {
+function LabCard(props: { template: TemplateId; size: CardSize; data: CardData; host: string }) {
   const palette = usePosterPalette(props.data.posterUrl?.replace("/w780/", "/w92/"));
   return <CardPreview {...props} palette={palette} />;
 }

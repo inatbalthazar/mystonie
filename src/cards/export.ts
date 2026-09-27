@@ -3,9 +3,13 @@
 import { domToBlob } from "modern-screenshot";
 import { useEffect, useState, type RefObject } from "react";
 import { CARD_DIMENSIONS, type CardSize } from "@/core/cards/types";
+import { ensureCardFonts } from "./fonts";
 
 /** Renders the (unscaled) card node to a PNG at export size, after fonts and images are ready. */
 export async function renderCardPng(node: HTMLElement, size: CardSize): Promise<Blob> {
+  await ensureCardFonts(node.textContent);
+  // Force a layout so newly defined fallbacks start downloading before we wait for them.
+  void node.offsetHeight;
   await document.fonts.ready;
   await Promise.all(
     [...node.querySelectorAll("img")].map((img) => (img.complete ? Promise.resolve() : img.decode().catch(() => {}))),

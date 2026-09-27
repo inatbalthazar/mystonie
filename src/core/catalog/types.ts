@@ -31,3 +31,13 @@ export type Title = {
   episodeCount: number | null;
   seasonCount: number | null;
 };
+
+/** One episode of a series. Mirrors the `title_episodes` table. Season 0 (specials) is not kept. */
+export type Episode = {
+  season: number;
+  episode: number;
+  name: string | null;
+  runtimeMin: number | null;
+  /** `YYYY-MM-DD`; null when TMDB doesn't know it yet. */
+  airDate: string | null;
+};

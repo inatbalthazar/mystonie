@@ -27,12 +27,62 @@ The heart of Mystonie, modelled on Strava's post-activity share. Every finish or
 - Users can hide username or any stat on a card.
 - Weekly Recap is computed by a scheduled job (pg_cron → route handler) per user time zone. Only users with activity that week get one.
 
+## Built ([ADR 0024](../../decisions/0024-card-saving-and-share-links.md))
+- **Celebration** (`src/components/celebration.tsx`, a full-screen `<dialog>`):
+  - It opens right after **Finished**: quick add, changing an entry's status to finished, and "Yes, I finished it" on a series.
+  - It shows the FINISHED stamp landing (`motion-safe:animate-stamp`) and a short vibration where supported. Both are skipped under `prefers-reduced-motion`.
+  - The card preview comes with **Share** as the primary button (**Copy card link** where files can't be shared, e.g. desktops).
+  - Secondary buttons: **Download**, **Change style** (or swipe), **Sticker** (a checkerboard shows the transparency).
+  - Also: Story / Post size, and "Hide on card" (`@username`, watch time, episodes).
+  - Rating and a one-line review are optional, below the actions. They are saved on the entry when the celebration closes (`PATCH /api/entries/[id] { rating, review }`).
+  - **Skip** (then **Done**) is always in the sticky top bar.
+  - "Make a card" in the edit sheet (finished entries) and "Make a Finish card" on the series page reopen it without the animation.
+- **Progress card** (series page): every log offers "Logged S1 · E4. Want a card?". Crossing 25/50/75 % of aired episodes turns it into a highlighted milestone ("Halfway there! 🎉"). The card shows the milestone or episode, `EP 8/16` and the watched time.
+- **Templates:**
+  - Metadata is in `src/core/cards/templates.ts` (`kinds`, `sizes`, `tier`).
+  - Ticket is for Finish cards; Polaroid and Bold Stats draw Finish and Progress cards; **Sticker** is white ink on a transparent background.
+  - Every card's footer is `mystonie · @username` plus the site host.
+- **Saving:** `POST /api/cards` stores the inputs (`params`, validated) with the username taken from the profile. Share also sets `shared_at` and returns a signed upload URL, and the PNG goes to the public `cards` bucket at `<user_id>/<id>.png`. Download saves the inputs only.
+- **`/c/[id]`:**
+  - A public, `noindex` page with the pasted-in card (the PNG, or a re-render from `params`), its line ("Finished Parasite") and the date.
+  - CTAs: **Make your own card** (`/?ref=card&tpl=…`) and **Start your collection**.
+  - The OG image (`opengraph-image.tsx`, `next/og`, 1200×630) has the poster, the stamp, the title (Latin only) and the facts. Twitter card: `summary_large_image`.
+- **Events:**
+  - `card_created {kind, tpl, card}`, `card_shared {tpl, size, channel: share_sheet|link, card}`, `card_downloaded {…, card}`.
+  - `signup_from_card {tpl}`: a `/c/[id]` visit remembered for 24 h, then a new account (< 15 min old) landing on `/collection`.
+- Tests:
+  - `src/core/cards/saved.test.ts`;
+  - `e2e/share.spec.ts` (finish → celebration → notes → publish → `/c/[id]` signed out → OG PNG; Sticker download);
+  - `e2e/series.spec.ts` (Progress offer, milestone card, finish celebration);
+  - `e2e/cards.spec.ts` (every template × kind × size in `/card-lab`, Sticker transparency).
+
+### Weekly Recap ([ADR 0025](../../decisions/0025-weekly-recaps.md))
+- **Schedule:**
+  - pg_cron calls `POST /api/cron/weekly-recaps` hourly (bearer `CRON_SECRET`; the URL and secret live in Supabase Vault).
+  - Users are due from their local Monday 09:00 when they logged an episode or finished a title in the week before. The week is Monday–Sunday in their time zone.
+  - The route stores the week's numbers (`weekly_recaps.stats`, from `weeklyRecap` in `src/core/stats/recap.ts`), then emails up to 100 per run.
+- **Email** (`Emails.recap`, `src/core/email/recap.ts`):
+  - It shows the hours, episodes and titles finished, and a strip of up to 4 posters.
+  - **Open my recap card** goes to `/recap/[id]` (signed in, owner only).
+  - It has its own unsubscribe (`list=recaps`) and one-click `List-Unsubscribe`. Settings → Emails turns it back on.
+- **Card:** `/recap/[id]` opens the celebration with the week's card.
+  - Templates: **Collage** (default: an album page, posters taped in) and **Bold Stats**.
+  - Sticker, Share, `/c/[id]` and the OG image all work as for Finish cards.
+  - The collection page shows "Your week is in" for 7 days.
+- **Web push** (built, [ADR 0028](../../decisions/0028-home-pwa-web-push.md)): in the installed app, Settings → Notifications (and a one-time note on Home) turns on recap notifications for that device. The hourly job pushes each new recap once, before the emails; tapping the notification opens `/recap/[id]`.
+- Tests:
+  - `src/core/stats/recap.test.ts`;
+  - `saved.test.ts` (recap parsing);
+  - `email.test.ts` (recap email, per-list unsubscribe);
+  - `stage1_weekly_recaps.test.sql` (due logic incl. time zones, RLS, cron job);
+  - `e2e/recap.spec.ts` (finish → Monday 10:00 run → email → recap card → share → note → unsubscribe).
+
 ## Acceptance criteria
-- [ ] Finishing a title shows the celebration with a rendered card in < 1 s on a mid-range phone.
-- [ ] Stats Sticker PNG has a transparent background.
-- [ ] Opening `/c/[id]` shows the card with a correct OG preview in X, Facebook and iMessage.
-- [ ] Weekly Recap arrives on the user's local Monday morning (configurable later).
-- [ ] PostHog events: `card_created`, `card_shared` (with `channel` if known), `card_downloaded`, `signup_from_card`.
+- [ ] Finishing a title shows the celebration with a rendered card in < 1 s on a mid-range phone. *The celebration opens optimistically, before the server answers, and the preview renders at once (e2e). Timing on a real mid-range phone is still to check (owner, with the real-device check).*
+- [x] Stats Sticker PNG has a transparent background. (`e2e/cards.spec.ts`: exported corners have alpha 0.)
+- [ ] Opening `/c/[id]` shows the card with a correct OG preview in X, Facebook and iMessage. *Page, `og:*` / `twitter:card` tags and the 1200×630 PNG checked locally (e2e). The previews in X, Facebook and iMessage need a deployed URL (after the stage 1 migrations go live).*
+- [x] Weekly Recap arrives on the user's local Monday morning (configurable later). (Due from 09:00 local, hourly job: `stage1_weekly_recaps.test.sql` checks Bangkok vs New York, `e2e/recap.spec.ts` checks 08:00 = nothing, 10:00 = the email.)
+- [x] PostHog events: `card_created`, `card_shared` (with `channel` if known), `card_downloaded`, `signup_from_card`. (`src/core/analytics.ts`; share / download events checked in `e2e/share.spec.ts`.)
 
 ## Data
 `cards`, `weekly_recaps`, Storage bucket `cards`.

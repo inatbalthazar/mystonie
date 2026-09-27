@@ -31,7 +31,8 @@ test("every template × size × hard case stays inside the card", async ({ page 
 
   const cards = page.locator("[data-testid]");
   const count = await cards.count();
-  expect(count).toBe(5 * 3 * 2);
+  // Finish fixtures: 3 finish templates + the sticker; progress, recap and stats fixtures: 2 templates + the sticker.
+  expect(count).toBe(5 * 4 * 2 + 2 * 3 * 2 + 3 * 3 * 2);
 
   for (let i = 0; i < count; i++) {
     const card = cards.nth(i);
@@ -67,13 +68,14 @@ test("every template × size × hard case stays inside the card", async ({ page 
   for (const script of ["Thai", "KR", "JP"]) expect(families).toContain(`Noto Sans ${script}`);
 });
 
-test("first screen does not download Korean/Japanese fonts", async ({ page }) => {
+test("first screen does not download Korean/Japanese fonts or their CSS", async ({ page }) => {
   await page.goto("/");
   await page.locator("[data-card]").first().waitFor();
   await settle(page);
-  const families = (await loadedFonts(page)).join(" | ");
-  expect(families).not.toContain("Noto Sans KR");
-  expect(families).not.toContain("Noto Sans JP");
+  // document.fonts lists every @font-face rule on the page, loaded or not: KR/JP must not even be declared.
+  const declared = (await page.evaluate(() => [...document.fonts].map((f) => f.family))).join(" | ");
+  expect(declared).not.toContain("Noto Sans KR");
+  expect(declared).not.toContain("Noto Sans JP");
 });
 
 test("a picked title downloads as a PNG at export size", async ({ page }) => {
@@ -104,5 +106,25 @@ test("Thai, Korean and Japanese text survive PNG export", async ({ page }, testI
     expect([png.readUInt32BE(16), png.readUInt32BE(20)]).toEqual([w, h]);
     await testInfo.attach(`${id}.export.png`, { body: png, contentType: "image/png" });
     writeFileSync(testInfo.outputPath(`${id}.export.png`), png);
+  }
+});
+
+test("the Stats Sticker exports with a transparent background", async ({ page }) => {
+  await page.goto("/card-lab");
+  await page.locator("[data-card]").first().waitFor();
+  await settle(page);
+  for (const id of ["korean.sticker.story", "progress-halfway.sticker.feed"]) {
+    const alpha = await page.evaluate(async (testId) => {
+      const base64 = await (window as unknown as { __exportCard: (id: string) => Promise<string> }).__exportCard(testId);
+      const bitmap = await createImageBitmap(await (await fetch(`data:image/png;base64,${base64}`)).blob());
+      const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(bitmap, 0, 0);
+      const at = (x: number, y: number) => ctx.getImageData(x, y, 1, 1).data[3];
+      const opaque = ctx.getImageData(0, 0, bitmap.width, bitmap.height).data.some((v, i) => i % 4 === 3 && v === 255);
+      return { corners: [at(0, 0), at(bitmap.width - 1, 0), at(0, bitmap.height - 1), at(bitmap.width - 1, bitmap.height - 1)], opaque };
+    }, id);
+    expect(alpha.corners, `${id} corners`).toEqual([0, 0, 0, 0]);
+    expect(alpha.opaque, `${id} has visible stats`).toBe(true);
   }
 });

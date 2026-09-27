@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type Ref } from "react";
 import { CARD_DIMENSIONS, type CardData, type CardSize, type Palette } from "@/core/cards/types";
+import { ensureCardFonts } from "./fonts";
 import { CardTemplate, type TemplateId } from "./registry";
 
 type Props = {
@@ -27,6 +28,11 @@ export function CardPreview({ template, data, size, palette, host, cardRef }: Pr
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
+
+  const recapNames = data.recap?.titles.map((t) => t.name).join(" ");
+  useEffect(() => {
+    void ensureCardFonts(data.name, data.review, recapNames);
+  }, [data.name, data.review, recapNames]);
 
   const scale = width / w;
 

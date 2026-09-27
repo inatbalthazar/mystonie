@@ -26,7 +26,16 @@ Sizes: 9:16 (Stories/TikTok) and 4:5 (feed). Footer: `mystonie · @username` + s
 ## Mascot: Stonie
 A small, round stone with a face, like a friendly carved milestone or stone tablet. When a user finishes a title, Stonie "carves" it into their collection (the celebration moment, alongside the FINISHED stamp). Keep it simple enough to work as a 24px icon and on cards; it never covers poster or stats. Name and meaning: [ADR 0011](../decisions/0011-name-mystonie.md).
 
-## Deliverables from the freelance designer (one-off)
+## Design system v1 (as built)
+Decided in [ADR 0017](../decisions/0017-design-system-v1.md). Source of truth is the code:
+- **Tokens:** `src/app/globals.css` (shadcn variables + `--brand`, `--brand-foreground`, `--brand-soft`; Tailwind `bg-brand`, `text-brand`, `bg-brand-soft`). Light: paper `#fcfaf6`, ink `#1d1713`, coral `#cf3c12`. Dark: `#120f0c`, `#f5f1ec`, coral `#f47249`. Checked for WCAG AA in both themes.
+- **Type:** `font-display` = Bricolage Grotesque (headlines, wordmark, card titles/numbers), `font-sans` = Geist (UI), `--font-caveat` (polaroid captions), Noto Thai/KR/JP fallbacks. Set up in `src/app/[locale]/layout.tsx`.
+- **Logo:** `src/app/icon.svg` (Stonie) and `src/components/logo.tsx` (mark + wordmark).
+- **Cards:** shared parts in `src/cards/parts.tsx` (`DISPLAY`, `FinishedStamp`, `CardFooter`), templates in `src/cards/templates/`. Check changes in `/card-lab` and with `pnpm test:e2e`.
+
+## Deliverables from a freelance designer (optional, later)
+A designer may refine v1; the list below is what they'd deliver.
+
 Logo + app icon (maskable) · Stonie mascot (neutral, celebrating, sleeping/empty-state poses) · colour tokens (light/dark) · type pairing · the 3 card templates in both sizes · 2 key screens (Home, Celebration) as style reference. Agents translate these into tokens and components.
 
 ## PWA

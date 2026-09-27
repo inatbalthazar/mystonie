@@ -26,6 +26,7 @@ test("edit a card, swipe templates, then share and download it", async ({ page }
 
   const preview = page.locator("[data-card]").last();
   await preview.waitFor();
+  await expect(page.getByPlaceholder("you@example.com")).toHaveCount(0);
 
   // Rating: tap 4 → 4, tap 4 again → 3.5.
   await page.getByRole("button", { name: "4 stars" }).click();
@@ -66,4 +67,18 @@ test("edit a card, swipe templates, then share and download it", async ({ page }
   const download = page.waitForEvent("download");
   await page.getByRole("button", { name: "Download" }).click();
   expect((await download).suggestedFilename()).toMatch(/-boldStats\.png$/);
+
+  // Analytics (recorded in development by src/lib/analytics.ts).
+  const events = await page.evaluate(() => window.__mystonieEvents ?? []);
+  expect(events).toEqual(
+    expect.arrayContaining([
+      ["card_created", expect.objectContaining({ tpl: "polaroid" })],
+      ["template_switched", { tpl: "boldStats", via: "swipe" }],
+      ["card_shared", { tpl: "boldStats", size: "story" }],
+      ["card_downloaded", { tpl: "boldStats", size: "story", fallback: false }],
+    ]),
+  );
+
+  // Celebrate first, ask later: the waitlist appears only once the card is out.
+  await expect(page.getByText("Save all your cards in one collection.")).toBeVisible();
 });

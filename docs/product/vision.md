@@ -16,7 +16,7 @@ Competitors are **databases with a UI** (Letterboxd: film only; Serializd, TV Ti
 3. **Global from day one.** English is the default. Other languages (Thai first) are optional locales. There are no region-specific core features, and dates, times and numbers follow the user's locale and time zone ([i18n](../architecture/i18n.md)).
 4. **Reuse before build.** Use TMDB for titles and DoesTheDogDie for warnings, and use Supabase for the backend.
 5. **Log in ≤ 3 taps. Celebrate first, ask later.**
-6. **Solo-founder sized.** Minimal services, near-zero cost until revenue, and each stage has pass criteria.
+6. **Solo-founder sized.** Minimal services and near-zero cost until revenue. Polished before launch: stages 0–2 ship together, and each stage has success measures for after launch.
 
 ## Glossary
 

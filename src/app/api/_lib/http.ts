@@ -1,5 +1,17 @@
+import { timingSafeEqual } from "node:crypto";
 import { TmdbError } from "@/data/tmdb";
 import { allowRequest, type Limit } from "@/data/rate-limit";
+
+/**
+ * Whether the request carries `Authorization: Bearer <secret>` (constant-time). A missing or short secret
+ * (under 16 characters) never matches, so an unset env var can't open the route.
+ */
+export function bearerAuthorized(request: Request, secret: string | undefined): boolean {
+  if (!secret || secret.length < 16) return false;
+  const given = Buffer.from(request.headers.get("authorization") ?? "");
+  const expected = Buffer.from(`Bearer ${secret}`);
+  return given.length === expected.length && timingSafeEqual(given, expected);
+}
 
 /** A 429 response when the caller is over `limit` for `bucket`, else null. */
 export async function rateLimited(request: Request, bucket: string, limit: Limit): Promise<Response | null> {

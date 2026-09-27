@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { contrast, DEFAULT_PALETTE, paletteFromPixels } from "./palette";
-import { scriptsIn, titleSizeStep, watchMinutes } from "./text";
+import { isLatinSafe, scriptsIn, titleSizeStep, watchMinutes } from "./text";
 
 const pixels = (...colors: [number, number, number, number][]) =>
   Uint8ClampedArray.from(colors.flatMap(([r, g, b, n]) => Array.from({ length: n }, () => [r, g, b, 255]).flat()));
@@ -56,5 +56,17 @@ describe("titleSizeStep", () => {
     expect(titleSizeStep("Stranger Things: Tales")).toBe(1);
     expect(titleSizeStep("Dr. Strangelove or: How I Learned to Stop Worrying")).toBe(3);
     expect(titleSizeStep("千と千尋の神隠し")).toBe(0);
+  });
+});
+
+describe("isLatinSafe", () => {
+  it("accepts Latin titles with accents and punctuation", () => {
+    expect(isLatinSafe("Amélie")).toBe(true);
+    expect(isLatinSafe("Dr. Strangelove — or: How I Learned…")).toBe(true);
+    expect(isLatinSafe("Łódź")).toBe(true);
+  });
+
+  it("rejects other scripts and emoji", () => {
+    for (const s of ["千と千尋の神隠し", "기생충", "เพราะเราคู่กัน", "Кино", "Up 🎈"]) expect(isLatinSafe(s)).toBe(false);
   });
 });

@@ -155,11 +155,11 @@ max_indexes = 5
 enabled = true
 # The base URL of your website. Used as an allow-list for redirects and for constructing URLs used
 # in emails.
-site_url = "http://127.0.0.1:3000"
+site_url = "http://localhost:3000"
 # The public URL that Auth serves on. Defaults to the API external URL with `/auth/v1` appended.
 # external_url = ""
 # A list of *exact* URLs that auth providers are permitted to redirect to post authentication.
-additional_redirect_urls = ["https://127.0.0.1:3000"]
+additional_redirect_urls = ["http://localhost:3000/**", "http://127.0.0.1:3000/**"]
 # How long tokens are valid for, in seconds. Defaults to 3600 (1 hour), maximum 604,800 (1 week).
 jwt_expiry = 3600
 # JWT issuer URL. If not set, defaults to auth.external_url.
@@ -232,15 +232,16 @@ otp_length = 6
 # Number of seconds before the email OTP expires (defaults to 1 hour).
 otp_expiry = 3600
 
-# Use a production-ready SMTP server
+# Not used: auth emails go through the Send Email Hook below (ADR 0020), which sends with Resend's API.
+# Kept for reference in case the hook is ever switched off.
 # [auth.email.smtp]
 # enabled = true
-# host = "smtp.sendgrid.net"
-# port = 587
-# user = "apikey"
-# pass = "env(SENDGRID_API_KEY)"
-# admin_email = "admin@email.com"
-# sender_name = "Admin"
+# host = "smtp.resend.com"
+# port = 465
+# user = "resend"
+# pass = "env(RESEND_API_KEY)"
+# admin_email = "hello@mystonie.app"
+# sender_name = "Mystonie"
 
 # Uncomment to customize email template
 # [auth.email.template.invite]
@@ -273,6 +274,15 @@ max_frequency = "5s"
 # timebox = "24h"
 # Force log out if the user has been inactive longer than the specified duration.
 # inactivity_timeout = "8h"
+
+# Sign-in emails are rendered and sent by our app (ADR 0020): Supabase calls this route, which renders the
+# email in the user's locale and sends it with Resend (or, locally without a key, to Mailpit). Needs
+# `pnpm dev` running on port 3000. The secret below is for the local stack only: put the same value in
+# .env.local as SEND_EMAIL_HOOK_SECRET. Production generates its own in the dashboard (Auth → Hooks).
+[auth.hook.send_email]
+enabled = true
+uri = "http://host.docker.internal:3000/api/auth/email-hook"
+secrets = "v1,whsec_BVNos1f5O9Db0wQYrzCSH05U1NY0Bh3XadZWD2dPr34="
 
 # This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
 # [auth.hook.before_user_created]
@@ -318,6 +328,15 @@ max_frequency = "5s"
 # Use an external OAuth provider. The full list of providers are: `apple`, `azure`, `bitbucket`,
 # `discord`, `facebook`, `github`, `gitlab`, `google`, `keycloak`, `linkedin_oidc`, `notion`, `twitch`,
 # `twitter`, `x`, `slack`, `spotify`, `workos`, `zoom`.
+# Google sign-in (ADR 0020). Off locally unless you create a Google OAuth client for localhost; then set
+# enabled = true and the two env vars (redirect URI: http://127.0.0.1:54321/auth/v1/callback).
+# Production: Supabase dashboard → Authentication → Sign In / Providers → Google.
+[auth.external.google]
+enabled = false
+client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
+skip_nonce_check = true
+
 [auth.external.apple]
 enabled = false
 client_id = ""

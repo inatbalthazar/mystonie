@@ -2,24 +2,37 @@
 
 import { useTranslations } from "next-intl";
 import type { CardData } from "@/core/cards/types";
+import { cn } from "@/lib/utils";
 import { CardPreview } from "./card-preview";
-import { TEMPLATES, type TemplateId } from "./registry";
+import { FINISH_TEMPLATES, type TemplateId } from "./registry";
 import { usePosterPalette } from "./use-poster-palette";
+
+// Scrapbook fan: the middle card (the default template) in front, the others tilted behind it.
+const FAN = [
+  "z-0 -mr-6 mt-6 -rotate-[7deg]",
+  "z-10 w-[40%]",
+  "z-0 -ml-6 mt-6 rotate-[6deg]",
+];
 
 /** First screen: one example per template, so people see the output before typing. */
 export function ExampleCards({ examples, host }: { examples: CardData[]; host: string }) {
   const t = useTranslations("Card");
+  const th = useTranslations("Home");
   return (
-    <section className="flex w-full max-w-2xl flex-col gap-3">
-      <h2 className="text-sm font-medium text-muted-foreground">{t("examples")}</h2>
-      <ul className="grid grid-cols-3 gap-3">
-        {TEMPLATES.map(({ id }, i) => (
-          <li key={id} className="flex flex-col gap-1">
-            <Example template={id} data={examples[i % examples.length]!} host={host} />
-            <span className="text-center text-xs text-muted-foreground">{t(`templates.${id}`)}</span>
+    <section aria-label={t("examples")} className="flex w-full max-w-md flex-col items-center gap-4">
+      <ul className="flex w-full items-start justify-center">
+        {FINISH_TEMPLATES.map((id, i) => (
+          <li key={id} className={cn("flex w-[33%] shrink-0 flex-col items-center gap-2", FAN[i])}>
+            <div className="w-full overflow-hidden rounded-xl shadow-[0_18px_40px_-12px_rgba(0,0,0,0.45)] ring-1 ring-black/5">
+              <Example template={id} data={examples[i % examples.length]!} host={host} />
+            </div>
+            <span className="rounded-full bg-card px-2.5 py-0.5 text-xs font-medium text-muted-foreground shadow-sm ring-1 ring-border">
+              {t(`templates.${id}`)}
+            </span>
           </li>
         ))}
       </ul>
+      <p className="text-sm text-muted-foreground">{th("examplesHint")}</p>
     </section>
   );
 }

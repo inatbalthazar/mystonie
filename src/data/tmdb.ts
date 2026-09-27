@@ -3,10 +3,11 @@ import {
   mergeTmdbSearch,
   normalizeTmdbDetails,
   normalizeTmdbList,
+  normalizeTmdbSeason,
   tmdbMediaType,
   type TmdbKind,
 } from "@/core/catalog/tmdb";
-import type { SearchResult, Title } from "@/core/catalog/types";
+import type { Episode, SearchResult, Title } from "@/core/catalog/types";
 
 const API = "https://api.themoviedb.org/3";
 
@@ -55,4 +56,9 @@ export async function titleDetails(kind: TmdbKind, externalId: string): Promise<
   const raw = await tmdb(`/${tmdbMediaType(kind)}/${externalId}`, {}, DAY);
   const title = normalizeTmdbDetails(kind, raw);
   return title ? { title, raw } : null;
+}
+
+/** Episodes of one season of a series (`/tv/{id}/season/{n}`). */
+export async function seasonEpisodes(externalId: string, season: number): Promise<Episode[]> {
+  return normalizeTmdbSeason(await tmdb(`/tv/${externalId}/season/${season}`, {}, DAY));
 }

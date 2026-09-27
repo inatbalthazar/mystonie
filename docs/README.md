@@ -2,7 +2,7 @@
 
 ## Reading order (agents)
 1. [product/vision.md](product/vision.md): what Mystonie is, principles, glossary. **Always read first.**
-2. [roadmap.md](roadmap.md): current stage, next task, pass criteria and expansion gates.
+2. [roadmap.md](roadmap.md): current stage, next task, success measures and expansion gates.
 3. The spec your task links to in [product/features/](product/features/). Files are prefixed by stage (`S0-`, `S1-`, `S2-`).
 4. The relevant architecture doc:
    - [architecture/overview.md](architecture/overview.md): single Next.js app + Supabase, code layout, where logic lives, day-one rules

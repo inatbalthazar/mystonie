@@ -1,6 +1,6 @@
-// Normalizes TMDB v3 JSON (search/multi, trending/all/week, movie/{id}, tv/{id}).
+// Normalizes TMDB v3 JSON (search/multi, trending/all/week, movie/{id}, tv/{id}, tv/{id}/season/{n}).
 // Input is untrusted: every field is checked, and unusable items are dropped.
-import type { SearchResult, Title } from "./types";
+import type { Episode, SearchResult, Title } from "./types";
 
 export type TmdbKind = "movie" | "series";
 
@@ -132,4 +132,43 @@ export function normalizeTmdbDetails(kind: TmdbKind, body: unknown): Title | nul
     episodeCount: kind === "series" ? (count(body.number_of_episodes) ?? null) : null,
     seasonCount: kind === "series" ? (count(body.number_of_seasons) ?? null) : null,
   };
+}
+
+/** Numbered seasons of a `/tv/{id}` body that have episodes (specials, season 0, are skipped). */
+export function tmdbSeasonNumbers(body: unknown): number[] {
+  if (!isObject(body) || !Array.isArray(body.seasons)) return [];
+  const seasons = body.seasons.flatMap((s) => {
+    if (!isObject(s)) return [];
+    const n = count(s.season_number);
+    return n && n > 0 && (count(s.episode_count) ?? 1) > 0 ? [n] : [];
+  });
+  return [...new Set(seasons)].sort((a, b) => a - b);
+}
+
+/** Whether a `/tv/{id}` body says no more episodes are coming (the "Finished the series?" prompt). */
+export function tmdbSeriesEnded(body: unknown): boolean {
+  return isObject(body) && (body.status === "Ended" || body.status === "Canceled");
+}
+
+/** `/tv/{id}/season/{n}` → its episodes, in order. */
+export function normalizeTmdbSeason(body: unknown): Episode[] {
+  if (!isObject(body) || !Array.isArray(body.episodes)) return [];
+  const season = count(body.season_number);
+  if (!season) return [];
+  const episodes = body.episodes.flatMap((e): Episode[] => {
+    if (!isObject(e)) return [];
+    const episode = count(e.episode_number);
+    if (episode === undefined || count(e.season_number) !== season) return [];
+    const airDate = text(e.air_date);
+    return [
+      {
+        season,
+        episode,
+        name: text(e.name) ?? null,
+        runtimeMin: count(e.runtime) || null,
+        airDate: airDate && /^\d{4}-\d{2}-\d{2}$/.test(airDate) ? airDate : null,
+      },
+    ];
+  });
+  return episodes.sort((a, b) => a.episode - b.episode);
 }

@@ -2,7 +2,7 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { ImageResponse } from "next/og";
 
-// Home-screen icon, generated at build time from the placeholder mark in icon.svg.
+// Home-screen icon, generated at build time from the Stonie mark in icon.svg.
 export const size = { width: 180, height: 180 };
 export const contentType = "image/png";
 
@@ -19,7 +19,7 @@ export default async function AppleIcon() {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          background: "#f4f2ef",
+          background: "#fbf9f5",
         }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- rendered to PNG, not the DOM */}

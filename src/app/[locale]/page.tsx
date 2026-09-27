@@ -61,12 +61,13 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
   });
 
   return (
-    <main className="flex flex-1 flex-col items-center gap-8 px-4 pt-16 pb-8">
-      <header className="flex max-w-xl flex-col items-center gap-2 text-center">
-        <h1 className="text-3xl font-semibold tracking-tight">{t("title")}</h1>
-        <p className="text-lg">{t("tagline")}</p>
-        <p className="text-muted-foreground">{t("intro")}</p>
-      </header>
+    <main className="flex flex-1 flex-col items-center gap-10 px-4 pt-8 pb-12">
+      <section className="flex max-w-xl flex-col items-center gap-3 text-center">
+        <h1 className="font-display text-[2.75rem] leading-[0.95] font-extrabold tracking-[-0.035em] text-balance sm:text-6xl">
+          {t.rich("headline", { mark: (chunks) => <span className="text-brand">{chunks}</span> })}
+        </h1>
+        <p className="max-w-sm text-lg text-muted-foreground text-balance">{t("intro")}</p>
+      </section>
       <ExampleCards examples={examples} host={host} />
       <TitlePicker trending={trending.slice(0, 12)} host={host} />
     </main>

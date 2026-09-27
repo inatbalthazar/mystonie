@@ -1,0 +1,63 @@
+{
+  "id": 77680,
+  "season_number": 1,
+  "name": "Season 1",
+  "episodes": [
+    {
+      "episode_number": 1,
+      "season_number": 1,
+      "name": "Chapter One: The Vanishing of Will Byers",
+      "runtime": 48,
+      "air_date": "2016-07-15"
+    },
+    {
+      "episode_number": 2,
+      "season_number": 1,
+      "name": "Chapter Two: The Weirdo on Maple Street",
+      "runtime": 55,
+      "air_date": "2016-07-15"
+    },
+    {
+      "episode_number": 3,
+      "season_number": 1,
+      "name": "Chapter Three: Holly, Jolly",
+      "runtime": 51,
+      "air_date": "2016-07-15"
+    },
+    {
+      "episode_number": 4,
+      "season_number": 1,
+      "name": "Chapter Four: The Body",
+      "runtime": 50,
+      "air_date": "2016-07-15"
+    },
+    {
+      "episode_number": 5,
+      "season_number": 1,
+      "name": "Chapter Five: The Flea and the Acrobat",
+      "runtime": 52,
+      "air_date": "2016-07-15"
+    },
+    {
+      "episode_number": 6,
+      "season_number": 1,
+      "name": "Chapter Six: The Monster",
+      "runtime": 46,
+      "air_date": "2016-07-15"
+    },
+    {
+      "episode_number": 7,
+      "season_number": 1,
+      "name": "Chapter Seven: The Bathtub",
+      "runtime": 42,
+      "air_date": "2016-07-15"
+    },
+    {
+      "episode_number": 8,
+      "season_number": 1,
+      "name": "Chapter Eight: The Upside Down",
+      "runtime": 54,
+      "air_date": "2016-07-15"
+    }
+  ]
+}

@@ -5,7 +5,7 @@ Instructions for AI coding agents (Claude Code, Codex, Cursor, …) working in t
 ## Project
 **Mystonie** ("my stone", from *Milestone*; mascot: Stonie, [ADR 0011](docs/decisions/0011-name-mystonie.md)) is *Strava for the shows and movies you finish*. Users log what they watch (episode by episode) and get beautiful, shareable artwork with their stats. Global product: **English-first**, Thai as an optional locale. Folder `mystonie`, GitHub `inatbalthazar/mystonie`, deploy on Vercel `inatbalthazars-projects` (project `mystonie`). Built by a **solo founder**: keep things simple, small and cheap.
 
-**Status:** Stage 0 in progress. The Next.js app is scaffolded at the repo root. The next task is the first unchecked item of **Stage 0** in [docs/roadmap.md](docs/roadmap.md).
+**Status:** Stages 0 (card maker) and 1 (collection MVP) are built; only owner tasks (go-live keys, real-device checks, Git link) remain there, and agents move on to Stage 2. The owner wants a polished, complete product before launch: build stages 0 → 1 → 2 back to back without waiting for users, then launch ([ADR 0016](docs/decisions/0016-polish-before-launch.md)). The next task is the first unchecked agent task in [docs/roadmap.md](docs/roadmap.md).
 
 ## Workflow
 1. Read [docs/product/vision.md](docs/product/vision.md), then take the first unchecked, non-🧑 task of the current stage in [docs/roadmap.md](docs/roadmap.md) (or the task you were given).
@@ -34,7 +34,7 @@ Instructions for AI coding agents (Claude Code, Codex, Cursor, …) working in t
 | `src/app/api/` | Route handlers: search proxy, warnings, recaps, Stripe webhook |
 | `src/components/` | Shared UI (shadcn/ui primitives in `ui/`) |
 | `src/i18n/` | next-intl setup: `routing.ts` (locales), `navigation.ts` (locale-aware `Link`, `useRouter`), `request.ts` (messages + English fallback) |
-| `src/lib/` | Small app helpers (`utils.ts` → `cn`, `site.ts` → site URL). Not for domain logic, which goes in `src/core` |
+| `src/lib/` | Small app helpers (`utils.ts` → `cn`, `site.ts` → site URL, `supabase-browser.ts` → browser client for the sign-in page). Not for domain logic, which goes in `src/core` |
 | `src/cards/` | Card templates (`templates/*`, each = component + metadata) and the PNG renderer |
 | `src/core/` | Pure TS: types, zod schemas, catalog normalizers, stats, formatting, import parsers (+ `*.test.ts`) |
 | `src/data/` | Server-side data access, no React: Supabase clients, typed queries (`database.types.ts` from `pnpm db:types`), external API clients (`tmdb.ts`) |
@@ -53,19 +53,33 @@ GitHub Actions (`.github/workflows/ci.yml`) runs `lint`, `typecheck`, `test` and
 - Conventional commits (`feat(cards): …`) that mention the roadmap task.
 
 ## Commands
-Needs Node 24 and pnpm 12 (`corepack enable pnpm`).
+Needs Node 24 and pnpm 12 (`corepack enable pnpm`). When a new dependency has a build script, set it to `true` or `false` under `allowBuilds` in `pnpm-workspace.yaml` (pnpm skips it with a warning until you do).
+
+First-time setup:
 ```
 pnpm install
+cp .env.example .env.local         # then fill it in (below)
+pnpm db:start                      # prints the local API URL and service_role key
 pnpm dev                           # http://localhost:3000
-pnpm lint                          # ESLint (incl. the src/core purity rule)
+```
+`.env.local` for development: `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY` + `SUPABASE_SERVICE_ROLE_KEY` from `pnpm db:start`, `SEND_EMAIL_HOOK_SECRET` (the local value under `[auth.hook.send_email]` in `supabase/config.toml`), `TMDB_API_TOKEN` (the owner's "API Read Access Token"), `IP_HASH_SALT` (any string). Everything else can stay empty: PostHog, Sentry and email sending are off without keys (`/api/unsubscribe` answers 503 without `UNSUBSCRIBE_SECRET`), and without Supabase the rate limits and title cache switch off (the waitlist and `/api/health` answer 503).
+
+Daily:
+```
+pnpm lint                          # ESLint (incl. the src/core purity rule and react/jsx-no-literals)
 pnpm typecheck                     # next typegen + tsc --noEmit
 pnpm test                          # Vitest, all *.test.ts
-pnpm test src/core/stats           # single file or folder
-pnpm test:e2e                      # Playwright card + editor tests (needs pnpm dev + TMDB token; uses installed Chrome)
-pnpm build                         # production build
+pnpm test src/core/cards           # single file or folder
+pnpm test:watch
+pnpm test:e2e                      # Playwright (e2e/): cards, editor, waitlist, auth, collection, series, share, recap, stats, profile, home. Reuses a running pnpm dev on :3000
+                                   # or starts one; needs the TMDB token and installed Chrome
+pnpm build                         # production build (then pnpm start to serve it)
 pnpm dlx shadcn@latest add <name>  # add a shadcn/ui component
 ```
-If `pnpm typecheck` fails inside `.next/dev/types` after moving or deleting routes, delete `.next` (stale dev-server types).
+- `pnpm typecheck` failing inside `.next/dev/types` after moving or deleting routes: delete `.next` (stale dev-server types).
+- `CI=1 pnpm test:e2e` uses Playwright's bundled Chromium instead of Chrome (`pnpm exec playwright install chromium` first). `E2E_BASE_URL=http://localhost:3100` points the tests at another server.
+- Analytics in development: `track()` records events on `window.__mystonieEvents` (PostHog itself drops headless browsers). `/card-lab` renders every card template × size × hard case (development only).
+- Performance check (spec target: Lighthouse mobile ≥ 90): `pnpm build && PORT=3100 pnpm start`, then `npx lighthouse http://localhost:3100/ --only-categories=performance --form-factor=mobile`.
 
 Database (local Supabase, needs Docker Desktop running; the CLI is a devDependency):
 ```
@@ -76,7 +90,17 @@ pnpm db:new <name>                 # new migration file
 pnpm db:types                      # regenerate src/data/database.types.ts after a migration
 pnpm db:stop
 ```
-Never apply migrations to the remote project unless the owner asks.
+On Windows, `docker` isn't on PATH by default; for `docker exec supabase_db_mystonie psql -U postgres` add `C:\Users\<you>\AppData\Local\Programs\DockerDesktop\resources\bin`.
+
+Never apply migrations to the remote project unless the owner asks. Remote: Supabase project `mystonie` (ref `fuhwuwhiquysbfjmgtfi`, us-east-1); migrations so far went through the Supabase MCP (`apply_migration`), so its history uses MCP version numbers (see [data model](docs/architecture/data-model.md)). Run `get_advisors` (security) after every remote DDL change.
+
+Deploy: Vercel project `mystonie` (team `inatbalthazars-projects`, functions in `iad1`). Until the owner links the GitHub repo, production deploys are created from GitHub `main` with the Vercel MCP (`create_deployment`, `gitSource` org `inatbalthazar`, repo `mystonie`, ref `main`, target `production`), so **commit and push first**. Env vars live in Vercel; secrets are added by the owner as Sensitive. After a deploy, smoke-test `/`, `/th`, `/api/health`, `/api/trending`, `/api/search?q=strang`.
+
+Launch email (owner-run, [ADR 0019](docs/decisions/0019-email-resend.md)): `curl -X POST https://<domain>/api/admin/launch-email -H "Authorization: Bearer $ADMIN_SECRET" -d '{"dryRun":true}'` previews; without `dryRun` it sends the next ≤ 100 and returns `remaining`. Locally, sign-in emails land in Mailpit (http://127.0.0.1:54324), never in real inboxes: Supabase calls our Send Email Hook at `host.docker.internal:3000`, so email sign-in needs `pnpm dev` on port 3000 ([ADR 0020](docs/decisions/0020-auth-passwordless-ssr.md)); `e2e/auth.spec.ts`, `e2e/collection.spec.ts`, `e2e/series.spec.ts`, `e2e/share.spec.ts`, `e2e/recap.spec.ts`, `e2e/stats.spec.ts`, `e2e/profile.spec.ts` and `e2e/home.spec.ts` read the codes from Mailpit (helpers in `e2e/helpers.ts`) and skip when it isn't running; the collection, series, share, recap, stats, profile and home tests seed their titles (and episodes) through the local service role and mock `/api/search`, so they don't need TMDB. Repeated requests from one machine can trip Vercel's bot challenge (403 "Security Checkpoint"); check in a browser instead of retrying.
+
+Weekly recaps ([ADR 0025](docs/decisions/0025-weekly-recaps.md)): pg_cron calls `POST /api/cron/weekly-recaps` hourly (bearer `CRON_SECRET`; the URL and secret come from Supabase Vault, so the local job stays idle). Locally, start `pnpm dev` with `CRON_SECRET` and `UNSUBSCRIBE_SECRET` set and call it yourself, e.g. `curl -X POST localhost:3000/api/cron/weekly-recaps -H "Authorization: Bearer $CRON_SECRET" -d '{"now":"2026-10-05T03:00:00Z"}'` (`now` is honoured outside production only); recap emails go to Mailpit. `e2e/recap.spec.ts` skips without those two variables.
+
+Web push ([ADR 0028](docs/decisions/0028-home-pwa-web-push.md)): `pnpm push:keys` prints a VAPID pair for `.env.local` (`NEXT_PUBLIC_VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY`); without it there is no notifications switch and nothing is pushed. The switch only appears in the installed app (standalone), so headless tests can't use it: `e2e/home.spec.ts` and `e2e/recap.spec.ts` register subscriptions through `POST /api/push` against a local fake push service (`fakePushService` in `e2e/helpers.ts`, allowed outside production) and decrypt what the cron route pushed.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

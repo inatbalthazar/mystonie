@@ -27,3 +27,11 @@ export function titleSizeStep(name: string): 0 | 1 | 2 | 3 {
   const n = [...name].length;
   return n <= 14 ? 0 : n <= 28 ? 1 : n <= 48 ? 2 : 3;
 }
+
+/**
+ * Whether text renders with the Latin font bundled for OG images (Basic Latin, Latin-1, Latin Extended,
+ * general punctuation). Link previews leave other scripts out rather than show empty boxes.
+ */
+export function isLatinSafe(text: string): boolean {
+  return /^[\u0020-\u007e\u00a0-\u024f\u2010-\u2027\u2030-\u205e]*$/.test(text);
+}

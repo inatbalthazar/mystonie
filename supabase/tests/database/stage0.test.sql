@@ -1,6 +1,6 @@
 -- pgTAP tests for the stage 0 schema. Run with `pnpm db:test` (local stack must be running).
 begin;
-select plan(16);
+select plan(19);
 
 -- RLS is on for every stage 0 table.
 select ok((select relrowsecurity from pg_class where oid = 'public.titles'::regclass), 'titles has RLS');
@@ -26,10 +26,11 @@ select lives_ok(
 select throws_ok(
   $$insert into public.waitlist (email, consent_at) values ('Someone@Example.com', now())$$,
   '23514', null, 'waitlist emails must be stored lower-cased');
+select has_column('public', 'waitlist', 'launch_sent_at', 'waitlist remembers who got the launch email');
 
 -- Anonymous visitors (browser with the anon key).
 set local role anon;
-select is((select count(*)::int from public.titles), 2, 'anon can read titles');
+select is((select count(*)::int from public.titles where external_id = '66732'), 2, 'anon can read titles');
 select throws_ok(
   $$insert into public.titles (kind, source, external_id, name) values ('movie', 'tmdb', '1', 'x')$$,
   '42501', null, 'anon cannot write titles');
@@ -50,6 +51,12 @@ select is((select name from public.titles where kind = 'series' and external_id 
 select ok(public.rate_limit_hit('test:ip', 60, 2), 'first hit is allowed');
 select ok(public.rate_limit_hit('test:ip', 60, 2), 'second hit is allowed');
 select ok(not public.rate_limit_hit('test:ip', 60, 2), 'third hit in the same window is refused');
+
+-- Old windows are pruned (hourly by pg_cron), so IP hashes don't outlive a day.
+insert into public.rate_limits (key, window_start, count) values ('test:old', now() - interval '2 days', 1);
+select public.rate_limits_prune();
+select is((select count(*)::int from public.rate_limits where key = 'test:old'), 0, 'prune drops windows older than a day');
+select is((select schedule from cron.job where jobname = 'rate-limits-prune'), '17 * * * *', 'prune is scheduled hourly');
 
 select * from finish();
 rollback;

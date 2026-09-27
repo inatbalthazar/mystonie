@@ -1,6 +1,8 @@
+import type { TmdbKind } from "@/core/catalog/tmdb";
 import type { Title, TitleKind } from "@/core/catalog/types";
 import type { Database, Json } from "./database.types";
 import { adminClient } from "./supabase-admin";
+import { titleDetails } from "./tmdb";
 
 type Row = Database["public"]["Tables"]["titles"]["Row"];
 
@@ -29,7 +31,7 @@ export async function getCachedTitle(
   source: Title["source"],
   kind: TitleKind,
   externalId: string,
-): Promise<{ title: Title; stale: boolean } | null> {
+): Promise<{ id: string; title: Title; stale: boolean } | null> {
   const db = adminClient();
   if (!db) return null;
   const { data, error } = await db
@@ -41,13 +43,14 @@ export async function getCachedTitle(
     .maybeSingle();
   if (error) console.error("titles read failed", error.message);
   if (!data) return null;
-  return { title: titleFromRow(data), stale: Date.now() - Date.parse(data.fetched_at) > TITLE_TTL_MS };
+  return { id: data.id, title: titleFromRow(data), stale: Date.now() - Date.parse(data.fetched_at) > TITLE_TTL_MS };
 }
 
-export async function saveTitle(title: Title, raw: unknown): Promise<void> {
+/** Caches a title; returns its row id (null when the database is unavailable). */
+export async function saveTitle(title: Title, raw: unknown): Promise<string | null> {
   const db = adminClient();
-  if (!db) return;
-  const { error } = await db.from("titles").upsert(
+  if (!db) return null;
+  const { data, error } = await db.from("titles").upsert(
     {
       source: title.source,
       kind: title.kind,
@@ -65,6 +68,21 @@ export async function saveTitle(title: Title, raw: unknown): Promise<void> {
       fetched_at: new Date().toISOString(),
     },
     { onConflict: "source,kind,external_id" },
-  );
+  ).select("id").single();
   if (error) console.error("titles upsert failed", error.message);
+  return data?.id ?? null;
+}
+
+/**
+ * The `titles` row id for a TMDB title, fetching and caching it first when needed (adding to the
+ * collection). A cached copy is good enough even when stale. Null when TMDB doesn't know the title;
+ * throws `TmdbError` when TMDB fails.
+ */
+export async function ensureTitle(kind: TmdbKind, externalId: string): Promise<{ id: string; title: Title } | null> {
+  const cached = await getCachedTitle("tmdb", kind, externalId);
+  if (cached) return { id: cached.id, title: cached.title };
+  const details = await titleDetails(kind, externalId);
+  if (!details) return null;
+  const id = await saveTitle(details.title, details.raw);
+  return id ? { id, title: details.title } : null;
 }

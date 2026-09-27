@@ -1,36 +1,59 @@
-import { useTranslations } from "next-intl";
-import { CardFooter, CardRoot, CardTitle, Poster, Review, Stars, useFinishedDate, type TemplateProps } from "../parts";
+import { useFormatter, useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
+import { CardFooter, CardRoot, footerUser, CardTitle, Poster, Review, Stars, useFinishedDate, useHeadline, type TemplateProps } from "../parts";
 
-/** Poster in a slightly tilted polaroid frame with a hand-written-style caption. Works for anything. */
+/** Poster in a tilted polaroid frame with tape and a hand-written caption. Works for anything. */
 export function PolaroidCard({ data, size, palette, host }: TemplateProps) {
   const t = useTranslations("Card");
+  const format = useFormatter();
   const date = useFinishedDate(data);
+  const headline = useHeadline(data);
+  const progress = data.progress;
   const story = size === "story";
 
   return (
     <CardRoot size={size} palette={palette} className="items-center p-[72px]">
-      {/* Tape */}
-      <span className="absolute top-[72px] left-1/2 z-10 h-[72px] w-[260px] -translate-x-1/2 rotate-[-3deg] bg-[var(--card-accent)] opacity-70" />
+      {/* Tape strips on two corners. */}
+      <span className="absolute top-[88px] left-[150px] z-10 h-[64px] w-[220px] rotate-[-14deg] bg-[var(--card-accent)] opacity-75" />
+      <span className="absolute top-[70px] right-[140px] z-10 h-[64px] w-[200px] rotate-[10deg] bg-[var(--card-paper)] opacity-60" />
 
       <div
-        className={
-          "mt-[40px] flex w-[860px] shrink-0 rotate-[-2deg] flex-col gap-[28px] bg-[var(--card-paper)] p-[40px] text-[var(--card-ink)] shadow-[0_24px_60px_rgba(0,0,0,0.35)] " +
-          (story ? "pb-[56px]" : "pb-[36px]")
-        }
+        className={cn(
+          "mt-[48px] flex shrink-0 rotate-[-2deg] flex-col gap-[20px] bg-[var(--card-paper)] p-[40px] text-[var(--card-ink)] shadow-[0_28px_70px_rgba(0,0,0,0.4)]",
+          story ? "w-[800px] pb-[44px]" : "w-[860px] pb-[28px]",
+        )}
       >
         <Poster url={data.posterUrl} className={story ? "aspect-[2/3] w-full" : "h-[580px] w-full"} />
-        <div className="flex items-end justify-between gap-[24px]">
-          <p className="text-[36px] italic opacity-70">{t("finishedOn", { date })}</p>
-          <Stars rating={data.rating} className="shrink-0 text-[48px]" />
+        <div className="flex items-center justify-between gap-[24px]">
+          <p className="text-[52px] leading-none whitespace-nowrap [font-family:var(--card-hand)]">{date}</p>
+          <Stars rating={data.rating} className="shrink-0 text-[48px] text-[var(--card-stamp)]" />
         </div>
       </div>
 
-      <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-[24px] text-center">
+      <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-[16px] text-center">
+        {progress && (
+          // Progress card: the milestone (or episode) in handwriting, then how far along.
+          <p className="flex max-w-full items-baseline gap-[20px] px-[12px] text-[var(--card-accent)]">
+            <span className={cn("truncate [font-family:var(--card-hand)]", story ? "text-[72px]" : "text-[56px]", "leading-[1.1]")}>{headline}</span>
+            {!data.hide?.includes("episodes") && (
+              <span className="shrink-0 text-[40px] font-bold tracking-[0.08em] whitespace-nowrap uppercase">
+                {t("progressCount", { watched: format.number(progress.watched), total: format.number(progress.total) })}
+              </span>
+            )}
+          </p>
+        )}
         <CardTitle data={data} size={size} className={story ? "line-clamp-2" : "line-clamp-2 text-[52px]"} />
-        <Review text={data.review} className={"text-[44px] italic leading-snug text-[var(--card-muted)] " + (story ? "" : "line-clamp-1")} />
+        <Review
+          text={data.review}
+          className={cn(
+            // Side padding keeps script glyph overhang inside the box (clamped text must not scroll).
+            "px-[12px] text-[var(--card-muted)] [font-family:var(--card-hand)]",
+            story ? "line-clamp-2 text-[54px]/[1.15]" : "line-clamp-2 text-[44px]/[1.1]",
+          )}
+        />
       </div>
 
-      <CardFooter host={host} className="shrink-0" />
+      <CardFooter host={host} username={footerUser(data)} className="w-full shrink-0" />
     </CardRoot>
   );
 }
