@@ -1,8 +1,11 @@
 // The stats page (S1 stats): headline numbers, activity heatmap, per-month bars, taste and records.
 // Components only render this. Per-title rules are `titleWatch`'s (split into dated events here), so the
-// headline equals `summarizeCollection`, i.e. the collection header, for the same period.
+// headline equals `summarizeCollection`, i.e. the collection header, for the same period. Reading (S2 books &
+// manga) follows `titleRead`: its totals equal `summarizeReading`, i.e. the Read tab's header.
 import { RECAP_COLLAGE_MAX, type CardRecap, type StatsPeriod } from "../cards/types";
+import { isReadingKind } from "../catalog/types";
 import { localDateKey, periodRange, safeTimeZone } from "./period";
+import { readingEvents, sumReadEvents, summarizeReading, type ReadingSummary, type StatsReadingLog } from "./reading";
 import { addDays } from "./recap";
 import { summarizeCollection, type CollectionSummary, type StatsEntry, type StatsEpisodeLog, type StatsTitle } from "./summary";
 
@@ -20,12 +23,18 @@ export type TitleRecord = { name: string; minutes: number };
 
 export type StatsReport = {
   totals: CollectionSummary;
-  /** Days with something watched (local `YYYY-MM-DD` → episodes logged + titles finished) in `from`–`to`. */
+  /** Pages, chapters, volumes, books and manga finished, and the estimated reading time in the period. */
+  reading: ReadingSummary;
+  /** Days with something watched or read (local `YYYY-MM-DD` → episodes and reading logged + titles finished) in `from`–`to`. */
   heatmap: { from: string; to: string; days: Record<string, number> };
   /** The last 12 local months (`YYYY-MM`), oldest first. */
   months: MonthBar[];
-  /** Watch time and titles finished by kind, in the period. */
-  split: { movie: { minutes: number; finished: number }; series: { minutes: number; finished: number } };
+  /** Watch time (reading time for books and manga) and titles finished by kind, in the period. */
+  split: {
+    movie: { minutes: number; finished: number };
+    series: { minutes: number; finished: number };
+    reading: { minutes: number; finished: number };
+  };
   /** Titles watched in the period, per genre / original language: top 5. */
   genres: Ranked[];
   languages: Ranked[];
@@ -58,7 +67,7 @@ const HEATMAP_WEEKS = 53;
 /** One title's watching as dated events, by `titleWatch`'s rules: summing them over a range gives `titleWatch`. */
 export function titleEvents(title: StatsTitle, entry: StatsEntry | undefined, logs: readonly StatsEpisodeLog[]): WatchEvent[] {
   const finishedAt = entry && !entry.deletedAt && entry.status === "finished" && entry.finishedAt ? Date.parse(entry.finishedAt) : null;
-  const runtime = title.runtimeMin ?? 0;
+  const runtime = title.kind === "movie" || title.kind === "series" ? (title.runtimeMin ?? 0) : 0;
   if (title.kind !== "series") return finishedAt === null ? [] : [{ at: finishedAt, minutes: runtime, episodes: 0, finished: 1 }];
 
   const live = logs.filter((l) => !l.deletedAt);
@@ -97,11 +106,13 @@ export function statsReport(
   entries: readonly StatsEntry[],
   episodeLogs: readonly StatsEpisodeLog[],
   options: ReportOptions,
+  readingLogs: readonly StatsReadingLog[] = [],
 ): StatsReport {
   const timeZone = safeTimeZone(options.timeZone);
   const { period, now } = options;
   const range = periodRange(period, { timeZone, weekStart: options.weekStart, now });
   const totals = summarizeCollection(titles, entries, episodeLogs, range);
+  const reading = summarizeReading(titles, entries, readingLogs, range);
 
   // Local dates through a per-hour cache: Intl formatting dominates, and logs cluster in hours. An hour whose
   // two ends fall on different local dates (zones with :30/:45 offsets) is never cached.
@@ -125,7 +136,7 @@ export function statsReport(
   const heatmapDays: Record<string, number> = {};
   const periodDays = new Set<string>();
   const monthMinutes = new Map<string, number>();
-  const split = { movie: { minutes: 0, finished: 0 }, series: { minutes: 0, finished: 0 } };
+  const split = { movie: { minutes: 0, finished: 0 }, series: { minutes: 0, finished: 0 }, reading: { minutes: 0, finished: 0 } };
   const genres = new Map<string, number>();
   const languages = new Map<string, number>();
   const watched: { title: ReportTitle; minutes: number; finished: boolean }[] = [];
@@ -140,10 +151,41 @@ export function statsReport(
     if (list) list.push(log);
     else logsByTitle.set(log.titleId, [log]);
   }
+  const readsByTitle = new Map<string, StatsReadingLog[]>();
+  for (const log of readingLogs) {
+    const list = readsByTitle.get(log.titleId);
+    if (list) list.push(log);
+    else readsByTitle.set(log.titleId, [log]);
+  }
+  const taste = (title: ReportTitle) => {
+    for (const genre of new Set(title.genres)) genres.set(genre, (genres.get(genre) ?? 0) + 1);
+    if (title.originalLanguage) languages.set(title.originalLanguage, (languages.get(title.originalLanguage) ?? 0) + 1);
+  };
 
-  for (const titleId of new Set([...entryByTitle.keys(), ...logsByTitle.keys()])) {
+  for (const titleId of new Set([...entryByTitle.keys(), ...logsByTitle.keys(), ...readsByTitle.keys()])) {
     const title = titleById.get(titleId);
     if (!title) continue;
+    if (isReadingKind(title.kind)) {
+      // Reading: a log or a finish marks the day; the time is the estimate `titleRead` gives.
+      const events = readingEvents(title, entryByTitle.get(titleId), readsByTitle.get(titleId) ?? []);
+      let active = false;
+      let finished = false;
+      for (const e of events) {
+        const day = dayOf(e.at);
+        if (day >= heatmapFrom && day <= today) heatmapDays[day] = (heatmapDays[day] ?? 0) + 1;
+        if (!inPeriod(e.at)) continue;
+        active = true;
+        finished ||= e.finished > 0;
+        periodDays.add(day);
+      }
+      if (!active) continue;
+      const minutes = sumReadEvents(events, range).minutes;
+      split.reading.minutes += minutes;
+      if (finished) split.reading.finished += 1;
+      watched.push({ title, minutes, finished });
+      taste(title);
+      continue;
+    }
     let total = 0;
     let minutes = 0;
     let finished = false;
@@ -170,8 +212,7 @@ export function statsReport(
     const kind = title.kind === "series" ? split.series : split.movie;
     kind.minutes += minutes;
     if (finished) kind.finished += 1;
-    for (const genre of new Set(title.genres)) genres.set(genre, (genres.get(genre) ?? 0) + 1);
-    if (title.originalLanguage) languages.set(title.originalLanguage, (languages.get(title.originalLanguage) ?? 0) + 1);
+    taste(title);
     if (!finished) continue;
     if (title.kind === "movie" && (title.runtimeMin ?? 0) > (longestMovie?.minutes ?? 0)) longestMovie = { name: title.name, minutes: title.runtimeMin! };
     if (title.kind === "series" && total > (longestSeries?.minutes ?? 0)) longestSeries = { name: title.name, minutes: total };
@@ -207,6 +248,7 @@ export function statsReport(
 
   return {
     totals,
+    reading,
     heatmap: { from: heatmapFrom, to: today, days: heatmapDays },
     months,
     split,

@@ -6,6 +6,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { SeriesEpisodes } from "@/components/series/series-episodes";
 import { localizedPath } from "@/core/auth";
 import { tmdbImageUrl } from "@/core/catalog/tmdb";
+import { isExternalId, isReadingKind, type TitleKind } from "@/core/catalog/types";
 import type { EntryStatus } from "@/core/collection/entries";
 import { ensureEpisodes, episodeLogs, type SeriesEpisodes as Series } from "@/data/episodes";
 import { userClient } from "@/data/supabase-server";
@@ -13,20 +14,22 @@ import { ensureTitle } from "@/data/titles";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
+import { ReadingTitle } from "./reading";
 
 export async function generateMetadata(): Promise<Metadata> {
   return { robots: { index: false, follow: false } };
 }
 
 /**
- * Title detail (S1 collection → Series): seasons and episodes with logging. Series only for now; movie
- * pages come with the title-detail work. Signed-in only (the proxy sends others to /auth).
+ * Title detail: a series' seasons and episodes with logging (S1 collection → Series), or a book's or manga's reading
+ * progress (S2 books & manga). No movie pages yet; they come with the title-detail work. Signed-in only (the proxy
+ * sends others to /auth).
  */
 export default async function TitlePage({ params }: PageProps<"/[locale]/title/[kind]/[id]">) {
   const { locale: raw, kind, id } = await params;
   const locale = raw as Locale;
   setRequestLocale(locale);
-  if (kind !== "series" || !/^\d{1,10}$/.test(id)) notFound();
+  if ((kind !== "series" && kind !== "book" && kind !== "manga") || !isExternalId(kind as TitleKind, id)) notFound();
   const self = localizedPath(`/title/${kind}/${id}`, locale, routing.defaultLocale);
 
   const supabase = await userClient();
@@ -34,20 +37,20 @@ export default async function TitlePage({ params }: PageProps<"/[locale]/title/[
   const userId = data?.claims.sub;
   if (!supabase || !userId) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
-  const t = await getTranslations("Series");
+  const [t, reading] = await Promise.all([getTranslations("Series"), getTranslations("Reading")]);
   let title: Awaited<ReturnType<typeof ensureTitle>> = null;
   let series: Series | null = null;
   let failed = false;
   try {
-    title = await ensureTitle("series", id);
-    if (title) series = await ensureEpisodes(title.id, id);
+    title = await ensureTitle(kind as TitleKind, id);
+    if (title && kind === "series") series = await ensureEpisodes(title.id, id);
   } catch {
     failed = true; // TMDB is down and nothing is cached
   }
   if (failed && !title) {
     return (
       <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-4 px-4 pt-10 pb-16">
-        <p className="text-muted-foreground">{t("loadError")}</p>
+        <p className="text-muted-foreground">{kind === "series" ? t("loadError") : reading("loadError")}</p>
         <Link href="/collection" className="font-semibold text-brand">
           {t("backToCollection")}
         </Link>
@@ -55,6 +58,9 @@ export default async function TitlePage({ params }: PageProps<"/[locale]/title/[
     );
   }
   if (!title) notFound();
+  if (isReadingKind(title.title.kind)) {
+    return <ReadingTitle supabase={supabase} userId={userId} kind={title.title.kind} externalId={id} title={title} />;
+  }
 
   const [{ data: profile }, { data: entry }, logs] = await Promise.all([
     supabase.from("profiles").select("time_zone, username").eq("id", userId).single(),

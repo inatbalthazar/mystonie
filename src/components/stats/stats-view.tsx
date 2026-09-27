@@ -55,19 +55,40 @@ export function Headline({ report, period, children }: { report: StatsReport; pe
     { label: t("titlesFinished"), value: report.totals.finished.toLocaleString(locale) },
     { label: t("episodesWatched"), value: report.totals.episodes.toLocaleString(locale) },
   ];
+  // Reading (S2 books & manga), once there is some in the period: the same numbers as the Read tab's header.
+  const { reading } = report;
+  const read = [
+    { label: t("readingTime"), value: runtime(reading.minutes), show: true },
+    { label: t("pagesRead"), value: reading.pages.toLocaleString(locale), show: reading.pages > 0 },
+    { label: t("chaptersRead"), value: reading.chapters.toLocaleString(locale), show: reading.chapters > 0 },
+    { label: t("volumesRead"), value: reading.volumes.toLocaleString(locale), show: reading.volumes > 0 },
+  ].filter((s) => s.show);
+  const hasReading = reading.minutes > 0 || reading.finished > 0;
   return (
     <PaperCard className="flex flex-col gap-4">
       <p className="font-hand text-2xl leading-none text-muted-foreground">{t("headline", { period })}</p>
-      <dl className="grid grid-cols-3 divide-x-2 divide-dashed divide-border">
-        {stats.map((s) => (
-          <div key={s.label} className="flex min-w-0 flex-col gap-1 px-2 first:pl-0 last:pr-0">
-            <dt className="text-[11px] leading-tight font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">{s.label}</dt>
-            <dd className="font-display text-2xl leading-tight font-extrabold tabular-nums break-words sm:text-4xl">{s.value}</dd>
-          </div>
-        ))}
-      </dl>
+      <Figures stats={stats} />
+      {hasReading && (
+        <div className="flex flex-col gap-2 border-t-2 border-dashed border-border pt-4">
+          <Figures stats={read} />
+          <p className="text-xs text-muted-foreground">{t("readingHint")}</p>
+        </div>
+      )}
       {report.card ? children : <p className="text-sm text-muted-foreground">{t("emptyPeriod")}</p>}
     </PaperCard>
+  );
+}
+
+function Figures({ stats }: { stats: { label: string; value: string }[] }) {
+  return (
+    <dl className={cn("grid divide-x-2 divide-dashed divide-border", stats.length > 3 ? "grid-cols-2 gap-y-3 sm:grid-cols-4" : "grid-cols-3")}>
+      {stats.map((s) => (
+        <div key={s.label} className="flex min-w-0 flex-col gap-1 px-2 first:pl-0 last:pr-0">
+          <dt className="text-[11px] leading-tight font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">{s.label}</dt>
+          <dd className="font-display text-2xl leading-tight font-extrabold tabular-nums break-words sm:text-4xl">{s.value}</dd>
+        </div>
+      ))}
+    </dl>
   );
 }
 
@@ -157,13 +178,18 @@ function RankedList({ title, items, name }: { title: string; items: Ranked[]; na
   );
 }
 
-/** Movies vs series, top genres and top original languages in the period. */
+/** Movies vs series vs books & manga (watching vs reading time), top genres and top original languages in the period. */
 export function Taste({ report }: { report: StatsReport }) {
   const t = useTranslations("Stats");
   const locale = useLocale();
   const runtime = useRuntime();
-  const { movie, series } = report.split;
-  const total = movie.minutes + series.minutes;
+  const { movie, series, reading } = report.split;
+  const total = movie.minutes + series.minutes + reading.minutes;
+  const kinds = [
+    [t("movies"), movie, "bg-chart-1"],
+    [t("series"), series, "bg-chart-3"],
+    ...(reading.minutes > 0 || reading.finished > 0 ? [[t("reading"), reading, "bg-chart-4"] as const] : []),
+  ] as const;
   const languages = (() => {
     try {
       return new Intl.DisplayNames([locale], { type: "language" });
@@ -188,16 +214,12 @@ export function Taste({ report }: { report: StatsReport }) {
         <>
           <div className="flex flex-col gap-2">
             <div aria-hidden="true" className="flex h-3 overflow-hidden rounded-full bg-muted">
-              <span className="bg-chart-1" style={{ width: `${total ? (movie.minutes / total) * 100 : 0}%` }} />
-              <span className="bg-chart-3" style={{ width: `${total ? (series.minutes / total) * 100 : 0}%` }} />
+              {kinds.map(([label, v, dot]) => (
+                <span key={label} className={dot} style={{ width: `${total ? (v.minutes / total) * 100 : 0}%` }} />
+              ))}
             </div>
-            <dl className="grid grid-cols-2 gap-2 text-sm">
-              {(
-                [
-                  [t("movies"), movie, "bg-chart-1"],
-                  [t("series"), series, "bg-chart-3"],
-                ] as const
-              ).map(([label, v, dot]) => (
+            <dl className={cn("grid gap-2 text-sm", kinds.length > 2 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2")}>
+              {kinds.map(([label, v, dot]) => (
                 <div key={label} className="flex min-w-0 flex-col">
                   <dt className="flex items-center gap-1.5 font-semibold">
                     <span aria-hidden="true" className={cn("size-2.5 rounded-full", dot)} />

@@ -1,5 +1,6 @@
 // Collection entries: validation of quick-add / edit requests, the finish date, and list order
 // (S1 collection, ADR 0021). Shared by the route handlers (authoritative) and the optimistic UI.
+import { isExternalId, sourceForKind, type CatalogSource, type TitleKind } from "../catalog/types";
 import { isUuidV7 } from "../ids";
 import { localDateKey, safeTimeZone, startOfLocalDay } from "../stats/period";
 
@@ -13,8 +14,8 @@ export function isEntryStatus(value: unknown): value is EntryStatus {
 /** A title as the collection shows it. `id` is the `titles` row once the server has it. */
 export type CollectionTitle = {
   id?: string;
-  source: "tmdb";
-  kind: "movie" | "series";
+  source: CatalogSource;
+  kind: TitleKind;
   externalId: string;
   name: string;
   year: number | null;
@@ -24,6 +25,10 @@ export type CollectionTitle = {
   /** Movie runtime, or the typical episode runtime of a series. */
   runtimeMin?: number | null;
   episodeCount?: number | null;
+  /** Books: pages. Manga: chapters and volumes (null while a series runs). */
+  pageCount?: number | null;
+  chapterCount?: number | null;
+  volumeCount?: number | null;
 };
 
 export type CollectionItem = {
@@ -98,14 +103,14 @@ export function parseNewEntry(body: unknown, now: number = Date.now()): NewEntry
   const { id, status, finishedAt } = body;
   const { source, kind, externalId } = body.title;
   if (typeof id !== "string" || !isUuidV7(id) || !isEntryStatus(status)) return null;
-  if (source !== "tmdb" || (kind !== "movie" && kind !== "series")) return null;
-  if (typeof externalId !== "string" || !/^\d{1,10}$/.test(externalId)) return null;
+  if (kind !== "movie" && kind !== "series" && kind !== "book" && kind !== "manga") return null;
+  if (source !== sourceForKind(kind) || !isExternalId(kind, externalId)) return null;
   let date: string | null = null;
   if (finishedAt !== undefined && finishedAt !== null) {
     date = validFinishedAt(finishedAt, now);
     if (!date) return null;
   }
-  return { id, title: { source, kind, externalId }, ...statusColumns(status, date, now) };
+  return { id, title: { source: sourceForKind(kind), kind, externalId }, ...statusColumns(status, date, now) };
 }
 
 export type EntryNotes = { rating: number | null; review: string | null };

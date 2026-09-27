@@ -51,19 +51,34 @@ export const canSeed = () => !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.
 
 export type SeedTitle = { kind: "movie" | "series"; externalId: string; name: string; year: number; posterPath: string | null; runtimeMin: number };
 
+/** A book (Google Books) or manga (AniList) to cache; `posterPath` is a volume id or a full AniList cover URL. */
+export type SeedReadingTitle = {
+  kind: "book" | "manga";
+  externalId: string;
+  name: string;
+  year: number;
+  posterPath: string | null;
+  pageCount?: number | null;
+  chapterCount?: number | null;
+  volumeCount?: number | null;
+};
+
 /** Caches titles in the local `titles` table, so adding them never needs TMDB. */
-export async function seedTitles(request: APIRequestContext, titles: SeedTitle[]): Promise<void> {
+export async function seedTitles(request: APIRequestContext, titles: (SeedTitle | SeedReadingTitle)[]): Promise<void> {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const res = await request.post(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/titles?on_conflict=source,kind,external_id`, {
     headers: { apikey: key, Authorization: `Bearer ${key}`, Prefer: "resolution=merge-duplicates" },
     data: titles.map((t) => ({
-      source: "tmdb",
+      source: t.kind === "book" ? "google_books" : t.kind === "manga" ? "anilist" : "tmdb",
       kind: t.kind,
       external_id: t.externalId,
       name: t.name,
       year: t.year,
       poster_path: t.posterPath,
-      runtime_min: t.runtimeMin,
+      runtime_min: "runtimeMin" in t ? t.runtimeMin : null,
+      page_count: "pageCount" in t ? (t.pageCount ?? null) : null,
+      chapter_count: "chapterCount" in t ? (t.chapterCount ?? null) : null,
+      volume_count: "volumeCount" in t ? (t.volumeCount ?? null) : null,
       fetched_at: new Date().toISOString(),
     })),
   });

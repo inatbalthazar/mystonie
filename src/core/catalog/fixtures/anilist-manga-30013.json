@@ -1,0 +1,30 @@
+{
+  "data": {
+    "Media": {
+      "id": 30013,
+      "format": "MANGA",
+      "isAdult": false,
+      "countryOfOrigin": "JP",
+      "genres": [
+        "Action",
+        "Adventure",
+        "Comedy",
+        "Fantasy"
+      ],
+      "chapters": null,
+      "volumes": null,
+      "title": {
+        "english": "One Piece",
+        "romaji": "ONE PIECE",
+        "native": "ONE PIECE"
+      },
+      "startDate": {
+        "year": 1997
+      },
+      "coverImage": {
+        "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx30013-BeslEMqiPhlk.jpg",
+        "extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30013-BeslEMqiPhlk.jpg"
+      }
+    }
+  }
+}

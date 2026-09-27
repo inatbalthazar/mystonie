@@ -1,4 +1,4 @@
-import { tmdbImageUrl } from "@/core/catalog/tmdb";
+import { posterUrl } from "@/core/catalog/images";
 import { sortCollection, type CollectionItem, type EntryPatch, type NewEntry } from "@/core/collection/entries";
 import type { Database } from "./database.types";
 import type { UserClient } from "./supabase-server";
@@ -6,11 +6,23 @@ import type { UserClient } from "./supabase-server";
 type EntryRow = Pick<Database["public"]["Tables"]["entries"]["Row"], "id" | "status" | "finished_at" | "created_at" | "rating" | "review">;
 type TitleRow = Pick<
   Database["public"]["Tables"]["titles"]["Row"],
-  "id" | "source" | "kind" | "external_id" | "name" | "year" | "poster_path" | "genres" | "runtime_min" | "episode_count"
+  | "id"
+  | "source"
+  | "kind"
+  | "external_id"
+  | "name"
+  | "year"
+  | "poster_path"
+  | "genres"
+  | "runtime_min"
+  | "episode_count"
+  | "page_count"
+  | "chapter_count"
+  | "volume_count"
 >;
 
 // The entry plus the title fields a collection row shows (RLS: the signed-in user's rows).
-const COLUMNS = "id, status, finished_at, created_at, rating, review, title:titles!inner(id, source, kind, external_id, name, year, poster_path, genres, runtime_min, episode_count)";
+const COLUMNS = "id, status, finished_at, created_at, rating, review, title:titles!inner(id, source, kind, external_id, name, year, poster_path, genres, runtime_min, episode_count, page_count, chapter_count, volume_count)";
 
 function itemFromRow(row: EntryRow & { title: TitleRow }): CollectionItem {
   return {
@@ -22,15 +34,18 @@ function itemFromRow(row: EntryRow & { title: TitleRow }): CollectionItem {
     review: row.review,
     title: {
       id: row.title.id,
-      source: "tmdb",
+      source: row.title.source as CollectionItem["title"]["source"],
       kind: row.title.kind as CollectionItem["title"]["kind"],
       externalId: row.title.external_id,
       name: row.title.name,
       year: row.title.year,
-      posterUrl: row.title.poster_path ? tmdbImageUrl(row.title.poster_path, "w342") : null,
+      posterUrl: posterUrl(row.title.source, row.title.poster_path),
       genres: row.title.genres,
       runtimeMin: row.title.runtime_min,
       episodeCount: row.title.episode_count,
+      pageCount: row.title.page_count,
+      chapterCount: row.title.chapter_count,
+      volumeCount: row.title.volume_count,
     },
   };
 }

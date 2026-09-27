@@ -9,6 +9,7 @@ export function PolaroidCard({ data, size, palette, host }: TemplateProps) {
   const date = useFinishedDate(data);
   const headline = useHeadline(data);
   const progress = data.progress;
+  const reading = data.reading;
   const story = size === "story";
 
   return (
@@ -31,6 +32,17 @@ export function PolaroidCard({ data, size, palette, host }: TemplateProps) {
       </div>
 
       <div className="flex min-h-0 w-full flex-1 flex-col items-center justify-center gap-[16px] text-center">
+        {reading && (
+          // Reading Progress card: the milestone (or where the reader is) in handwriting, then how far along.
+          <p className="flex max-w-full items-baseline gap-[20px] px-[12px] text-[var(--card-accent)]">
+            <span className={cn("truncate [font-family:var(--card-hand)]", story ? "text-[72px]" : "text-[56px]", "leading-[1.1]")}>{headline}</span>
+            {!data.hide?.includes("episodes") && reading.total && (
+              <span className="shrink-0 text-[40px] font-bold tracking-[0.08em] whitespace-nowrap uppercase">
+                {t("readingCount", { unit: reading.unit, position: format.number(reading.position), total: format.number(reading.total) })}
+              </span>
+            )}
+          </p>
+        )}
         {progress && (
           // Progress card: the milestone (or episode) in handwriting, then how far along.
           <p className="flex max-w-full items-baseline gap-[20px] px-[12px] text-[var(--card-accent)]">

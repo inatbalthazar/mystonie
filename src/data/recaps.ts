@@ -1,6 +1,7 @@
 // Weekly recaps (ADR 0025). Server only: creating and notifying run with the service role from the cron route;
 // reading a recap runs as the user (RLS: owners read their own).
-import { tmdbImageUrl } from "@/core/catalog/tmdb";
+import { posterUrl } from "@/core/catalog/images";
+import type { TitleKind } from "@/core/catalog/types";
 import { parseRecap } from "@/core/cards/saved";
 import type { CardRecap } from "@/core/cards/types";
 import { uuidv7 } from "@/core/ids";
@@ -56,7 +57,7 @@ async function computeRecap(db: AdminClient, userId: string, timeZone: string, w
   const titleIds = [...new Set([...logs.map((l) => l.title_id), ...entries.map((e) => e.title_id)])];
   if (titleIds.length === 0) return null;
   const titles = check(
-    await db.from("titles").select("id, kind, name, poster_path, runtime_min, episode_count").in("id", titleIds),
+    await db.from("titles").select("id, source, kind, name, poster_path, runtime_min, episode_count").in("id", titleIds),
     "titles read",
   );
 
@@ -79,9 +80,9 @@ async function computeRecap(db: AdminClient, userId: string, timeZone: string, w
 
   const recapTitles: RecapTitle[] = titles.map((t) => ({
     id: t.id,
-    kind: t.kind === "series" ? "series" : "movie",
+    kind: t.kind as TitleKind,
     name: t.name,
-    posterUrl: t.poster_path ? tmdbImageUrl(t.poster_path, "w342") : null,
+    posterUrl: posterUrl(t.source, t.poster_path),
     runtimeMin: t.runtime_min,
     episodeCount: t.episode_count,
   }));

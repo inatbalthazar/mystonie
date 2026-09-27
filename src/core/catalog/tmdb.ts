@@ -131,6 +131,9 @@ export function normalizeTmdbDetails(kind: TmdbKind, body: unknown): Title | nul
     runtimeMin: runtimeMin ?? null,
     episodeCount: kind === "series" ? (count(body.number_of_episodes) ?? null) : null,
     seasonCount: kind === "series" ? (count(body.number_of_seasons) ?? null) : null,
+    pageCount: null,
+    chapterCount: null,
+    volumeCount: null,
   };
 }
 

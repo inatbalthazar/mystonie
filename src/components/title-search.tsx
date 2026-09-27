@@ -3,7 +3,7 @@
 import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import type { SearchResult } from "@/core/catalog/types";
+import type { SearchResult, SearchType } from "@/core/catalog/types";
 
 const DEBOUNCE_MS = 250;
 export const MIN_SEARCH_CHARS = 2;
@@ -14,8 +14,11 @@ export type SearchState =
   | { status: "done"; query: string; results: SearchResult[] }
   | { status: "error"; rateLimited: boolean };
 
-/** Search-as-you-type against /api/search (debounced; older requests are cancelled). */
-export function useTitleSearch(query: string): SearchState {
+/**
+ * Search-as-you-type against /api/search (debounced; older requests are cancelled). `type` picks the catalogs (the
+ * collection's switcher); without it, movies and series (the card maker).
+ */
+export function useTitleSearch(query: string, type?: SearchType): SearchState {
   const q = query.trim();
   const [search, setSearch] = useState<SearchState>({ status: "idle" });
 
@@ -25,7 +28,8 @@ export function useTitleSearch(query: string): SearchState {
     const timer = setTimeout(async () => {
       setSearch({ status: "loading" });
       try {
-        const res = await fetch(`/api/search?q=${encodeURIComponent(q)}`, { signal: controller.signal });
+        const params = new URLSearchParams({ q, ...(type ? { type } : {}) });
+        const res = await fetch(`/api/search?${params}`, { signal: controller.signal });
         if (!res.ok) return setSearch({ status: "error", rateLimited: res.status === 429 });
         const body = (await res.json()) as { results: SearchResult[] };
         setSearch({ status: "done", query: q, results: body.results });
@@ -37,7 +41,7 @@ export function useTitleSearch(query: string): SearchState {
       clearTimeout(timer);
       controller.abort();
     };
-  }, [q]);
+  }, [q, type]);
 
   return search;
 }
@@ -55,7 +59,7 @@ export function SearchStatus({ query, search }: { query: string; search: SearchS
   );
 }
 
-/** A search result as a poster tile. */
+/** A search result as a poster tile: the kind is always spelled out (a manga and its anime share a name). */
 export function PosterButton({ result, onPick }: { result: SearchResult; onPick: (r: SearchResult) => void }) {
   const t = useTranslations("Home");
   return (
@@ -69,6 +73,7 @@ export function PosterButton({ result, onPick }: { result: SearchResult; onPick:
       <span className="text-xs text-muted-foreground">
         {t("titleMeta", { kind: result.kind, year: result.year ?? "none" })}
       </span>
+      {result.creator && <span className="-mt-1 line-clamp-1 text-xs text-muted-foreground">{t("byCreator", { creator: result.creator })}</span>}
     </button>
   );
 }

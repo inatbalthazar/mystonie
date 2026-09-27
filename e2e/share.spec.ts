@@ -22,7 +22,7 @@ test("finish → celebration → publish the card → /c/[id] with its preview",
     await page.getByRole("button", { name: "Add a title" }).click({ timeout: 2000 });
     await expect(page.getByRole("dialog")).toBeVisible({ timeout: 1000 });
   }).toPass();
-  await page.getByRole("dialog").getByLabel("Search movies and series").fill("Parasite");
+  await page.getByRole("dialog").getByLabel("Search movies, series, books and manga").fill("Parasite");
   await page.getByRole("dialog").getByRole("button", { name: /^Parasite Movie/ }).first().click();
   await page.getByRole("button", { name: "Finished", exact: true }).click();
   const celebration = page.getByRole("dialog", { name: "You finished Parasite!" });

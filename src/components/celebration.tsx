@@ -1,7 +1,7 @@
 "use client";
 
 import { DownloadIcon, LinkIcon, PaletteIcon, Share2Icon, StickerIcon } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
 import { useCanShareFiles } from "@/cards/can-share";
 import { CardPreview } from "@/cards/card-preview";
@@ -24,7 +24,7 @@ import { cn } from "@/lib/utils";
  */
 export type CelebrationSource =
   | { kind: "finish"; entryId: string; ready: boolean }
-  | { kind: "progress"; episodeLogId: string | null; ready: boolean }
+  | { kind: "progress"; episodeLogId: string | null; readingLogId?: string | null; ready: boolean }
   | { kind: "weekly_recap"; recapId: string; ready: boolean }
   | { kind: "stats"; ready: boolean };
 
@@ -57,6 +57,7 @@ const SWIPE_PX = 40;
 export function Celebration({ data, source, animate = false, username, host, onClose }: Props) {
   const t = useTranslations("Celebration");
   const tc = useTranslations("Card");
+  const format = useFormatter();
   const dialog = useRef<HTMLDialogElement>(null);
   const [cardId] = useState(uuidv7);
   const styles = templatesFor(source.kind);
@@ -134,6 +135,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
         size,
         entryId: source.kind === "finish" ? source.entryId : null,
         episodeLogId: source.kind === "progress" ? source.episodeLogId : null,
+        readingLogId: source.kind === "progress" ? (source.readingLogId ?? null) : null,
         recapId: source.kind === "weekly_recap" ? source.recapId : null,
         data: inputs,
         share: !!blob,
@@ -197,10 +199,11 @@ export function Celebration({ data, source, animate = false, username, host, onC
   function toggleHide(item: CardHideable) {
     setHide((cur) => (cur.includes(item) ? cur.filter((h) => h !== item) : [...cur, item]));
   }
+  const read = data.kind === "book" || data.kind === "manga";
   const hideable: CardHideable[] = [
     ...(username ? (["username"] as const) : []),
-    "time",
-    ...((data.recap ? data.recap.episodes > 0 : data.kind === "series") ? (["episodes"] as const) : []),
+    ...(read && !data.reading ? [] : (["time"] as const)),
+    ...((data.recap ? data.recap.episodes > 0 : data.kind === "series" || read) ? (["episodes"] as const) : []),
   ];
 
   return (
@@ -234,12 +237,18 @@ export function Celebration({ data, source, animate = false, username, host, onC
           </p>
           <h2 id="celebration-title" className="mt-1 font-hand text-2xl leading-tight text-balance">
             {source.kind === "finish"
-              ? t("finishedTitle", { name: data.name })
+              ? read
+                ? t("finishedReadTitle", { name: data.name })
+                : t("finishedTitle", { name: data.name })
               : data.recap
                 ? t("recapTitle", { period: data.recap.period ?? "week", range })
-                : data.progress?.milestone
-                  ? t("milestoneTitle", { name: data.name, milestone: data.progress.milestone })
-                  : t("progressTitle", { name: data.name })}
+                : data.reading
+                  ? data.reading.milestone
+                    ? t("milestoneTitle", { name: data.name, milestone: data.reading.milestone })
+                    : t("readingTitle", { name: data.name, unit: data.reading.unit, position: format.number(data.reading.position) })
+                  : data.progress?.milestone
+                    ? t("milestoneTitle", { name: data.name, milestone: data.progress.milestone })
+                    : t("progressTitle", { name: data.name })}
           </h2>
         </header>
 
@@ -294,7 +303,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
             <span className="text-sm font-semibold">{t("hideOnCard")}</span>
             {hideable.map((item) => (
               <Chip key={item} pressed={hide.includes(item)} onClick={() => toggleHide(item)} className="ring-1 ring-border">
-                {t("hideItem", { item, username: username ?? "" })}
+                {t("hideItem", { item, username: username ?? "", shelf: read ? "read" : "watch" })}
               </Chip>
             ))}
           </div>

@@ -41,14 +41,20 @@ export default async function StatsPage({ params, searchParams }: PageProps<"/[l
     statsRows(supabase, userId),
     getTranslations("Stats"),
   ]);
-  const empty = rows.entries.length === 0 && rows.logs.length === 0;
-  const report = statsReport(rows.titles, rows.entries, rows.logs, {
-    period,
-    timeZone: profile?.time_zone ?? "UTC",
-    weekStart: weekStartFor(locale),
-    // eslint-disable-next-line react-hooks/purity -- a server render, once per request
-    now: Date.now(),
-  });
+  const empty = rows.entries.length === 0 && rows.logs.length === 0 && rows.reads.length === 0;
+  const report = statsReport(
+    rows.titles,
+    rows.entries,
+    rows.logs,
+    {
+      period,
+      timeZone: profile?.time_zone ?? "UTC",
+      weekStart: weekStartFor(locale),
+      // eslint-disable-next-line react-hooks/purity -- a server render, once per request
+      now: Date.now(),
+    },
+    rows.reads,
+  );
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 pt-10 pb-28">

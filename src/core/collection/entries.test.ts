@@ -23,6 +23,16 @@ describe("parseNewEntry", () => {
     );
   });
 
+  it("accepts books from Google Books and manga from AniList (S2 books & manga)", () => {
+    const book = { ...body, title: { source: "google_books", kind: "book", externalId: "3fzJEAAAQBAJ" } };
+    const manga = { ...body, status: "watching", title: { source: "anilist", kind: "manga", externalId: "30013" } };
+    expect(parseNewEntry(book, NOW)?.title).toEqual(book.title);
+    expect(parseNewEntry(manga, NOW)).toMatchObject({ title: manga.title, status: "watching", finishedAt: null });
+    // Each kind only from its own catalog, with that catalog's ids.
+    expect(parseNewEntry({ ...body, title: { source: "anilist", kind: "book", externalId: "30013" } }, NOW)).toBeNull();
+    expect(parseNewEntry({ ...body, title: { source: "google_books", kind: "book", externalId: "30013" } }, NOW)).toBeNull();
+  });
+
   it("rejects bad input", () => {
     const bad = [
       null,

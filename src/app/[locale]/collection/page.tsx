@@ -3,10 +3,11 @@ import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { CollectionView } from "@/components/collection/collection-view";
 import { localizedPath } from "@/core/auth";
-import { tmdbImageUrl } from "@/core/catalog/tmdb";
+import { posterUrl } from "@/core/catalog/images";
 import type { SearchResult } from "@/core/catalog/types";
 import { listCollection } from "@/data/entries";
 import { watchLogs } from "@/data/episodes";
+import { readLogs } from "@/data/reading";
 import { userClient } from "@/data/supabase-server";
 import { ensureTitle } from "@/data/titles";
 import { redirect } from "@/i18n/navigation";
@@ -24,15 +25,9 @@ async function pickedTitle(raw: string | string[] | undefined): Promise<SearchRe
   if (!match) return null;
   const title = await ensureTitle(match[1] as "movie" | "series", match[2]!).catch(() => null);
   if (!title) return null;
-  const { kind, externalId, name, year, posterPath } = title.title;
-  return {
-    source: "tmdb",
-    kind,
-    externalId,
-    name,
-    ...(year ? { year } : {}),
-    ...(posterPath ? { imageUrl: tmdbImageUrl(posterPath, "w342") } : {}),
-  };
+  const { source, kind, externalId, name, year, posterPath } = title.title;
+  const imageUrl = posterUrl(source, posterPath);
+  return { source, kind, externalId, name, ...(year ? { year } : {}), ...(imageUrl ? { imageUrl } : {}) };
 }
 
 /**
@@ -51,10 +46,11 @@ export default async function CollectionPage({ params, searchParams }: PageProps
   if (!supabase || !userId) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
   const query = await searchParams;
-  const [{ data: profile }, items, allLogs, t, pick] = await Promise.all([
+  const [{ data: profile }, items, allLogs, reads, t, pick] = await Promise.all([
     supabase.from("profiles").select("time_zone, username").eq("id", userId).single(),
     listCollection(supabase, userId),
     watchLogs(supabase, userId),
+    readLogs(supabase, userId),
     getTranslations("Collection"),
     query.add === "1" ? pickedTitle(query.pick) : null,
   ]);
@@ -69,6 +65,7 @@ export default async function CollectionPage({ params, searchParams }: PageProps
         key={query.add === "1" ? `add-${pick ? `${pick.kind}:${pick.externalId}` : ""}` : "list"}
         initialItems={items}
         logs={allLogs}
+        readLogs={reads}
         username={profile?.username ?? ""}
         host={siteUrl().host}
         timeZone={timeZone}

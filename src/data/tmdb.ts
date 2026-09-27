@@ -8,17 +8,11 @@ import {
   type TmdbKind,
 } from "@/core/catalog/tmdb";
 import type { Episode, SearchResult, Title } from "@/core/catalog/types";
+import { CatalogError } from "./catalog-error";
 
 const API = "https://api.themoviedb.org/3";
 
-export class TmdbError extends Error {
-  constructor(
-    message: string,
-    readonly status: number,
-  ) {
-    super(message);
-  }
-}
+export class TmdbError extends CatalogError {}
 
 async function tmdb(path: string, params: Record<string, string>, revalidate: number): Promise<unknown> {
   const token = process.env.TMDB_API_TOKEN;

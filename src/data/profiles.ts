@@ -1,6 +1,6 @@
 // Public profiles and account data export (S1 profile & privacy, ADR 0027). Server only.
 import { collectPages } from "@/core/account";
-import { tmdbImageUrl } from "@/core/catalog/tmdb";
+import { posterUrl } from "@/core/catalog/images";
 import type { UserClient } from "./supabase-server";
 
 export type PublicProfile =
@@ -40,7 +40,7 @@ export type WatchingTitle = { id: string; kind: string; name: string; posterUrl:
 export async function currentlyWatching(db: UserClient, userId: string, limit: number): Promise<WatchingTitle[]> {
   const { data, error } = await db
     .from("entries")
-    .select("title:titles!inner(id, kind, name, poster_path)")
+    .select("title:titles!inner(id, source, kind, name, poster_path)")
     .eq("user_id", userId)
     .eq("status", "watching")
     .is("deleted_at", null)
@@ -51,7 +51,7 @@ export async function currentlyWatching(db: UserClient, userId: string, limit: n
     id: title.id,
     kind: title.kind,
     name: title.name,
-    posterUrl: title.poster_path ? tmdbImageUrl(title.poster_path, "w342") : null,
+    posterUrl: posterUrl(title.source, title.poster_path),
   }));
 }
 
@@ -68,7 +68,7 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
       return data ?? [];
     });
 
-  const [profile, entries, episodeLogs, cards, weeklyRecaps] = await Promise.all([
+  const [profile, entries, episodeLogs, readingLogs, cards, weeklyRecaps] = await Promise.all([
     db
       .from("profiles")
       .select("username, display_name, avatar_url, locale, time_zone, country, visibility, theme, email_recaps, created_at, updated_at")
@@ -96,8 +96,16 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
     ),
     table((from, to) =>
       db
+        .from("reading_logs")
+        .select("id, unit, position, read_at, created_at, updated_at, deleted_at, title:titles(source, kind, external_id, name)")
+        .eq("user_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
+    table((from, to) =>
+      db
         .from("cards")
-        .select("id, kind, entry_id, episode_log_id, template_id, size, params, image_path, shared_at, created_at, updated_at, deleted_at")
+        .select("id, kind, entry_id, episode_log_id, reading_log_id, template_id, size, params, image_path, shared_at, created_at, updated_at, deleted_at")
         .eq("user_id", user.id)
         .order("id")
         .range(from, to),
@@ -120,6 +128,7 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
     profile,
     entries,
     episodeLogs,
+    readingLogs,
     cards,
     weeklyRecaps,
   };

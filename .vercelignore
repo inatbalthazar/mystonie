@@ -1,0 +1,9 @@
+# Direct CLI deploys (`vercel deploy`): never upload local secrets or test output.
+.env*
+!.env.example
+node_modules
+.next
+test-results
+playwright-report
+supabase/.temp
+supabase/.branches

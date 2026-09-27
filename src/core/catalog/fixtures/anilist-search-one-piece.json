@@ -1,0 +1,151 @@
+{
+  "data": {
+    "Page": {
+      "media": [
+        {
+          "id": 30013,
+          "format": "MANGA",
+          "isAdult": false,
+          "countryOfOrigin": "JP",
+          "genres": [
+            "Action",
+            "Adventure",
+            "Comedy",
+            "Fantasy"
+          ],
+          "chapters": null,
+          "volumes": null,
+          "title": {
+            "english": "One Piece",
+            "romaji": "ONE PIECE",
+            "native": "ONE PIECE"
+          },
+          "startDate": {
+            "year": 1997
+          },
+          "coverImage": {
+            "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx30013-BeslEMqiPhlk.jpg",
+            "extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx30013-BeslEMqiPhlk.jpg"
+          }
+        },
+        {
+          "id": 102533,
+          "format": "MANGA",
+          "isAdult": false,
+          "countryOfOrigin": "JP",
+          "genres": [
+            "Adventure",
+            "Comedy"
+          ],
+          "chapters": 34,
+          "volumes": 7,
+          "title": {
+            "english": null,
+            "romaji": "One Piece Party",
+            "native": "ワンピース パーティー"
+          },
+          "startDate": {
+            "year": 2014
+          },
+          "coverImage": {
+            "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/nx102533-YLT9eI1BH2a1.jpg",
+            "extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/nx102533-YLT9eI1BH2a1.jpg"
+          }
+        },
+        {
+          "id": 110715,
+          "format": "MANGA",
+          "isAdult": false,
+          "countryOfOrigin": "JP",
+          "genres": [
+            "Comedy"
+          ],
+          "chapters": null,
+          "volumes": null,
+          "title": {
+            "english": "ONE PIECE ACADEMY",
+            "romaji": "ONE PIECE Gakuen!!",
+            "native": "ONE PIECE学園!!"
+          },
+          "startDate": {
+            "year": 2019
+          },
+          "coverImage": {
+            "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx110715-IqObMH5zGdOM.jpg",
+            "extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx110715-IqObMH5zGdOM.jpg"
+          }
+        },
+        {
+          "id": 110233,
+          "format": "MANGA",
+          "isAdult": false,
+          "countryOfOrigin": "JP",
+          "genres": [
+            "Comedy",
+            "Romance"
+          ],
+          "chapters": 180,
+          "volumes": 13,
+          "title": {
+            "english": "ONE PIECE in Love",
+            "romaji": "Koisuru ONE PIECE",
+            "native": "恋するワンピース"
+          },
+          "startDate": {
+            "year": 2018
+          },
+          "coverImage": {
+            "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx110233-7Z79ZksUA043.jpg",
+            "extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx110233-7Z79ZksUA043.jpg"
+          }
+        },
+        {
+          "id": 155103,
+          "format": "MANGA",
+          "isAdult": false,
+          "countryOfOrigin": "JP",
+          "genres": [
+            "Drama"
+          ],
+          "chapters": null,
+          "volumes": 2,
+          "title": {
+            "english": null,
+            "romaji": "Boku no One Piece",
+            "native": "ぼくのワンピース"
+          },
+          "startDate": {
+            "year": 2017
+          },
+          "coverImage": {
+            "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx155103-zxpi6s6QBmOm.jpg",
+            "extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx155103-zxpi6s6QBmOm.jpg"
+          }
+        },
+        {
+          "id": 183896,
+          "format": "MANGA",
+          "isAdult": false,
+          "countryOfOrigin": "JP",
+          "genres": [
+            "Horror"
+          ],
+          "chapters": 6,
+          "volumes": 1,
+          "title": {
+            "english": null,
+            "romaji": "Noroi no One Piece",
+            "native": "呪いのワンピース"
+          },
+          "startDate": {
+            "year": 1989
+          },
+          "coverImage": {
+            "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/b183896-dvmUExfSg77A.jpg",
+            "extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/b183896-dvmUExfSg77A.jpg"
+          }
+        }
+      ]
+    }
+  }
+}

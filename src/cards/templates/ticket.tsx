@@ -20,6 +20,7 @@ export function TicketCard({ data, size, palette, host }: TemplateProps) {
           <span className="absolute top-1/2 -right-[32px] size-[64px] -translate-y-1/2 rounded-full bg-[var(--card-bg)]" />
           <span className="absolute top-1/2 right-[48px] left-[48px] border-t-[6px] border-dashed border-[var(--card-ink)] opacity-25" />
           <FinishedStamp
+            read={data.kind === "book" || data.kind === "manga"}
             date={date}
             className={cn("absolute right-[56px] rotate-[-8deg] bg-[var(--card-paper)]", story ? "-top-[118px]" : "-top-[112px] origin-right scale-[0.85]")}
           />

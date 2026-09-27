@@ -22,9 +22,10 @@ Competitors are **databases with a UI** (Letterboxd: film only; Serializd, TV Ti
 
 | Term | Meaning |
 |---|---|
-| **Title** | A movie, series (incl. anime and K-drama), later a book or manga. Cached from TMDB (later Google Books/AniList). Table `titles`. |
+| **Title** | A movie, series (incl. anime and K-drama), book or manga. Cached from TMDB, Google Books or AniList. Table `titles`. |
 | **Entry** | A user's record of a title with status `want` / `watching` / `finished`, rating, one-line review and editable `finished_at`. Table `entries`. |
 | **Episode log** | A user marking one episode as watched. Table `episode_logs`. |
+| **Reading log** | A user marking how far they have read a book or manga (a page, chapter or volume reached). Table `reading_logs`. |
 | **Card** | Generated share artwork (Finish, Progress, Weekly Recap, Stats Sticker, …). Rendered in the browser. |
 | **Template** | A card design (Ticket, Polaroid, Bold Stats, …) defined in code + data. |
 | **Recap** | An automatic weekly, monthly or yearly summary card. Weeks follow the user's local time zone. |

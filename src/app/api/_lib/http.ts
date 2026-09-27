@@ -1,5 +1,5 @@
 import { timingSafeEqual } from "node:crypto";
-import { TmdbError } from "@/data/tmdb";
+import { CatalogError } from "@/data/catalog-error";
 import { allowRequest, type Limit } from "@/data/rate-limit";
 
 /**
@@ -24,7 +24,7 @@ export async function rateLimited(request: Request, bucket: string, limit: Limit
 
 /** Maps catalog failures to a JSON error the UI can show as "try again". */
 export function catalogError(error: unknown): Response {
-  const status = error instanceof TmdbError ? error.status : 500;
+  const status = error instanceof CatalogError ? error.status : 500;
   if (status !== 404) console.error(error);
   const code = status === 404 ? "not_found" : status === 503 ? "catalog_unavailable" : "catalog_error";
   return Response.json({ error: code }, { status, headers: { "Cache-Control": "no-store" } });

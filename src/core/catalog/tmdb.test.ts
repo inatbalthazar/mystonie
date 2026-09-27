@@ -93,6 +93,9 @@ describe("normalizeTmdbDetails", () => {
       runtimeMin: 128,
       episodeCount: 42,
       seasonCount: 5,
+      pageCount: null,
+      chapterCount: null,
+      volumeCount: null,
     });
   });
 

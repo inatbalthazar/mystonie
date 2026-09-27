@@ -1,0 +1,31 @@
+{
+  "data": {
+    "Media": {
+      "id": 105778,
+      "format": "MANGA",
+      "isAdult": false,
+      "countryOfOrigin": "JP",
+      "genres": [
+        "Action",
+        "Comedy",
+        "Drama",
+        "Horror",
+        "Supernatural"
+      ],
+      "chapters": 232,
+      "volumes": 24,
+      "title": {
+        "english": "Chainsaw Man",
+        "romaji": "Chainsaw Man",
+        "native": "チェンソーマン"
+      },
+      "startDate": {
+        "year": 2018
+      },
+      "coverImage": {
+        "large": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx105778-euxXZEIfDY2u.png",
+        "extraLarge": "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx105778-euxXZEIfDY2u.png"
+      }
+    }
+  }
+}

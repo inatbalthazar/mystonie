@@ -23,7 +23,7 @@ test("a finished week → Monday recap email → recap card → share, then unsu
     await page.getByRole("button", { name: "Add a title" }).click({ timeout: 2000 });
     await expect(page.getByRole("dialog")).toBeVisible({ timeout: 1000 });
   }).toPass();
-  await page.getByRole("dialog").getByLabel("Search movies and series").fill("Parasite");
+  await page.getByRole("dialog").getByLabel("Search movies, series, books and manga").fill("Parasite");
   await page.getByRole("dialog").getByRole("button", { name: /^Parasite Movie/ }).first().click();
   const added = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/entries" && r.request().method() === "POST");
   await page.getByRole("button", { name: "Finished", exact: true }).click();

@@ -42,3 +42,6 @@ Thumbs.db
 # editor / local agent settings
 .idea/
 .claude/settings.local.json
+
+.vercel
+.env*

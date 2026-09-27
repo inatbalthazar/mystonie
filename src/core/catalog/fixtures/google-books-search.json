@@ -1,0 +1,51 @@
+{
+  "kind": "books#volumes",
+  "totalItems": 812,
+  "items": [
+    {
+      "kind": "books#volume",
+      "id": "3fzJEAAAQBAJ",
+      "volumeInfo": {
+        "title": "Project Hail Mary",
+        "subtitle": "A Novel",
+        "authors": ["Andy Weir"],
+        "publisher": "Ballantine Books",
+        "publishedDate": "2021-05-04",
+        "pageCount": 496,
+        "printType": "BOOK",
+        "categories": ["Fiction / Science Fiction / Space Opera"],
+        "maturityRating": "NOT_MATURE",
+        "imageLinks": {
+          "smallThumbnail": "http://books.google.com/books/content?id=3fzJEAAAQBAJ&printsec=frontcover&img=1&zoom=5&edge=curl&source=gbs_api",
+          "thumbnail": "http://books.google.com/books/content?id=3fzJEAAAQBAJ&printsec=frontcover&img=1&zoom=1&edge=curl&source=gbs_api"
+        },
+        "language": "en"
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "zyTCAlFPjgYC",
+      "volumeInfo": {
+        "title": "The Google Story",
+        "authors": ["David A. Vise", "Mark Malseed"],
+        "publishedDate": "2005",
+        "printType": "BOOK",
+        "categories": ["Business & Economics"],
+        "maturityRating": "NOT_MATURE",
+        "language": "en"
+      }
+    },
+    {
+      "kind": "books#volume",
+      "id": "mature00000A",
+      "volumeInfo": { "title": "Not for cards", "maturityRating": "MATURE", "language": "en" }
+    },
+    { "kind": "books#volume", "id": "bad id", "volumeInfo": { "title": "Broken id" } },
+    { "kind": "books#volume", "id": "noTitle0000A", "volumeInfo": { "authors": ["Nobody"] } },
+    {
+      "kind": "books#volume",
+      "id": "3fzJEAAAQBAJ",
+      "volumeInfo": { "title": "Project Hail Mary", "authors": ["Andy Weir"] }
+    }
+  ]
+}

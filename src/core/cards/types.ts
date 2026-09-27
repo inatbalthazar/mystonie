@@ -1,4 +1,5 @@
 import type { TitleKind } from "../catalog/types";
+import type { ReadingUnit } from "../collection/reading";
 
 export type CardSize = "story" | "feed";
 
@@ -20,6 +21,10 @@ export type CardData = {
   runtimeMin?: number | null;
   episodeCount?: number | null;
   seasonCount?: number | null;
+  /** Books: pages. Manga: chapters and volumes. */
+  pageCount?: number | null;
+  chapterCount?: number | null;
+  volumeCount?: number | null;
   /** 0.5–5 in half steps. */
   rating?: number | null;
   review?: string | null;
@@ -27,6 +32,8 @@ export type CardData = {
   finishedOn: string;
   /** Set on a Progress card: the episode just logged and how far along the series is. */
   progress?: CardProgress | null;
+  /** Set on a reading Progress card (a book or manga): the page, chapter or volume just reached. */
+  reading?: CardReading | null;
   /** Set on a Weekly Recap card: the week's totals and collage. `kind`, `name` and `posterUrl` are the top title's. */
   recap?: CardRecap | null;
   /** Printed in the footer (`@username`) of saved cards. The server sets it, never the browser. */
@@ -47,6 +54,19 @@ export type CardProgress = {
   total: number;
   /** Watched time so far, minutes. */
   watchedMin: number | null;
+  /** A milestone crossed by this log (25/50/75 %), else null. */
+  milestone: Milestone | null;
+};
+
+/** A reading Progress card: "Chapter 1100", and how far along when the length is known. */
+export type CardReading = {
+  unit: ReadingUnit;
+  /** The page, chapter or volume reached. */
+  position: number;
+  /** The title's length in `unit`; null while unknown (a running manga). */
+  total: number | null;
+  /** Estimated reading time so far, minutes. */
+  readMin: number | null;
   /** A milestone crossed by this log (25/50/75 %), else null. */
   milestone: Milestone | null;
 };

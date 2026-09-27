@@ -44,6 +44,7 @@ export type Database = {
           image_path: string | null
           kind: string
           params: Json
+          reading_log_id: string | null
           shared_at: string | null
           size: string
           template_id: string
@@ -59,6 +60,7 @@ export type Database = {
           image_path?: string | null
           kind: string
           params?: Json
+          reading_log_id?: string | null
           shared_at?: string | null
           size: string
           template_id: string
@@ -74,6 +76,7 @@ export type Database = {
           image_path?: string | null
           kind?: string
           params?: Json
+          reading_log_id?: string | null
           shared_at?: string | null
           size?: string
           template_id?: string
@@ -93,6 +96,13 @@ export type Database = {
             columns: ["episode_log_id", "user_id"]
             isOneToOne: false
             referencedRelation: "episode_logs"
+            referencedColumns: ["id", "user_id"]
+          },
+          {
+            foreignKeyName: "cards_reading_log_id_user_id_fkey"
+            columns: ["reading_log_id", "user_id"]
+            isOneToOne: false
+            referencedRelation: "reading_logs"
             referencedColumns: ["id", "user_id"]
           },
           {
@@ -313,6 +323,57 @@ export type Database = {
         }
         Relationships: []
       }
+      reading_logs: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          position: number
+          read_at: string
+          title_id: string
+          unit: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id: string
+          position: number
+          read_at?: string
+          title_id: string
+          unit: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          position?: number
+          read_at?: string
+          title_id?: string
+          unit?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reading_logs_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "titles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reading_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       reports: {
         Row: {
           created_at: string
@@ -403,6 +464,7 @@ export type Database = {
       }
       titles: {
         Row: {
+          chapter_count: number | null
           created_at: string
           episode_count: number | null
           external_id: string
@@ -413,6 +475,7 @@ export type Database = {
           name: string
           original_language: string | null
           original_name: string | null
+          page_count: number | null
           palette: Json | null
           poster_path: string | null
           raw: Json | null
@@ -420,9 +483,11 @@ export type Database = {
           season_count: number | null
           source: string
           updated_at: string
+          volume_count: number | null
           year: number | null
         }
         Insert: {
+          chapter_count?: number | null
           created_at?: string
           episode_count?: number | null
           external_id: string
@@ -433,6 +498,7 @@ export type Database = {
           name: string
           original_language?: string | null
           original_name?: string | null
+          page_count?: number | null
           palette?: Json | null
           poster_path?: string | null
           raw?: Json | null
@@ -440,9 +506,11 @@ export type Database = {
           season_count?: number | null
           source: string
           updated_at?: string
+          volume_count?: number | null
           year?: number | null
         }
         Update: {
+          chapter_count?: number | null
           created_at?: string
           episode_count?: number | null
           external_id?: string
@@ -453,6 +521,7 @@ export type Database = {
           name?: string
           original_language?: string | null
           original_name?: string | null
+          page_count?: number | null
           palette?: Json | null
           poster_path?: string | null
           raw?: Json | null
@@ -460,6 +529,7 @@ export type Database = {
           season_count?: number | null
           source?: string
           updated_at?: string
+          volume_count?: number | null
           year?: number | null
         }
         Relationships: []

@@ -6,6 +6,7 @@ import { isLatinSafe, watchMinutes } from "@/core/cards/text";
 import { formatRuntime } from "@/core/format/runtime";
 import { recapFigures } from "@/core/stats/recap";
 import en from "../../../../../messages/en.json";
+import { siteUrl } from "@/lib/site";
 import { loadCard } from "./load";
 
 // Link preview of a shared card (X, Facebook, iMessage…). English only and Latin-safe, like the site's
@@ -24,9 +25,12 @@ const MUTED = "#ada7a0";
 async function posterData(url: string | null | undefined): Promise<string | null> {
   if (!url) return null;
   try {
-    const res = await fetch(url.replace(/\/w\d+\//, "/w500/"), { signal: AbortSignal.timeout(3000) });
+    // Book covers are served by our own proxy (a relative URL); TMDB posters come in a bigger size.
+    const src = url.startsWith("/") ? new URL(url, siteUrl()).toString() : url.replace(/\/w\d+\//, "/w500/");
+    const res = await fetch(src, { signal: AbortSignal.timeout(3000) });
     if (!res.ok) return null;
-    return `data:image/jpeg;base64,${Buffer.from(await res.arrayBuffer()).toString("base64")}`;
+    const type = res.headers.get("content-type") === "image/png" ? "image/png" : "image/jpeg";
+    return `data:${type};base64,${Buffer.from(await res.arrayBuffer()).toString("base64")}`;
   } catch {
     return null;
   }
@@ -45,18 +49,24 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
     ? en.Metadata.title
     : recap
       ? t("recapHeadline", { period: recap.period ?? "week" })
-      : data.progress
-        ? data.progress.milestone
-          ? t("milestone", { milestone: data.progress.milestone })
-          : t("episodeCode", { season: data.progress.season, episode: data.progress.episode })
-        : t("finished");
+      : data.reading
+        ? data.reading.milestone
+          ? t("milestone", { milestone: data.reading.milestone })
+          : t("readingHeadline", { unit: data.reading.unit, position: data.reading.position.toLocaleString("en") })
+        : data.progress
+          ? data.progress.milestone
+            ? t("milestone", { milestone: data.progress.milestone })
+            : t("episodeCode", { season: data.progress.season, episode: data.progress.episode })
+          : data.kind === "book" || data.kind === "manga"
+            ? t("finishedRead")
+            : t("finished");
   const day = (key: string) => new Date(`${key}T00:00:00Z`);
   const name = recap
     ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" }).formatRange(day(recap.from), day(recap.to))
     : data && isLatinSafe(data.name)
       ? data.name
       : null;
-  const minutes = data ? (data.progress ? data.progress.watchedMin : watchMinutes(data)) : null;
+  const minutes = data ? (data.reading ? data.reading.readMin : data.progress ? data.progress.watchedMin : watchMinutes(data)) : null;
   const facts = recap
     ? recapFigures(recap, { time: hidden.has("time"), episodes: hidden.has("episodes") }).map(({ key, value }) =>
         key === "finished"
@@ -70,6 +80,9 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
         t("kind", { kind: data.kind }),
         data.year ? String(data.year) : null,
         data.progress && !hidden.has("episodes") ? t("progressCount", { watched: data.progress.watched, total: data.progress.total }) : null,
+        data.reading?.total && !hidden.has("episodes")
+          ? t("readingCount", { unit: data.reading.unit, position: data.reading.position.toLocaleString("en"), total: data.reading.total.toLocaleString("en") })
+          : null,
         minutes && !hidden.has("time") ? formatRuntime(minutes, "en") : null,
         data.rating ? `${data.rating} / 5` : null,
       ].filter(Boolean)

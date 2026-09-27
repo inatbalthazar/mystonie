@@ -1,10 +1,11 @@
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { CardFooter, CardRoot, footerUser, CardTitle, DISPLAY, Poster, Review, Stars, useFinishedDate, useHeadline, useStats, type TemplateProps } from "../parts";
 
 /** Strava-style: huge condensed numbers, a strip of poster, the title. Best for series, progress and recaps. */
 export function BoldStatsCard({ data, size, palette, host }: TemplateProps) {
   const t = useTranslations("Card");
+  const format = useFormatter();
   const date = useFinishedDate(data);
   const stats = useStats(data);
   const headline = useHeadline(data);
@@ -38,6 +39,7 @@ export function BoldStatsCard({ data, size, palette, host }: TemplateProps) {
             {t("kind", { kind: data.kind })}
             {data.year ? ` · ${data.year}` : ""}
             {data.progress?.milestone ? ` · ${t("episodeCode", { season: data.progress.season, episode: data.progress.episode })}` : ""}
+            {data.reading?.milestone ? ` · ${t("readingHeadline", { unit: data.reading.unit, position: format.number(data.reading.position) })}` : ""}
             {" · "}
             {date}
           </p>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { cardImagePath, crossedMilestone, parseCardData, parseCardSave, parseRecap } from "./saved";
+import { cardImagePath, crossedMilestone, parseCardData, parseCardSave, parseRecap, readingProgress } from "./saved";
 import { templateFits, templatesFor } from "./templates";
 
 const ID = "01926000-0000-7000-8000-000000000001";
@@ -67,7 +67,7 @@ describe("parseCardData", () => {
 
   it("rejects bad inputs", () => {
     const bad = [
-      { ...data, kind: "book" },
+      { ...data, kind: "game" },
       { ...data, name: " " },
       { ...data, finishedOn: "2026-13-01" },
       { ...data, posterUrl: "https://evil.example/x.jpg" },
@@ -165,7 +165,7 @@ describe("parseRecap", () => {
       { ...recap, titles: Array(5).fill(recap.titles[0]) },
       { ...recap, titleCount: 0 },
       { ...recap, titles: [{ ...recap.titles[0], posterUrl: "https://evil.example/x.jpg" }] },
-      { ...recap, titles: [{ ...recap.titles[0], kind: "book" }] },
+      { ...recap, titles: [{ ...recap.titles[0], kind: "game" }] },
       { ...recap, period: "decade" },
     ];
     for (const b of bad) expect(parseRecap(b), JSON.stringify(b)).toBeNull();
@@ -184,5 +184,55 @@ describe("templates", () => {
 
   it("builds the storage path", () => {
     expect(cardImagePath("u1", ID)).toBe(`u1/${ID}.png`);
+  });
+});
+
+describe("reading Progress cards (S2 books & manga)", () => {
+  const manga = {
+    kind: "manga",
+    name: "One Piece",
+    year: 1997,
+    posterUrl: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx30013-BeslEMqiPhlk.jpg",
+    finishedOn: "2026-09-27",
+  };
+  const log = (id: string, position: number, readAt: string) => ({ id, titleId: "op", unit: "chapter" as const, position, readAt });
+
+  it("logging chapter 1100 of a running manga makes a Progress card: where, and the reading time so far", () => {
+    const after = [log("a", 1100, "2026-09-27T10:00:00Z")];
+    const reading = readingProgress({ kind: "manga", chapterCount: null }, [], after, "chapter", 1100);
+    expect(reading).toEqual({ unit: "chapter", position: 1100, total: null, readMin: 5500, milestone: null });
+    const save = { id: ID, kind: "progress", templateId: "boldStats", size: "story", readingLogId: LOG, data: { ...manga, reading }, share: true };
+    expect(parseCardSave(save)).toMatchObject({ kind: "progress", readingLogId: LOG, episodeLogId: null, data: { kind: "manga", reading } });
+    expect(parseCardSave({ ...save, templateId: "polaroid" })).not.toBeNull();
+  });
+
+  it("marks milestones when the length is known, and drops a total the reader is already past", () => {
+    const lengths = { kind: "manga" as const, chapterCount: 232 };
+    const before = [log("a", 100, "2026-09-01T10:00:00Z")];
+    const after = [...before, log("b", 120, "2026-09-02T10:00:00Z")];
+    expect(readingProgress(lengths, before, after, "chapter", 120)).toMatchObject({ total: 232, milestone: 50 });
+    expect(readingProgress({ kind: "manga", chapterCount: 100 }, [], [log("c", 120, "2026-09-02T10:00:00Z")], "chapter", 120)).toMatchObject({
+      total: null,
+      milestone: null,
+    });
+  });
+
+  it("accepts a book's Finish card and rejects reading progress that doesn't add up", () => {
+    const book = { kind: "book", name: "Project Hail Mary", posterUrl: "/api/covers/3fzJEAAAQBAJ", pageCount: 496, finishedOn: "2026-09-27" };
+    expect(parseCardSave({ id: ID, kind: "finish", templateId: "ticket", size: "feed", entryId: ENTRY, data: book })).toMatchObject({ data: { pageCount: 496 } });
+    const reading = { unit: "chapter", position: 1100, total: null, readMin: 5500, milestone: null };
+    const progress = { id: ID, kind: "progress", templateId: "boldStats", size: "story", readingLogId: LOG, data: { ...manga, reading } };
+    for (const bad of [
+      { ...progress, data: { ...manga, reading: { ...reading, unit: "episode" } } },
+      { ...progress, data: { ...manga, reading: { ...reading, total: 1000 } } }, // past the end
+      { ...progress, data: { ...manga, reading: { ...reading, milestone: 50 } } }, // a milestone needs a length
+      { ...progress, data: { ...manga, reading: null } },
+      { ...progress, data: { ...manga, kind: "series", reading } }, // series progress is by episode
+      { ...progress, episodeLogId: LOG, readingLogId: null },
+      { ...progress, entryId: ENTRY },
+      { ...progress, data: { ...manga, reading, posterUrl: "https://books.google.com/books/content?id=x" } },
+    ]) {
+      expect(parseCardSave(bad), JSON.stringify(bad)).toBeNull();
+    }
   });
 });

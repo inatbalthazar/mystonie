@@ -56,7 +56,9 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress (add branch name) · 🧑 
 
 ## Stage 2: Warnings, reading, revenue (2–3 months)
 - [ ] 🧑 Get a DTDD API key and confirm terms. Then: DTDD provider + matching + cache, avoid-topics settings, warning block + badges, Survived card. ([S2 warnings](product/features/S2-content-warnings.md), [ADR 0009](decisions/0009-content-warnings-from-dtdd-first.md)) · ⚡ high (title matching + new external API)
-- [ ] Books (Google Books) + manga (AniList), reading progress, Read tab + stats. ([S2 books & manga](product/features/S2-books-manga.md)) · ⚡ high (two new catalogs, data-shape ADR for reading progress)
+- [x] Books (Google Books) + manga (AniList), reading progress, Read tab + stats. ([S2 books & manga](product/features/S2-books-manga.md), [ADR 0029](decisions/0029-books-manga-reading-progress.md)) · ⚡ high (two new catalogs, data-shape ADR for reading progress)
+- [ ] 🧑 Books go-live ([ADR 0029](decisions/0029-books-manga-reading-progress.md)): create a Google Cloud API key restricted to the Books API (the anonymous quota is 0) and add it in Vercel as `GOOGLE_BOOKS_API_KEY` (Sensitive). Apply `20260927170000_stage2_reading.sql` to the remote project (an agent can, when asked).
+- [ ] Book and manga card templates: **Spine** (a book spine on a shelf) and **Manga panel** (the cover in comic panels with a speech bubble), for Finish and reading Progress cards. ([S2 books & manga](product/features/S2-books-manga.md)) · ⚡ medium (two templates, card-lab hard cases)
 - [ ] Milestone cards, Monthly Recap, **Year in Review** (ship by early December). · ⚡ high (builds on the recap pipeline; many card designs)
 - [ ] 🧑 TMDB commercial terms, Vercel Pro. Then: Stripe Pro subscription + premium templates. ([S2 Pro](product/features/S2-pro-subscription.md)) · ⚡ max (webhooks, entitlements, money is server-authoritative)
 - [ ] Where to watch by country. ([S2 where to watch](product/features/S2-where-to-watch.md)) · ⚡ medium (one TMDB endpoint + cache + attribution)

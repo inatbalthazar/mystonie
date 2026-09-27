@@ -5,13 +5,16 @@ import { useLocale, useTranslations } from "next-intl";
 import { useId } from "react";
 import { ENTRY_STATUSES, isEntryStatus } from "@/core/collection/entries";
 import {
+  COLLECTION_SHELVES,
   COLLECTION_SORTS,
   isCollectionSort,
   type CollectionFilter,
   type CollectionLayout,
+  type CollectionShelf,
   type CollectionSort,
 } from "@/core/collection/view";
 import { formatRuntime } from "@/core/format/runtime";
+import type { ReadTotals } from "@/core/stats/reading";
 import type { WatchTotals } from "@/core/stats/summary";
 import { cn } from "@/lib/utils";
 
@@ -27,6 +30,31 @@ export function CollectionSummary({ totals, year }: { totals: WatchTotals; year:
     { label: t("titlesFinished"), value: totals.finished.toLocaleString(locale) },
     { label: t("episodesWatched"), value: totals.episodes.toLocaleString(locale) },
   ];
+  return <SummaryTicket stats={stats} year={year} />;
+}
+
+/**
+ * The Read tab's header (S2 books & manga): estimated reading time, books and manga finished, and pages / chapters /
+ * volumes read (the ones there are). Always the sum of the rows below it.
+ */
+export function ReadSummary({ totals, year }: { totals: ReadTotals; year: number | null }) {
+  const t = useTranslations("Collection");
+  const locale = useLocale();
+  const amounts = [
+    { label: t("pagesRead"), value: totals.pages },
+    { label: t("chaptersRead"), value: totals.chapters },
+    { label: t("volumesRead"), value: totals.volumes },
+  ].filter((a, i) => a.value > 0 || (i === 0 && totals.chapters === 0 && totals.volumes === 0));
+  const stats = [
+    { label: t("readTime"), value: totals.minutes > 0 ? formatRuntime(totals.minutes, locale) : "0" },
+    { label: t("titlesRead"), value: totals.finished.toLocaleString(locale) },
+    ...amounts.map((a) => ({ label: a.label, value: a.value.toLocaleString(locale) })),
+  ];
+  return <SummaryTicket stats={stats} year={year} hint={t("readTimeHint")} />;
+}
+
+function SummaryTicket({ stats, year, hint }: { stats: { label: string; value: string }[]; year: number | null; hint?: string }) {
+  const t = useTranslations("Collection");
   return (
     <section aria-labelledby="collection-summary" className="relative mt-2 rounded-2xl bg-card px-4 pt-5 pb-4 shadow-[0_1px_2px_rgb(0_0_0/0.06),0_10px_24px_-14px_rgb(0_0_0/0.35)] ring-1 ring-border">
       {/* Tape holding the ticket onto the page. */}
@@ -34,7 +62,7 @@ export function CollectionSummary({ totals, year }: { totals: WatchTotals; year:
       <h2 id="collection-summary" className="font-hand text-2xl leading-none text-muted-foreground">
         {t("summaryTitle", { year: year ?? "all" })}
       </h2>
-      <dl className="mt-3 grid grid-cols-3 divide-x-2 divide-dashed divide-border">
+      <dl className={cn("mt-3 grid divide-x-2 divide-dashed divide-border", stats.length > 3 ? "grid-cols-2 gap-y-3 sm:grid-cols-4" : "grid-cols-3")}>
         {stats.map((s) => (
           <div key={s.label} className="flex min-w-0 flex-col gap-1 px-2 first:pl-0 last:pr-0">
             <dt className="text-[11px] leading-tight font-semibold tracking-wide text-muted-foreground uppercase">{s.label}</dt>
@@ -42,7 +70,36 @@ export function CollectionSummary({ totals, year }: { totals: WatchTotals; year:
           </div>
         ))}
       </dl>
+      {hint && <p className="mt-3 text-xs text-muted-foreground">{hint}</p>}
     </section>
+  );
+}
+
+/**
+ * Watch · Read (S2 books & manga): the album's divider tabs. Movies and series on one, books and manga on the other;
+ * each tab has its own header, filters and rows.
+ */
+export function ShelfTabs({ shelf, onShelf }: { shelf: CollectionShelf; onShelf: (shelf: CollectionShelf) => void }) {
+  const t = useTranslations("Collection");
+  return (
+    <div role="group" aria-label={t("shelves")} className="flex gap-2 border-b-2 border-border">
+      {COLLECTION_SHELVES.map((value) => (
+        <button
+          key={value}
+          type="button"
+          aria-pressed={shelf === value}
+          onClick={() => onShelf(value)}
+          className={cn(
+            "-mb-0.5 min-h-11 rounded-t-xl border-2 border-b-0 px-5 font-display text-lg font-extrabold transition-colors",
+            shelf === value
+              ? "border-border bg-card text-foreground shadow-[0_-4px_10px_-8px_rgb(0_0_0/0.3)]"
+              : "border-transparent text-muted-foreground hover:text-foreground",
+          )}
+        >
+          {t("shelf", { shelf: value })}
+        </button>
+      ))}
+    </div>
   );
 }
 
@@ -106,7 +163,7 @@ export function CollectionControls({
             <option value="">{t("allStatuses")}</option>
             {ENTRY_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {t("statusLabel", { status: s })}
+                {t("statusLabel", { status: s, shelf: filter.shelf ?? "watch" })}
               </option>
             ))}
           </select>

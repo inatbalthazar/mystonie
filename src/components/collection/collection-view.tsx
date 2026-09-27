@@ -4,7 +4,7 @@ import { ImageIcon, PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useId, useState, useSyncExternalStore } from "react";
-import type { SearchResult } from "@/core/catalog/types";
+import { isReadingKind, type SearchResult } from "@/core/catalog/types";
 import {
   finishedAtForDate,
   sortCollection,
@@ -18,12 +18,16 @@ import {
   collectionRows,
   collectionYears,
   isCollectionLayout,
+  shelfOf,
   sortRows,
+  summarizeReadRows,
   summarizeRows,
   type CollectionFilter,
   type CollectionLayout,
   type CollectionRow,
+  type CollectionShelf,
   type CollectionSort,
+  type ReadLog,
   type WatchLog,
 } from "@/core/collection/view";
 import { formatMinutes, formatRuntime } from "@/core/format/runtime";
@@ -34,7 +38,7 @@ import { cn } from "@/lib/utils";
 import type { CardData } from "@/core/cards/types";
 import { Celebration } from "../celebration";
 import { Sheet } from "../sheet";
-import { CollectionControls, CollectionSummary } from "./collection-header";
+import { CollectionControls, CollectionSummary, ReadSummary, ShelfTabs } from "./collection-header";
 import { QuickAdd } from "./quick-add";
 
 type Row = CollectionItem & { pending?: boolean };
@@ -94,6 +98,7 @@ async function send(url: string, method: "POST" | "PATCH", body: unknown): Promi
 export function CollectionView({
   initialItems,
   logs,
+  readLogs,
   timeZone,
   username,
   host,
@@ -103,6 +108,8 @@ export function CollectionView({
   initialItems: CollectionItem[];
   /** The user's episode logs (runtime and time), for the series rows and the summary. */
   logs: WatchLog[];
+  /** The user's reading logs, for the book and manga rows and the Read tab's summary. */
+  readLogs: ReadLog[];
   timeZone: string;
   /** For the card footer (`@username`) and the site shown on cards. */
   username: string;
@@ -115,6 +122,10 @@ export function CollectionView({
   const locale = useLocale();
   const [items, setItems] = useState<Row[]>(initialItems);
   const [filter, setFilter] = useState<CollectionFilter>({ year: null, status: null });
+  // Watch · Read. Starts where the picked title belongs, or on Read when there's nothing to watch.
+  const [shelf, setShelf] = useState<CollectionShelf>(() =>
+    startWith ? shelfOf({ title: startWith }) : initialItems.length > 0 && initialItems.every((i) => shelfOf(i) === "read") ? "read" : "watch",
+  );
   const [sort, setSort] = useState<CollectionSort>("finished");
   const layout = useSyncExternalStore(subscribeLayout, readLayout, () => "list" as const);
   const [adding, setAdding] = useState(startAdding);
@@ -137,8 +148,8 @@ export function CollectionView({
   async function add(result: SearchResult, status: EntryStatus, finishedAt: string | null) {
     closeAdd();
     const title = {
-      source: "tmdb" as const,
-      kind: result.kind as CollectionItem["title"]["kind"],
+      source: result.source,
+      kind: result.kind,
       externalId: result.externalId,
       name: result.name,
       year: result.year ?? null,
@@ -152,6 +163,7 @@ export function CollectionView({
       pending: true,
     };
     setItems((cur) => replace(key, optimistic, cur));
+    setShelf(shelfOf({ title }));
     setNotice(t("added", { name: title.name }));
     if (status === "finished") setCelebrating({ key, animate: true }); // celebrate first, sync after
     try {
@@ -195,16 +207,22 @@ export function CollectionView({
     if (notes && celebrated) void saveNotes(celebrated, notes);
   }
 
-  const years = collectionYears(items, logs, timeZone);
+  const shelfItems = items.filter((i) => shelfOf(i) === shelf);
+  const years = collectionYears(shelfItems, logs, timeZone, readLogs);
   // A year with nothing left in it (its last finish date was moved) falls back to all time.
-  const activeFilter = filter.year !== null && !years.includes(filter.year) ? { ...filter, year: null } : filter;
-  const rows = sortRows(collectionRows(items, logs, activeFilter, timeZone), sort, locale);
+  const activeFilter = { ...(filter.year !== null && !years.includes(filter.year) ? { ...filter, year: null } : filter), shelf };
+  const rows = sortRows(collectionRows(items, logs, activeFilter, timeZone, readLogs), sort, locale);
 
   return (
     <>
       {items.length > 0 && (
         <div className="flex flex-col gap-4">
-          <CollectionSummary totals={summarizeRows(rows)} year={activeFilter.year} />
+          <ShelfTabs shelf={shelf} onShelf={setShelf} />
+          {shelf === "read" ? (
+            <ReadSummary totals={summarizeReadRows(rows)} year={activeFilter.year} />
+          ) : (
+            <CollectionSummary totals={summarizeRows(rows)} year={activeFilter.year} />
+          )}
           <CollectionControls
             years={years}
             filter={activeFilter}
@@ -230,6 +248,17 @@ export function CollectionView({
             className="h-12 rounded-2xl bg-brand px-6 font-bold text-brand-foreground shadow-sm hover:bg-brand/90"
           >
             {t("addFirst")}
+          </button>
+        </div>
+      ) : shelfItems.length === 0 ? (
+        <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-10 text-center">
+          <p className="font-hand text-2xl text-muted-foreground">{t("emptyShelf", { shelf })}</p>
+          <button
+            type="button"
+            onClick={() => setAdding(true)}
+            className="h-11 rounded-xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90"
+          >
+            {t("addToShelf", { shelf })}
           </button>
         </div>
       ) : rows.length === 0 ? (
@@ -299,11 +328,35 @@ export function CollectionView({
   );
 }
 
-/** "2h 36m (156 min)" for a movie; "12 / 42 episodes · 9h 10m" for a series (short: without the extras). */
+/**
+ * "2h 36m (156 min)" for a movie; "12 / 42 episodes · 9h 10m" for a series; "Chapter 1,100 · 91h 40m read" for a
+ * manga, "Page 120 / 320" for a book (short: without the extras).
+ */
 function useLength() {
   const t = useTranslations("Collection");
   const locale = useLocale();
-  return ({ item, lengthMin, episodesLogged }: CollectionRow<Row>, short = false): string => {
+  return ({ item, lengthMin, episodesLogged, reached }: CollectionRow<Row>, short = false): string => {
+    const { title } = item;
+    if (isReadingKind(title.kind)) {
+      const n = (v: number) => v.toLocaleString(locale);
+      const total = (v: number | null | undefined) => (v ? n(v) : "none");
+      const progress =
+        reached.page > 0
+          ? t("readPages", { read: n(reached.page), total: total(title.pageCount) })
+          : reached.chapter > 0
+            ? t("readChapters", { read: n(reached.chapter), total: total(title.chapterCount) })
+            : reached.volume > 0
+              ? t("readVolumes", { read: n(reached.volume), total: total(title.volumeCount) })
+              : title.pageCount
+                ? t("pageCount", { count: title.pageCount })
+                : title.chapterCount
+                  ? t("chapterCount", { count: title.chapterCount })
+                  : title.volumeCount
+                    ? t("volumeCount", { count: title.volumeCount })
+                    : "";
+      if (short || !lengthMin || !progress) return progress;
+      return t("readLength", { progress, time: formatRuntime(lengthMin, locale) });
+    }
     if (item.title.kind === "movie") {
       if (!lengthMin) return "";
       const runtime = formatRuntime(lengthMin, locale);
@@ -347,7 +400,7 @@ function EntryRow({ row, timeZone, onEdit }: { row: CollectionRow<Row>; timeZone
           {item.pending ? t("saving") : item.finishedAt ? t("finishedDate", { date }) : t("addedDate", { date })}
         </span>
       </span>
-      <StatusStamp status={item.status} />
+      <StatusStamp status={item.status} shelf={shelfOf(item)} />
     </button>
   );
 }
@@ -381,7 +434,7 @@ function EntryTile({ row, tilt, onEdit }: { row: CollectionRow<Row>; tilt: numbe
         </span>
         <span className="absolute inset-x-0 -bottom-2.5 flex justify-center">
           <span className="rounded-md bg-card/95">
-            <StatusStamp status={item.status} small />
+            <StatusStamp status={item.status} shelf={shelfOf(item)} small />
           </span>
         </span>
       </span>
@@ -392,7 +445,7 @@ function EntryTile({ row, tilt, onEdit }: { row: CollectionRow<Row>; tilt: numbe
 }
 
 /** The status as a small rubber stamp (scrapbook): FINISHED in brand ink, the others quieter. */
-function StatusStamp({ status, small = false }: { status: EntryStatus; small?: boolean }) {
+function StatusStamp({ status, shelf, small = false }: { status: EntryStatus; shelf: CollectionShelf; small?: boolean }) {
   const t = useTranslations("Collection");
   return (
     <span
@@ -404,7 +457,7 @@ function StatusStamp({ status, small = false }: { status: EntryStatus; small?: b
         status === "want" && "border-dashed border-muted-foreground text-muted-foreground",
       )}
     >
-      {t("statusLabel", { status })}
+      {t("statusLabel", { status, shelf })}
     </span>
   );
 }
@@ -420,6 +473,9 @@ function cardData(item: Row, timeZone: string): CardData {
     genres: title.genres,
     runtimeMin: title.runtimeMin,
     episodeCount: title.episodeCount,
+    pageCount: title.pageCount,
+    chapterCount: title.chapterCount,
+    volumeCount: title.volumeCount,
     rating: item.rating ?? null,
     review: item.review ?? null,
     finishedOn: localDateKey(Date.parse(item.finishedAt ?? item.addedAt), timeZone),
@@ -467,7 +523,7 @@ function EntryEditor({
               )}
             >
               <input type="radio" name={groupId} value={s} checked={status === s} onChange={() => setStatus(s)} className="sr-only" />
-              {t("statusLabel", { status: s })}
+              {t("statusLabel", { status: s, shelf: shelfOf(item) })}
             </label>
           ))}
         </div>
@@ -502,12 +558,12 @@ function EntryEditor({
         </button>
       )}
 
-      {item.title.kind === "series" && (
+      {item.title.kind !== "movie" && (
         <Link
-          href={`/title/series/${item.title.externalId}`}
+          href={`/title/${item.title.kind}/${item.title.externalId}`}
           className="flex h-12 items-center justify-center rounded-2xl font-semibold ring-1 ring-border hover:bg-muted"
         >
-          {t("episodes")}
+          {item.title.kind === "series" ? t("episodes") : t("readingProgress")}
         </Link>
       )}
 

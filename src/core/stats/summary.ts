@@ -13,6 +13,10 @@ export type StatsTitle = {
   /** Movie runtime, or the typical episode runtime for a series. */
   runtimeMin: number | null;
   episodeCount: number | null;
+  /** Books and manga (reading totals, `titleRead`). */
+  pageCount?: number | null;
+  chapterCount?: number | null;
+  volumeCount?: number | null;
 };
 
 export type StatsEntry = {
@@ -47,6 +51,7 @@ const live = <T extends { deletedAt?: string | null }>(row: T) => !row.deletedAt
 /**
  * What one title adds to the totals. Only finished entries and logged episodes count (S1 collection):
  * - a movie counts its runtime when it was finished in the range;
+ * - a book or manga counts as finished, with no watch time (its reading is `titleRead`'s);
  * - a series counts its logged episodes in the range. A series marked finished without any logged
  *   episodes counts all its episodes (runtime × episode count) on its finish date, as its Finish card does.
  * `logs` are this title's episode logs (any range; deleted ones are ignored).
@@ -61,7 +66,8 @@ export function titleWatch(
   const runtime = title?.runtimeMin ?? 0;
 
   if (title?.kind !== "series") {
-    return { minutes: finished ? runtime : 0, episodes: 0, finished: finished ? 1 : 0 };
+    const watched = finished && title?.kind === "movie" ? runtime : 0;
+    return { minutes: watched, episodes: 0, finished: finished ? 1 : 0 };
   }
 
   const liveLogs = logs.filter(live);

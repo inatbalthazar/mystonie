@@ -55,13 +55,14 @@ export async function saveCard(
         kind: save.kind,
         entry_id: save.entryId,
         episode_log_id: save.episodeLogId,
+        reading_log_id: save.readingLogId,
         template_id: save.templateId,
         size: save.size,
         params,
         ...shared,
       });
   if (error) {
-    // 23503: the entry or episode log isn't the user's (composite foreign key), or doesn't exist yet.
+    // 23503: the entry, episode log or reading log isn't the user's (composite foreign key), or doesn't exist yet.
     if (error.code === "23503") return null;
     throw new Error(`cards write failed: ${error.message}`);
   }

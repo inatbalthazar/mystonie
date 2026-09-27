@@ -1,8 +1,7 @@
-import type { TmdbKind } from "@/core/catalog/tmdb";
-import type { Title, TitleKind } from "@/core/catalog/types";
+import { sourceForKind, type Title, type TitleKind } from "@/core/catalog/types";
+import { catalogDetails } from "./catalog";
 import type { Database, Json } from "./database.types";
 import { adminClient } from "./supabase-admin";
-import { titleDetails } from "./tmdb";
 
 type Row = Database["public"]["Tables"]["titles"]["Row"];
 
@@ -23,6 +22,9 @@ export function titleFromRow(row: Row): Title {
     runtimeMin: row.runtime_min,
     episodeCount: row.episode_count,
     seasonCount: row.season_count,
+    pageCount: row.page_count,
+    chapterCount: row.chapter_count,
+    volumeCount: row.volume_count,
   };
 }
 
@@ -64,6 +66,9 @@ export async function saveTitle(title: Title, raw: unknown): Promise<string | nu
       runtime_min: title.runtimeMin,
       episode_count: title.episodeCount,
       season_count: title.seasonCount,
+      page_count: title.pageCount,
+      chapter_count: title.chapterCount,
+      volume_count: title.volumeCount,
       raw: raw as Json,
       fetched_at: new Date().toISOString(),
     },
@@ -74,14 +79,14 @@ export async function saveTitle(title: Title, raw: unknown): Promise<string | nu
 }
 
 /**
- * The `titles` row id for a TMDB title, fetching and caching it first when needed (adding to the
- * collection). A cached copy is good enough even when stale. Null when TMDB doesn't know the title;
- * throws `TmdbError` when TMDB fails.
+ * The `titles` row id for a title (from its kind's catalog: TMDB, AniList or Google Books), fetching and caching it
+ * first when needed (adding to the collection). A cached copy is good enough even when stale. Null when the catalog
+ * doesn't know the title; throws `CatalogError` when the catalog fails.
  */
-export async function ensureTitle(kind: TmdbKind, externalId: string): Promise<{ id: string; title: Title } | null> {
-  const cached = await getCachedTitle("tmdb", kind, externalId);
+export async function ensureTitle(kind: TitleKind, externalId: string): Promise<{ id: string; title: Title } | null> {
+  const cached = await getCachedTitle(sourceForKind(kind), kind, externalId);
   if (cached) return { id: cached.id, title: cached.title };
-  const details = await titleDetails(kind, externalId);
+  const details = await catalogDetails(kind, externalId);
   if (!details) return null;
   const id = await saveTitle(details.title, details.raw);
   return id ? { id, title: details.title } : null;

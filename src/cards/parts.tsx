@@ -157,6 +157,25 @@ export function useStats(data: CardData): { value: string; label: string }[] {
       label: key === "finished" ? t("titlesFinished", { count: value }) : key === "episodes" ? t("episodes", { count: value }) : t(key),
     }));
   }
+  if (data.reading) {
+    // A reading Progress card: how far along (or just where, while the length is unknown), then the time so far.
+    const { unit, position, total, readMin } = data.reading;
+    const label = unit === "page" ? t("pages", { count: total ?? position }) : unit === "chapter" ? t("chapters", { count: total ?? position }) : t("volumes", { count: total ?? position });
+    if (!hidden.has("episodes")) stats.push({ value: total ? `${format.number(position)}/${format.number(total)}` : format.number(position), label });
+    if (!hidden.has("time") && readMin) {
+      stats.push(
+        readMin >= 120 ? { value: format.number(Math.round(readMin / 60)), label: t("hours") } : { value: format.number(readMin), label: t("minutes") },
+      );
+    }
+    return stats;
+  }
+  if (data.kind === "book" || data.kind === "manga") {
+    // A Finish card for a book or manga: its length.
+    if (data.pageCount && !hidden.has("episodes")) stats.push({ value: format.number(data.pageCount), label: t("pages", { count: data.pageCount }) });
+    if (data.volumeCount && !hidden.has("seasons")) stats.push({ value: format.number(data.volumeCount), label: t("volumes", { count: data.volumeCount }) });
+    if (data.chapterCount && !hidden.has("episodes")) stats.push({ value: format.number(data.chapterCount), label: t("chapters", { count: data.chapterCount }) });
+    return stats;
+  }
   if (data.progress) {
     const { watched, total, watchedMin } = data.progress;
     if (!hidden.has("episodes")) stats.push({ value: `${format.number(watched)}/${format.number(total)}`, label: t("episodes", { count: total }) });
@@ -189,12 +208,17 @@ export function useStats(data: CardData): { value: string; label: string }[] {
 
 /**
  * The card's headline word: "Finished" on a Finish card; on a Progress card the milestone
- * ("Halfway there") or the episode ("S1 · E8"); "My week" on a recap.
+ * ("Halfway there"), the episode ("S1 · E8") or where the reader is ("Chapter 1100"); "My week" on a recap.
  */
 export function useHeadline(data: CardData): string {
   const t = useTranslations("Card");
+  const format = useFormatter();
   if (data.recap) return t("recapHeadline", { period: data.recap.period ?? "week" });
-  if (!data.progress) return t("finished");
+  if (data.reading) {
+    const { milestone, unit, position } = data.reading;
+    return milestone ? t("milestone", { milestone }) : t("readingHeadline", { unit, position: format.number(position) });
+  }
+  if (!data.progress) return data.kind === "book" || data.kind === "manga" ? t("finishedRead") : t("finished");
   const { milestone, season, episode } = data.progress;
   return milestone ? t("milestone", { milestone }) : t("episodeCode", { season, episode });
 }
@@ -216,8 +240,8 @@ export function CardFooter({ host, username, className }: { host: string; userna
 /** Footer props from the card data: the username unless the user hid it. */
 export const footerUser = (data: CardData) => (data.hide?.includes("username") ? null : data.username);
 
-/** Rubber "FINISHED" stamp (the collectible moment), optionally with the date. */
-export function FinishedStamp({ date, className }: { date?: string; className?: string }) {
+/** Rubber "FINISHED" stamp (the collectible moment), optionally with the date. `read` for a book or manga. */
+export function FinishedStamp({ date, read = false, className }: { date?: string; read?: boolean; className?: string }) {
   const t = useTranslations("Card");
   return (
     <div
@@ -227,7 +251,7 @@ export function FinishedStamp({ date, className }: { date?: string; className?: 
       )}
     >
       <div className="flex flex-col items-center rounded-[10px] border-[2px] border-current px-[26px] py-[10px]">
-        <span className={cn(DISPLAY, "text-[46px] leading-none font-extrabold tracking-[0.1em] uppercase")}>{t("finished")}</span>
+        <span className={cn(DISPLAY, "text-[46px] leading-none font-extrabold tracking-[0.1em] uppercase")}>{read ? t("finishedRead") : t("finished")}</span>
         {date && <span className="mt-[6px] text-[24px] font-bold tracking-[0.12em] whitespace-nowrap uppercase">{date}</span>}
       </div>
     </div>
