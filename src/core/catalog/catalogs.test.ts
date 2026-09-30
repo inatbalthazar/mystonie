@@ -174,6 +174,28 @@ describe("mergeSearch", () => {
     expect(new Set(merged.map((r) => r.kind))).toEqual(new Set(["series", "movie", "manga", "book"]));
   });
 
+  it("doesn't let other catalogs' exact and prefix names bury a catalog's first pick", () => {
+    const movies: SearchResult[] = [
+      { source: "tmdb", externalId: "1", kind: "movie", name: "Zelda", year: 2021 },
+      { source: "tmdb", externalId: "2", kind: "movie", name: "Zelda Catwoman of Queens", year: 1990 },
+      { source: "tmdb", externalId: "3", kind: "movie", name: "Zelda: A Simple Woman", year: 2015 },
+    ];
+    const games: SearchResult[] = [
+      { source: "rawg", externalId: "22511", kind: "game", name: "The Legend of Zelda: Breath of the Wild", year: 2017 },
+      { source: "rawg", externalId: "25097", kind: "game", name: "The Legend of Zelda: Ocarina of Time (1998)", year: 1998 },
+    ];
+    expect(mergeSearch("zelda", [movies, games]).map((r) => r.name)).toEqual([
+      "Zelda",
+      "The Legend of Zelda: Breath of the Wild",
+      "Zelda Catwoman of Queens",
+      "Zelda: A Simple Woman",
+      "The Legend of Zelda: Ocarina of Time (1998)",
+    ]);
+    // Only a first pick with every word of the query moves up.
+    const other: SearchResult[] = [{ source: "rawg", externalId: "1", kind: "game", name: "Hyrule Warriors", year: 2014 }];
+    expect(mergeSearch("zelda", [movies, other]).at(-1)!.name).toBe("Hyrule Warriors");
+  });
+
   it("drops duplicates and keeps the limit", () => {
     expect(mergeSearch("one", [tmdb, tmdb], 2)).toHaveLength(2);
     expect(mergeSearch("one", [tmdb, tmdb])).toHaveLength(3);

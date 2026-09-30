@@ -4,28 +4,29 @@
 
 ## Summary
 DoesTheDogDie says *whether* a title has something ("a dog dies: yes"). Mystonie's own warnings say **where**, so people can skip it.
-- People who watched or read a title add **scene warnings**: what happens and where. For example "a dog dies · S2 · E5 · 41:10–42:30", "jump scares · 1:02:13" or "self-harm · Chapter 12".
+- People who watched, read or played a title add **scene warnings**: what happens and where. For example "a dog dies · S2 · E5 · 41:10–42:30", "jump scares · 1:02:13" or "self-harm · Chapter 12".
 - Others who saw it **confirm** ("Saw it") or **dispute** ("Not there"). A warning is **confirmed** once 5 people saw it.
 - The **warnings quiz** asks people quick questions about titles they finished, such as "Does a dog die in *Up*?", or asks them to confirm someone's warning. After 10 answers a question is settled.
-- Confirmed warnings and settled "yes" answers **flag titles** for the topics people avoid, next to DTDD's votes, on every kind of title (books and manga too).
+- Confirmed warnings and settled "yes" answers **flag titles** for the topics people avoid, next to DTDD's votes, on every kind of title (books, manga and games too).
 - **No Gems:** the quiz rewards nothing. The Gem economy stays gated ([ADR 0036](../../decisions/0036-expansion-features-before-launch.md)).
 
 ## Rules
 ### Topics
 - **26 topics** in five groups: animals, scares and senses, body, violence, heavy themes. Examples: a dog dies, spiders, jump scares, flashing lights, blood and gore, needles, gun violence, sexual assault, suicide, self-harm, sex scenes, drug use.
 - **Each topic is also a DoesTheDogDie topic.** So the avoid-topics people pick in Settings (DTDD ids) flag our warnings too, with no second list to choose from.
-- **Screen-only topics** (jump scares, flashing lights, sudden loud noises) are offered only for movies and series.
+- **Screen-only topics** (jump scares, flashing lights, sudden loud noises) are offered only for movies, series and games.
 - **Topics are data:** the `warning_topics` table. `active = false` retires one without touching its warnings. Names and quiz questions are translations in the app (`WarningTopics` in `messages/*.json`), so a new topic needs words in the app before the database lists it. Code: `src/core/scene-warnings.ts`.
 - **Names are translated** (Thai too). Our topics' names replace DTDD's English ones in badges.
 
 ### Adding a scene warning
-- **Who:** someone whose collection has the title as **watching** (reading) or **finished**. Anyone else sees "Mark it as watching or finished to add warnings and confirm them."
+- **Who:** someone whose collection has the title as **watching** (reading, playing) or **finished**. Anyone else sees "Mark it as watching or finished to add warnings and confirm them."
 - **What and where**, in a sheet on the title page ("Add a scene warning"):
   - **what happens:** a topic, grouped;
   - **where**, optional:
     - a series: season and episode (starting on the furthest episode logged), or "Throughout";
     - a time into the movie or episode: from and to, typed like a video player shows it (`41:10`, `1:02:13`);
-    - a book: chapter or page; a manga: chapter or volume.
+    - a book: chapter or page; a manga: chapter or volume;
+    - a game: nowhere. A game's warning is about the whole game, because a game has no fixed timeline ([S3 games](S3-games.md)).
 - **Someone already noted it?** When others' warnings have the same topic at the same episode (on a movie, anywhere), the sheet offers them first: "If it's the same scene, confirm theirs instead", with "That's the one". Votes then gather on one warning instead of spreading over near-copies.
 - **Limits:**
   - the same warning twice (same topic and place) is refused;
@@ -46,7 +47,7 @@ DoesTheDogDie says *whether* a title has something ("a dog dies: yes"). Mystonie
 - Deleting an account deletes its votes (the warnings are recounted) and keeps the warnings it added, without the account.
 
 ### The title page
-- **Every kind of title** has a **Scene warnings** block. On movies and series it comes after DTDD's "Content warnings" block. For books and manga it's the only warnings block.
+- **Every kind of title** has a **Scene warnings** block. On movies and series it comes after DTDD's "Content warnings" block. For books, manga and games it's the only warnings block.
 - **The block:**
   - a short intro ("…noted by people who watched it, so you can skip ahead. A warning is confirmed once 5 people saw it.");
   - the warnings in viewing order: "Throughout" first, then by episode, chapter or page, then time;

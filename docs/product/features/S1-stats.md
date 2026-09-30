@@ -28,6 +28,7 @@ A Strava-like stats page with big, bold numbers first, then charts.
   - Per month: watch time for the last 12 months, with the number of titles finished under each month.
   - Taste: movies vs series by watch time, top 5 genres, top 5 original languages (named with `Intl.DisplayNames`).
   - Records: longest movie, longest series finished (by total watch time), busiest month and longest daily streak. Each shows "Not yet" when there is none.
+  - Later kinds: reading adds a read row and "Books & manga" in Taste ([S2 books & manga](S2-books-manga.md)); games add a play row and "Games" ([S3 games](S3-games.md)). Play time stays out of hours watched.
 - **Share stats** opens the celebration with the period's card: Bold Stats first, then Collage, plus the Sticker. The card says "My month", "5 titles this month", and the range with its year.
 - **Empty state:** with nothing logged, the page shows "Log your first title", which opens the quick-add sheet. A period with nothing in it says so under the headline.
 - **Tests:**

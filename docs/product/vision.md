@@ -30,4 +30,4 @@ Competitors are **databases with a UI** (Letterboxd: film only; Serializd, TV Ti
 | **Template** | A card design (Ticket, Polaroid, Bold Stats, …) defined in code + data. |
 | **Recap** | An automatic weekly, monthly or yearly summary card. Weeks follow the user's local time zone. |
 | **Content warning** | Stage 2: sensitive-content data (e.g. "a dog dies", "jump scares") from the DoesTheDogDie API, shown for the user's chosen avoid-topics. |
-| **Scene warning** | Stage 3: our own warning, added by someone who watched or read the title, with where it happens (S2 · E5 · 41:10, a chapter). Confirmed once 5 people saw it. Table `scene_warnings`. |
+| **Scene warning** | Stage 3: our own warning, added by someone who watched, read or played the title, with where it happens (S2 · E5 · 41:10, a chapter; a game's is about the whole game). Confirmed once 5 people saw it. Table `scene_warnings`. |

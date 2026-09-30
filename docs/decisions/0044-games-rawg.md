@@ -21,8 +21,8 @@ What we found (checked 2026-09-30):
 - Games are titles of kind `game` from source `rawg`, with RAWG's numeric ids.
 - `TITLE_KINDS` / `isTitleKind` in `src/core/catalog/types.ts` replace the kind lists that were written out in several places.
 - `src/core/catalog/rawg.ts` normalizes `/games?search=` and `/games/{id}`.
-  - Search asks for close matches without DLC (`search_precise`, `exclude_additions`) and 20 results.
-  - Adults-only games are left out (ESRB "AO", RAWG's `nsfw` and `hentai` tags), as adult titles are on AniList and Google Books.
+  - Search asks for close matches without DLC (`search_precise`, `exclude_additions`), 40 at a time (RAWG's largest page), and lists 20 of them (see the ranking below).
+  - Adult games are left out by RAWG's `nsfw` and `hentai` tags, as adult titles are on AniList and Google Books. RAWG's ESRB field isn't used: it calls Hitman (2016) and Hitman: Contracts "Adults Only".
   - Platforms come from `parent_platforms`, named briefly ("PC", "PlayStation", "Xbox", "Nintendo", "Mac", …).
 - `src/data/rawg.ts` keeps the key on the server (`RAWG_API_KEY`).
   - Without a key, game search answers 503, "All" leaves games out, and games already saved still show.
@@ -31,6 +31,13 @@ What we found (checked 2026-09-30):
   - At about three debounced searches per title added, the free 20,000 requests cover roughly 6,000 additions a month.
   - Rejected: a global daily cap now. The rate-limit counter would count Next's cache hits as calls, and pre-launch traffic is far below the quota.
 - Rejected: IGDB. The roadmap names RAWG, its commercial terms are no better, and its Twitch OAuth adds a token to refresh.
+
+**Ranking** (checked live with the owner's key, 2026-09-30).
+- RAWG's relevance order buries famous games under fan projects and jam games. For "zelda" it put Breath of the Wild 30th, and for "witcher" a 2019 web game that 2 people added came first.
+- `rankGames` (`src/core/catalog/rawg.ts`) puts names with every word of the query first (the last word may be half typed), then the games more RAWG users added (`added`), then RAWG's order.
+- "All" merges only the 8 best-known games (`RAWG_ALL_RESULTS`): the merge puts exact names first, and RAWG has a fan game named after nearly everything.
+- `mergeSearch` now ranks a catalog's own first pick with the names that start with the query, when its name has every word of it. Before, other catalogs' exact and prefix names could fill all 20 places: for "zelda", four movies called Zelda and the manga Zelda no Densetsu left no room for a game. "one piece" is unchanged.
+- Rejected: RAWG's `ordering=-added`. It drops relevance: "the last of us" then lists Skyrim and The Witcher 3, because RAWG matches any word.
 
 **Game art stays landscape.**
 - `titles.poster_path` holds RAWG's media path (`games/618/618c….jpg`). `posterUrl` picks a ready-made width: 420 for lists, 640 for pages, 1280 for big sizes.
@@ -78,7 +85,7 @@ What we found (checked 2026-09-30):
 **HowLongToBeat: not built.** It has no official API. Scraping it needs the owner's approval: its terms are a risk, and a scraper needs watching. The player's own hours and RAWG's average cover the need until then. The owner's call on 2026-09-30: no scraper (including `ckatzorke/howlongtobeat`); ask HowLongToBeat for permission or a data license instead, and add its times only if they agree.
 
 **Small things that come with a new kind:**
-- badges "Player One" (a first game) and "Level Up" (10 games);
+- badges "Player One" (a first game) and "Level Up" (10 games), and a game counts as one of All-Rounder's 4 kinds (its wording now says "4 kinds of title");
 - a "Gamers" club;
 - a game case on the Shelf;
 - "game" as an import unit ("Imported 12 games");
@@ -88,6 +95,6 @@ What we found (checked 2026-09-30):
 ## Consequences
 - The remote project needs `20261008090000_stage3_games.sql` (when the owner says so), and Vercel needs `RAWG_API_KEY` (Sensitive). Until then, game search answers 503 and "All" has no games.
 - **Commercial use of RAWG** needs the owner's reading of the terms, or RAWG's answer (api@rawg.io), before Pro takes money, as DTDD's Commercial tier does ([open questions](../open-questions.md) O7).
-- The normalizer's fixtures were built from RAWG's own page data (the same game objects its API serves), because there was no key yet. Once the key is in, one live search (`/api/search?type=game&q=witcher`) confirms the shape.
+- The first fixtures were built from RAWG's own page data (the same game objects its API serves), before there was a key. With the owner's key (2026-09-30), live searches through `/api/search` confirmed the shape, and `rawg-search-zelda.json` is the API's live answer, trimmed to the fields we read.
 - If requests near 20,000 a month, the options are: cache searches in Postgres, raise the "All" threshold, or pay for a plan.
 - If HowLongToBeat grants permission or a data license later, a new ADR adds a cached job that fills main-story and completionist times next to RAWG's average.

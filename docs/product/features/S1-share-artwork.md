@@ -42,6 +42,7 @@ The heart of Mystonie, modelled on Strava's post-activity share. Every finish or
   - Metadata is in `src/core/cards/templates.ts` (`kinds`, `sizes`, `tier`, and `titleKinds` for a template made for some titles only).
   - Ticket is for Finish cards; Polaroid and Bold Stats draw Finish and Progress cards; **Sticker** is white ink on a transparent background.
   - Books and manga add **Spine**, and manga also **Manga Panel**, which is where their cards open ([S2 books & manga](S2-books-manga.md), [ADR 0030](../../decisions/0030-book-manga-card-templates.md)).
+  - Games add **Cartridge**, where their Finish cards open. Games have no Progress cards ([S3 games](S3-games.md), [ADR 0044](../../decisions/0044-games-rawg.md)).
   - Milestone cards open on **Stone** and Year in Review on **Yearbook**; monthly recaps use the weekly recap's templates ([S2 milestones & recaps](S2-milestones-recaps.md)).
   - A movie or series finish with a fun scare on DTDD (jump scares, zombies, …) is offered **Survived** ([S2 content warnings](S2-content-warnings.md)). It is still a `finish` card; only that template carries `survived`.
   - Every card's footer is `mystonie · @username` plus the site host.

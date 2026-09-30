@@ -8,7 +8,7 @@
 | Trending from our own data, numbered "Finisher #N" stamps, friend leaderboards: **built in stage 3** as [S3 finishers & the board](../features/S3-finishers-board.md) | ≥ 200 logs/week on a popular title |
 | Monthly challenges, fandom clubs: **built in stage 3** as [S3 challenges & clubs](../features/S3-challenges-clubs.md) | WAU ≥ 2,000 |
 | Native app (Expo), widgets, direct IG Stories share | WAU ≥ 3,000 or web sharing friction |
-| Games: **built in stage 3** as [S3 games](../features/S3-games.md) from RAWG ([ADR 0044](../../decisions/0044-games-rawg.md)); HowLongToBeat waits for the owner's approval | Top request in feature vote |
+| Games: **built in stage 3** as [S3 games](../features/S3-games.md) from RAWG ([ADR 0044](../../decisions/0044-games-rawg.md)); HowLongToBeat only with its permission (no scraper) | Top request in feature vote |
 | Our own timestamped warnings + the quiz ([crowdsourced-warnings.md](crowdsourced-warnings.md), [quiz.md](quiz.md)): **built in stage 3** as [S3 warnings & quiz](../features/S3-warnings-quiz.md), without Gems | MAU ≥ 5,000 or DTDD data insufficient |
 | Offline-first ([offline-first.md](offline-first.md)): **built in stage 3** as [S3 offline](../features/S3-offline.md) | Users complain about logging offline |
 | [badges-and-shelf.md](badges-and-shelf.md) | After social feed |

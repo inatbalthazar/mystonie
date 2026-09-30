@@ -5,7 +5,7 @@
 ## Summary
 Strava's monthly challenges and clubs, for what you finish.
 - Every month has four **challenges**. Join one, and everything you finish, watch or read that month counts. Complete it and you get an embroidered **patch** for your album and a **Challenge card**: the month's calendar page with your days circled.
-- **Fandom clubs** gather people around a fandom (K-drama, anime, horror, books, …). A club page shows its members, what's big with them lately, and their latest finishes.
+- **Fandom clubs** gather people around a fandom (K-drama, anime, horror, books, games, …). A club page shows its members, what's big with them lately, and their latest finishes.
 
 ## Rules
 ### Challenges
@@ -13,7 +13,7 @@ Strava's monthly challenges and clubs, for what you finish.
 
   | | Challenges |
   |---|---|
-  | Every month | Finish Four (finish 4 titles), Twenty Hours (20 hours watching and reading, the recap numbers), Twelve Days (log something on 12 different days) |
+  | Every month | Finish Four (finish 4 titles), Twenty Hours (20 hours watching and reading, the recap numbers; play time doesn't count, [S3 games](S3-games.md)), Twelve Days (log something on 12 different days) |
   | Themed | Jan New Chapter (2 books or manga) · Feb Love Stories (3 romances) · Mar World Tour (3 original languages) · Apr Laugh Lines (3 comedies) · May Anime Month (3 anime) · Jun Movie Marathon (5 movies) · Jul Out of This World (3 sci-fi or fantasy) · Aug Box Set (2 series) · Sep Case Files (3 crime or mystery) · Oct Fright Month (3 horror) · Nov K-drama Month (2 Korean series) · Dec Triple Threat (3 kinds of title) |
 
   Code: `src/core/challenges.ts`. Names are English in every locale, like badges.
@@ -46,6 +46,7 @@ Strava's monthly challenges and clubs, for what you finish.
   | Anime Club | Japanese animation, movies and series |
   | Manga Club | Manga (manhwa, webtoons) |
   | Book Club | Books |
+| Gamers | Games ([S3 games](S3-games.md)) |
   | C-drama Club | Chinese-language series |
   | Indian Cinema Club | Movies in Hindi, Tamil, Telugu, Malayalam, Kannada, Bengali, Marathi |
   | Horror, Romance, Sci-fi & Fantasy, Mystery, Comedy, Documentary Clubs | By genre |

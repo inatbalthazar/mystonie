@@ -48,7 +48,7 @@ Constraints we found (checked 2026-09-27):
 - `GET /api/search` takes `type=all|screen|book|manga`.
 - Without a type it stays TMDB only, so the card maker (`/`) is unchanged.
 - The collection's sheet opens on All, with a switcher: All · Movies & TV · Books · Manga.
-- "All" queries the three catalogs in parallel, and a failing catalog is left out. Their popularity numbers can't be compared, so `mergeSearch` ranks by name match first (exact name, then names starting with the query, then the rest). Within each rank the catalogs take turns. "one piece" therefore shows the TMDB series and the AniList manga side by side, each labelled with its kind.
+- "All" queries the three catalogs in parallel, and a failing catalog is left out. Their popularity numbers can't be compared, so `mergeSearch` ranks by name match first (exact name, then names starting with the query, then the rest). Within each rank the catalogs take turns. "one piece" therefore shows the TMDB series and the AniList manga side by side, each labelled with its kind. (Amended by [ADR 0044](0044-games-rawg.md): a catalog's first pick with every word of the query ranks with the names starting with it.)
 
 **Collection and stats:**
 - Collection has **Watch · Read** tabs. Each tab has its own header, filters and rows.

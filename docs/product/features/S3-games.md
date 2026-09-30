@@ -8,9 +8,10 @@ Games join movies, series, books and manga as a fifth kind of title. People find
 ## Rules
 ### Finding and adding
 - **Search:** the ➕ sheet gets a **Games** switch (All · Movies & TV · Books · Manga · Games).
-  - "All" includes games from 3 characters.
+  - Best known first: names with every word typed, then the games most people added on RAWG. "zelda" gives Breath of the Wild, not a fan game called Zelda. The Games switch lists 20.
+  - "All" includes games from 3 characters, the 8 best known. Each catalog's first pick stays near the top, so "zelda" in All shows the game among the movies and manga called Zelda.
   - Results say "Game · 2015" with the platforms ("PC, PlayStation, Xbox").
-  - Adults-only games aren't listed, and DLC isn't either (the base game is what people finish).
+  - Adult games (RAWG's nsfw and hentai tags) aren't listed, and DLC isn't either (the base game is what people finish).
 - **The status step** shows the game's art landscape, its platforms, and **Finished · Playing · Want to play** (stored as `finished` / `watching` / `want`). Three taps, as for everything else.
 - **Without a RAWG key** game search is off: "All" leaves games out, the Games switch says "Search isn't working right now", and games already saved still show.
 
@@ -47,7 +48,7 @@ Games join movies, series, books and manga as a fifth kind of title. People find
 - Our own **scene warnings** cover games: every topic, about the whole game (a game has no fixed timeline, so no time, episode or chapter). Adding and confirming need the game on the Play shelf as Playing or Finished, as for other titles. The warnings quiz asks about finished games too.
 
 ### Everywhere else
-- **Badges:** Player One (a first game), Level Up (10 games).
+- **Badges:** Player One (a first game), Level Up (10 games). A game counts as a kind for All-Rounder ("4 kinds of title").
 - **Clubs:** Gamers.
 - **The Shelf** on public profiles shows a finished game as a game case: its art under a platform band.
 - **Imports:** "Imported 12 games". Mystonie's CSV export carries `hours_played`; exports made before games still import.
@@ -55,7 +56,7 @@ Games join movies, series, books and manga as a fifth kind of title. People find
 - **Attribution:** "Game data and images from RAWG" (linked) in every page's footer, as RAWG's terms ask. The Privacy Policy and Terms name RAWG.
 
 ## Acceptance criteria
-- [x] Searching finds games from RAWG, under Games and in All, labelled as games with their platforms. (`src/core/catalog/rawg.test.ts` with RAWG's own game objects; `e2e/games.spec.ts`)
+- [x] Searching finds games from RAWG, under Games and in All, labelled as games with their platforms, best known first. (`src/core/catalog/rawg.test.ts` with RAWG's own game objects and its live answer for "zelda"; `catalogs.test.ts` for the merge; `e2e/games.spec.ts`; checked live with the key on 2026-09-30)
 - [x] A game is added in three taps, as Finished, Playing or Want to play, and lands on the Play tab. (`e2e/games.spec.ts`)
 - [x] Finishing a game celebrates on the Cartridge card, and the hours played given there show on the card and are saved. (`e2e/games.spec.ts`; `saved.test.ts`, `entries.test.ts`, `ops.test.ts`, `overlay.test.ts`)
 - [x] The Play tab's header, the stats page, recaps and the Year in Review agree on play time, and play time stays out of watch time and the hours milestones. (`src/core/stats/play.test.ts`)
@@ -69,7 +70,7 @@ Games join movies, series, books and manga as a fifth kind of title. People find
 - `RAWG_API_KEY` (server only).
 
 ## Not in this task
-- **HowLongToBeat** times (main story, completionist): the owner decides first (no official API; [ADR 0044](../../decisions/0044-games-rawg.md)).
+- **HowLongToBeat** times (main story, completionist): only if HowLongToBeat grants permission or a data license. There's no official API, and the owner ruled out scraping ([ADR 0044](../../decisions/0044-games-rawg.md)).
 - Logging play sessions or hours as you go; Progress cards for games.
 - Which platform the player played on.
 - Importing from Steam, Backloggd, PlayStation or Xbox.

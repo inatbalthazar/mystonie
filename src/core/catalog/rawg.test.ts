@@ -1,13 +1,15 @@
 import { describe, expect, it } from "vitest";
 import witcher from "./fixtures/rawg-game-3328.json";
 import witcherSearch from "./fixtures/rawg-search-witcher.json";
+import zeldaSearch from "./fixtures/rawg-search-zelda.json";
 import { cardImageUrl, isCardPosterUrl, posterUrl, rawgMediaPath } from "./images";
-import { normalizeRawgDetails, normalizeRawgSearch, rawgSearchParams } from "./rawg";
+import { normalizeRawgDetails, normalizeRawgSearch, RAWG_ALL_RESULTS, RAWG_RESULTS, rawgSearchParams } from "./rawg";
 import { mergeSearch } from "./search";
 import { isExternalId, isTitleKind, sourceForKind, type SearchResult } from "./types";
 
 // Fixtures: RAWG's own game objects (from its website's page data, the same objects its API serves), trimmed; the
-// platform lists are in the API's shape, `[{ platform: { id, name, slug } }]`.
+// platform lists are in the API's shape, `[{ platform: { id, name, slug } }]`. `rawg-search-zelda.json` is the API's
+// live answer to the app's own search for "zelda" (2026-09-30), trimmed to the fields the normalizer reads.
 
 const ART = "games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg";
 
@@ -46,11 +48,12 @@ describe("RAWG details", () => {
     expect(normalizeRawgDetails(null)).toBeNull();
   });
 
-  it("leaves adults-only games out", () => {
-    expect(normalizeRawgDetails({ ...witcher, esrb_rating: { id: 5, name: "Adults Only", slug: "adults-only" } })).toBeNull();
+  it("leaves adult games out, by RAWG's tags", () => {
     expect(normalizeRawgDetails({ ...witcher, tags: [...witcher.tags, { id: 50, name: "NSFW", slug: "nsfw" }] })).toBeNull();
-    // Mature games stay: The Witcher 3 is rated M.
+    expect(normalizeRawgDetails({ ...witcher, tags: [{ id: 51, name: "Hentai", slug: "hentai" }] })).toBeNull();
+    // Mature games stay: The Witcher 3 is rated M. RAWG's ESRB field isn't trusted: it calls Hitman (2016) "Adults Only".
     expect(normalizeRawgDetails(witcher)).not.toBeNull();
+    expect(normalizeRawgDetails({ ...witcher, esrb_rating: { id: 5, name: "Adults Only", slug: "adults-only" } })).not.toBeNull();
   });
 
   it("reads platforms as the API sends them, and as plain slugs", () => {
@@ -61,8 +64,8 @@ describe("RAWG details", () => {
 });
 
 describe("RAWG search", () => {
-  it("lists games in RAWG's order, each labelled a game with its platforms and small art", () => {
-    const results = normalizeRawgSearch(witcherSearch);
+  it("lists games best known first, each labelled a game with its platforms and small art", () => {
+    const results = normalizeRawgSearch(witcherSearch, "witcher");
     expect(results.map((r) => r.name)).toEqual([
       "The Witcher 3: Wild Hunt",
       "The Witcher 2: Assassins of Kings Enhanced Edition",
@@ -85,18 +88,41 @@ describe("RAWG search", () => {
 
   it("drops duplicates and unusable items, and reads nothing from a bad body", () => {
     const [first] = witcherSearch.results;
-    expect(normalizeRawgSearch({ results: [first, first, { id: 1 }, null] })).toHaveLength(1);
-    expect(normalizeRawgSearch({ error: "The key parameter is not provided" })).toEqual([]);
-    expect(normalizeRawgSearch(null)).toEqual([]);
+    expect(normalizeRawgSearch({ results: [first, first, { id: 1 }, null] }, "witcher")).toHaveLength(1);
+    expect(normalizeRawgSearch({ error: "The key parameter is not provided" }, "witcher")).toEqual([]);
+    expect(normalizeRawgSearch(null, "witcher")).toEqual([]);
   });
 
-  it("asks for exact-ish matches without DLC", () => {
-    expect(rawgSearchParams("elden ring")).toEqual({ search: "elden ring", search_precise: "true", exclude_additions: "true", page_size: "20" });
+  it("puts famous games first: RAWG's own order had Breath of the Wild 30th for \"zelda\"", () => {
+    expect(zeldaSearch.results.findIndex((g) => g.id === 22511)).toBe(29);
+    const results = normalizeRawgSearch(zeldaSearch, "zelda");
+    expect(results).toHaveLength(RAWG_RESULTS);
+    expect(results.slice(0, 3).map((r) => r.name)).toEqual([
+      "The Legend of Zelda: Breath of the Wild",
+      "The Legend of Zelda: Ocarina of Time (1998)",
+      "The Legend of Zelda: Tears of the Kingdom",
+    ]);
+    // "All" merges only the best known, so a fan game called just "Zelda" can't take the top spot as an exact name.
+    const all = mergeSearch("zelda", [results.slice(0, RAWG_ALL_RESULTS)]);
+    expect(all[0]!.name).toBe("The Legend of Zelda: Breath of the Wild");
+    expect(all.map((r) => r.name)).not.toContain("Zelda");
+  });
+
+  it("ranks names with every word first, the last word maybe half typed", () => {
+    const g = (id: number, name: string, added: number) => ({ id, name, added, released: "2020-06-19" });
+    const body = { results: [g(1, "Among Us", 7982), g(2, "The Last of Us: Winter Hunt", 0), g(3, "The Last of Us Part II", 7510), g(4, "The Last Of Us", 7377)] };
+    expect(normalizeRawgSearch(body, "the last of u").map((r) => r.externalId)).toEqual(["3", "4", "2", "1"]);
+    // Equally known games keep RAWG's order.
+    expect(normalizeRawgSearch({ results: [g(5, "Hades Escape", 0), g(6, "Hades' Cave", 0)] }, "hades").map((r) => r.externalId)).toEqual(["5", "6"]);
+  });
+
+  it("asks for exact-ish matches without DLC, a full page for the ranking", () => {
+    expect(rawgSearchParams("elden ring")).toEqual({ search: "elden ring", search_precise: "true", exclude_additions: "true", page_size: "40" });
   });
 
   it("merges with the other catalogs by name, so the game and the series sit together", () => {
     const series: SearchResult[] = [{ source: "tmdb", externalId: "71912", kind: "series", name: "The Witcher", year: 2019 }];
-    const merged = mergeSearch("the witcher", [series, normalizeRawgSearch(witcherSearch)]);
+    const merged = mergeSearch("the witcher", [series, normalizeRawgSearch(witcherSearch, "the witcher")]);
     expect(merged.slice(0, 2).map((r) => `${r.kind}:${r.name}`)).toEqual(["series:The Witcher", "game:The Witcher 3: Wild Hunt"]);
   });
 });

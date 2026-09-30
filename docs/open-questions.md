@@ -10,7 +10,7 @@ Most product questions were **decided on 2026-09-23** (see [brief.th.md §16](br
 | O4 | DTDD API key + terms (incl. commercial use). **Key obtained, terms read 2026-09-29** ([external APIs](architecture/external-apis.md)): the free tier is non-commercial only, so the paid Commercial tier is needed before Pro goes live. | Stage 2 warnings |
 | O5 | TMDB commercial agreement. | Before Pro |
 | O6 | Postal address for the email footer (CAN-SPAM), e.g. a PO box or virtual mailbox ([ADR 0019](decisions/0019-email-resend.md)). | Before the launch email |
-| O7 | RAWG API key, and RAWG's terms for commercial use: its pricing says the free plan is non-commercial ($149/month Business), its API terms say free under 100,000 MAU or 500,000 page views a month ([ADR 0044](decisions/0044-games-rawg.md)). Also: HowLongToBeat yes or no (no official API). | Game search; before Pro |
+| O7 | RAWG's terms for commercial use: its pricing says the free plan is non-commercial ($149/month Business), its API terms say free under 100,000 MAU or 500,000 page views a month ([ADR 0044](decisions/0044-games-rawg.md)). **Key obtained 2026-09-30** (in `.env.local`; Vercel still needs it). HowLongToBeat decided 2026-09-30: no scraper, its times only with its permission or a data license. | Game search in production; before Pro |
 
 ## Open, with defaults
 | # | Question | Default until decided |

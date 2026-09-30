@@ -37,6 +37,12 @@ describe("evaluateBadges", () => {
     expect(get(all, "first-movie").progress).toBe(0);
   });
 
+  it("counts a game as one of the All-Rounder's 4 kinds", () => {
+    const titles = [title("movie"), title("series"), title("book"), title("game", [], null)];
+    const all = evaluateBadges(titles, titles.map((t, i) => finish(t, day(i + 1))), "UTC");
+    expect(get(all, "all-rounder")).toMatchObject({ progress: 4, earnedAt: Date.parse(day(4)), titleId: titles[3]!.id });
+  });
+
   it("returns the whole catalogue in order, and doesn't depend on row order", () => {
     const books = Array.from({ length: 5 }, () => title("book"));
     const entries = books.map((b) => finish(b, day(3)));

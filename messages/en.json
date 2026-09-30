@@ -862,7 +862,7 @@
       },
       "all-rounder": {
         "name": "All-Rounder",
-        "how": "Finish a movie, a series, a book and a manga."
+        "how": "Finish 4 kinds of title: movies, series, books, manga or games."
       }
     },
     "album": "Sticker album",

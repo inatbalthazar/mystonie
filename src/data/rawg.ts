@@ -20,7 +20,7 @@ async function rawg(path: string, params: Record<string, string>): Promise<unkno
 }
 
 export async function searchGames(query: string): Promise<SearchResult[]> {
-  return normalizeRawgSearch(await rawg("/games", rawgSearchParams(query)));
+  return normalizeRawgSearch(await rawg("/games", rawgSearchParams(query)), query);
 }
 
 /** Details plus the raw body (kept in `titles.raw`, e.g. for the developers). Null when RAWG has no such game. */

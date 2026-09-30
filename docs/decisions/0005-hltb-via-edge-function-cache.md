@@ -1,6 +1,6 @@
 # ADR 0005: Game data from RAWG, HowLongToBeat times via a cached Edge Function
 
-**Status:** Superseded by [ADR 0044](0044-games-rawg.md) (games from RAWG, built in stage 3; HowLongToBeat not built without the owner's approval) · **Date:** 2026-09-23
+**Status:** Superseded by [ADR 0044](0044-games-rawg.md) (games from RAWG, built in stage 3; no HowLongToBeat scraper) · **Date:** 2026-09-23
 
 ## Context
 The spec wants Main Story and Completionist times from HowLongToBeat (HLTB). HLTB has no official API. Its internal search endpoint changes occasionally and blocks heavy traffic. RAWG provides game metadata plus an average `playtime`.

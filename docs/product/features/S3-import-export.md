@@ -50,20 +50,20 @@ Every reader is a pure function in `src/core/import/`, tested against fixtures l
   - a day becomes noon that day in the user's time zone (S2);
   - an **undated** finish (MyAnimeList often has none) is dated **1 January of the title's year**. That keeps years-old finishes out of this week's numbers, this month's challenges and recaps, while the Year in Review still roughly fits. The preview says "Finished (no date, so it's dated by its year)".
 - **After:**
-  - one "Imported N …" card, counted in films, books, shows or manga when the import is all one kind, else in titles (`recap.importedUnit`). It covers the titles the import finished or logged history for, their watch time and episodes;
+  - one "Imported N …" card, counted in films, books, shows, manga or games when the import is all one kind, else in titles (`recap.importedUnit`). It covers the titles the import finished or logged history for, their watch time and episodes;
   - the summary adds "N episodes logged" and "N reading bookmarks added";
   - milestones, badges and challenges are recorded quietly, as in S2.
 
 ### CSV export
 - **Settings → Your data → Export as CSV:** `GET /api/account/export/csv` returns `mystonie-<username>-<date>-csv.zip`, stored without compression. It holds:
-  - `collection.csv`: kind, source, external_id, name, original_name, year, original_language, genres, status, finished_at, rating, review, added_at;
+  - `collection.csv`: kind, source, external_id, name, original_name, year, original_language, genres, status, finished_at, rating, review, added_at, hours_played (games, [S3 games](S3-games.md)). Files exported before games, without `hours_played`, still import;
   - `episodes.csv`: source, external_id, name, season, episode, runtime_min, watched_at;
   - `reading.csv`: kind, source, external_id, name, unit, position, read_at.
 - **Format:**
   - UTF-8 with a byte-order mark, so spreadsheets read Thai and Korean names;
   - cells a spreadsheet would run as formulas get a leading `'`, and importing removes it;
   - only live rows (the JSON export keeps deleted ones too).
-- **Round trip:** exporting and importing into another account gives the same collection, exactly: statuses, finish times, ratings, reviews and every log.
+- **Round trip:** exporting and importing into another account gives the same collection, exactly: statuses, finish times, ratings, reviews, hours played and every log.
 
 ### Where
 - `/settings/import` (was "Import from Letterboxd"): "Where from?" chips pick whose instructions show, and `?from=goodreads` preselects one. The file itself decides the reader.

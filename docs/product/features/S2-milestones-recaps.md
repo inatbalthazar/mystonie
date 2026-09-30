@@ -10,7 +10,7 @@ Three more reasons to come back and share, all built on the stats and recap pipe
 
 ## Rules
 - **Numbers come from the existing sources:**
-  - `titleWatch` and `titleRead` for recaps;
+  - `titleWatch` and `titleRead` for recaps (and `titlePlay` for games, [S3 games](S3-games.md));
   - `statsReport` for Year in Review;
   - `titleEvents` replayed in time order for milestones.
   So they always match the collection headers and the stats page.
@@ -18,13 +18,14 @@ Three more reasons to come back and share, all built on the stats and recap pipe
   - Titles finished (all kinds): 10, 25, 50, 100, 250, 500, 1,000, 2,500, 5,000.
   - Hours watched: 24, 100, 250, 500, 1,000, 2,500, 5,000, 10,000.
   - Episodes: 100, 250, 500, 1,000, 2,500, 5,000, 10,000.
-  - Reading time is an estimate, so it doesn't count toward hours. Books and manga count as titles.
+  - Reading time is an estimate, so it doesn't count toward hours, and neither does play time (games). Books, manga and games count as titles.
 - **Each milestone is celebrated once.** Only the highest one crossed per metric is shown.
   - For an existing collection, milestones reached before the feature are recorded silently. Only one reached in the last 2 days is celebrated. They can all still be shared from the stats page.
 - **Monthly Recap:**
   - It covers a calendar month in the user's time zone and is due on the local 1st from 09:00.
   - It uses the same email, notification, recap page and opt-out as the weekly recap.
 - **Recaps now count reading:** activity, an estimated reading-time figure ("hours read") and book and manga covers in the collage.
+- **And play time** ([S3 games](S3-games.md)): a finished game's hours (the player's, else RAWG's average) on its finish date, as "hours played". A recap card shows three figures, so with watching, reading, playing and titles finished, the smallest time gives way.
 - **Year in Review** covers a calendar year in the user's time zone.
   - The current year reads "so far".
   - Home points to it from December 1 to January 31.
