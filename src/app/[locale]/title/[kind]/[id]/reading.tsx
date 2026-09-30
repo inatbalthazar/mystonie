@@ -1,15 +1,21 @@
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
+import { Suspense } from "react";
+import { RememberTitles } from "@/components/offline/recent-titles";
 import { ReadingProgress } from "@/components/reading/reading-progress";
+import { TitleFinishers } from "@/components/title/finishers";
+import { SceneWarnings, SceneWarningsSkeleton } from "@/components/title/scene-warnings";
+import { TitleClubs } from "@/components/title/title-clubs";
 import { posterUrl } from "@/core/catalog/images";
 import type { ReadingKind, Title } from "@/core/catalog/types";
 import type { EntryStatus } from "@/core/collection/entries";
 import { titleReadingLogs } from "@/data/reading";
 import type { UserClient } from "@/data/supabase-server";
+import { avoidTopicIds } from "@/data/warnings";
 import { Link } from "@/i18n/navigation";
 import { siteUrl } from "@/lib/site";
 
-/** A book's or manga's page (S2 books & manga): cover, length and reading progress with logging. */
+/** A book's or manga's page (S2 books & manga): cover, length, reading progress with logging and scene warnings (S3). */
 export async function ReadingTitle({
   supabase,
   userId,
@@ -24,10 +30,11 @@ export async function ReadingTitle({
   title: { id: string; title: Title };
 }) {
   const t = await getTranslations("Reading");
-  const [{ data: profile }, { data: entry }, logs] = await Promise.all([
+  const [{ data: profile }, { data: entry }, logs, avoid] = await Promise.all([
     supabase.from("profiles").select("time_zone, username").eq("id", userId).single(),
-    supabase.from("entries").select("id, status, finished_at, rating, review").eq("user_id", userId).eq("title_id", title.id).is("deleted_at", null).maybeSingle(),
+    supabase.from("entries").select("id, status, finished_at, rating, review, finisher_no").eq("user_id", userId).eq("title_id", title.id).is("deleted_at", null).maybeSingle(),
     titleReadingLogs(supabase, userId, title.id),
+    avoidTopicIds(supabase, userId),
   ]);
   const { name, year, pageCount, chapterCount, volumeCount, genres } = title.title;
   const cover = posterUrl(title.title.source, title.title.posterPath);
@@ -50,18 +57,31 @@ export async function ReadingTitle({
           </p>
         </div>
       </header>
+      {/* Offline, quick add offers titles opened lately (S3 offline). */}
+      <RememberTitles
+        titles={[{ source: title.title.source, kind, externalId, name, ...(year ? { year } : {}), ...(cover ? { imageUrl: cover } : {}) }]}
+      />
       <ReadingProgress
+        userId={userId}
         kind={kind}
         externalId={externalId}
         lengths={{ kind, pageCount, chapterCount, volumeCount }}
         initialLogs={logs}
         initialStatus={(entry?.status as EntryStatus | undefined) ?? null}
-        initialEntry={entry && { id: entry.id, finishedAt: entry.finished_at, rating: entry.rating, review: entry.review }}
+        initialEntry={entry && { id: entry.id, finishedAt: entry.finished_at, rating: entry.rating, review: entry.review, finisherNo: entry.finisher_no }}
         timeZone={profile?.time_zone ?? "UTC"}
         card={{ kind, name, year, posterUrl: cover, genres, pageCount, chapterCount, volumeCount }}
         username={profile?.username ?? ""}
         host={siteUrl().host}
       />
+      {/* Our own scene warnings (S3 warnings & quiz): the only warnings books and manga have. */}
+      <Suspense fallback={<SceneWarningsSkeleton />}>
+        <SceneWarnings supabase={supabase} titleId={title.id} kind={kind} avoid={avoid} status={(entry?.status as EntryStatus | undefined) ?? null} />
+      </Suspense>
+      <Suspense fallback={null}>
+        <TitleFinishers supabase={supabase} userId={userId} titleId={title.id} />
+      </Suspense>
+      <TitleClubs title={title.title} />
     </main>
   );
 }

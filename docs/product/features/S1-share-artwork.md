@@ -39,8 +39,11 @@ The heart of Mystonie, modelled on Strava's post-activity share. Every finish or
   - "Make a card" in the edit sheet (finished entries) and "Make a Finish card" on the series page reopen it without the animation.
 - **Progress card** (series page): every log offers "Logged S1 · E4. Want a card?". Crossing 25/50/75 % of aired episodes turns it into a highlighted milestone ("Halfway there! 🎉"). The card shows the milestone or episode, `EP 8/16` and the watched time.
 - **Templates:**
-  - Metadata is in `src/core/cards/templates.ts` (`kinds`, `sizes`, `tier`).
+  - Metadata is in `src/core/cards/templates.ts` (`kinds`, `sizes`, `tier`, and `titleKinds` for a template made for some titles only).
   - Ticket is for Finish cards; Polaroid and Bold Stats draw Finish and Progress cards; **Sticker** is white ink on a transparent background.
+  - Books and manga add **Spine**, and manga also **Manga Panel**, which is where their cards open ([S2 books & manga](S2-books-manga.md), [ADR 0030](../../decisions/0030-book-manga-card-templates.md)).
+  - Milestone cards open on **Stone** and Year in Review on **Yearbook**; monthly recaps use the weekly recap's templates ([S2 milestones & recaps](S2-milestones-recaps.md)).
+  - A movie or series finish with a fun scare on DTDD (jump scares, zombies, …) is offered **Survived** ([S2 content warnings](S2-content-warnings.md)). It is still a `finish` card; only that template carries `survived`.
   - Every card's footer is `mystonie · @username` plus the site host.
 - **Saving:** `POST /api/cards` stores the inputs (`params`, validated) with the username taken from the profile. Share also sets `shared_at` and returns a signed upload URL, and the PNG goes to the public `cards` bucket at `<user_id>/<id>.png`. Download saves the inputs only.
 - **`/c/[id]`:**

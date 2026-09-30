@@ -6,8 +6,11 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AccountLink } from "@/components/account-link";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Logo } from "@/components/logo";
+import { SyncProvider } from "@/components/offline/sync-provider";
+import { SyncStatus } from "@/components/offline/sync-status";
 import { PwaListener } from "@/components/pwa/browser";
 import { ThemeScript } from "@/components/theme-script";
+import { RawgAttribution } from "@/components/rawg-attribution";
 import { TmdbAttribution } from "@/components/tmdb-attribution";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -75,6 +78,9 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
             <Logo />
             <AccountLink />
           </header>
+          {/* Offline-first (S3 offline): the service worker, the outbox, and a note while changes wait on this device. */}
+          <SyncProvider />
+          <SyncStatus />
           {children}
           <footer className="mt-auto flex flex-col items-center gap-4 border-t border-border px-4 pt-8 pb-10">
             <LocaleSwitcher />
@@ -87,6 +93,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
               </Link>
             </nav>
             <TmdbAttribution />
+            <RawgAttribution />
           </footer>
         </NextIntlClientProvider>
       </body>

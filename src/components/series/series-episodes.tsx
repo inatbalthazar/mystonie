@@ -2,7 +2,7 @@
 
 import { CheckIcon, ImageIcon, PartyPopperIcon } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import type { Episode } from "@/core/catalog/types";
 import { crossedMilestone } from "@/core/cards/saved";
 import type { CardData, CardProgress } from "@/core/cards/types";
@@ -10,37 +10,42 @@ import type { CollectionItem, EntryNotes, EntryStatus } from "@/core/collection/
 import { episodeKey, nextEpisode, seriesComplete, seriesProgress, type EpisodeRef } from "@/core/collection/episodes";
 import { formatRuntime } from "@/core/format/runtime";
 import { uuidv7 } from "@/core/ids";
+import type { OpTitle } from "@/core/sync/ops";
+import { overlayEpisodes, overlayTitleState, type EntrySnapshot, type TitleState } from "@/core/sync/overlay";
 import { localDateKey } from "@/core/stats/period";
 import { cn } from "@/lib/utils";
 import { Celebration } from "../celebration";
+import { useMilestones } from "../milestone-celebration";
+import { send, useOverlayOps } from "../offline/outbox";
 
-export type Logged = EpisodeRef & { id: string; pending?: boolean };
+export type Logged = EpisodeRef & { id: string };
 
 /** The series as card inputs (everything but the date and progress). */
 export type SeriesCard = Omit<CardData, "finishedOn" | "progress">;
 
 /** The user's entry for the series, when there is one (finish cards and their rating / review). */
-export type SeriesEntry = { id: string; finishedAt: string | null; rating: number | null; review: string | null };
+export type SeriesEntry = EntrySnapshot;
 
 type LogResponse = { logs: Logged[]; status: EntryStatus };
 
-/** POST /api/episodes. Throws on failure. */
-export async function postEpisodes(externalId: string, episodes: Logged[]): Promise<LogResponse> {
-  const res = await fetch("/api/episodes", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ externalId, episodes: episodes.map(({ id, season, episode }) => ({ id, season, episode })) }),
-  });
-  if (!res.ok) throw new Error(String(res.status));
-  return res.json();
+/** The entry the server answered with, as the series and reading pages hold it. */
+export function entrySnapshot(body: unknown): { status: EntryStatus; entry: SeriesEntry } | null {
+  const saved = (body as { entry?: CollectionItem } | null)?.entry;
+  if (!saved) return null;
+  return {
+    status: saved.status,
+    entry: { id: saved.id, finishedAt: saved.finishedAt, rating: saved.rating ?? null, review: saved.review ?? null, finisherNo: saved.finisherNo ?? null },
+  };
 }
 
 /**
  * A series' seasons and episodes with one-tap logging (S1 collection → Series): "Next episode",
  * tap an episode to log or un-log it, "Mark season watched", and "Finished the series? 🎉" once every
- * episode of an ended series is logged. Optimistic, rolled back on failure.
+ * episode of an ended series is logged. Logs show at once and go through the outbox, so they work offline too
+ * (S3 offline); one the server refuses drops out with a notice.
  */
 export function SeriesEpisodes({
+  userId,
   externalId,
   episodes,
   ended,
@@ -52,6 +57,8 @@ export function SeriesEpisodes({
   username,
   host,
 }: {
+  /** Who is signed in: the owner of the logs made here. */
+  userId: string;
   externalId: string;
   episodes: Episode[];
   ended: boolean;
@@ -66,15 +73,30 @@ export function SeriesEpisodes({
   const t = useTranslations("Series");
   const locale = useLocale();
   const [today] = useState(() => localDateKey(Date.now(), timeZone));
-  const [logs, setLogs] = useState<Logged[]>(initialLogs);
-  const [status, setStatus] = useState<EntryStatus | null>(initialStatus);
+  const title: OpTitle = useMemo(
+    () => ({ source: "tmdb", kind: "series", externalId, name: card.name, year: card.year ?? null, posterUrl: card.posterUrl ?? null }),
+    [externalId, card.name, card.year, card.posterUrl],
+  );
+  // The server's logs and entry (fresh ones arrive with a refresh), with the changes on this device laid over them.
+  const [baseLogs, setBaseLogs] = useState<Logged[]>(initialLogs);
+  const [baseState, setBaseState] = useState<TitleState>({ status: initialStatus, entry: initialEntry });
+  const [from, setFrom] = useState({ initialLogs, initialStatus, initialEntry });
+  if (from.initialLogs !== initialLogs || from.initialStatus !== initialStatus || from.initialEntry !== initialEntry) {
+    setFrom({ initialLogs, initialStatus, initialEntry });
+    setBaseLogs(initialLogs);
+    setBaseState({ status: initialStatus, entry: initialEntry });
+  }
+  const ops = useOverlayOps(userId);
+  const logs = useMemo(() => overlayEpisodes(title, baseLogs, ops), [title, baseLogs, ops]);
+  const { status, entry, sync: entrySync } = useMemo(() => overlayTitleState(title, baseState, ops), [title, baseState, ops]);
   const [askFinish, setAskFinish] = useState(false);
   const [notice, setNotice] = useState("");
-  const [entry, setEntry] = useState<SeriesEntry | null>(initialEntry);
   // A Progress card offered after a log (not forced), and the open celebration.
   const [offer, setOffer] = useState<{ logId: string; progress: CardProgress } | null>(null);
   const [celebrating, setCelebrating] = useState<"finish" | "progress" | null>(null);
   const [animate, setAnimate] = useState(false);
+  // A log or a finish can cross a milestone (500 episodes, 1,000 hours): its card follows, once nothing else is open.
+  const milestones = useMilestones({ username, host });
 
   const logged = new Map(logs.map((l) => [episodeKey(l), l]));
   const progress = seriesProgress(episodes, logs, today);
@@ -85,27 +107,36 @@ export function SeriesEpisodes({
   const format = useFormatter();
   const airDate = (date: string) => format.dateTime(new Date(`${date}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" });
 
+  const runtimes = new Map(episodes.map((e) => [episodeKey(e), e.runtimeMin ?? card.runtimeMin ?? null]));
+
   async function log(refs: EpisodeRef[]) {
-    const fresh = refs.filter((r) => !logged.has(episodeKey(r))).map((r) => ({ ...r, id: uuidv7(), pending: true }));
+    const fresh = refs
+      .filter((r) => !logged.has(episodeKey(r)))
+      .map((r) => ({ id: uuidv7(), season: r.season, episode: r.episode, runtimeMin: runtimes.get(episodeKey(r)) ?? null }));
     if (fresh.length === 0) return;
-    const before = logs;
-    setLogs((cur) => [...cur, ...fresh]);
     setNotice(fresh.length === 1 ? t("loggedOne", { season: fresh[0]!.season, episode: fresh[0]!.episode }) : t("loggedMany", { count: fresh.length }));
-    try {
-      const result = await postEpisodes(externalId, fresh);
-      setLogs(result.logs);
-      setStatus(result.status);
-      const after = seriesProgress(episodes, result.logs, today);
-      if (result.status !== "finished" && seriesComplete(after, ended)) {
-        setAskFinish(true);
-        setOffer(null);
-      } else {
-        setOffer(progressOffer(fresh, result.logs, progress.watched, after.watched, after.aired));
-      }
-    } catch {
-      setLogs(before);
-      setNotice(t("logError"));
+    // What comes next is worked out here, so it works offline too: the Progress card (downloadable at once, shared
+    // once saved), or "Finished the series?" after the last episode.
+    const now = [...logs, ...fresh];
+    const after = seriesProgress(episodes, now, today);
+    if (status !== "finished" && seriesComplete(after, ended)) {
+      setAskFinish(true);
+      setOffer(null);
+    } else {
+      setOffer(progressOffer(fresh, now, progress.watched, after.watched, after.aired));
     }
+    const saved = await send(userId, { type: "episodes.log", title, episodes: fresh });
+    if (!saved.ok) {
+      setOffer(null);
+      setAskFinish(false);
+      return setNotice(t("logError"));
+    }
+    const result = saved.body as LogResponse;
+    setBaseLogs(result.logs);
+    setBaseState((cur) => ({ ...cur, status: result.status }));
+    // An episode logged before on another device keeps its log: the card points at that one.
+    setOffer((cur) => cur && { ...cur, logId: result.logs.find((l) => l.season === cur.progress.season && l.episode === cur.progress.episode)?.id ?? cur.logId });
+    milestones.check();
   }
 
   /** The Progress card for the furthest episode just logged: how far along, watched time, milestone crossed. */
@@ -130,72 +161,44 @@ export function SeriesEpisodes({
   }
 
   async function unlog(entry: Logged) {
-    const before = logs;
-    setLogs((cur) => cur.filter((l) => l.id !== entry.id));
     setNotice(t("unlogged", { season: entry.season, episode: entry.episode }));
-    try {
-      const res = await fetch(`/api/episodes/${entry.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deleted: true }),
-      });
-      if (!res.ok) throw new Error(String(res.status));
-    } catch {
-      setLogs(before);
-      setNotice(t("logError"));
-    }
+    setOffer((cur) => (cur?.logId === entry.id ? null : cur));
+    const saved = await send(userId, { type: "episode.unlog", logId: entry.id, title, season: entry.season, episode: entry.episode });
+    if (!saved.ok) return setNotice(t("logError"));
+    setBaseLogs((cur) => cur.filter((l) => l.id !== entry.id));
   }
 
   async function finish() {
     setAskFinish(false);
     setOffer(null);
-    const before = status;
-    const beforeEntry = entry;
-    setStatus("finished");
     setNotice(t("finishedNotice"));
     // Celebrate first: the card shows now and can be shared once the entry is saved.
-    setEntry((cur) => (cur ? { ...cur, finishedAt: new Date().toISOString() } : null));
     setAnimate(true);
     setCelebrating("finish");
-    try {
-      const res = await fetch("/api/entries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: uuidv7(), title: { source: "tmdb", kind: "series", externalId }, status: "finished" }),
-      });
-      if (!res.ok) throw new Error(String(res.status));
-      const saved = (await res.json()).entry as CollectionItem;
-      setEntry({ id: saved.id, finishedAt: saved.finishedAt, rating: saved.rating ?? null, review: saved.review ?? null });
-    } catch {
-      setStatus(before);
-      setEntry(beforeEntry);
+    const saved = await send(userId, { type: "entry.add", entryId: entry?.id ?? uuidv7(), title, status: "finished", finishedAt: new Date().toISOString() });
+    if (!saved.ok) {
       setCelebrating(null);
-      setNotice(t("logError"));
+      return setNotice(t("logError"));
     }
+    const kept = entrySnapshot(saved.body);
+    if (kept) setBaseState(kept);
+    if (!saved.superseded) milestones.check();
   }
 
   async function closeCelebration(notes: EntryNotes | null) {
     setCelebrating(null);
     if (!notes || !entry) return;
-    const before = entry;
-    setEntry({ ...entry, ...notes });
-    try {
-      const res = await fetch(`/api/entries/${entry.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(notes),
-      });
-      if (!res.ok) throw new Error(String(res.status));
-    } catch {
-      setEntry(before);
-      setNotice(t("logError"));
-    }
+    const saved = await send(userId, { type: "entry.notes", entryId: entry.id, title, ...notes });
+    if (!saved.ok) return setNotice(t("logError"));
+    const kept = entrySnapshot(saved.body);
+    if (kept) setBaseState(kept);
   }
 
   const finishCard: CardData = {
     ...card,
     rating: entry?.rating ?? null,
     review: entry?.review ?? null,
+    finisherNo: entry?.finisherNo ?? null,
     finishedOn: entry?.finishedAt ? localDateKey(Date.parse(entry.finishedAt), timeZone) : today,
   };
 
@@ -267,7 +270,8 @@ export function SeriesEpisodes({
       {celebrating === "finish" && (
         <Celebration
           data={finishCard}
-          source={{ kind: "finish", entryId: entry?.id ?? "", ready: !!entry?.id && status === "finished" }}
+          source={{ kind: "finish", entryId: entry?.id ?? "", ready: !!entry?.id && status === "finished" && !entrySync }}
+          survivedFor={{ kind: "series", externalId }}
           animate={animate}
           username={username}
           host={host}
@@ -277,12 +281,13 @@ export function SeriesEpisodes({
       {celebrating === "progress" && offer && (
         <Celebration
           data={{ ...card, finishedOn: today, progress: offer.progress }}
-          source={{ kind: "progress", episodeLogId: offer.logId, ready: true }}
+          source={{ kind: "progress", episodeLogId: offer.logId, ready: !logs.find((l) => l.id === offer.logId)?.sync }}
           username={username}
           host={host}
           onClose={() => setCelebrating(null)}
         />
       )}
+      {!celebrating && milestones.node}
 
       {askFinish && (
         <section className="flex flex-col gap-3 rounded-2xl border-2 border-dashed border-brand/60 bg-brand-soft/40 p-4">
@@ -350,7 +355,7 @@ export function SeriesEpisodes({
                     <li key={e.episode}>
                       <button
                         type="button"
-                        disabled={!out || entry?.pending}
+                        disabled={!out}
                         aria-pressed={!!entry}
                         onClick={() => (entry ? unlog(entry) : log([e]))}
                         className="flex min-h-12 w-full items-center gap-3 rounded-xl px-2 py-2 text-left hover:bg-muted disabled:opacity-50 disabled:hover:bg-transparent"
@@ -359,9 +364,12 @@ export function SeriesEpisodes({
                           className={cn(
                             "flex size-7 shrink-0 items-center justify-center rounded-full ring-2",
                             entry ? "bg-brand text-brand-foreground ring-brand" : "ring-border",
+                            // Saved on this device, not on the server yet: a dashed stamp.
+                            entry?.sync === "waiting" && "bg-brand/60 ring-brand/60 outline-2 outline-offset-2 outline-brand/60 outline-dashed",
                           )}
                         >
                           {entry && <CheckIcon className="size-4" aria-hidden="true" />}
+                          {entry?.sync === "waiting" && <span className="sr-only">{t("waitingToSync")}</span>}
                         </span>
                         <span className="flex min-w-0 flex-1 flex-col">
                           <span className="truncate text-sm font-medium">

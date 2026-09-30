@@ -6,8 +6,9 @@ import { searchCatalog } from "@/data/catalog";
 const LIMIT = { max: 60, windowSeconds: 60 };
 
 /**
- * GET /api/search?q=stranger[&type=all|screen|book|manga] → { results: SearchResult[] }. Without a type: movies +
- * series from TMDB (the card maker). `all` merges TMDB, AniList and Google Books (the collection's search sheet).
+ * GET /api/search?q=stranger[&type=all|screen|book|manga|game] → { results: SearchResult[] }. Without a type: movies
+ * + series from TMDB (the card maker). `all` merges TMDB, AniList, Google Books and RAWG (the collection's search
+ * sheet).
  */
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;

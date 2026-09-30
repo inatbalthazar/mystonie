@@ -28,6 +28,12 @@ describe("protected paths", () => {
     expect(isProtectedPath("/settings/")).toBe(true);
     expect(isProtectedPath("/recap/01926000-0000-7000-8000-000000000001")).toBe(true);
     expect(isProtectedPath("/settings/account")).toBe(true);
+    expect(isProtectedPath("/feed")).toBe(true);
+    expect(isProtectedPath("/people")).toBe(true);
+    expect(isProtectedPath("/board")).toBe(true);
+    expect(isProtectedPath("/challenges")).toBe(true);
+    // Club pages are public: signed-out visitors see the club and are asked to sign in to join.
+    expect(isProtectedPath("/clubs/kdrama")).toBe(false);
     expect(isProtectedPath("/settingsx")).toBe(false);
     expect(isProtectedPath("/homework")).toBe(false);
     expect(isProtectedPath("/")).toBe(false);

@@ -44,7 +44,7 @@ test("one piece: manga and series side by side → log chapter 1100 → Progress
   }).toPass();
   const sheet = page.getByRole("dialog", { name: "Add a title" });
   await expect(sheet.getByRole("button", { name: "All" })).toHaveAttribute("aria-pressed", "true");
-  await sheet.getByLabel("Search movies, series, books and manga").fill("one piece");
+  await sheet.getByLabel("Search movies, series, books, manga and games").fill("one piece");
   await expect(sheet.getByRole("button", { name: /^One Piece Series · 1999/ })).toBeVisible();
   await expect(sheet.getByRole("button", { name: /^One Piece Manga · 1997/ })).toBeVisible();
   expect(types).toContain("all");
@@ -79,13 +79,15 @@ test("one piece: manga and series side by side → log chapter 1100 → Progress
   await main.getByRole("button", { name: "Make a card" }).click();
   const celebration = page.getByRole("dialog", { name: "Chapter 1,100 of One Piece" });
   await expect(celebration).toBeVisible();
+  // Manga open on the Manga Panel template (the speech bubble says where the reader is).
+  await expect(celebration.getByText("Manga Panel · swipe for another style")).toBeVisible();
   await expect(celebration.locator("[data-card]")).toContainText("Chapter 1,100");
   const saved = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/cards");
   await celebration.getByRole("button", { name: "Copy card link" }).click({ timeout: 15_000 });
   const save = await saved;
   expect(save.status()).toBe(201);
-  const body = save.request().postDataJSON() as { kind: string; readingLogId: string | null; data: { reading: { position: number } } };
-  expect(body).toMatchObject({ kind: "progress", data: { reading: { position: 1100 } } });
+  const body = save.request().postDataJSON() as { kind: string; templateId: string; readingLogId: string | null; data: { reading: { position: number } } };
+  expect(body).toMatchObject({ kind: "progress", templateId: "mangaPanel", data: { reading: { position: 1100 } } });
   expect(body.readingLogId).toMatch(/^[0-9a-f-]{36}$/);
   await celebration.getByRole("button", { name: "Done" }).click();
 

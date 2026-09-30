@@ -18,8 +18,8 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 /**
- * One of the user's weekly recaps (ADR 0025), opened from the recap email or the collection page: the
- * celebration with the week's card, ready to share. Only the owner can open it (RLS).
+ * One of the user's weekly or monthly recaps (ADR 0025, 0031), opened from the recap email, a notification or
+ * Home: the celebration with the recap card, ready to share. Only the owner can open it (RLS).
  */
 export default async function RecapPage({ params }: PageProps<"/[locale]/recap/[id]">) {
   const { locale: raw, id } = await params;

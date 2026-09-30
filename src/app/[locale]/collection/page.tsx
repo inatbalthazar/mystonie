@@ -5,11 +5,13 @@ import { CollectionView } from "@/components/collection/collection-view";
 import { localizedPath } from "@/core/auth";
 import { posterUrl } from "@/core/catalog/images";
 import type { SearchResult } from "@/core/catalog/types";
+import { parsePick } from "@/core/trending";
 import { listCollection } from "@/data/entries";
 import { watchLogs } from "@/data/episodes";
 import { readLogs } from "@/data/reading";
 import { userClient } from "@/data/supabase-server";
 import { ensureTitle } from "@/data/titles";
+import { avoidBadges } from "@/data/warnings";
 import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
@@ -19,21 +21,21 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: `${t("title")} · Mystonie`, robots: { index: false, follow: false } };
 }
 
-/** `?pick=movie:496243` (a trending title on Home) as a quick-add result, or null. */
+/** `?pick=movie:496243` (a trending title on Home, a game's page: any kind) as a quick-add result, or null. */
 async function pickedTitle(raw: string | string[] | undefined): Promise<SearchResult | null> {
-  const match = typeof raw === "string" ? /^(movie|series):(\d{1,10})$/.exec(raw) : null;
-  if (!match) return null;
-  const title = await ensureTitle(match[1] as "movie" | "series", match[2]!).catch(() => null);
+  const pick = parsePick(raw);
+  if (!pick) return null;
+  const title = await ensureTitle(pick.kind, pick.externalId).catch(() => null);
   if (!title) return null;
-  const { source, kind, externalId, name, year, posterPath } = title.title;
+  const { source, kind, externalId, name, year, posterPath, platforms } = title.title;
   const imageUrl = posterUrl(source, posterPath);
-  return { source, kind, externalId, name, ...(year ? { year } : {}), ...(imageUrl ? { imageUrl } : {}) };
+  return { source, kind, externalId, name, ...(year ? { year } : {}), ...(imageUrl ? { imageUrl } : {}), ...(platforms.length ? { platforms } : {}) };
 }
 
 /**
  * The signed-in user's collection (S1 collection) with the ➕ quick-add sheet. `?add=1` opens the sheet
- * straight away (the header's ➕); with `&pick=<kind>:<id>` (Home's trending) it opens on that title's status
- * step. The summary header, filters, sort and tiles/list live in `CollectionView`.
+ * straight away (the header's ➕); with `&pick=<kind>:<id>` (Home's trending, a game's page) it opens on that title's
+ * status step. The summary header, filters, sort and tiles/list live in `CollectionView`.
  */
 export default async function CollectionPage({ params, searchParams }: PageProps<"/[locale]/collection">) {
   const locale = (await params).locale as Locale;
@@ -56,6 +58,8 @@ export default async function CollectionPage({ params, searchParams }: PageProps
   ]);
 
   const timeZone = profile?.time_zone ?? "UTC";
+  // Warning badges: cached DTDD data (S2 content warnings) and our own warnings (S3 warnings & quiz).
+  const badges = await avoidBadges(supabase, items.flatMap((i) => (i.title.id ? [i.title.id] : [])));
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 px-4 pt-10 pb-28">
@@ -63,6 +67,7 @@ export default async function CollectionPage({ params, searchParams }: PageProps
       {/* A new ?add=1 (header ➕ while already here) remounts the view with the sheet open. */}
       <CollectionView
         key={query.add === "1" ? `add-${pick ? `${pick.kind}:${pick.externalId}` : ""}` : "list"}
+        userId={userId}
         initialItems={items}
         logs={allLogs}
         readLogs={reads}
@@ -71,6 +76,7 @@ export default async function CollectionPage({ params, searchParams }: PageProps
         timeZone={timeZone}
         startAdding={query.add === "1"}
         startWith={pick}
+        warnings={Object.fromEntries(badges)}
       />
     </main>
   );

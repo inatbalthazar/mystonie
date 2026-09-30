@@ -31,8 +31,10 @@ Extend the collection to reading: books (Google Books) and manga / manhwa / webt
 - **Cards:**
   - Polaroid and Bold Stats draw reading Progress cards.
   - Finish cards for books and manga show pages, chapters and volumes, with a "Finished" stamp. In Thai it reads "อ่านจบแล้ว".
-  - The dedicated **Spine** and **Manga panel** templates are a separate roadmap task.
-- Weekly recaps don't include reading yet: that comes with the Monthly Recap / Year in Review task.
+  - **Spine** (books and manga): the title printed down a spine on a shelf and the cover facing out. A Finish card gets the stamp; a Progress card gets a bookmark ribbon and a taped note ("Chapter 1,100").
+  - **Manga Panel** (manga only): the cover in the big panel with a speech bubble for the headline, the title on screentone, the numbers in focus lines.
+  - A new card opens on the Manga Panel for manga and the Spine for books; Polaroid, Bold Stats (and Ticket for a finish) are a swipe away ([ADR 0030](../../decisions/0030-book-manga-card-templates.md)).
+- Weekly and monthly recaps include reading (activity, "hours read", covers in the collage) since [S2 milestones & recaps](S2-milestones-recaps.md).
 
 ## Acceptance criteria
 - [x] Searching "one piece" returns the manga (AniList) and the series (TMDB), clearly labelled. (`mergeSearch` test with real AniList fixtures; `e2e/reading.spec.ts`)

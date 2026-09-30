@@ -14,6 +14,7 @@ import {
   type CollectionSort,
 } from "@/core/collection/view";
 import { formatRuntime } from "@/core/format/runtime";
+import type { PlayTotals } from "@/core/stats/play";
 import type { ReadTotals } from "@/core/stats/reading";
 import type { WatchTotals } from "@/core/stats/summary";
 import { cn } from "@/lib/utils";
@@ -53,6 +54,20 @@ export function ReadSummary({ totals, year }: { totals: ReadTotals; year: number
   return <SummaryTicket stats={stats} year={year} hint={t("readTimeHint")} />;
 }
 
+/**
+ * The Play tab's header (S3 games): play time and games finished. Play time is the hours the player gave for each
+ * game, else its average playtime on RAWG. Always the sum of the rows below it.
+ */
+export function PlaySummary({ totals, year }: { totals: PlayTotals; year: number | null }) {
+  const t = useTranslations("Collection");
+  const locale = useLocale();
+  const stats = [
+    { label: t("playTime"), value: totals.minutes > 0 ? formatRuntime(totals.minutes, locale) : "0" },
+    { label: t("gamesFinished"), value: totals.finished.toLocaleString(locale) },
+  ];
+  return <SummaryTicket stats={stats} year={year} hint={t("playTimeHint")} />;
+}
+
 function SummaryTicket({ stats, year, hint }: { stats: { label: string; value: string }[]; year: number | null; hint?: string }) {
   const t = useTranslations("Collection");
   return (
@@ -62,7 +77,12 @@ function SummaryTicket({ stats, year, hint }: { stats: { label: string; value: s
       <h2 id="collection-summary" className="font-hand text-2xl leading-none text-muted-foreground">
         {t("summaryTitle", { year: year ?? "all" })}
       </h2>
-      <dl className={cn("mt-3 grid divide-x-2 divide-dashed divide-border", stats.length > 3 ? "grid-cols-2 gap-y-3 sm:grid-cols-4" : "grid-cols-3")}>
+      <dl
+        className={cn(
+          "mt-3 grid divide-x-2 divide-dashed divide-border",
+          stats.length > 3 ? "grid-cols-2 gap-y-3 sm:grid-cols-4" : stats.length === 2 ? "grid-cols-2" : "grid-cols-3",
+        )}
+      >
         {stats.map((s) => (
           <div key={s.label} className="flex min-w-0 flex-col gap-1 px-2 first:pl-0 last:pr-0">
             <dt className="text-[11px] leading-tight font-semibold tracking-wide text-muted-foreground uppercase">{s.label}</dt>
@@ -76,8 +96,8 @@ function SummaryTicket({ stats, year, hint }: { stats: { label: string; value: s
 }
 
 /**
- * Watch · Read (S2 books & manga): the album's divider tabs. Movies and series on one, books and manga on the other;
- * each tab has its own header, filters and rows.
+ * Watch · Read · Play (S2 books & manga, S3 games): the album's divider tabs. Movies and series on one, books and manga
+ * on the next, games on the last; each tab has its own header, filters and rows.
  */
 export function ShelfTabs({ shelf, onShelf }: { shelf: CollectionShelf; onShelf: (shelf: CollectionShelf) => void }) {
   const t = useTranslations("Collection");

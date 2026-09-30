@@ -1,6 +1,6 @@
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { CardFooter, CardRoot, footerUser, CardTitle, DISPLAY, FinishedStamp, Poster, Review, Stars, useFinishedDate, useStats, type TemplateProps } from "../parts";
+import { CardFooter, CardRoot, footerUser, CardTitle, DISPLAY, FinishedStamp, FinisherStamp, Poster, Review, Stars, useFinishedDate, useStats, type TemplateProps } from "../parts";
 
 /** Cinema ticket stub: poster on top, perforation with a FINISHED stamp, stats where seat/row would be. Best for movies. */
 export function TicketCard({ data, size, palette, host }: TemplateProps) {
@@ -13,6 +13,7 @@ export function TicketCard({ data, size, palette, host }: TemplateProps) {
     <CardRoot size={size} palette={palette} className="items-center justify-center p-[64px]">
       <div className="relative flex w-full flex-1 flex-col overflow-hidden rounded-[40px] bg-[var(--card-paper)] text-[var(--card-ink)] shadow-[0_30px_80px_rgba(0,0,0,0.35)]">
         <Poster url={data.posterUrl} className={story ? "h-[840px] shrink-0" : "h-[340px] shrink-0"} />
+        <FinisherStamp data={data} className={cn("absolute top-[40px] left-[40px] rotate-[-10deg]", !story && "top-[24px] origin-top-left scale-[0.75]")} />
 
         {/* Perforation: two notches + dashed tear line, with the stamp sitting across it. */}
         <div className="relative h-[64px] shrink-0">
@@ -20,7 +21,7 @@ export function TicketCard({ data, size, palette, host }: TemplateProps) {
           <span className="absolute top-1/2 -right-[32px] size-[64px] -translate-y-1/2 rounded-full bg-[var(--card-bg)]" />
           <span className="absolute top-1/2 right-[48px] left-[48px] border-t-[6px] border-dashed border-[var(--card-ink)] opacity-25" />
           <FinishedStamp
-            read={data.kind === "book" || data.kind === "manga"}
+            kind={data.kind}
             date={date}
             className={cn("absolute right-[56px] rotate-[-8deg] bg-[var(--card-paper)]", story ? "-top-[118px]" : "-top-[112px] origin-right scale-[0.85]")}
           />

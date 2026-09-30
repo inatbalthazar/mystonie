@@ -1,4 +1,4 @@
-import { catalogError, rateLimited } from "@/app/api/_lib/http";
+import { catalogError, otherAccount, rateLimited } from "@/app/api/_lib/http";
 import { parseReadingLog } from "@/core/collection/reading";
 import { logReading } from "@/data/reading";
 import { userClient } from "@/data/supabase-server";
@@ -8,8 +8,8 @@ const LIMIT = { max: 120, windowSeconds: 60 };
 const noStore = { "Cache-Control": "no-store" };
 
 /**
- * POST /api/reading { id, kind: book|manga, externalId, unit: page|chapter|volume, position } → { logs, logId, status }.
- * Logs how far the signed-in user has read (a checkpoint, ADR 0029). The title is cached from its catalog when needed
+ * POST /api/reading { id, kind: book|manga, externalId, unit: page|chapter|volume, position, readAt? } → { logs, logId, status }.
+ * Logs how far the signed-in user has read (a checkpoint, ADR 0029), at `readAt` (default now, ADR 0042). The title is cached from its catalog when needed
  * and joins the collection as "reading" if it isn't there yet.
  */
 export async function POST(request: Request) {
@@ -21,6 +21,8 @@ export async function POST(request: Request) {
   const { data: auth } = await supabase.auth.getClaims();
   const userId = auth?.claims.sub;
   if (!userId) return Response.json({ error: "unauthorized" }, { status: 401, headers: noStore });
+  const other = otherAccount(request, userId);
+  if (other) return other;
 
   const limited = await rateLimited(request, "reading", LIMIT);
   if (limited) return limited;

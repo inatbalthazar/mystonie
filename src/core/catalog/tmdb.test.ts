@@ -33,6 +33,7 @@ describe("normalizeTmdbList", () => {
       originalLanguage: "en",
       year: 2016,
       imageUrl: "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+      votes: 19000,
     });
   });
 
@@ -96,6 +97,8 @@ describe("normalizeTmdbDetails", () => {
       pageCount: null,
       chapterCount: null,
       volumeCount: null,
+      playtimeHours: null,
+      platforms: [],
     });
   });
 

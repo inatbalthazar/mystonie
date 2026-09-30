@@ -1,0 +1,43 @@
+import type { Metadata } from "next";
+import type { Locale } from "next-intl";
+import { getTranslations, setRequestLocale } from "next-intl/server";
+import { WarningsQuiz } from "@/components/warnings/warnings-quiz";
+import { localizedPath } from "@/core/auth";
+import { parseQuizTitle } from "@/core/quiz";
+import { userClient } from "@/data/supabase-server";
+import { Link, redirect } from "@/i18n/navigation";
+import { routing } from "@/i18n/routing";
+
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Quiz");
+  return { title: `${t("metaTitle")} · Mystonie`, robots: { index: false, follow: false } };
+}
+
+/**
+ * The warnings quiz (S3 warnings & quiz): quick questions about titles the user finished, one at a time. `?title=`
+ * (a title id, from its page) asks about that title first. Signed-in only.
+ */
+export default async function QuizPage({ params, searchParams }: PageProps<"/[locale]/quiz">) {
+  const locale = (await params).locale as Locale;
+  setRequestLocale(locale);
+  const self = localizedPath("/quiz", locale, routing.defaultLocale);
+
+  const supabase = await userClient();
+  const { data: auth } = supabase ? await supabase.auth.getClaims() : { data: null };
+  if (!supabase || !auth?.claims.sub) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
+
+  const [t, query] = await Promise.all([getTranslations("Quiz"), searchParams]);
+
+  return (
+    <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-8 pb-16">
+      <Link href="/home" className="inline-flex min-h-11 items-center self-start text-sm font-semibold text-brand">
+        {t("back")}
+      </Link>
+      <div className="flex flex-col gap-2">
+        <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("title")}</h1>
+        <p className="text-sm text-muted-foreground">{t("intro")}</p>
+      </div>
+      <WarningsQuiz titleId={parseQuizTitle(query.title)} />
+    </main>
+  );
+}

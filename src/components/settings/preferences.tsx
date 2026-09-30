@@ -18,13 +18,26 @@ const THEME_ICONS = { system: MonitorIcon, light: SunIcon, dark: MoonIcon } as c
 const noSubscribe = () => () => {};
 const deviceZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
 
-/** Settings → Preferences: language, time zone and theme, each saved as soon as it changes. */
-export function Preferences({ timeZone: savedZone, timeZones, theme: savedTheme }: { timeZone: string; timeZones: string[]; theme: Theme }) {
+/** Settings → Preferences: language, time zone, country (for where to watch) and theme, each saved as soon as it changes. */
+export function Preferences({
+  timeZone: savedZone,
+  timeZones,
+  country: savedCountry,
+  countries,
+  theme: savedTheme,
+}: {
+  timeZone: string;
+  timeZones: string[];
+  country: string | null;
+  countries: [string, string][];
+  theme: Theme;
+}) {
   const t = useTranslations("Settings");
   const id = useId();
   const locale = useLocale();
   const language = useChangeLocale();
   const [zone, setZone] = useState(savedZone);
+  const [country, setCountry] = useState(savedCountry ?? "");
   const [theme, setTheme] = useState(savedTheme);
   const [busy, setBusy] = useState(false);
   const [failed, setFailed] = useState(false);
@@ -46,6 +59,12 @@ export function Preferences({ timeZone: savedZone, timeZones, theme: savedTheme 
     const before = zone;
     setZone(next);
     void save({ timeZone: next }, () => setZone(before));
+  }
+
+  function changeCountry(next: string) {
+    const before = country;
+    setCountry(next);
+    void save({ country: next }, () => setCountry(before));
   }
 
   async function changeTheme(next: Theme) {
@@ -99,6 +118,34 @@ export function Preferences({ timeZone: savedZone, timeZones, theme: savedTheme 
             {t("useDeviceTimeZone", { zone: device.replaceAll("_", " ") })}
           </button>
         )}
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor={`${id}-country`} className="text-sm font-semibold">
+          {t("country")}
+        </label>
+        <select
+          id={`${id}-country`}
+          value={country}
+          disabled={busy}
+          aria-describedby={`${id}-country-hint`}
+          onChange={(e) => changeCountry(e.target.value)}
+          className={selectClass}
+        >
+          {!country && (
+            <option value="" disabled>
+              {t("countryNotSet")}
+            </option>
+          )}
+          {countries.map(([code, name]) => (
+            <option key={code} value={code}>
+              {name}
+            </option>
+          ))}
+        </select>
+        <p id={`${id}-country-hint`} className="text-sm text-muted-foreground">
+          {t("countryHint")}
+        </p>
       </div>
 
       <fieldset className="flex flex-col gap-1">

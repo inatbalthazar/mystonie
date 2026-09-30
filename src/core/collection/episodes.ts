@@ -2,6 +2,7 @@
 // Shared by the series page, "Up next" and the logging route.
 import type { Episode } from "../catalog/types";
 import { isUuidV7 } from "../ids";
+import { actionTime } from "./entries";
 
 export type EpisodeRef = { season: number; episode: number };
 
@@ -55,15 +56,22 @@ export const MAX_EPISODES_PER_LOG = 500;
 export type EpisodeLogRequest = {
   externalId: string;
   episodes: (EpisodeRef & { id: string })[];
+  /** When they were watched, by the device's clock (a log made offline arrives later, ADR 0042). */
+  watchedAt: string;
 };
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 const smallInt = (v: unknown, min: number) => typeof v === "number" && Number.isInteger(v) && v >= min && v <= 32767;
 
-/** POST /api/episodes body: `{ externalId, episodes: [{ id, season, episode }] }` (TMDB series id, v7 ids). */
-export function parseEpisodeLog(body: unknown): EpisodeLogRequest | null {
+/**
+ * POST /api/episodes body: `{ externalId, episodes: [{ id, season, episode }], watchedAt? }` (TMDB series id, v7 ids,
+ * `watchedAt` defaults to now).
+ */
+export function parseEpisodeLog(body: unknown, now: number = Date.now()): EpisodeLogRequest | null {
   if (!isObject(body) || typeof body.externalId !== "string" || !/^\d{1,10}$/.test(body.externalId)) return null;
   if (!Array.isArray(body.episodes) || body.episodes.length === 0 || body.episodes.length > MAX_EPISODES_PER_LOG) return null;
+  const watchedAt = actionTime(body.watchedAt, now);
+  if (!watchedAt) return null;
   const episodes: EpisodeLogRequest["episodes"] = [];
   const seen = new Set<string>();
   for (const e of body.episodes) {
@@ -74,5 +82,5 @@ export function parseEpisodeLog(body: unknown): EpisodeLogRequest | null {
     seen.add(episodeKey(ref));
     episodes.push(ref);
   }
-  return { externalId: body.externalId, episodes };
+  return { externalId: body.externalId, episodes, watchedAt };
 }

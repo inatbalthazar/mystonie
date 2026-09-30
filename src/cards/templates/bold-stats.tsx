@@ -1,6 +1,6 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { CardFooter, CardRoot, footerUser, CardTitle, DISPLAY, Poster, Review, Stars, useFinishedDate, useHeadline, useStats, type TemplateProps } from "../parts";
+import { CardFooter, CardRoot, footerUser, CardTitle, DISPLAY, FinisherStamp, Poster, Review, Stars, useFinishedDate, useHeadline, useStats, type TemplateProps } from "../parts";
 
 /** Strava-style: huge condensed numbers, a strip of poster, the title. Best for series, progress and recaps. */
 export function BoldStatsCard({ data, size, palette, host }: TemplateProps) {
@@ -24,6 +24,10 @@ export function BoldStatsCard({ data, size, palette, host }: TemplateProps) {
           <span className="size-[20px] shrink-0 rounded-full bg-current" />
           <span className="truncate">{headline}</span>
         </p>
+        <FinisherStamp
+          data={data}
+          className={cn("absolute right-0 rotate-[8deg]", story ? "top-[100px]" : "-top-[24px] origin-top-right scale-[0.7]")}
+        />
         <div className={story ? "mt-[320px]" : "mt-[80px]"}>
           <CardTitle data={data} size={size} className={story ? "" : "line-clamp-2"} />
         </div>
@@ -33,6 +37,13 @@ export function BoldStatsCard({ data, size, palette, host }: TemplateProps) {
             {t("titlesWatched", { count: data.recap.titleCount, period: data.recap.period ?? "week" })}
             {" · "}
             {data.recap.titles.map((title) => title.name).join(", ")}
+          </p>
+        ) : data.challenge ? (
+          // A challenge: its month, and the title that completed it.
+          <p className="line-clamp-2 text-[34px] text-[var(--card-muted)]">
+            {format.dateTime(new Date(`${data.challenge.month}-01T00:00:00Z`), { month: "long", year: "numeric", timeZone: "UTC" })}
+            {" · "}
+            {t("challengeBy", { name: data.name })}
           </p>
         ) : (
           <p className="text-[34px] text-[var(--card-muted)]">
@@ -45,7 +56,13 @@ export function BoldStatsCard({ data, size, palette, host }: TemplateProps) {
           </p>
         )}
 
-        <dl className="mt-auto grid grid-cols-3 gap-[32px] border-t-[4px] border-[var(--card-text)]/20 pt-[36px]">
+        <dl
+          className={cn(
+            "mt-auto grid gap-[32px] border-t-[4px] border-[var(--card-text)]/20 pt-[36px]",
+            // One number (a milestone) gets the whole row, so its label isn't cut.
+            stats.length === 1 ? "grid-cols-1" : "grid-cols-3",
+          )}
+        >
           {stats.map((s) => (
             <div key={s.label} className="min-w-0">
               <dd

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { contrast, DEFAULT_PALETTE, paletteFromPixels } from "./palette";
-import { isLatinSafe, scriptsIn, titleSizeStep, watchMinutes } from "./text";
+import { finishedKey, gameHours, isLatinSafe, scriptsIn, titleSizeStep, watchMinutes } from "./text";
 
 const pixels = (...colors: [number, number, number, number][]) =>
   Uint8ClampedArray.from(colors.flatMap(([r, g, b, n]) => Array.from({ length: n }, () => [r, g, b, 255]).flat()));
@@ -50,12 +50,34 @@ describe("watchMinutes", () => {
   });
 });
 
+describe("game cards (S3 games)", () => {
+  it("show the player's hours, else RAWG's average, and nothing for other kinds", () => {
+    expect(gameHours({ kind: "game", hoursPlayed: 187, playtimeHours: 43 })).toEqual({ hours: 187, own: true });
+    expect(gameHours({ kind: "game", hoursPlayed: null, playtimeHours: 43 })).toEqual({ hours: 43, own: false });
+    expect(gameHours({ kind: "game" })).toBeNull();
+    expect(gameHours({ kind: "movie", hoursPlayed: 3 })).toBeNull();
+  });
+
+  it("stamp the kind's word: watched, read or played (in Thai)", () => {
+    expect(["movie", "series", "book", "manga", "game"].map((k) => finishedKey(k as never))).toEqual([
+      "finished",
+      "finished",
+      "finishedRead",
+      "finishedRead",
+      "finishedPlay",
+    ]);
+  });
+});
+
 describe("titleSizeStep", () => {
-  it("shrinks long titles, counting code points", () => {
+  it("shrinks long titles, counting code points (a wide CJK one as two)", () => {
     expect(titleSizeStep("Parasite")).toBe(0);
     expect(titleSizeStep("Stranger Things: Tales")).toBe(1);
     expect(titleSizeStep("Dr. Strangelove or: How I Learned to Stop Worrying")).toBe(3);
-    expect(titleSizeStep("千と千尋の神隠し")).toBe(0);
+    expect(titleSizeStep("기생충")).toBe(0);
+    expect(titleSizeStep("千と千尋の神隠し")).toBe(1);
+    expect(titleSizeStep("ゼルダの伝説 ティアーズ オブ ザ キングダム")).toBe(2);
+    expect(titleSizeStep("เพราะเราคู่กัน")).toBe(0);
   });
 });
 

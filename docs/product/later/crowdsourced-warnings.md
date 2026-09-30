@@ -1,6 +1,6 @@
 # F05 · Content warnings (doesthedogdie-style)
 
-> **Status: LATER (gated).** Not part of the current plan. See [later/README.md](README.md) for the gate. Written before the global, solo-sized plan: re-check against AGENTS.md before building.
+> **Status: BUILT in stage 3** as [S3 warnings & quiz](../features/S3-warnings-quiz.md) ([ADR 0043](../../decisions/0043-scene-warnings-and-quiz.md)). That spec is the source of truth, and it differs from this old design: 26 topics of our own, each mapped to a DoesTheDogDie topic (not a `warning_tags` table with Thai and English names); nothing seeded from DTDD (its terms allow caching only); no free-text notes; people watching or finished may add and vote; the adder counts as the first of the 5 confirmations, and "verified" is called confirmed. Kept for history.
 
 **Phase:** M4 · **Priority:** Core differentiator
 

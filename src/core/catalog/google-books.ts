@@ -83,5 +83,7 @@ export function normalizeGoogleBooksDetails(body: unknown): Title | null {
     pageCount: v.pageCount ?? null,
     chapterCount: null,
     volumeCount: null,
+    playtimeHours: null,
+    platforms: [],
   };
 }

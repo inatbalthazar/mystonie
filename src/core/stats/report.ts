@@ -1,10 +1,12 @@
 // The stats page (S1 stats): headline numbers, activity heatmap, per-month bars, taste and records.
 // Components only render this. Per-title rules are `titleWatch`'s (split into dated events here), so the
 // headline equals `summarizeCollection`, i.e. the collection header, for the same period. Reading (S2 books &
-// manga) follows `titleRead`: its totals equal `summarizeReading`, i.e. the Read tab's header.
+// manga) follows `titleRead`: its totals equal `summarizeReading`, i.e. the Read tab's header. Games (S3 games)
+// follow `titlePlay`: their totals equal `summarizePlay`, i.e. the Play tab's header.
 import { RECAP_COLLAGE_MAX, type CardRecap, type StatsPeriod } from "../cards/types";
 import { isReadingKind } from "../catalog/types";
 import { localDateKey, periodRange, safeTimeZone } from "./period";
+import { summarizePlay, titlePlay, type PlayTotals } from "./play";
 import { readingEvents, sumReadEvents, summarizeReading, type ReadingSummary, type StatsReadingLog } from "./reading";
 import { addDays } from "./recap";
 import { summarizeCollection, type CollectionSummary, type StatsEntry, type StatsEpisodeLog, type StatsTitle } from "./summary";
@@ -25,15 +27,18 @@ export type StatsReport = {
   totals: CollectionSummary;
   /** Pages, chapters, volumes, books and manga finished, and the estimated reading time in the period. */
   reading: ReadingSummary;
+  /** Games finished and their play time in the period. */
+  play: PlayTotals;
   /** Days with something watched or read (local `YYYY-MM-DD` → episodes and reading logged + titles finished) in `from`–`to`. */
   heatmap: { from: string; to: string; days: Record<string, number> };
   /** The last 12 local months (`YYYY-MM`), oldest first. */
   months: MonthBar[];
-  /** Watch time (reading time for books and manga) and titles finished by kind, in the period. */
+  /** Watch time (reading time for books and manga, play time for games) and titles finished by kind, in the period. */
   split: {
     movie: { minutes: number; finished: number };
     series: { minutes: number; finished: number };
     reading: { minutes: number; finished: number };
+    play: { minutes: number; finished: number };
   };
   /** Titles watched in the period, per genre / original language: top 5. */
   genres: Ranked[];
@@ -46,6 +51,10 @@ export type StatsReport = {
     busiestMonth: { month: string; minutes: number } | null;
     longestStreak: { days: number; from: string; to: string } | null;
   };
+  /** Days in the period with something watched or read. */
+  activeDays: number;
+  /** The period's most watched, read or played titles (reading time for books and manga, play time for games), at most 5. */
+  topTitles: { name: string; kind: ReportTitle["kind"]; posterUrl: string | null; minutes: number }[];
   /** The "Share stats" card's numbers; null when nothing was watched in the period. */
   card: CardRecap | null;
 };
@@ -113,6 +122,7 @@ export function statsReport(
   const range = periodRange(period, { timeZone, weekStart: options.weekStart, now });
   const totals = summarizeCollection(titles, entries, episodeLogs, range);
   const reading = summarizeReading(titles, entries, readingLogs, range);
+  const play = summarizePlay(titles, entries, range);
 
   // Local dates through a per-hour cache: Intl formatting dominates, and logs cluster in hours. An hour whose
   // two ends fall on different local dates (zones with :30/:45 offsets) is never cached.
@@ -136,7 +146,12 @@ export function statsReport(
   const heatmapDays: Record<string, number> = {};
   const periodDays = new Set<string>();
   const monthMinutes = new Map<string, number>();
-  const split = { movie: { minutes: 0, finished: 0 }, series: { minutes: 0, finished: 0 }, reading: { minutes: 0, finished: 0 } };
+  const split = {
+    movie: { minutes: 0, finished: 0 },
+    series: { minutes: 0, finished: 0 },
+    reading: { minutes: 0, finished: 0 },
+    play: { minutes: 0, finished: 0 },
+  };
   const genres = new Map<string, number>();
   const languages = new Map<string, number>();
   const watched: { title: ReportTitle; minutes: number; finished: boolean }[] = [];
@@ -165,6 +180,22 @@ export function statsReport(
   for (const titleId of new Set([...entryByTitle.keys(), ...logsByTitle.keys(), ...readsByTitle.keys()])) {
     const title = titleById.get(titleId);
     if (!title) continue;
+    if (title.kind === "game") {
+      // A game: its finish marks the day, with all its play time (`titlePlay`).
+      const entry = entryByTitle.get(titleId);
+      const game = titlePlay(title, entry);
+      if (!game.finished || !entry?.finishedAt) continue;
+      const at = Date.parse(entry.finishedAt);
+      const day = dayOf(at);
+      if (day >= heatmapFrom && day <= today) heatmapDays[day] = (heatmapDays[day] ?? 0) + 1;
+      if (!inPeriod(at)) continue;
+      periodDays.add(day);
+      split.play.minutes += game.minutes;
+      split.play.finished += 1;
+      watched.push({ title, minutes: game.minutes, finished: true });
+      taste(title);
+      continue;
+    }
     if (isReadingKind(title.kind)) {
       // Reading: a log or a finish marks the day; the time is the estimate `titleRead` gives.
       const events = readingEvents(title, entryByTitle.get(titleId), readsByTitle.get(titleId) ?? []);
@@ -244,17 +275,22 @@ export function statsReport(
           finished: totals.finished,
           titleCount: watched.length,
           titles: watched.slice(0, RECAP_COLLAGE_MAX).map(({ title }) => ({ name: title.name, kind: title.kind, posterUrl: title.posterUrl })),
+          ...(reading.minutes > 0 ? { readMinutes: reading.minutes } : {}),
+          ...(play.minutes > 0 ? { playMinutes: play.minutes } : {}),
         };
 
   return {
     totals,
     reading,
+    play,
     heatmap: { from: heatmapFrom, to: today, days: heatmapDays },
     months,
     split,
     genres: top(genres),
     languages: top(languages),
     records: { longestMovie, longestSeries, busiestMonth, longestStreak },
+    activeDays: days.length,
+    topTitles: watched.slice(0, TOP).map(({ title, minutes }) => ({ name: title.name, kind: title.kind, posterUrl: title.posterUrl, minutes })),
     card,
   };
 }

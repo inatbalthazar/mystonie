@@ -3,7 +3,7 @@
 import { ImageIcon, PlusIcon } from "lucide-react";
 import Image from "next/image";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { useId, useState, useSyncExternalStore } from "react";
+import { useId, useMemo, useState, useSyncExternalStore } from "react";
 import { isReadingKind, type SearchResult } from "@/core/catalog/types";
 import {
   finishedAtForDate,
@@ -11,6 +11,7 @@ import {
   statusColumns,
   titleKey,
   type CollectionItem,
+  type CollectionTitle,
   type EntryNotes,
   type EntryStatus,
 } from "@/core/collection/entries";
@@ -20,6 +21,7 @@ import {
   isCollectionLayout,
   shelfOf,
   sortRows,
+  summarizePlayRows,
   summarizeReadRows,
   summarizeRows,
   type CollectionFilter,
@@ -32,16 +34,23 @@ import {
 } from "@/core/collection/view";
 import { formatMinutes, formatRuntime } from "@/core/format/runtime";
 import { uuidv7 } from "@/core/ids";
+import type { OpTitle } from "@/core/sync/ops";
+import { overlayCollection, overlayReadLogs, overlayWatchLogs, type Synced } from "@/core/sync/overlay";
 import { localDateKey } from "@/core/stats/period";
+import type { BadgeTopic } from "@/core/warnings";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { CardData } from "@/core/cards/types";
 import { Celebration } from "../celebration";
+import { useMilestones } from "../milestone-celebration";
+import { send, useOverlayOps } from "../offline/outbox";
 import { Sheet } from "../sheet";
-import { CollectionControls, CollectionSummary, ReadSummary, ShelfTabs } from "./collection-header";
+import { useWarningLabel, WarningBadge } from "../warnings/warning-badge";
+import { CollectionControls, CollectionSummary, PlaySummary, ReadSummary, ShelfTabs } from "./collection-header";
 import { QuickAdd } from "./quick-add";
 
-type Row = CollectionItem & { pending?: boolean };
+/** A row as shown: the server's entry with the changes still on this device laid over it (S3 offline). */
+type Row = Synced<CollectionItem>;
 
 const EDIT_ORDER: EntryStatus[] = ["finished", "watching", "want"];
 
@@ -76,6 +85,9 @@ function subscribeLayout(listener: () => void) {
   };
 }
 
+const noSubscribe = () => () => {};
+const readAddParam = () => new URLSearchParams(window.location.search).get("add") === "1";
+
 /** Drops `?add=1` (the header ➕) and `pick` once the sheet closes, so the next ➕ tap opens it again. */
 function clearAddParam() {
   const url = new URL(window.location.href);
@@ -85,17 +97,25 @@ function clearAddParam() {
   window.history.replaceState(null, "", url);
 }
 
-async function send(url: string, method: "POST" | "PATCH", body: unknown): Promise<{ entry?: CollectionItem }> {
-  const res = await fetch(url, { method, headers: { "Content-Type": "application/json" }, body: JSON.stringify(body) });
-  if (!res.ok) throw new Error(String(res.status));
-  return res.json();
-}
+const opTitle = (title: CollectionTitle): OpTitle => ({
+  source: title.source,
+  kind: title.kind,
+  externalId: title.externalId,
+  name: title.name,
+  year: title.year,
+  posterUrl: title.posterUrl,
+});
+
+/** The entry the server answered with, if any. */
+const savedEntry = (body: unknown) => (body as { entry?: CollectionItem } | null)?.entry ?? null;
 
 /**
- * The signed-in user's collection with quick add and editing. Changes show at once (optimistic) and roll
- * back with a notice if the server refuses them.
+ * The signed-in user's collection with quick add and editing. Changes show at once and go through the outbox
+ * (S3 offline): sent right away when online, kept on this device and sent later when not. A change the server
+ * refuses drops out with a notice.
  */
 export function CollectionView({
+  userId,
   initialItems,
   logs,
   readLogs,
@@ -104,7 +124,10 @@ export function CollectionView({
   host,
   startAdding = false,
   startWith = null,
+  warnings = {},
 }: {
+  /** Who is signed in: the owner of the changes made here. */
+  userId: string;
   initialItems: CollectionItem[];
   /** The user's episode logs (runtime and time), for the series rows and the summary. */
   logs: WatchLog[];
@@ -117,15 +140,29 @@ export function CollectionView({
   startAdding?: boolean;
   /** Opens quick add on this title's status step (a trending title tapped on Home). */
   startWith?: SearchResult | null;
+  /** Content warnings: by title id, the user's avoid-topics each title has a Yes for (badges; DTDD's and our own). */
+  warnings?: Record<string, BadgeTopic[]>;
 }) {
   const t = useTranslations("Collection");
   const locale = useLocale();
-  const [items, setItems] = useState<Row[]>(initialItems);
+  // The server's entries (fresh ones arrive with a refresh), with the changes on this device laid over them.
+  const [base, setBase] = useState<CollectionItem[]>(initialItems);
+  const [baseFrom, setBaseFrom] = useState(initialItems);
+  if (baseFrom !== initialItems) {
+    setBaseFrom(initialItems);
+    setBase(initialItems);
+  }
+  const ops = useOverlayOps(userId);
+  const items: Row[] = useMemo(() => overlayCollection(base, ops), [base, ops]);
+  const watchLogs = useMemo(() => overlayWatchLogs(logs, items, ops), [logs, items, ops]);
+  const readingLogs = useMemo(() => overlayReadLogs(readLogs, items, ops), [readLogs, items, ops]);
   const [filter, setFilter] = useState<CollectionFilter>({ year: null, status: null });
-  // Watch · Read. Starts where the picked title belongs, or on Read when there's nothing to watch.
-  const [shelf, setShelf] = useState<CollectionShelf>(() =>
-    startWith ? shelfOf({ title: startWith }) : initialItems.length > 0 && initialItems.every((i) => shelfOf(i) === "read") ? "read" : "watch",
-  );
+  // Watch · Read · Play. Starts where the picked title belongs, or on the one tab with anything on it.
+  const [shelf, setShelf] = useState<CollectionShelf>(() => {
+    if (startWith) return shelfOf({ title: startWith });
+    const shelves = new Set(initialItems.map(shelfOf));
+    return shelves.size === 1 ? [...shelves][0]! : "watch";
+  });
   const [sort, setSort] = useState<CollectionSort>("finished");
   const layout = useSyncExternalStore(subscribeLayout, readLayout, () => "list" as const);
   const [adding, setAdding] = useState(startAdding);
@@ -134,10 +171,18 @@ export function CollectionView({
   // The celebration + card for a finished title (by title key: the saved entry may get another id).
   const [celebrating, setCelebrating] = useState<{ key: string; animate: boolean } | null>(null);
   const celebrated = celebrating && items.find((i) => titleKey(i.title) === celebrating.key && i.finishedAt);
+  // A finish can cross a milestone (the 100th title, 1,000 hours): its card follows the Finish card.
+  const milestones = useMilestones({ username, host });
 
-  function replace(key: string, next: Row | null, cur: Row[]): Row[] {
-    const rest = cur.filter((i) => titleKey(i.title) !== key);
-    return sortCollection(next ? [next, ...rest] : rest);
+  // Offline, the page comes from this device's saved copy, made without `?add=1`: the ➕ link still opens quick add.
+  const addInUrl = useSyncExternalStore(noSubscribe, readAddParam, () => false);
+
+  /** The server's answer replaces its entry in `base` (by title: the server may keep another id). */
+  function keep(key: string, next: CollectionItem | null) {
+    setBase((cur) => {
+      const rest = cur.filter((i) => titleKey(i.title) !== key);
+      return sortCollection(next ? [next, ...rest] : rest);
+    });
   }
 
   function closeAdd() {
@@ -147,7 +192,7 @@ export function CollectionView({
 
   async function add(result: SearchResult, status: EntryStatus, finishedAt: string | null) {
     closeAdd();
-    const title = {
+    const title: OpTitle = {
       source: result.source,
       kind: result.kind,
       externalId: result.externalId,
@@ -157,49 +202,44 @@ export function CollectionView({
     };
     const key = titleKey(title);
     const existing = items.find((i) => titleKey(i.title) === key);
-    const optimistic: Row = {
-      ...(existing ?? { id: uuidv7(), addedAt: new Date().toISOString(), title }),
-      ...statusColumns(status, finishedAt, Date.now()),
-      pending: true,
-    };
-    setItems((cur) => replace(key, optimistic, cur));
     setShelf(shelfOf({ title }));
     setNotice(t("added", { name: title.name }));
     if (status === "finished") setCelebrating({ key, animate: true }); // celebrate first, sync after
-    try {
-      const { entry } = await send("/api/entries", "POST", { id: optimistic.id, title, status, finishedAt: optimistic.finishedAt });
-      setItems((cur) => replace(key, entry!, cur));
-    } catch {
-      setItems((cur) => replace(key, existing ?? null, cur));
-      setNotice(t("addError", { name: title.name }));
-    }
+    const columns = statusColumns(status, finishedAt, Date.now());
+    const saved = await send(userId, { type: "entry.add", entryId: existing?.id ?? uuidv7(), title, ...columns });
+    if (!saved.ok) return setNotice(t("addError", { name: title.name }));
+    keep(key, savedEntry(saved.body));
+    if (saved.superseded) setNotice(t("changedElsewhere", { name: title.name }));
+    else if (status === "finished") milestones.check();
   }
 
   async function update(item: Row, change: { status: EntryStatus; finishedAt: string | null } | { deleted: true }) {
     setEditing(null);
-    const key = titleKey(item.title);
-    setItems((cur) => replace(key, "deleted" in change ? null : { ...item, ...change, pending: true }, cur));
-    setNotice("deleted" in change ? t("removed", { name: item.title.name }) : "");
-    if (!("deleted" in change) && change.status === "finished" && item.status !== "finished") setCelebrating({ key, animate: true });
-    try {
-      const { entry } = await send(`/api/entries/${item.id}`, "PATCH", change);
-      if (entry) setItems((cur) => replace(key, entry, cur));
-    } catch {
-      setItems((cur) => replace(key, item, cur));
-      setNotice(t("saveError"));
-    }
+    const title = opTitle(item.title);
+    const key = titleKey(title);
+    const removing = "deleted" in change;
+    const finishing = !removing && change.status === "finished" && item.status !== "finished";
+    setNotice(removing ? t("removed", { name: title.name }) : "");
+    if (finishing) setCelebrating({ key, animate: true });
+    const saved = await send(
+      userId,
+      removing ? { type: "entry.remove", entryId: item.id, title } : { type: "entry.status", entryId: item.id, title, ...change },
+    );
+    if (!saved.ok) return setNotice(t("saveError"));
+    const entry = savedEntry(saved.body);
+    if (entry || removing) keep(key, entry);
+    if (saved.superseded) setNotice(t("changedElsewhere", { name: title.name }));
+    else if (finishing) milestones.check();
   }
 
   /** Rating / review typed in the celebration: shown at once, saved on the entry. */
   async function saveNotes(item: Row, notes: EntryNotes) {
-    const key = titleKey(item.title);
-    setItems((cur) => cur.map((i) => (titleKey(i.title) === key ? { ...i, ...notes } : i)));
-    try {
-      await send(`/api/entries/${item.id}`, "PATCH", notes);
-    } catch {
-      setItems((cur) => cur.map((i) => (titleKey(i.title) === key ? { ...i, rating: item.rating, review: item.review } : i)));
-      setNotice(t("saveError"));
-    }
+    const title = opTitle(item.title);
+    const saved = await send(userId, { type: "entry.notes", entryId: item.id, title, ...notes });
+    if (!saved.ok) return setNotice(t("saveError"));
+    const entry = savedEntry(saved.body);
+    if (entry) keep(titleKey(title), entry);
+    if (saved.superseded) setNotice(t("changedElsewhere", { name: title.name }));
   }
 
   function closeCelebration(notes: EntryNotes | null) {
@@ -208,10 +248,10 @@ export function CollectionView({
   }
 
   const shelfItems = items.filter((i) => shelfOf(i) === shelf);
-  const years = collectionYears(shelfItems, logs, timeZone, readLogs);
+  const years = collectionYears(shelfItems, watchLogs, timeZone, readingLogs);
   // A year with nothing left in it (its last finish date was moved) falls back to all time.
   const activeFilter = { ...(filter.year !== null && !years.includes(filter.year) ? { ...filter, year: null } : filter), shelf };
-  const rows = sortRows(collectionRows(items, logs, activeFilter, timeZone, readLogs), sort, locale);
+  const rows = sortRows(collectionRows(items, watchLogs, activeFilter, timeZone, readingLogs), sort, locale);
 
   return (
     <>
@@ -220,6 +260,8 @@ export function CollectionView({
           <ShelfTabs shelf={shelf} onShelf={setShelf} />
           {shelf === "read" ? (
             <ReadSummary totals={summarizeReadRows(rows)} year={activeFilter.year} />
+          ) : shelf === "play" ? (
+            <PlaySummary totals={summarizePlayRows(rows)} year={activeFilter.year} />
           ) : (
             <CollectionSummary totals={summarizeRows(rows)} year={activeFilter.year} />
           )}
@@ -249,6 +291,9 @@ export function CollectionView({
           >
             {t("addFirst")}
           </button>
+          <Link href="/settings/import" className="text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground">
+            {t("importLink")}
+          </Link>
         </div>
       ) : shelfItems.length === 0 ? (
         <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-10 text-center">
@@ -276,7 +321,7 @@ export function CollectionView({
         <ul className="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4">
           {rows.map((row, i) => (
             <li key={row.item.id}>
-              <EntryTile row={row} tilt={i} onEdit={() => setEditing(row.item)} />
+              <EntryTile row={row} tilt={i} warning={warnings[row.item.title.id ?? ""]} onEdit={() => setEditing(row.item)} />
             </li>
           ))}
         </ul>
@@ -284,7 +329,7 @@ export function CollectionView({
         <ul className="flex flex-col gap-3">
           {rows.map((row) => (
             <li key={row.item.id}>
-              <EntryRow row={row} timeZone={timeZone} onEdit={() => setEditing(row.item)} />
+              <EntryRow row={row} timeZone={timeZone} warning={warnings[row.item.title.id ?? ""]} onEdit={() => setEditing(row.item)} />
             </li>
           ))}
         </ul>
@@ -299,7 +344,7 @@ export function CollectionView({
         <PlusIcon className="size-8" aria-hidden="true" />
       </button>
 
-      <QuickAdd open={adding} onClose={closeAdd} onAdd={add} timeZone={timeZone} initialPick={startWith} />
+      <QuickAdd open={adding || addInUrl} onClose={closeAdd} onAdd={add} timeZone={timeZone} initialPick={startWith} />
       <Sheet open={!!editing} onClose={() => setEditing(null)} title={editing?.title.name ?? ""} closeLabel={t("close")}>
         {editing && (
           <EntryEditor
@@ -317,26 +362,38 @@ export function CollectionView({
         <Celebration
           key={celebrating.key}
           data={cardData(celebrated, timeZone)}
-          source={{ kind: "finish", entryId: celebrated.id, ready: !celebrated.pending }}
+          source={{ kind: "finish", entryId: celebrated.id, ready: !celebrated.sync }}
+          survivedFor={
+            celebrated.title.source === "tmdb" && (celebrated.title.kind === "movie" || celebrated.title.kind === "series")
+              ? { kind: celebrated.title.kind, externalId: celebrated.title.externalId }
+              : undefined
+          }
           animate={celebrating.animate}
           username={username}
           host={host}
           onClose={closeCelebration}
         />
       )}
+      {!celebrating && milestones.node}
     </>
   );
 }
 
 /**
  * "2h 36m (156 min)" for a movie; "12 / 42 episodes · 9h 10m" for a series; "Chapter 1,100 · 91h 40m read" for a
- * manga, "Page 120 / 320" for a book (short: without the extras).
+ * manga, "Page 120 / 320" for a book; "68h played" for a game with the player's hours, else "About 43h on average"
+ * (RAWG's average playtime) (short: without the extras).
  */
 function useLength() {
   const t = useTranslations("Collection");
   const locale = useLocale();
   return ({ item, lengthMin, episodesLogged, reached }: CollectionRow<Row>, short = false): string => {
     const { title } = item;
+    if (title.kind === "game") {
+      if (!lengthMin) return "";
+      const time = formatRuntime(lengthMin, locale);
+      return item.hoursPlayed ? t("playedLength", { time }) : short ? t("averageShort", { time }) : t("averageLength", { time });
+    }
     if (isReadingKind(title.kind)) {
       const n = (v: number) => v.toLocaleString(locale);
       const total = (v: number | null | undefined) => (v ? n(v) : "none");
@@ -368,9 +425,10 @@ function useLength() {
   };
 }
 
-function EntryRow({ row, timeZone, onEdit }: { row: CollectionRow<Row>; timeZone: string; onEdit: () => void }) {
+function EntryRow({ row, timeZone, warning, onEdit }: { row: CollectionRow<Row>; timeZone: string; warning?: BadgeTopic[]; onEdit: () => void }) {
   const { item } = row;
   const t = useTranslations("Collection");
+  const warningLabel = useWarningLabel()(warning);
   const home = useTranslations("Home");
   const format = useFormatter();
   const length = useLength()(row);
@@ -380,14 +438,15 @@ function EntryRow({ row, timeZone, onEdit }: { row: CollectionRow<Row>; timeZone
     <button
       type="button"
       onClick={onEdit}
-      aria-label={t("edit", { name: item.title.name })}
+      aria-label={[t("edit", { name: item.title.name }), warningLabel].filter(Boolean).join(". ")}
       className={cn(
         "relative flex w-full items-center gap-3 rounded-2xl bg-card p-2 pr-4 text-left shadow-[0_1px_2px_rgb(0_0_0/0.06),0_6px_16px_-10px_rgb(0_0_0/0.25)] ring-1 ring-border transition-colors hover:ring-brand/40",
-        item.pending && "opacity-70",
+        item.sync && "opacity-70",
       )}
     >
       <span className="relative aspect-[2/3] w-14 shrink-0 overflow-hidden rounded-lg bg-muted">
         {item.title.posterUrl && <Image src={item.title.posterUrl} alt="" fill unoptimized sizes="56px" className="object-cover" />}
+        {warningLabel && <WarningBadge label={warningLabel} className="absolute top-0.5 right-0.5 size-6" />}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="line-clamp-2 font-semibold leading-snug">{item.title.name}</span>
@@ -397,7 +456,13 @@ function EntryRow({ row, timeZone, onEdit }: { row: CollectionRow<Row>; timeZone
         </span>
         {length && <span className="text-xs font-medium tabular-nums">{length}</span>}
         <span className="text-xs text-muted-foreground">
-          {item.pending ? t("saving") : item.finishedAt ? t("finishedDate", { date }) : t("addedDate", { date })}
+          {item.sync === "waiting"
+            ? t("waitingToSync")
+            : item.sync
+              ? t("saving")
+              : item.finishedAt
+                ? t("finishedDate", { date, shelf: shelfOf(item) })
+                : t("addedDate", { date })}
         </span>
       </span>
       <StatusStamp status={item.status} shelf={shelfOf(item)} />
@@ -411,16 +476,17 @@ const TILTS = ["rotate-[-1.5deg]", "rotate-[1deg]", "rotate-[-0.5deg]", "rotate-
  * A poster pasted into the album (tiles view): a paper frame, a slight tilt that alternates down the
  * page, the status stamp on the corner and the length under it.
  */
-function EntryTile({ row, tilt, onEdit }: { row: CollectionRow<Row>; tilt: number; onEdit: () => void }) {
+function EntryTile({ row, tilt, warning, onEdit }: { row: CollectionRow<Row>; tilt: number; warning?: BadgeTopic[]; onEdit: () => void }) {
   const { item } = row;
   const t = useTranslations("Collection");
+  const warningLabel = useWarningLabel()(warning);
   const length = useLength()(row, true);
   return (
     <button
       type="button"
       onClick={onEdit}
-      aria-label={t("edit", { name: item.title.name })}
-      className={cn("group flex w-full flex-col gap-1.5 text-left", TILTS[tilt % TILTS.length], item.pending && "opacity-70")}
+      aria-label={[t("edit", { name: item.title.name }), warningLabel].filter(Boolean).join(". ")}
+      className={cn("group flex w-full flex-col gap-1.5 text-left", TILTS[tilt % TILTS.length], item.sync && "opacity-70")}
     >
       <span className="relative block rounded-md bg-card p-1 pb-1.5 shadow-[0_1px_2px_rgb(0_0_0/0.08),0_8px_18px_-12px_rgb(0_0_0/0.4)] ring-1 ring-border transition-transform group-hover:-translate-y-0.5 group-hover:ring-brand/40">
         <span className="relative block aspect-[2/3] overflow-hidden rounded-[3px] bg-muted">
@@ -432,6 +498,7 @@ function EntryTile({ row, tilt, onEdit }: { row: CollectionRow<Row>; tilt: numbe
             </span>
           )}
         </span>
+        {warningLabel && <WarningBadge label={warningLabel} className="absolute -top-2 -right-2" />}
         <span className="absolute inset-x-0 -bottom-2.5 flex justify-center">
           <span className="rounded-md bg-card/95">
             <StatusStamp status={item.status} shelf={shelfOf(item)} small />
@@ -476,8 +543,11 @@ function cardData(item: Row, timeZone: string): CardData {
     pageCount: title.pageCount,
     chapterCount: title.chapterCount,
     volumeCount: title.volumeCount,
+    playtimeHours: title.playtimeHours ?? null,
+    hoursPlayed: item.hoursPlayed ?? null,
     rating: item.rating ?? null,
     review: item.review ?? null,
+    finisherNo: item.finisherNo ?? null,
     finishedOn: localDateKey(Date.parse(item.finishedAt ?? item.addedAt), timeZone),
   };
 }
@@ -547,7 +617,7 @@ function EntryEditor({
         </div>
       )}
 
-      {item.status === "finished" && item.finishedAt && !item.pending && (
+      {item.status === "finished" && item.finishedAt && !item.sync && (
         <button
           type="button"
           onClick={onCard}
@@ -558,14 +628,18 @@ function EntryEditor({
         </button>
       )}
 
-      {item.title.kind !== "movie" && (
-        <Link
-          href={`/title/${item.title.kind}/${item.title.externalId}`}
-          className="flex h-12 items-center justify-center rounded-2xl font-semibold ring-1 ring-border hover:bg-muted"
-        >
-          {item.title.kind === "series" ? t("episodes") : t("readingProgress")}
-        </Link>
-      )}
+      <Link
+        href={`/title/${item.title.kind}/${item.title.externalId}`}
+        className="flex h-12 items-center justify-center rounded-2xl font-semibold ring-1 ring-border hover:bg-muted"
+      >
+        {item.title.kind === "series"
+          ? t("episodes")
+          : item.title.kind === "movie"
+            ? t("whereToWatch")
+            : item.title.kind === "game"
+              ? t("aboutGame")
+              : t("readingProgress")}
+      </Link>
 
       <button
         type="button"

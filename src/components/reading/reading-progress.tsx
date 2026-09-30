@@ -2,25 +2,30 @@
 
 import { ImageIcon, PartyPopperIcon, XIcon } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { useId, useState } from "react";
+import { useId, useMemo, useState } from "react";
 import type { ReadingKind } from "@/core/catalog/types";
 import { readingProgress } from "@/core/cards/saved";
 import type { CardData, CardReading } from "@/core/cards/types";
-import type { CollectionItem, EntryNotes, EntryStatus } from "@/core/collection/entries";
+import type { EntryNotes, EntryStatus } from "@/core/collection/entries";
 import { READING_SECONDS, readingAmounts, readingPosition, unitsFor, unitTotal, type ReadingLengths, type ReadingLog, type ReadingUnit } from "@/core/collection/reading";
 import { formatRuntime } from "@/core/format/runtime";
 import { uuidv7 } from "@/core/ids";
+import type { OpTitle } from "@/core/sync/ops";
+import { overlayReadingLogs, overlayTitleState, type EntrySnapshot, type ReadingLogged, type TitleState } from "@/core/sync/overlay";
 import { localDateKey } from "@/core/stats/period";
 import { cn } from "@/lib/utils";
 import { Celebration } from "../celebration";
+import { useMilestones } from "../milestone-celebration";
+import { send, useOverlayOps } from "../offline/outbox";
+import { entrySnapshot } from "../series/series-episodes";
 
-export type ReadLogged = { id: string; unit: ReadingUnit; position: number; readAt: string; pending?: boolean };
+export type ReadLogged = ReadingLogged;
 
 /** The book or manga as card inputs (everything but the date and progress). */
 export type ReadingCard = Omit<CardData, "finishedOn" | "reading" | "progress">;
 
 /** The user's entry for the title, when there is one (finish cards and their rating / review). */
-export type ReadingEntry = { id: string; finishedAt: string | null; rating: number | null; review: string | null };
+export type ReadingEntry = EntrySnapshot;
 
 const HISTORY = 8;
 
@@ -29,9 +34,11 @@ const asLogs = (logs: readonly ReadLogged[]): ReadingLog[] => logs.map((l) => ({
 /**
  * Reading progress for a book or manga (S2 books & manga): where the reader is, one tap to log the next page, chapter or
  * volume (or type any number: catching up on chapter 1100 is one log), the recent log with undo, a Progress card
- * offered after each log, and "Finished it? 🎉" once the end is reached. Optimistic, rolled back on failure.
+ * offered after each log, and "Finished it? 🎉" once the end is reached. Logs show at once and go through the outbox,
+ * so they work offline too (S3 offline); one the server refuses drops out with a notice.
  */
 export function ReadingProgress({
+  userId,
   kind,
   externalId,
   lengths,
@@ -43,6 +50,8 @@ export function ReadingProgress({
   username,
   host,
 }: {
+  /** Who is signed in: the owner of the logs made here. */
+  userId: string;
   kind: ReadingKind;
   externalId: string;
   lengths: ReadingLengths;
@@ -59,9 +68,22 @@ export function ReadingProgress({
   const format = useFormatter();
   const inputId = useId();
   const [today] = useState(() => localDateKey(Date.now(), timeZone));
-  const [logs, setLogs] = useState<ReadLogged[]>(initialLogs);
-  const [status, setStatus] = useState<EntryStatus | null>(initialStatus);
-  const [entry, setEntry] = useState<ReadingEntry | null>(initialEntry);
+  const title: OpTitle = useMemo(
+    () => ({ source: kind === "book" ? "google_books" : "anilist", kind, externalId, name: card.name, year: card.year ?? null, posterUrl: card.posterUrl ?? null }),
+    [kind, externalId, card.name, card.year, card.posterUrl],
+  );
+  // The server's logs and entry (fresh ones arrive with a refresh), with the changes on this device laid over them.
+  const [baseLogs, setBaseLogs] = useState<ReadLogged[]>(initialLogs);
+  const [baseState, setBaseState] = useState<TitleState>({ status: initialStatus, entry: initialEntry });
+  const [from, setFrom] = useState({ initialLogs, initialStatus, initialEntry });
+  if (from.initialLogs !== initialLogs || from.initialStatus !== initialStatus || from.initialEntry !== initialEntry) {
+    setFrom({ initialLogs, initialStatus, initialEntry });
+    setBaseLogs(initialLogs);
+    setBaseState({ status: initialStatus, entry: initialEntry });
+  }
+  const ops = useOverlayOps(userId);
+  const logs = useMemo(() => overlayReadingLogs(title, baseLogs, ops), [title, baseLogs, ops]);
+  const { status, entry, sync: entrySync } = useMemo(() => overlayTitleState(title, baseState, ops), [title, baseState, ops]);
   // Manga: chapters unless only volumes were logged so far.
   const [unit, setUnit] = useState<ReadingUnit>(() => {
     const units = unitsFor(kind);
@@ -73,6 +95,8 @@ export function ReadingProgress({
   const [offer, setOffer] = useState<{ logId: string; reading: CardReading } | null>(null);
   const [celebrating, setCelebrating] = useState<"finish" | "progress" | null>(null);
   const [animate, setAnimate] = useState(false);
+  // Finishing can cross a milestone (the 100th title): its card follows the Finish card.
+  const milestones = useMilestones({ username, host });
 
   const n = (v: number) => format.number(v);
   const position = readingPosition(logs, unit);
@@ -85,100 +109,66 @@ export function ReadingProgress({
   async function log(target: number) {
     if (!Number.isInteger(target) || target < 1) return;
     if (total && target > total) return setNotice(t("pastEnd", { total: label(unit, total) }));
-    const fresh: ReadLogged = { id: uuidv7(), unit, position: target, readAt: new Date().toISOString(), pending: true };
-    const before = logs;
-    setLogs((cur) => [...cur.filter((l) => !(l.unit === unit && l.position === target)), fresh]);
+    const logId = uuidv7();
     setValue("");
-    setOffer(null);
     setNotice(t("logged", { position: label(unit, target) }));
-    try {
-      const res = await fetch("/api/reading", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: fresh.id, kind, externalId, unit, position: target }),
-      });
-      if (!res.ok) throw new Error(String(res.status));
-      const result = (await res.json()) as { logs: ReadLogged[]; logId: string; status: EntryStatus };
-      setLogs(result.logs);
-      setStatus(result.status);
-      const reading = readingProgress(lengths, asLogs(before), asLogs(result.logs), unit, target);
-      if (result.status !== "finished" && total && readingPosition(result.logs, unit) >= total) setAskFinish(true);
-      setOffer({ logId: result.logId, reading });
-    } catch {
-      setLogs(before);
-      setNotice(t("logError"));
+    // The Progress card and "Finished it?" are worked out here, so they work offline too (a point logged before keeps
+    // its log, as on the server).
+    const already = logs.find((l) => l.unit === unit && l.position === target);
+    const now = already ? logs : [...logs, { id: logId, unit, position: target, readAt: new Date().toISOString() }];
+    if (status !== "finished" && total && readingPosition(now, unit) >= total) setAskFinish(true);
+    setOffer({ logId: already?.id ?? logId, reading: readingProgress(lengths, asLogs(logs), asLogs(now), unit, target) });
+    const saved = await send(userId, { type: "reading.log", logId, title, unit, position: target });
+    if (!saved.ok) {
+      setOffer(null);
+      setAskFinish(false);
+      return setNotice(t("logError"));
     }
+    const result = saved.body as { logs: ReadLogged[]; logId: string; status: EntryStatus };
+    setBaseLogs(result.logs);
+    setBaseState((cur) => ({ ...cur, status: result.status }));
+    setOffer((cur) => (cur?.logId === logId ? { ...cur, logId: result.logId } : cur));
   }
 
   async function unlog(item: ReadLogged) {
-    const before = logs;
-    setLogs((cur) => cur.filter((l) => l.id !== item.id));
     setOffer((cur) => (cur?.logId === item.id ? null : cur));
     setNotice(t("unlogged", { position: label(item.unit, item.position) }));
-    try {
-      const res = await fetch(`/api/reading/${item.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ deleted: true }),
-      });
-      if (!res.ok) throw new Error(String(res.status));
-    } catch {
-      setLogs(before);
-      setNotice(t("logError"));
-    }
+    const saved = await send(userId, { type: "reading.unlog", logId: item.id, title, unit: item.unit, position: item.position });
+    if (!saved.ok) return setNotice(t("logError"));
+    setBaseLogs((cur) => cur.filter((l) => l.id !== item.id));
   }
 
   async function finish() {
     setAskFinish(false);
     setOffer(null);
-    const before = status;
-    const beforeEntry = entry;
-    setStatus("finished");
     setNotice(t("finishedNotice"));
     // Celebrate first: the card shows now and can be shared once the entry is saved.
-    setEntry((cur) => (cur ? { ...cur, finishedAt: new Date().toISOString() } : null));
     setAnimate(true);
     setCelebrating("finish");
-    try {
-      const source = kind === "book" ? "google_books" : "anilist";
-      const res = await fetch("/api/entries", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: uuidv7(), title: { source, kind, externalId }, status: "finished" }),
-      });
-      if (!res.ok) throw new Error(String(res.status));
-      const saved = (await res.json()).entry as CollectionItem;
-      setEntry({ id: saved.id, finishedAt: saved.finishedAt, rating: saved.rating ?? null, review: saved.review ?? null });
-    } catch {
-      setStatus(before);
-      setEntry(beforeEntry);
+    const saved = await send(userId, { type: "entry.add", entryId: entry?.id ?? uuidv7(), title, status: "finished", finishedAt: new Date().toISOString() });
+    if (!saved.ok) {
       setCelebrating(null);
-      setNotice(t("logError"));
+      return setNotice(t("logError"));
     }
+    const kept = entrySnapshot(saved.body);
+    if (kept) setBaseState(kept);
+    if (!saved.superseded) milestones.check();
   }
 
   async function closeCelebration(notes: EntryNotes | null) {
     setCelebrating(null);
     if (!notes || !entry) return;
-    const before = entry;
-    setEntry({ ...entry, ...notes });
-    try {
-      const res = await fetch(`/api/entries/${entry.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(notes),
-      });
-      if (!res.ok) throw new Error(String(res.status));
-    } catch {
-      setEntry(before);
-      setNotice(t("logError"));
-    }
+    const saved = await send(userId, { type: "entry.notes", entryId: entry.id, title, ...notes });
+    if (!saved.ok) return setNotice(t("logError"));
+    const kept = entrySnapshot(saved.body);
+    if (kept) setBaseState(kept);
   }
 
   const finishCard: CardData = {
     ...card,
     rating: entry?.rating ?? null,
     review: entry?.review ?? null,
+    finisherNo: entry?.finisherNo ?? null,
     finishedOn: entry?.finishedAt ? localDateKey(Date.parse(entry.finishedAt), timeZone) : today,
   };
   const history = [...logs].sort((a, b) => Date.parse(b.readAt) - Date.parse(a.readAt) || (a.id < b.id ? 1 : -1)).slice(0, HISTORY);
@@ -343,16 +333,16 @@ export function ReadingProgress({
           </h2>
           <ul className="flex flex-col divide-y divide-dashed divide-border rounded-2xl bg-card px-4 ring-1 ring-border">
             {history.map((item) => (
-              <li key={item.id} className={cn("flex min-h-12 items-center justify-between gap-3", item.pending && "opacity-60")}>
+              <li key={item.id} className={cn("flex min-h-12 items-center justify-between gap-3", item.sync && "opacity-60")}>
                 <span className="text-sm tabular-nums">
                   {t("historyItem", {
                     position: label(item.unit, item.position),
                     date: format.dateTime(new Date(item.readAt), { dateStyle: "medium", timeZone }),
                   })}
+                  {item.sync === "waiting" && <span className="text-muted-foreground"> · {t("waitingToSync")}</span>}
                 </span>
                 <button
                   type="button"
-                  disabled={item.pending}
                   onClick={() => unlog(item)}
                   aria-label={t("remove", { position: label(item.unit, item.position) })}
                   className="flex size-11 items-center justify-center rounded-lg text-muted-foreground hover:bg-muted hover:text-foreground disabled:opacity-40"
@@ -368,7 +358,7 @@ export function ReadingProgress({
       {celebrating === "finish" && (
         <Celebration
           data={finishCard}
-          source={{ kind: "finish", entryId: entry?.id ?? "", ready: !!entry?.id && status === "finished" }}
+          source={{ kind: "finish", entryId: entry?.id ?? "", ready: !!entry?.id && status === "finished" && !entrySync }}
           animate={animate}
           username={username}
           host={host}
@@ -378,12 +368,13 @@ export function ReadingProgress({
       {celebrating === "progress" && offer && (
         <Celebration
           data={{ ...card, finishedOn: today, reading: offer.reading }}
-          source={{ kind: "progress", episodeLogId: null, readingLogId: offer.logId, ready: true }}
+          source={{ kind: "progress", episodeLogId: null, readingLogId: offer.logId, ready: !logs.find((l) => l.id === offer.logId)?.sync }}
           username={username}
           host={host}
           onClose={() => setCelebrating(null)}
         />
       )}
+      {!celebrating && milestones.node}
     </div>
   );
 }

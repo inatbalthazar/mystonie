@@ -1,46 +1,72 @@
+import { FlameIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
 import type { Locale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
+import { RememberTitles } from "@/components/offline/recent-titles";
 import { InstallPrompt } from "@/components/pwa/install-prompt";
 import { PushPrompt } from "@/components/pwa/push";
 import { RecapNote } from "@/components/recap-note";
 import { UpNext, type UpNextSeries } from "@/components/series/up-next";
 import { SharedCardImage, SignupFromCard } from "@/components/shared-card";
+import { ChallengeNote, type NoteChallenge } from "@/components/challenges/challenge-note";
+import { BoardNote } from "@/components/social/board-note";
+import { FriendsFinished } from "@/components/social/friends-finished";
+import { QuizNote } from "@/components/warnings/quiz-note";
 import { localizedPath } from "@/core/auth";
-import type { SearchResult } from "@/core/catalog/types";
+import { currentMonth, isChallengeSlug, monthChallenges } from "@/core/challenges";
+import { localDateKey, safeTimeZone } from "@/core/stats/period";
+import { reviewSeasonYear } from "@/core/stats/year-review";
+import { blendTrending, type TrendingTitle } from "@/core/trending";
+import { friendBoard } from "@/data/board";
 import { recentCards } from "@/data/cards";
+import { userJoins, type ChallengeJoin } from "@/data/challenges";
+import { followingFeed } from "@/data/social";
 import { listCollection } from "@/data/entries";
 import { cachedEpisodes, episodeLogs } from "@/data/episodes";
 import { pushConfig } from "@/data/push";
 import { latestRecap } from "@/data/recaps";
-import { userClient } from "@/data/supabase-server";
+import { userClient, type UserClient } from "@/data/supabase-server";
 import { trendingTitles } from "@/data/tmdb";
+import { ownTrending } from "@/data/trending";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
 
 const RECENT_CARDS = 6;
 const TRENDING = 9;
+/** Friends' finishes on Home, picked from the first feed items (which include the viewer's own). */
+const FRIENDS = 3;
+const FRIENDS_LOOKAHEAD = 12;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("HomeApp");
   return { title: `${t("title")} · Mystonie`, robots: { index: false, follow: false } };
 }
 
-/** Trending never blocks Home: no token, or TMDB down, just hides the section. */
-async function loadTrending(): Promise<SearchResult[]> {
-  try {
-    return (await trendingTitles()).filter((r) => r.kind === "movie" || r.kind === "series").slice(0, TRENDING);
-  } catch (error) {
-    console.warn(`Trending unavailable: ${error instanceof Error ? error.message : String(error)}`);
-    return [];
-  }
+/**
+ * Trending never blocks Home: what people on Mystonie finished this week first (S3 finishers & the board), then
+ * TMDB's weekly list. No token, or TMDB down, leaves our own; nothing at all hides the section.
+ */
+async function loadTrending(db: UserClient): Promise<TrendingTitle[]> {
+  const [own, world] = await Promise.all([
+    ownTrending(db),
+    trendingTitles().then(
+      (list) => list.filter((r) => r.kind === "movie" || r.kind === "series"),
+      (error: unknown) => {
+        console.warn(`Trending unavailable: ${error instanceof Error ? error.message : String(error)}`);
+        return [];
+      },
+    ),
+  ]);
+  return blendTrending(own, world, TRENDING);
 }
 
 /**
- * Home (signed-in landing, S1 collection): the week's recap note, the next episode of every series being watched,
- * the user's recent cards and what's trending (one tap into quick add). Also offers installing the app and, once
+ * Home (signed-in landing, S1 collection): the Year in Review note (December and January, ADR 0031), the latest
+ * recap's note, the next episode of every series being watched,
+ * the user's recent cards and what's trending (one tap into quick add). Stage 3 adds friends' finishes, the board,
+ * this month's challenges and the warnings quiz. Also offers installing the app and, once
  * installed, recap notifications (ADR 0028).
  */
 export default async function HomePage({ params }: PageProps<"/[locale]/home">) {
@@ -53,8 +79,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
   const userId = data?.claims.sub;
   if (!supabase || !userId) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
-  const [{ data: profile }, items, cards, recap, trending, t, format] = await Promise.all([
-    supabase.from("profiles").select("time_zone, username, display_name, created_at").eq("id", userId).single(),
+  const [{ data: profile }, items, cards, recap, trending, feed, t, format] = await Promise.all([
+    supabase.from("profiles").select("time_zone, username, display_name, avatar_url, created_at").eq("id", userId).single(),
     listCollection(supabase, userId),
     recentCards(supabase, userId, RECENT_CARDS).catch((error: unknown) => {
       console.error(error);
@@ -64,7 +90,11 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
       console.error(error);
       return null;
     }),
-    loadTrending(),
+    loadTrending(supabase),
+    followingFeed(supabase, userId, null, FRIENDS_LOOKAHEAD).catch((error: unknown) => {
+      console.error(error);
+      return [];
+    }),
     getTranslations("HomeApp"),
     getFormatter(),
   ]);
@@ -72,7 +102,29 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
   // "Up next": series being watched whose episodes are cached (quick add caches them after adding).
   const watching = items.filter((i) => i.status === "watching" && i.title.kind === "series" && i.title.id);
   const ids = watching.map((i) => i.title.id!);
-  const [episodes, logs] = await Promise.all([cachedEpisodes(supabase, ids), episodeLogs(supabase, userId, ids)]);
+  const timeZone = profile?.time_zone ?? "UTC";
+  // eslint-disable-next-line react-hooks/purity -- a server render, once per request
+  const now = Date.now();
+  const viewer = { id: userId, username: profile?.username ?? "", displayName: profile?.display_name ?? null, avatarUrl: profile?.avatar_url ?? null };
+  const month = currentMonth(now, timeZone);
+  const [episodes, logs, board, joins] = await Promise.all([
+    cachedEpisodes(supabase, ids),
+    episodeLogs(supabase, userId, ids),
+    friendBoard(supabase, viewer, "week", timeZone, now).catch((error: unknown) => {
+      console.error(error);
+      return null;
+    }),
+    userJoins(supabase, userId, month).catch((error: unknown): ChallengeJoin[] => {
+      console.error(error);
+      return [];
+    }),
+  ]);
+  // This month's challenges: progress as the last save recorded it (S3 challenges & clubs).
+  const challenges: NoteChallenge[] = monthChallenges(month).flatMap(({ slug, rule }) => {
+    if (!isChallengeSlug(slug)) return [];
+    const join = joins.find((j) => j.slug === slug);
+    return [{ slug, target: rule.target, value: join?.progress ?? 0, joined: !!join, completed: !!join?.completedAt }];
+  });
   const upNext: UpNextSeries[] = watching.map((i) => ({
     externalId: i.title.externalId,
     name: i.title.name,
@@ -80,12 +132,14 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
     episodes: episodes.get(i.title.id!) ?? [],
     logs: logs.get(i.title.id!) ?? [],
   }));
-  const timeZone = profile?.time_zone ?? "UTC";
-  // eslint-disable-next-line react-hooks/purity -- a server render, once per request
-  const now = Date.now();
   // Sign-in lands here: an account made in the last few minutes is a sign-up (signup_from_card).
   const newAccount = !!profile && now - Date.parse(profile.created_at) < 15 * 60 * 1000;
   const name = profile?.display_name || profile?.username || "";
+  // Year in Review: this year in December, last year in January, once something was finished in it.
+  const reviewYear = reviewSeasonYear(now, timeZone);
+  const hasReview =
+    reviewYear !== null && items.some((i) => i.finishedAt && localDateKey(Date.parse(i.finishedAt), safeTimeZone(timeZone)).startsWith(`${reviewYear}-`));
+  const friends = feed.filter((i) => !i.mine).slice(0, FRIENDS);
   const publicKey = pushConfig()?.publicKey;
   const host = siteUrl().host;
 
@@ -103,8 +157,27 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
 
       <InstallPrompt />
       {publicKey && <PushPrompt publicKey={publicKey} />}
+      {hasReview && (
+        <Link
+          href={`/review/${reviewYear}`}
+          className="group relative flex rotate-[0.6deg] flex-col gap-1 rounded-2xl bg-card p-5 pt-6 shadow-md ring-1 ring-border hover:ring-brand/50"
+        >
+          <span aria-hidden="true" className="absolute -top-3 left-10 h-6 w-20 -rotate-3 rounded-[2px] bg-brand-soft/90 ring-1 ring-brand/10" />
+          <span className="font-display text-5xl leading-none font-extrabold tracking-[-0.04em] tabular-nums">{reviewYear}</span>
+          <span className="font-hand text-2xl leading-tight">{t("reviewTitle", { year: reviewYear })}</span>
+          <span className="text-sm text-muted-foreground">{t("reviewBody")}</span>
+          <span className="mt-2 inline-flex h-11 items-center self-start rounded-xl bg-brand px-4 font-semibold text-brand-foreground group-hover:bg-brand/90">
+            {t("reviewCta")}
+          </span>
+        </Link>
+      )}
       {recap && <RecapNote recap={recap} />}
-      <UpNext series={upNext} timeZone={timeZone} />
+      <UpNext userId={userId} series={upNext} timeZone={timeZone} />
+      <FriendsFinished items={friends} now={now} />
+      {board && board.following > 0 && <BoardNote rows={board.rows} />}
+      <ChallengeNote month={month} challenges={challenges} />
+      {/* The warnings quiz asks about finished titles (S3 warnings & quiz). */}
+      {items.some((i) => i.status === "finished") && <QuizNote />}
 
       <section aria-labelledby="recent-cards" className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between gap-3">
@@ -134,7 +207,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
               const image = (
                 <SharedCardImage
                   imageUrl={card.imageUrl}
-                  alt={t("cardAlt", { name: card.data.recap ? t("recapCard") : card.data.name })}
+                  alt={t("cardAlt", { name: card.data.milestone ? t("milestoneCard") : card.data.recap?.highlights ? t("yearCard") : card.data.recap ? t("recapCard") : card.data.name })}
                   templateId={card.templateId}
                   size={card.size}
                   data={card.data}
@@ -163,19 +236,31 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
             <h2 id="trending" className="font-display text-xl font-extrabold">
               {t("trending")}
             </h2>
-            <p className="text-sm text-muted-foreground">{t("trendingHint")}</p>
+            <p className="text-sm text-muted-foreground">{trending.some((r) => r.people) ? t("trendingOwnHint") : t("trendingHint")}</p>
           </div>
+          {/* Offline, quick add offers titles seen lately: trending ones count, after the ones the user opened. */}
+          <RememberTitles titles={trending} later />
           <ul className="grid grid-cols-3 gap-x-3 gap-y-4">
             {trending.map((r, i) => (
               <li key={`${r.kind}-${r.externalId}`} className={i % 2 ? "rotate-[1deg]" : "rotate-[-1deg]"}>
                 {/* Straight to the status step of quick add: two taps to a finished title. */}
                 <Link
                   href={{ pathname: "/collection", query: { add: "1", pick: `${r.kind}:${r.externalId}` } }}
-                  aria-label={t("addTitle", { name: r.name })}
+                  aria-label={r.people ? t("addTrendingTitle", { name: r.name, count: r.people }) : t("addTitle", { name: r.name })}
                   className="group block"
                 >
                   <span className="relative block aspect-[2/3] overflow-hidden rounded-md bg-muted shadow-sm ring-1 ring-border transition-transform group-hover:-translate-y-0.5">
                     {r.imageUrl && <Image src={r.imageUrl} alt="" fill unoptimized sizes="120px" className="object-cover" />}
+                    {r.people && (
+                      // Trending on Mystonie: how many people were on it this week, as a little inked tag.
+                      <span
+                        title={t("trendingPeople", { count: r.people })}
+                        className="absolute bottom-1.5 left-1.5 flex -rotate-3 items-center gap-1 rounded-full bg-card/95 px-2 py-0.5 text-xs font-bold text-brand shadow-sm ring-1 ring-brand/30"
+                      >
+                        <FlameIcon className="size-3.5" aria-hidden="true" />
+                        {format.number(r.people)}
+                      </span>
+                    )}
                   </span>
                   <span className="mt-1.5 line-clamp-2 text-xs font-medium">{r.name}</span>
                 </Link>

@@ -1,0 +1,8 @@
+uuid,user_id,series_name,s_id,season_number,episode_number,type,created_at,movie_name,release_date,runtime
+a1,9,The Office,73244,1,1,watch,2021-03-04 20:00:00,,,1320
+a2,9,The Office,73244,1,1,rewatch,2021-03-05 20:00:00,,,1320
+a3,9,The Office,73244,0,1,watch,2021-03-06 20:00:00,,,1320
+a4,9,The Office,73244,,,count-watch,2021-03-07 20:00:00,,,0
+a5,9,Doctor Who (2005),78804,1,1,watch,2020-01-01 10:00:00,,,2700
+a6,9,,,,,watch,2020-07-16 19:00:00,Inception,2010-07-16,8880
+a7,9,,,,,towatch,2024-03-01 09:00:00,Dune: Part Two,2024-03-01,9960

@@ -1,4 +1,4 @@
-import { DownloadIcon } from "lucide-react";
+import { DownloadIcon, FileSpreadsheetIcon, TriangleAlertIcon, UploadIcon } from "lucide-react";
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -11,9 +11,12 @@ import { ProfileForm } from "@/components/settings/profile-form";
 import { SettingSwitch } from "@/components/settings/setting-switch";
 import { isTheme } from "@/core/account";
 import { localizedPath } from "@/core/auth";
+import { countryOptions, isCountryCode } from "@/core/countries";
 import { pushConfig } from "@/data/push";
+import { getProState } from "@/data/subscriptions";
 import { userClient } from "@/data/supabase-server";
-import { redirect } from "@/i18n/navigation";
+import { avoidTopicIds } from "@/data/warnings";
+import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -37,15 +40,18 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
   if (!supabase || !user) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
-  const [{ data: profile }, t] = await Promise.all([
+  const [{ data: profile }, t, tw, avoid] = await Promise.all([
     supabase
       .from("profiles")
-      .select("username, display_name, avatar_url, time_zone, theme, visibility, email_recaps")
+      .select("username, display_name, avatar_url, time_zone, country, theme, visibility, email_recaps")
       .eq("id", user.id)
       .single(),
     getTranslations("Settings"),
+    getTranslations("Warnings"),
+    avoidTopicIds(supabase, user.id),
   ]);
   const pushKey = pushConfig()?.publicKey;
+  const pro = await getProState(supabase, user.id).catch(() => null);
   const rows: [string, string][] = [
     [t("email"), user.email ?? ""],
     [t("signedInWith"), user.app_metadata.provider === "google" ? t("providerGoogle") : t("providerEmail")],
@@ -69,8 +75,22 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
             <Preferences
               timeZone={profile.time_zone}
               timeZones={timeZones()}
+              country={isCountryCode(profile.country) ? profile.country : null}
+              countries={countryOptions(locale)}
               theme={isTheme(profile.theme) ? profile.theme : "system"}
             />
+          </PaperCard>
+          <PaperCard>
+            <h2 className="font-display text-lg font-bold">{tw("title")}</h2>
+            <p className="mt-1 text-sm text-muted-foreground">{tw("settingsBody")}</p>
+            <p className="mt-3 text-sm font-semibold">{tw("settingsCount", { count: avoid.length })}</p>
+            <Link
+              href="/settings/warnings"
+              className="mt-4 inline-flex h-11 items-center gap-2 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
+            >
+              <TriangleAlertIcon className="size-4" aria-hidden="true" />
+              {tw("settingsLink")}
+            </Link>
           </PaperCard>
           <PaperCard>
             <h2 className="mb-3 font-display text-lg font-bold">{t("emails")}</h2>
@@ -96,18 +116,49 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
         </dl>
         <SignOutForm next={localizedPath("/", locale, routing.defaultLocale)} />
       </PaperCard>
+      {pro?.available && (
+        <PaperCard stamp={pro.pro ? t("proStamp") : undefined}>
+          <h2 className="font-display text-lg font-bold">{t("proTitle")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{pro.pro ? t("proActive") : t("proBody")}</p>
+          <Link href="/pro" className="mt-4 inline-flex h-11 items-center rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted">
+            {pro.pro ? t("proManage") : t("proLink")}
+          </Link>
+        </PaperCard>
+      )}
+      <PaperCard>
+        <h2 className="font-display text-lg font-bold">{t("importTitle")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("importBody")}</p>
+        <Link
+          href="/settings/import"
+          className="mt-4 inline-flex h-11 items-center gap-2 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
+        >
+          <UploadIcon className="size-4" aria-hidden="true" />
+          {t("importLink")}
+        </Link>
+      </PaperCard>
       <section className="flex flex-col gap-3 rounded-2xl border-2 border-dashed border-border p-5">
         <h2 className="font-display text-lg font-bold">{t("yourData")}</h2>
         <p className="text-sm text-muted-foreground">{t("exportBody")}</p>
         {/* A plain link: the browser downloads the file (Content-Disposition), no script needed. */}
-        <a
-          href="/api/account/export"
-          download
-          className="inline-flex h-11 items-center gap-2 self-start rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
-        >
-          <DownloadIcon className="size-4" aria-hidden="true" />
-          {t("exportButton")}
-        </a>
+        <div className="flex flex-wrap gap-3">
+          <a
+            href="/api/account/export"
+            download
+            className="inline-flex h-11 items-center gap-2 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
+          >
+            <DownloadIcon className="size-4" aria-hidden="true" />
+            {t("exportButton")}
+          </a>
+          {/* The collection as spreadsheets that import back (S3 import & export). */}
+          <a
+            href="/api/account/export/csv"
+            download
+            className="inline-flex h-11 items-center gap-2 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
+          >
+            <FileSpreadsheetIcon className="size-4" aria-hidden="true" />
+            {t("exportCsvButton")}
+          </a>
+        </div>
       </section>
       <DeleteAccount />
     </main>

@@ -22,6 +22,16 @@ export async function rateLimited(request: Request, bucket: string, limit: Limit
   );
 }
 
+/**
+ * A 409 when a change saved on this device while offline was made in another account than the one signed in now
+ * (`X-Mystonie-User`, S3 offline): it waits for its own account instead of landing in this one. Else null.
+ */
+export function otherAccount(request: Request, userId: string): Response | null {
+  const from = request.headers.get("x-mystonie-user");
+  if (!from || from === userId) return null;
+  return Response.json({ error: "other_account" }, { status: 409, headers: { "Cache-Control": "no-store" } });
+}
+
 /** Maps catalog failures to a JSON error the UI can show as "try again". */
 export function catalogError(error: unknown): Response {
   const status = error instanceof CatalogError ? error.status : 500;

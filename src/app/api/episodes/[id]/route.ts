@@ -1,3 +1,4 @@
+import { otherAccount } from "@/app/api/_lib/http";
 import { isUuidV7 } from "@/core/ids";
 import { unlogEpisode } from "@/data/episodes";
 import { userClient } from "@/data/supabase-server";
@@ -14,6 +15,8 @@ export async function PATCH(request: Request, ctx: RouteContext<"/api/episodes/[
   if (!supabase) return Response.json({ error: "unavailable" }, { status: 503, headers: noStore });
   const { data: auth } = await supabase.auth.getClaims();
   if (!auth?.claims.sub) return Response.json({ error: "unauthorized" }, { status: 401, headers: noStore });
+  const other = otherAccount(request, auth.claims.sub);
+  if (other) return other;
 
   try {
     if (!(await unlogEpisode(supabase, id))) return Response.json({ error: "not_found" }, { status: 404, headers: noStore });

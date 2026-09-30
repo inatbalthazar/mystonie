@@ -11,7 +11,7 @@
     "searchError": "ค้นหาไม่ได้ตอนนี้ ลองใหม่อีกครั้ง",
     "rateLimited": "ช้าลงนิดนึง แล้วลองใหม่",
     "trendingTitle": "มาแรงสัปดาห์นี้",
-    "titleMeta": "{kind, select, movie {หนัง} series {ซีรีส์} book {หนังสือ} manga {มังงะ} other {เรื่อง}}{year, select, none {} other { · {year}}}",
+    "titleMeta": "{kind, select, movie {หนัง} series {ซีรีส์} book {หนังสือ} manga {มังงะ} game {เกม} other {เรื่อง}}{year, select, none {} other { · {year}}}",
     "detailsError": "โหลดรายละเอียดไม่ได้",
     "clearPick": "ล้างการเลือก",
     "headline": "ดูจบแล้ว? <mark>Mystonie เลย</mark>",
@@ -26,9 +26,12 @@
     "addFirst": "เพิ่มเรื่องที่เพิ่งดูจบ",
     "seeProfile": "ดูหน้าของคุณ",
     "cardAlt": "การ์ด: {name}",
-    "recapCard": "สรุปประจำสัปดาห์",
+    "recapCard": "การ์ดสรุป",
     "trending": "มาแรงสัปดาห์นี้",
     "trendingHint": "ดูเรื่องไหนแล้ว แตะเพื่อเพิ่มลงคอลเลกชัน",
+    "trendingOwnHint": "เริ่มจากเรื่องที่คนบน Mystonie ดูหรืออ่านจบกันสัปดาห์นี้ ตามด้วยเรื่องที่คนทั่วโลกกำลังดู แตะเพื่อเพิ่มลงคอลเลกชัน",
+    "trendingPeople": "สัปดาห์นี้มีคนบน Mystonie {count} คน",
+    "addTrendingTitle": "เพิ่ม {name} (สัปดาห์นี้มีคนบน Mystonie {count} คน)",
     "addTitle": "เพิ่ม {name}",
     "installTitle": "เก็บ Mystonie ไว้บนหน้าจอหลัก",
     "installBody": "เปิดได้เหมือนแอป และแจ้งเตือนได้เมื่อสรุปประจำสัปดาห์พร้อม",
@@ -39,7 +42,12 @@
     "pushTitle": "รับสรุปประจำสัปดาห์เป็นการแจ้งเตือน",
     "pushBody": "ทุกเช้าวันจันทร์ เมื่อการ์ดสรุปของคุณพร้อม",
     "pushOn": "เปิด",
-    "pushError": "เปิดการแจ้งเตือนไม่ได้ ลองอีกครั้งจากหน้าการตั้งค่า"
+    "pushError": "เปิดการแจ้งเตือนไม่ได้ ลองอีกครั้งจากหน้าการตั้งค่า",
+    "milestoneCard": "หมุดหมาย",
+    "yearCard": "สรุปทั้งปี",
+    "reviewTitle": "สรุปปี {year} ของคุณมาแล้ว",
+    "reviewBody": "ทั้งปีที่คุณดูและอ่าน ทีละหน้า",
+    "reviewCta": "เปิดดูปีของฉัน"
   },
   "LocaleSwitcher": {
     "label": "ภาษา"
@@ -49,13 +57,14 @@
     "backHome": "กลับหน้าแรก"
   },
   "Attribution": {
-    "tmdb": "ผลิตภัณฑ์นี้ใช้ TMDB API แต่ไม่ได้รับการรับรองจาก TMDB"
+    "tmdb": "ผลิตภัณฑ์นี้ใช้ TMDB API แต่ไม่ได้รับการรับรองจาก TMDB",
+    "rawg": "ข้อมูลและภาพเกมจาก RAWG"
   },
   "Card": {
     "finished": "ดูจบแล้ว",
     "finishedOn": "ดูจบ {date}",
     "admitOne": "บัตรเข้าชม",
-    "kind": "{kind, select, movie {หนัง} series {ซีรีส์} book {หนังสือ} manga {มังงะ} other {เรื่อง}}",
+    "kind": "{kind, select, movie {หนัง} series {ซีรีส์} book {หนังสือ} manga {มังงะ} game {เกม} other {เรื่อง}}",
     "episodes": "ตอน",
     "seasons": "ซีซัน",
     "hours": "ชั่วโมง",
@@ -68,7 +77,15 @@
       "polaroid": "โพลารอยด์",
       "boldStats": "ตัวเลขใหญ่",
       "sticker": "สติกเกอร์",
-      "collage": "คอลลาจ"
+      "collage": "คอลลาจ",
+      "spine": "สันหนังสือ",
+      "mangaPanel": "ช่องมังงะ",
+      "stone": "ศิลาจารึก",
+      "yearbook": "สมุดรายปี",
+      "filmStrip": "Film Strip",
+      "survived": "รอดมาได้",
+      "calendar": "Calendar",
+      "cartridge": "ตลับเกม"
     },
     "sizes": {
       "story": "สตอรี่ 9:16",
@@ -99,11 +116,38 @@
     "titlesFinished": "{count, plural, other {ดูจบ}}",
     "titlesWatched": "{period, select, month {เดือนนี้} year {ปีนี้} all {ทั้งหมด} other {สัปดาห์นี้}} {count, plural, other {# เรื่อง}}",
     "finishedRead": "อ่านจบแล้ว",
+    "finishedPlay": "เล่นจบแล้ว",
+    "finisher": "Finisher",
     "readingHeadline": "{unit, select, page {หน้า {position}} chapter {ตอนที่ {position}} other {เล่ม {position}}}",
     "readingCount": "{unit, select, page {หน้า} chapter {ตอน} other {เล่ม}} {position}/{total}",
     "pages": "หน้า",
     "chapters": "ตอน",
-    "volumes": "เล่ม"
+    "volumes": "เล่ม",
+    "readHours": "ชั่วโมงที่อ่าน",
+    "readMinutes": "นาทีที่อ่าน",
+    "playHours": "ชั่วโมงที่เล่น",
+    "playMinutes": "นาทีที่เล่น",
+    "hoursPlayed": "{count, plural, other {ชั่วโมงที่เล่น}}",
+    "hoursAverage": "{count, plural, other {ชั่วโมงโดยเฉลี่ย}}",
+    "hoursLabel": "เล่นไปกี่ชั่วโมง",
+    "hoursHint": "ใส่เป็นชั่วโมงเต็ม ตามที่เครื่องเกมหรือ launcher บอก",
+    "hoursHintAverage": "ใส่เป็นชั่วโมงเต็ม ตามที่เครื่องเกมหรือ launcher บอก ถ้าเว้นว่าง การ์ดจะแสดงเวลาเฉลี่ย ({hours} ชม.)",
+    "milestoneHeadline": "{metric, select, titles {เรื่องที่ {value, number}} hours {{count} ชั่วโมง} other {{count} ตอน}}",
+    "milestoneLabel": "{metric, select, titles {เรื่องที่ดูจบ} hours {ชั่วโมงที่ดู} other {ตอนที่ดู}}",
+    "milestoneBy": "ด้วยเรื่อง {name}",
+    "challengeHeadline": "ชาเลนจ์สำเร็จ",
+    "challengeUnit": "{unit, select, titles {เรื่องที่จบ} languages {ภาษา} kinds {ประเภท} hours {ชั่วโมง} other {วัน}}",
+    "challengeBy": "สำเร็จด้วย {name}",
+    "yearInReview": "สรุปทั้งปี",
+    "topGenre": "แนวที่ดูเยอะสุด",
+    "busiestMonth": "เดือนที่ดูเยอะสุด",
+    "bestStreak": "ต่อเนื่องนานสุด",
+    "streakDays": "{count, plural, other {# วัน}}",
+    "importHeadline": "นำเข้า{unit, select, book {หนังสือ {count, plural, other {# เล่ม}}} series {ซีรีส์ {count, plural, other {# เรื่อง}}} manga {มังงะ {count, plural, other {# เรื่อง}}} game {เกม {count, plural, other {# เกม}}} title {{count, plural, other {# เรื่อง}}} other {หนัง {count, plural, other {# เรื่อง}}}}",
+    "filmEdge": "Mystonie 400 · Safety film",
+    "filmFrame": "▸ 12A",
+    "survivedBadge": "รอดมาได้",
+    "survivedHeadline": "รอดจาก{scare, select, jumpScares {ฉากตุ้งแช่} zombies {ซอมบี้} possession {ผีเข้า} ghosts {ผี} clowns {ตัวตลก} dolls {ตุ๊กตาหลอน} gore {เลือดสาด} spiders {แมงมุม} snakes {งู} sharks {ฉลาม} other {เข็มฉีดยา}}มาได้"
   },
   "Waitlist": {
     "heading": "อยากเก็บการ์ดทั้งหมดไว้ในที่เดียว? ลงชื่อรอไว้เลย",
@@ -157,19 +201,19 @@
       "ignore": "ไม่ได้พยายามเข้าสู่ระบบใช่ไหม ไม่ต้องทำอะไร ไม่มีใครเข้าบัญชีได้หากไม่มีรหัสนี้"
     },
     "recap": {
-      "subject": "สัปดาห์ของคุณบน Mystonie ({range})",
+      "subject": "{period, select, month {เดือนของคุณบน Mystonie ({range})} other {สัปดาห์ของคุณบน Mystonie ({range})}}",
       "preheader": "{summary} การ์ดสรุปพร้อมแล้ว",
-      "stamp": "สัปดาห์นี้",
-      "heading": "นี่คือสัปดาห์ของคุณ {range}",
-      "body": "สัปดาห์นี้มี {titles, plural, other {# เรื่อง}} เข้ามาอยู่ในคอลเลกชันของคุณ การ์ดสรุปพร้อมให้แชร์ หรือเก็บไว้ในสมุดสะสม",
+      "stamp": "{period, select, month {เดือนนี้} other {สัปดาห์นี้}}",
+      "heading": "{period, select, month {นี่คือเดือนของคุณ {range}} other {นี่คือสัปดาห์ของคุณ {range}}}",
+      "body": "{period, select, month {เดือนนี้} other {สัปดาห์นี้}}มี {titles, plural, other {# เรื่อง}} เข้ามาอยู่ในคอลเลกชันของคุณ การ์ดสรุปพร้อมให้แชร์ หรือเก็บไว้ในสมุดสะสม",
       "cta": "เปิดการ์ดสรุปของฉัน",
-      "why": "คุณได้รับอีเมลนี้เพราะเปิดสรุปประจำสัปดาห์ไว้ในบัญชี Mystonie",
+      "why": "คุณได้รับอีเมลนี้เพราะเปิดการสรุปไว้ในบัญชี Mystonie",
       "unsubscribe": "ปิดอีเมลสรุป"
     }
   },
   "Push": {
     "recap": {
-      "title": "สรุปสัปดาห์ของคุณมาแล้ว: {range}",
+      "title": "{period, select, month {สรุปเดือนของคุณมาแล้ว: {range}} other {สรุปสัปดาห์ของคุณมาแล้ว: {range}}}",
       "body": "{summary} แตะเพื่อดูการ์ดสรุป"
     }
   },
@@ -224,6 +268,9 @@
     "providerEmail": "รหัสทางอีเมล",
     "language": "ภาษา",
     "timeZone": "เขตเวลา",
+    "country": "ประเทศ",
+    "countryNotSet": "ยังไม่ได้ตั้ง",
+    "countryHint": "ใช้กับ \"ดูได้ที่ไหน\": บริการสตรีมมิงในประเทศนี้",
     "signOut": "ออกจากระบบ",
     "deleteTitle": "ลบบัญชี",
     "deleteBody": "การลบบัญชีจะลบโปรไฟล์และทุกอย่างที่คุณบันทึกไว้ และกู้คืนไม่ได้",
@@ -259,15 +306,25 @@
     "themeOption": "{theme, select, light {สว่าง} dark {มืด} other {ตามระบบ}}",
     "useDeviceTimeZone": "ใช้เขตเวลาของอุปกรณ์นี้ ({zone})",
     "yourData": "ข้อมูลของคุณ",
-    "exportBody": "ดาวน์โหลดทุกอย่างที่คุณบันทึกไว้ (เรื่อง ตอน การ์ด และสรุป) เป็นไฟล์ JSON",
+    "exportBody": "ดาวน์โหลดทุกอย่างที่คุณบันทึกไว้เป็นไฟล์ JSON หรือคอลเลกชันเป็นสเปรดชีต (CSV) ที่เปิดได้ทุกที่และนำเข้ากลับมา Mystonie ได้",
     "exportButton": "ส่งออกข้อมูลของฉัน",
+    "exportCsvButton": "ส่งออกเป็น CSV",
     "notifications": "การแจ้งเตือน",
     "pushRecaps": "แจ้งเตือนสรุปประจำสัปดาห์",
     "pushRecapsHint": "บนอุปกรณ์นี้ ทุกเช้าวันจันทร์เมื่อการ์ดสรุปของคุณพร้อม",
     "pushBlocked": "การแจ้งเตือนของ Mystonie ถูกปิดอยู่ เปิดได้ในการตั้งค่าของอุปกรณ์ก่อน",
     "pushInstall": "ติดตั้ง Mystonie บนอุปกรณ์นี้ (จากเมนูของเบราว์เซอร์) แล้วเปิดจากหน้าจอหลัก เพื่อรับสรุปประจำสัปดาห์เป็นการแจ้งเตือน",
     "pushInstallIos": "เพิ่ม Mystonie ลงในหน้าจอโฮม (แชร์ แล้วเลือก “เพิ่มไปยังหน้าจอโฮม”) แล้วเปิดจากตรงนั้นเพื่อเปิดการแจ้งเตือน",
-    "pushError": "เปลี่ยนการแจ้งเตือนไม่ได้ ลองอีกครั้ง"
+    "pushError": "เปลี่ยนการแจ้งเตือนไม่ได้ ลองอีกครั้ง",
+    "importTitle": "ย้ายมาจากแอปอื่น?",
+    "importBody": "นำประวัติของคุณมาจาก Letterboxd, Goodreads, MyAnimeList หรือ TV Time: เรื่องที่จบแล้วพร้อมวันที่และคะแนน เรื่องที่กำลังดูและอ่าน และเรื่องต่อไป",
+    "importLink": "นำเข้าประวัติของคุณ",
+    "proTitle": "Mystonie Pro",
+    "proStamp": "PRO",
+    "proBody": "สไตล์การ์ด Pro ได้ของใหม่ก่อนใคร และช่วยให้ Mystonie ไปต่อได้",
+    "proActive": "คุณเป็น Pro แล้ว ขอบคุณที่ช่วยให้ Mystonie ไปต่อได้",
+    "proLink": "ดู Pro",
+    "proManage": "จัดการ Pro"
   },
   "Collection": {
     "title": "คอลเลกชันของคุณ",
@@ -279,9 +336,9 @@
     "close": "ปิด",
     "backToSearch": "กลับไปค้นหา",
     "status": "สถานะ",
-    "statusLabel": "{status, select, finished {{shelf, select, read {อ่านจบแล้ว} other {ดูจบแล้ว}}} watching {{shelf, select, read {กำลังอ่าน} other {กำลังดู}}} other {{shelf, select, read {อยากอ่าน} other {อยากดู}}}}",
+    "statusLabel": "{status, select, finished {{shelf, select, read {อ่านจบแล้ว} play {เล่นจบแล้ว} other {ดูจบแล้ว}}} watching {{shelf, select, read {กำลังอ่าน} play {กำลังเล่น} other {กำลังดู}}} other {{shelf, select, read {อยากอ่าน} play {อยากเล่น} other {อยากดู}}}}",
     "finishedOn": "ดูจบเมื่อ",
-    "finishedDate": "ดูจบ {date}",
+    "finishedDate": "{shelf, select, read {อ่านจบ {date}} play {เล่นจบ {date}} other {ดูจบ {date}}}",
     "addedDate": "เพิ่มเมื่อ {date}",
     "saving": "กำลังบันทึก…",
     "added": "เพิ่ม “{name}” แล้ว",
@@ -311,28 +368,39 @@
     "seriesEpisodes": "{total, select, none {{watched} ตอน} other {{watched} / {total} ตอน}}",
     "seriesLength": "{episodes} · {time}",
     "makeCard": "ทำการ์ด",
-    "searchLabel": "ค้นหาหนัง ซีรีส์ หนังสือ และมังงะ",
+    "searchLabel": "ค้นหาหนัง ซีรีส์ หนังสือ มังงะ และเกม",
     "searchPlaceholder": "เพิ่งจบเรื่องอะไรมา?",
     "searchTypes": "ค้นหาอะไร",
-    "searchType": "{type, select, all {ทั้งหมด} screen {หนังและซีรีส์} book {หนังสือ} other {มังงะ}}",
+    "searchType": "{type, select, all {ทั้งหมด} screen {หนังและซีรีส์} book {หนังสือ} game {เกม} other {มังงะ}}",
     "shelves": "แท็บคอลเลกชัน",
-    "shelf": "{shelf, select, read {อ่าน} other {ดู}}",
+    "shelf": "{shelf, select, read {อ่าน} play {เล่น} other {ดู}}",
     "readTime": "เวลาที่อ่าน",
     "titlesRead": "อ่านจบ",
     "readTimeHint": "เวลาอ่านเป็นค่าประมาณ: หน้าละ 1.5 นาที มังงะตอนละ 5 นาที เล่มละ 45 นาที",
+    "playTime": "เวลาที่เล่น",
+    "gamesFinished": "เกมที่เล่นจบ",
+    "playTimeHint": "เวลาที่เล่นคือชั่วโมงที่คุณใส่ไว้ของแต่ละเกม ถ้าไม่ได้ใส่ จะใช้เวลาเล่นเฉลี่ยจาก RAWG",
+    "playedLength": "เล่นไป {time}",
+    "averageLength": "เฉลี่ยราว {time}",
+    "averageShort": "เฉลี่ย ~{time}",
     "pagesRead": "หน้า",
     "chaptersRead": "ตอน",
     "volumesRead": "เล่ม",
-    "emptyShelf": "{shelf, select, read {ยังไม่มีหนังสือหรือมังงะ} other {ยังไม่มีหนังหรือซีรีส์}}",
-    "addToShelf": "{shelf, select, read {เพิ่มหนังสือหรือมังงะ} other {เพิ่มหนังหรือซีรีส์}}",
+    "emptyShelf": "{shelf, select, read {ยังไม่มีหนังสือหรือมังงะ} play {ยังไม่มีเกม} other {ยังไม่มีหนังหรือซีรีส์}}",
+    "addToShelf": "{shelf, select, read {เพิ่มหนังสือหรือมังงะ} play {เพิ่มเกม} other {เพิ่มหนังหรือซีรีส์}}",
     "readingProgress": "ความคืบหน้าการอ่าน",
+    "aboutGame": "ข้อมูลเกมนี้",
+    "whereToWatch": "ดูได้ที่ไหน",
     "readPages": "{total, select, none {หน้า {read}} other {หน้า {read} / {total}}}",
     "readChapters": "{total, select, none {ตอนที่ {read}} other {ตอนที่ {read} / {total}}}",
     "readVolumes": "{total, select, none {เล่ม {read}} other {เล่ม {read} / {total}}}",
     "pageCount": "{count} หน้า",
     "chapterCount": "{count} ตอน",
     "volumeCount": "{count} เล่ม",
-    "readLength": "{progress} · อ่านไป {time}"
+    "readLength": "{progress} · อ่านไป {time}",
+    "importLink": "ย้ายมาจากแอปอื่น? นำเข้าประวัติของคุณ",
+    "waitingToSync": "รอซิงก์",
+    "changedElsewhere": "“{name}” ถูกแก้ไขในอุปกรณ์อื่นหลังจากนี้ จึงใช้การแก้ไขนั้นแทน"
   },
   "Series": {
     "backToCollection": "← คอลเลกชันของคุณ",
@@ -366,13 +434,31 @@
     "progressOffer": "บันทึก S{season} · E{episode} แล้ว ทำการ์ดไหม?",
     "milestoneOffer": "{milestone, select, 25 {มาได้หนึ่งในสี่แล้ว! 🎉} 50 {ครึ่งทางแล้ว! 🎉} other {ใกล้จบแล้ว! 🎉}}",
     "makeProgressCard": "ทำการ์ด",
-    "makeFinishCard": "ทำการ์ดดูจบ"
+    "makeFinishCard": "ทำการ์ดดูจบ",
+    "waitingToSync": "รอซิงก์"
+  },
+  "Movie": {
+    "meta": "ภาพยนตร์{year, select, none {} other { · {year}}}",
+    "loadError": "โหลดภาพยนตร์เรื่องนี้ไม่ได้ในตอนนี้ ลองใหม่อีกครั้ง"
+  },
+  "WhereToWatch": {
+    "title": "ดูได้ที่ไหน",
+    "country": "ประเทศ",
+    "chooseCountry": "เลือกประเทศ",
+    "pickCountry": "เลือกประเทศของคุณเพื่อดูว่าเรื่องนี้สตรีมได้ที่ไหน",
+    "group": "{group, select, stream {สตรีม} free {ดูฟรี} other {เช่าหรือซื้อ}}",
+    "provider": "{provider}: {group, select, stream {สตรีม} free {ดูฟรี} other {เช่าหรือซื้อ}} (เปิด TMDB)",
+    "none": "ตอนนี้ยังไม่มีให้สตรีม ดูฟรี หรือซื้อใน{country}",
+    "error": "โหลดข้อมูลว่าดูได้ที่ไหนไม่ได้ในตอนนี้ ลองใหม่อีกครั้ง",
+    "attribution": "ข้อมูลสตรีมมิงจาก <link>JustWatch</link>",
+    "saveError": "บันทึกประเทศไม่ได้ ลองใหม่อีกครั้ง"
   },
   "Celebration": {
     "yourCard": "การ์ดของคุณ",
     "skip": "ข้าม",
     "done": "เสร็จ",
     "finishedTitle": "ดู {name} จบแล้ว!",
+    "finisherLine": "คุณคือ Finisher #{number} บน Mystonie",
     "progressTitle": "ดู {name} ไปอีกหนึ่งตอน",
     "milestoneTitle": "{milestone, select, 25 {ดู {name} ไปได้หนึ่งในสี่แล้ว} 50 {ดู {name} มาครึ่งทางแล้ว!} other {{name} ใกล้จบแล้ว!}}",
     "styleLabel": "{style} · ปัดเพื่อเปลี่ยนสไตล์",
@@ -386,11 +472,22 @@
     "publishError": "เผยแพร่ลิงก์การ์ดไม่สำเร็จ ลองอีกครั้ง หรือกดดาวน์โหลด",
     "linkCopied": "คัดลอกลิงก์แล้ว วางได้ทุกที่",
     "hideOnCard": "ซ่อนบนการ์ด",
-    "hideItem": "{item, select, username {@{username}} time {{shelf, select, read {เวลาที่อ่าน} other {เวลาที่ดู}}} episodes {{shelf, select, read {ความคืบหน้า} other {จำนวนตอน}}} other {ซีซัน}}",
+    "hideItem": "{item, select, username {@{username}} time {{shelf, select, read {เวลาที่อ่าน} play {เวลาที่เล่น} other {เวลาที่ดู}}} episodes {{shelf, select, read {ความคืบหน้า} other {จำนวนตอน}}} finisher {Finisher #} other {ซีซัน}}",
     "notesTitle": "ให้คะแนนไหม? (ไม่บังคับ)",
     "recapTitle": "{period, select, month {เดือนของคุณ} year {ปีของคุณ} all {ที่ดูมาทั้งหมด} other {สัปดาห์ของคุณ}} {range}",
     "finishedReadTitle": "อ่าน {name} จบแล้ว!",
-    "readingTitle": "{unit, select, page {{name} หน้า {position}} chapter {{name} ตอนที่ {position}} other {{name} เล่ม {position}}}"
+    "finishedPlayTitle": "เล่น {name} จบแล้ว!",
+    "readingTitle": "{unit, select, page {{name} หน้า {position}} chapter {{name} ตอนที่ {position}} other {{name} เล่ม {position}}}",
+    "milestoneCardTitle": "{metric, select, titles {นี่คือเรื่องที่ {value, number} ของคุณ!} hours {ดูไปแล้ว {count} ชั่วโมง!} other {ดูไปแล้ว {count} ตอน!}}",
+    "challengeCardTitle": "คุณทำ {name} สำเร็จแล้ว!",
+    "yearTitle": "สรุปปี {year} ของคุณ",
+    "importTitle": "นำเข้า{unit, select, book {หนังสือ {count, plural, other {# เล่ม}}} series {ซีรีส์ {count, plural, other {# เรื่อง}}} manga {มังงะ {count, plural, other {# เรื่อง}}} game {เกม {count, plural, other {# เกม}}} title {{count, plural, other {# เรื่อง}}} other {หนัง {count, plural, other {# เรื่อง}}}} {range}",
+    "styleLabelPro": "{style} (Pro) · ปัดเพื่อเปลี่ยนสไตล์",
+    "proLocked": "{style} เป็นสไตล์ Pro แชร์และดาวน์โหลดได้เมื่อเป็น Pro",
+    "proUnlock": "ปลดล็อก",
+    "survivedOffer": "คุณผ่าน{scare, select, jumpScares {ฉากตุ้งแช่} zombies {ซอมบี้} possession {ผีเข้า} ghosts {ผี} clowns {ตัวตลก} dolls {ตุ๊กตาหลอน} gore {เลือดสาด} spiders {แมงมุม} snakes {งู} sharks {ฉลาม} other {เข็มฉีดยา}}มาได้แล้ว",
+    "survivedTry": "ทำเป็นการ์ด Survived",
+    "shareOffline": "แชร์ได้เมื่อกลับมาออนไลน์"
   },
   "SharedCard": {
     "notFoundTitle": "ไม่พบการ์ด · Mystonie",
@@ -406,11 +503,12 @@
     "makeYourOwn": "ทำการ์ดของคุณ",
     "startCollection": "เริ่มคอลเลกชันของคุณ",
     "recapLine": "{period, select, month {หนึ่งเดือนของการดู} year {หนึ่งปีของการดู} all {ที่ดูมาทั้งหมด} other {หนึ่งสัปดาห์ของการดู}} {range}",
-    "byUserLink": "จากคอลเลกชันของ <link>@{username}</link>"
+    "byUserLink": "จากคอลเลกชันของ <link>@{username}</link>",
+    "importLine": "นำเข้า{unit, select, book {หนังสือ {count, plural, other {# เล่ม}}} series {ซีรีส์ {count, plural, other {# เรื่อง}}} manga {มังงะ {count, plural, other {# เรื่อง}}} game {เกม {count, plural, other {# เกม}}} title {{count, plural, other {# เรื่อง}}} other {หนัง {count, plural, other {# เรื่อง}}}} {range}"
   },
   "Recap": {
-    "pageTitle": "สรุปประจำสัปดาห์",
-    "noteTitle": "สรุปสัปดาห์มาแล้ว: {range}",
+    "pageTitle": "การ์ดสรุป",
+    "noteTitle": "{period, select, month {สรุปเดือนมาแล้ว: {range}} other {สรุปสัปดาห์มาแล้ว: {range}}}",
     "noteCta": "ดูการ์ดสรุป"
   },
   "Stats": {
@@ -452,11 +550,20 @@
     "emptyCta": "บันทึกเรื่องแรกของคุณ",
     "emptyPeriod": "ช่วงนี้ยังไม่มีบันทึก",
     "reading": "หนังสือและมังงะ",
+    "games": "เกม",
     "readingTime": "เวลาที่อ่าน",
     "pagesRead": "หน้าที่อ่าน",
     "chaptersRead": "ตอนที่อ่าน",
     "volumesRead": "เล่มที่อ่าน",
-    "readingHint": "เวลาอ่านเป็นค่าประมาณ: หน้าละ 1.5 นาที มังงะตอนละ 5 นาที เล่มละ 45 นาที"
+    "readingHint": "เวลาอ่านเป็นค่าประมาณ: หน้าละ 1.5 นาที มังงะตอนละ 5 นาที เล่มละ 45 นาที",
+    "playTime": "เวลาที่เล่น",
+    "gamesFinished": "เกมที่เล่นจบ",
+    "playHint": "เวลาที่เล่นคือชั่วโมงที่คุณใส่ไว้ของแต่ละเกม หรือเวลาเล่นเฉลี่ยจาก RAWG",
+    "milestones": "หมุดหมาย",
+    "milestonesHint": "ตัวเลขกลมๆ ที่คุณทำได้แล้ว แตะเพื่อทำการ์ด",
+    "milestoneOn": "{date} · {name}",
+    "milestonesEmpty": "หมุดหมายแรกคือดูจบครบ 10 เรื่อง",
+    "yearReviewLink": "ดูสรุปปี {year} ของคุณ"
   },
   "Profile": {
     "metaTitle": "{name} (@{username})",
@@ -464,7 +571,7 @@
     "handle": "@{username}",
     "collectingSince": "เริ่มสะสมตั้งแต่ {date}",
     "statsTitle": "คอลเลกชันจนถึงตอนนี้",
-    "watchingNow": "กำลังดูอยู่",
+    "watchingNow": "ช่วงนี้กำลังติด",
     "gallery": "แกลเลอรีการ์ด",
     "galleryEmpty": "ยังไม่ได้แชร์การ์ด",
     "cardAlt": "การ์ด: {name}",
@@ -475,7 +582,212 @@
     "openSettings": "เปลี่ยนได้ในการตั้งค่า",
     "ctaTitle": "เริ่มคอลเลกชันของคุณเอง",
     "ctaBody": "บันทึกเรื่องที่ดูจบ แล้วรับการ์ดของแต่ละเรื่อง",
-    "ctaButton": "ทำการ์ดใบแรก"
+    "ctaButton": "ทำการ์ดใบแรก",
+    "milestoneCard": "หมุดหมาย",
+    "yearCard": "สรุปทั้งปี",
+    "followers": "ผู้ติดตาม <b>{count}</b>",
+    "followingCount": "กำลังติดตาม <b>{count}</b>",
+    "findPeople": "หาคนที่จะติดตาม",
+    "blockedTitle": "คุณบล็อก @{username} อยู่",
+    "blockedBody": "คุณทั้งสองจะไม่เห็นคอลเลกชัน เรื่องที่ดูจบ หรือการ์ดของกันและกัน และติดตามกันไม่ได้",
+    "shelf": "ชั้นสะสม",
+    "shelfHint": "ทุกเรื่องที่จบแล้ว ล่าสุดก่อน",
+    "shelfMore": "+ จบอีก {count} เรื่อง",
+    "shelfItem": "{name} ({kind, select, movie {หนัง} series {ซีรีส์} book {หนังสือ} manga {มังงะ} game {เกม} other {เรื่อง}})"
+  },
+  "Social": {
+    "follow": "ติดตาม",
+    "following": "กำลังติดตาม",
+    "problem": "{problem, select, limited {ช้าลงหน่อย แล้วลองใหม่อีกครั้ง} gone {ไม่พบคนนี้แล้ว} other {ทำไม่สำเร็จ ลองใหม่อีกครั้งในอีกสักครู่}}",
+    "stamp": "ปั๊ม",
+    "stamped": "ปั๊มแล้ว",
+    "unstamp": "ยกเลิกตราปั๊ม",
+    "stampCount": "{count} ตราปั๊ม",
+    "block": "บล็อก",
+    "unblock": "เลิกบล็อก",
+    "blocking": "กำลังบล็อก…",
+    "blockTitle": "บล็อก @{username} ไหม",
+    "blockBody": "คุณทั้งสองจะไม่เห็นคอลเลกชัน เรื่องที่ดูจบ หรือการ์ดของกันและกัน การติดตามและตราปั๊มระหว่างกันจะถูกลบ โดยอีกฝ่ายจะไม่ได้รับแจ้ง",
+    "blockConfirm": "บล็อก @{username}",
+    "close": "ปิด",
+    "you": "คุณ",
+    "handle": "@{username}",
+    "finishedWhen": "ดูจบ {when}",
+    "finishedLabel": "จบแล้ว",
+    "rated": "ให้ {rating} จาก 5 ดาว",
+    "cardAlt": "การ์ด: {name}",
+    "loadMore": "โหลดเพิ่ม",
+    "loading": "กำลังโหลด…",
+    "feedTitle": "กำลังติดตาม",
+    "feedKicker": "คนของคุณดูอะไรจบบ้าง",
+    "findPeople": "หาคน",
+    "feedEmpty": "ติดตามคนอื่นเพื่อดูว่าเขาดูอะไรจบ แล้วปั๊มตราให้เขา",
+    "activityTitle": "ช่วงนี้",
+    "activityStamp": "<b>{name}</b> ปั๊มตราให้ <b>{title}</b> ที่คุณดูจบ",
+    "activityFollow": "<b>{name}</b> เริ่มติดตามคุณ",
+    "peopleTitle": "หาคน",
+    "peopleHint": "ค้นหาด้วยชื่อผู้ใช้หรือชื่อ เฉพาะคอลเลกชันสาธารณะเท่านั้นที่จะแสดง",
+    "backToFeed": "← กำลังติดตาม",
+    "searchLabel": "ค้นหาคน",
+    "searchPlaceholder": "@ชื่อผู้ใช้ หรือชื่อ",
+    "searching": "กำลังค้นหา…",
+    "noPeople": "ไม่พบใครที่ตรงกับ “{query}”",
+    "finishedNote": " · ดูจบ {count} เรื่อง",
+    "followingTitle": "คุณติดตาม {count} คน",
+    "followingEmpty": "คุณยังไม่ได้ติดตามใคร",
+    "blockedTitle": "ที่บล็อกไว้",
+    "blockedHint": "เขาจะไม่เห็นคอลเลกชันของคุณ และคุณก็จะไม่เห็นของเขา",
+    "homeTitle": "จากคนที่คุณติดตาม",
+    "seeFeed": "ดูทั้งหมด",
+    "homeEmpty": "สะสมไปกับเพื่อน",
+    "homeEmptyHint": "ติดตามคนอื่นเพื่อดูว่าเขาดูอะไรจบ แล้วปั๊มตราให้เขา",
+    "friendFinished": "<b>{name}</b> ดู <b>{title}</b> จบแล้ว",
+    "finisherNo": "Finisher #{number}",
+    "toBoard": "กระดาน",
+    "toChallenges": "ชาเลนจ์",
+    "toClubs": "คลับ",
+    "communityLabel": "ชุมชน"
+  },
+  "Board": {
+    "title": "กระดาน",
+    "kicker": "คุณกับเพื่อน ๆ",
+    "toFeed": "← กำลังติดตาม",
+    "periodLabel": "ช่วงเวลาของกระดาน",
+    "period": "{period, select, month {เดือนนี้} other {สัปดาห์นี้}}",
+    "boardTitle": "{period, select, month {กระดานเดือนนี้} other {กระดานสัปดาห์นี้}}",
+    "you": "คุณ",
+    "place": "อันดับ {rank}",
+    "noRank": "–",
+    "unranked": "ยังไม่ติดกระดาน",
+    "details": "จบ {finished} เรื่อง{episodes, plural, =0 {} other { · # ตอน}}",
+    "minutes": "{count} นาที",
+    "hours": "{count} ชม.",
+    "finishedOnly": "จบ {count} เรื่อง",
+    "nothing": "–",
+    "quiet": "{period, select, month {เดือนนี้} other {สัปดาห์นี้}}ยังเงียบอยู่ ดูหรืออ่านอะไรให้จบแล้วขึ้นอันดับ 1 ได้เลย",
+    "empty": "ติดตามเพื่อน แล้วมาแข่งกันที่นี่",
+    "findPeople": "หาคน",
+    "hint": "เรียงตามเวลาที่ใช้ดูและอ่าน แล้วตามจำนวนเรื่องที่จบ แสดงเฉพาะคอลเลกชันสาธารณะ {period, select, month {กระดานใหม่เริ่มทุกวันที่ 1} other {กระดานใหม่เริ่มทุกวันจันทร์}}",
+    "homeTitle": "กระดานสัปดาห์นี้",
+    "homePlace": "สัปดาห์นี้คุณอยู่อันดับ {rank} จาก {count} คน",
+    "homeUnranked": "{count, plural, =0 {สัปดาห์นี้ยังไม่มีใครติดกระดาน} other {สัปดาห์นี้มีเพื่อน # คนติดกระดานแล้ว}} ดูหรืออ่านอะไรให้จบแล้วมาร่วมด้วยกัน",
+    "seeBoard": "ดูกระดาน"
+  },
+  "Finishers": {
+    "title": "Finishers",
+    "mine": "คุณคือ Finisher",
+    "number": "#{number}",
+    "count": "{count, plural, =0 {ยังไม่มีใครบน Mystonie จบเรื่องนี้} other {มีคนบน Mystonie จบเรื่องนี้แล้ว # คน}}",
+    "next": "{first, select, true {เป็นคนแรกสิ จบเรื่องนี้แล้วคุณจะเป็น Finisher #1} other {จบเรื่องนี้แล้วคุณจะเป็น Finisher #{number}}}",
+    "friends": "คนที่คุณติดตาม",
+    "friendWhen": "จบเมื่อ{when}",
+    "hint": "ทุกคนที่จบเรื่องหนึ่งจะได้หมายเลขถัดไป และเก็บหมายเลขนั้นไว้ตลอด"
+  },
+  "Badges": {
+    "items": {
+      "first-movie": {
+        "name": "Opening Night",
+        "how": "ดูหนังจบเรื่องแรก"
+      },
+      "first-series": {
+        "name": "Season Finale",
+        "how": "ดูซีรีส์จบเรื่องแรก"
+      },
+      "first-book": {
+        "name": "First Chapter",
+        "how": "อ่านหนังสือจบเล่มแรก"
+      },
+      "first-manga": {
+        "name": "First Volume",
+        "how": "อ่านมังงะจบเรื่องแรก"
+      },
+      "first-game": {
+        "name": "Player One",
+        "how": "เล่นเกมจบเกมแรก"
+      },
+      "film-buff": {
+        "name": "Film Buff",
+        "how": "ดูหนังจบ 25 เรื่อง"
+      },
+      "binge-master": {
+        "name": "Binge Master",
+        "how": "ดูซีรีส์จบ 10 เรื่อง"
+      },
+      "rookie-bookworm": {
+        "name": "Rookie Bookworm",
+        "how": "อ่านหนังสือจบ 5 เล่ม"
+      },
+      "bookworm": {
+        "name": "Bookworm",
+        "how": "อ่านหนังสือจบ 25 เล่ม"
+      },
+      "manga-marathon": {
+        "name": "Manga Marathon",
+        "how": "อ่านมังงะจบ 10 เรื่อง"
+      },
+      "level-up": {
+        "name": "Level Up",
+        "how": "เล่นเกมจบ 10 เกม"
+      },
+      "triple-feature": {
+        "name": "Triple Feature",
+        "how": "ดูหนังจบ 3 เรื่องในวันเดียว"
+      },
+      "kdrama-fan": {
+        "name": "K-drama Fan",
+        "how": "ดูซีรีส์เกาหลีจบ 5 เรื่อง"
+      },
+      "anime-fan": {
+        "name": "Anime Fan",
+        "how": "ดูอนิเมะ (ซีรีส์หรือหนัง) จบ 10 เรื่อง"
+      },
+      "fear-conqueror": {
+        "name": "Fear Conqueror",
+        "how": "จบเรื่องสยองขวัญ 10 เรื่อง"
+      },
+      "laugh-track": {
+        "name": "Laugh Track",
+        "how": "จบเรื่องตลก 10 เรื่อง"
+      },
+      "stargazer": {
+        "name": "Stargazer",
+        "how": "จบเรื่องไซไฟ 10 เรื่อง"
+      },
+      "hopeless-romantic": {
+        "name": "Hopeless Romantic",
+        "how": "จบเรื่องโรแมนติก 10 เรื่อง"
+      },
+      "sleuth": {
+        "name": "Sleuth",
+        "how": "จบเรื่องอาชญากรรมหรือสืบสวน 10 เรื่อง"
+      },
+      "subtitles-on": {
+        "name": "Subtitles On",
+        "how": "จบเรื่องจาก 5 ภาษาต้นฉบับ"
+      },
+      "genre-hopper": {
+        "name": "Genre Hopper",
+        "how": "จบเรื่องครบ 10 แนว"
+      },
+      "all-rounder": {
+        "name": "All-Rounder",
+        "how": "จบทั้งหนัง ซีรีส์ หนังสือ และมังงะ อย่างละเรื่อง"
+      }
+    },
+    "album": "สมุดสติกเกอร์",
+    "albumHint": "สติกเกอร์ที่ได้จากเรื่องที่คุณจบ แตะเพื่อดูวิธีได้",
+    "albumCount": "ติดแล้ว {count} จาก {total}",
+    "progress": "{progress} จาก {target}",
+    "earnedOn": "ได้เมื่อ {date}",
+    "earnedWith": "ได้เมื่อ {date} จาก {name}",
+    "notYet": "ยังไม่ได้: {progress} จาก {target}",
+    "close": "ปิด",
+    "newSticker": "{count, plural, other {ได้สติกเกอร์ใหม่ # ดวง!}}",
+    "newStickerWith": "จากการจบ {name}",
+    "seeAlbum": "ดูสมุดสติกเกอร์",
+    "stickers": "สติกเกอร์",
+    "stickersCount": "{count} จาก {total}",
+    "earnedInFeed": "ได้สติกเกอร์ {name}"
   },
   "Report": {
     "button": "รายงาน",
@@ -525,6 +837,559 @@
     "milestoneOffer": "{milestone, select, 25 {มาได้หนึ่งในสี่แล้ว! 🎉} 50 {ครึ่งทางแล้ว! 🎉} other {ใกล้จบแล้ว! 🎉}}",
     "makeProgressCard": "ทำการ์ด",
     "makeFinishCard": "ทำการ์ดอ่านจบ",
-    "count": "{unit, select, page {{count} หน้า} chapter {{count} ตอน} other {{count} เล่ม}}"
+    "count": "{unit, select, page {{count} หน้า} chapter {{count} ตอน} other {{count} เล่ม}}",
+    "waitingToSync": "รอซิงก์"
+  },
+  "Game": {
+    "backToCollection": "← คอลเลกชันของคุณ",
+    "loadError": "โหลดเกมนี้ไม่ได้ตอนนี้ ลองใหม่อีกครั้ง",
+    "meta": "เกม{year, select, none {} other { · {year}}}",
+    "average": "เวลาเล่นเฉลี่ยราว {time}",
+    "status": "{status, select, watching {กำลังเล่น} other {อยากเล่น}} อยู่บนชั้นเล่นของคุณ",
+    "finishedOn": "เล่นจบเมื่อ {date}",
+    "hoursPlayed": "เล่นไป {time}",
+    "notInCollection": "ยังไม่อยู่ในคอลเลกชันของคุณ",
+    "openCollection": "เปิดคอลเลกชัน",
+    "addFromCollection": "เพิ่มเข้าคอลเลกชัน",
+    "credit": "ข้อมูลและภาพเกมจาก <rawg>RAWG</rawg>"
+  },
+  "Review": {
+    "pageTitle": "สรุปปี {year}",
+    "stamp": "สรุปทั้งปี",
+    "cover": "{complete, select, true {ปี {year} ของคุณ} other {ปี {year} ของคุณจนถึงตอนนี้}}",
+    "coverBody": "ทุกซีรีส์ หนัง หนังสือ และมังงะที่คุณดูจบหรือติดตามอยู่ รวมไว้ในสมุดเล่มเดียว",
+    "numbers": "ตัวเลข",
+    "watchTime": "เวลาที่ดู",
+    "readingTime": "เวลาที่อ่าน",
+    "gamesFinished": "เกมที่เล่นจบ",
+    "playTime": "เวลาที่เล่น",
+    "titlesFinished": "เรื่องที่จบ",
+    "episodes": "ตอน",
+    "pagesRead": "หน้าที่อ่าน",
+    "chaptersRead": "ตอนที่อ่าน",
+    "activeDays": "วันที่ได้ดูหรืออ่าน",
+    "top": "ใช้เวลาด้วยมากที่สุด",
+    "topHint": "เรียงตามเวลา: เวลาที่ดู หนังสือและมังงะใช้เวลาที่อ่าน เกมใช้เวลาที่เล่น",
+    "taste": "รสนิยมของคุณ",
+    "records": "สถิติ",
+    "bookends": "เรื่องแรกและเรื่องล่าสุด",
+    "firstFinish": "เรื่องแรกที่จบในปีนี้",
+    "lastFinish": "{complete, select, true {เรื่องสุดท้ายที่จบในปีนี้} other {เรื่องล่าสุดที่จบ}}",
+    "milestones": "หมุดหมายของปีนี้",
+    "share": "แชร์ปีของฉัน",
+    "shareHint": "การ์ดใบเดียวที่มีทั้งปีอยู่ในนั้น",
+    "emptyTitle": "ยังไม่มีอะไรในปี {year}",
+    "emptyBody": "ดูซีรีส์ หนัง หรืออ่านหนังสือจบสักเรื่อง แล้วสมุดเล่มนี้จะเริ่มมีเรื่องราว",
+    "emptyCta": "เพิ่มเรื่องที่เพิ่งจบ",
+    "byMonth": "รายเดือน"
+  },
+  "Import": {
+    "title": "นำเข้าประวัติของคุณ",
+    "back": "การตั้งค่า",
+    "intro": "นำสิ่งที่คุณดูและอ่านจากแอปอื่นมาด้วย: เรื่องที่จบแล้วพร้อมวันที่และคะแนน เรื่องที่กำลังดูอยู่ และเรื่องที่อยากดู",
+    "fromLabel": "มาจากไหน?",
+    "howTitle": "ขอไฟล์ส่งออกจาก {source}",
+    "sources": {
+      "letterboxd": {
+        "name": "Letterboxd",
+        "how1": "ที่ letterboxd.com เปิด Settings แล้ว Data แล้วเลือก Export your data",
+        "how2": "เลือกไฟล์ ZIP ได้เลยไม่ต้องแตกไฟล์ หรือเลือกไฟล์ CSV ที่อยู่ข้างใน",
+        "brings": "หนังที่ดูแล้วพร้อมวันที่และคะแนน และรายการที่อยากดู"
+      },
+      "goodreads": {
+        "name": "Goodreads",
+        "how1": "ที่ goodreads.com เปิด My Books แล้ว Import and export (ใต้ Tools) แล้วเลือก Export Library",
+        "how2": "เมื่อพร้อมแล้ว ดาวน์โหลด goodreads_library_export.csv แล้วเลือกไฟล์นั้นที่นี่",
+        "brings": "หนังสือที่อ่านจบพร้อมวันที่และคะแนน เล่มที่กำลังอ่าน และชั้นที่อยากอ่าน"
+      },
+      "mal": {
+        "name": "MyAnimeList",
+        "how1": "ที่ myanimelist.net เปิด Settings แล้ว Export (myanimelist.net/panel.php?go=export) แล้วส่งออกรายการอนิเมะ มังงะ หรือทั้งสองอย่าง",
+        "how2": "เลือกไฟล์ .xml.gz ที่ดาวน์โหลดมาได้เลย ไม่ต้องแตกไฟล์",
+        "brings": "อนิเมะและมังงะที่จบแล้วพร้อมวันที่และคะแนน เรื่องที่กำลังดูหรืออ่าน และรายการที่วางแผนไว้ เรื่องที่ทิ้งกลางคัน (Dropped) จะไม่ถูกนำเข้า"
+      },
+      "tvtime": {
+        "name": "TV Time",
+        "how1": "TV Time ปิดตัวไปเมื่อกรกฎาคม 2026 ถ้าคุณดาวน์โหลดข้อมูลไว้ก่อนหน้านั้น (ไฟล์ GDPR export) ให้หาไฟล์ ZIP นั้น",
+        "how2": "เลือกไฟล์ ZIP ได้เลย เราอ่านแค่ซีรีส์ ตอน และหนังของคุณ ไฟล์บัญชีและอุปกรณ์ที่อยู่ข้างในจะไม่ถูกเปิดเลย",
+        "brings": "ทุกตอนที่คุณเช็กอินพร้อมวันที่ หนังที่ดูแล้ว และซีรีส์ที่ติดตามไว้"
+      },
+      "mystonie": {
+        "name": "Mystonie",
+        "how1": "ในการตั้งค่า หัวข้อข้อมูลของคุณ เลือกส่งออกเป็น CSV (จากบัญชีนี้หรือบัญชีอื่น)",
+        "how2": "เลือกไฟล์ ZIP ได้เลย หรือเลือกไฟล์ CSV ที่อยู่ข้างใน",
+        "brings": "คอลเลกชันทั้งหมดกลับมา: สถานะ เวลาที่ดูจบ คะแนน รีวิว ตอน และความคืบหน้าการอ่าน"
+      }
+    },
+    "pick": "เลือกไฟล์ส่งออก",
+    "dropHint": "หรือลากมาวางตรงนี้",
+    "reading": "กำลังอ่าน",
+    "privacy": "ไฟล์ของคุณถูกอ่านบนอุปกรณ์นี้ ส่งไปแค่ชื่อ ปี ผู้แต่ง ISBN และรหัสในฐานข้อมูล เพื่อค้นหาเรื่องของคุณ",
+    "problem": {
+      "notExport": "ไฟล์นี้ดูไม่ใช่ไฟล์ส่งออกที่เรารู้จัก เลือกไฟล์ตามที่ดาวน์โหลดมาจาก Letterboxd, Goodreads, MyAnimeList หรือ TV Time หรือไฟล์ CSV ที่ส่งออกจาก Mystonie",
+      "empty": "ไฟล์ส่งออกนี้ยังไม่มีอะไรให้นำเข้า",
+      "unreadable": "อ่านไฟล์นี้ไม่ได้ ลองอีกครั้ง หรือเลือกไฟล์ที่อยู่ใน ZIP",
+      "match": "ติดต่อฐานข้อมูลไม่ได้ ที่หาเจอแล้วยังเก็บไว้",
+      "save": "บันทึกได้ไม่ครบ ส่วนที่บันทึกแล้วยังอยู่",
+      "signedOut": "คุณออกจากระบบแล้ว เข้าสู่ระบบอีกครั้งแล้วนำเข้าใหม่ (ไม่มีเรื่องไหนถูกเพิ่มซ้ำ)"
+    },
+    "retry": "ลองอีกครั้ง",
+    "matching": "กำลังหาเรื่องของคุณ… {done, number} จาก {total, number}",
+    "saving": "กำลังเพิ่มลงคอลเลกชัน… {done, number} จาก {total, number}",
+    "stayHere": "เปิดหน้านี้ไว้จนกว่าจะเสร็จ",
+    "waiting": "พักสักครู่ให้ฐานข้อมูลตามทัน เดี๋ยวทำต่อเอง",
+    "things": "{unit, select, book {หนังสือ {count, plural, other {# เล่ม}}} series {ซีรีส์ {count, plural, other {# เรื่อง}}} manga {มังงะ {count, plural, other {# เรื่อง}}} game {เกม {count, plural, other {# เกม}}} title {{count, plural, other {# เรื่อง}}} other {หนัง {count, plural, other {# เรื่อง}}}}",
+    "previewStamp": "PREVIEW",
+    "previewTitle": "{things}ในไฟล์ส่งออก",
+    "statReady": "พร้อม",
+    "statCheck": "ต้องเช็ก",
+    "statMissing": "หาไม่เจอ",
+    "cut": "ไฟล์ของคุณมี {total, number} เรื่อง จะนำเข้า {max, number} เรื่องล่าสุด",
+    "haveNote": "มี {count, plural, other {# เรื่อง}}อยู่ในคอลเลกชันแล้ว ไม่มีอะไรถูกเพิ่มซ้ำ: เรื่องเหล่านั้นคงข้อมูลที่คุณบันทึกไว้ ขยับไปข้างหน้าได้อย่างเดียว (อยากดู กำลังดู จบแล้ว) และเติมแค่วันที่ คะแนน หรือตอนที่ยังขาด",
+    "mergedNote": "{count, plural, other {# แถว}}เป็นเรื่องเดียวกับแถวอื่น (อนิเมะแต่ละซีซันคือซีรีส์เดียวกันที่นี่) จึงรวมเป็นหนึ่ง",
+    "checkTitle": "เรื่องไหนกันแน่?",
+    "checkBody": "ชื่อพวกนี้ตรงกับมากกว่าหนึ่งเรื่อง แตะโปสเตอร์ที่ใช่ หรือค้นหาเอง",
+    "missingTitle": "หาไม่เจอ",
+    "missingBody": "หาเรื่องพวกนี้จากชื่อไม่เจอ ลองค้นหาแบบอื่น หรือข้ามไป",
+    "readyTitle": "พร้อมนำเข้า ({count, number})",
+    "readyBody": "เอาเครื่องหมายออกจากเรื่องที่ไม่อยากนำเข้า",
+    "show": "แสดง",
+    "include": "นำเข้า {name}",
+    "watchedOn": "ดูเมื่อ {date}",
+    "readOn": "อ่านเมื่อ {date}",
+    "finishedUndated": "จบแล้ว (ไม่มีวันที่ จะลงวันที่ตามปีของเรื่อง)",
+    "watching": "กำลังดู",
+    "watchlist": "อยากดู",
+    "wantRead": "อยากอ่าน",
+    "episodes": "{count, plural, other {# ตอน}}",
+    "readingAt": "{unit, select, page {หน้า} chapter {ตอนที่} other {เล่ม}} {position, number}",
+    "rating": "★ {rating}",
+    "picked": "{name} ({year})",
+    "have": "อยู่ในคอลเลกชันแล้ว",
+    "findIt": "ค้นหา",
+    "leaveOut": "ข้าม",
+    "findTitle": "ค้นหา “{name}”",
+    "findLabel": "ค้นหาในฐานข้อมูล",
+    "close": "ปิด",
+    "importButton": "นำเข้า{things}",
+    "importNone": "เลือกเรื่องที่จะนำเข้า",
+    "doneStamp": "IMPORTED",
+    "doneTitle": "แปะลงคอลเลกชันแล้ว",
+    "done": {
+      "added": "เพิ่ม{things}",
+      "updated": "อัปเดต{things}",
+      "kept": "{things}มีอยู่แล้ว",
+      "failed": "บันทึกไม่ได้ {things} นำเข้าอีกครั้งเพื่อลองใหม่ ไม่มีอะไรถูกเพิ่มซ้ำ",
+      "episodes": "บันทึก {count, plural, other {# ตอน}}",
+      "reading": "เพิ่มที่คั่นการอ่าน {count, plural, other {# จุด}}"
+    },
+    "seeCollection": "ดูคอลเลกชัน",
+    "makeCard": "ทำการ์ด",
+    "again": "นำเข้าไฟล์อื่น"
+  },
+  "Pro": {
+    "title": "Mystonie Pro",
+    "stamp": "PRO",
+    "intro": "สไตล์การ์ดเพิ่มเติม สำหรับคนที่อยากให้สมุดสะสมเป็นตัวเองยิ่งขึ้น",
+    "whatYouGet": "Pro มีอะไรเพิ่ม",
+    "featureTemplates": "สไตล์การ์ด Pro เริ่มจาก Film Strip: โปสเตอร์ของคุณเป็นเฟรมบนแถบฟิล์ม 35 มม. ที่แปะลงสมุด",
+    "featureFirst": "สไตล์ Pro ใหม่ๆ มาที่นี่ก่อน",
+    "featureSupport": "ช่วยให้ Mystonie เป็นอิสระและไม่มีโฆษณา",
+    "freeStaysFree": "การบันทึก สไตล์การ์ดพื้นฐาน สรุปผล สถิติ และการแชร์ ยังฟรีเหมือนเดิม",
+    "plan": "{plan, select, yearly {รายปี} other {รายเดือน}}",
+    "price": "{price} {plan, select, yearly {ต่อปี} other {ต่อเดือน}}",
+    "save": "ประหยัด {percent}%",
+    "choose": "สมัคร Pro {plan, select, yearly {รายปี} other {รายเดือน}}",
+    "signInFirst": "เข้าสู่ระบบเพื่อสมัคร Pro",
+    "opening": "กำลังเปิด…",
+    "unlocking": "กำลังปลดล็อก Pro… ใช้เวลาไม่กี่วินาที",
+    "slowWebhook": "ชำระเงินแล้ว แต่ Pro ยังไม่เปิด ลองรีเฟรชอีกสักนาที ถ้ายังไม่เปิดให้ติดต่อเรา",
+    "youArePro": "คุณเป็น Pro แล้ว ขอบคุณมาก!",
+    "renewsOn": "ต่ออายุวันที่ {date}",
+    "endsOn": "ยกเลิกแล้ว: Pro ใช้ได้ถึงวันที่ {date}",
+    "manage": "จัดการการสมัคร",
+    "error": "มีบางอย่างผิดพลาด ลองอีกครั้งในอีกสักครู่",
+    "pricesUnavailable": "ตอนนี้แสดงแพ็กเกจไม่ได้ ลองอีกครั้งในอีกสักครู่",
+    "fineprint": "ราคาเป็น USD เรียกเก็บโดย Stripe ยกเลิกได้ทุกเมื่อ: Pro ยังใช้ได้จนจบรอบที่จ่ายไว้"
+  },
+  "Warnings": {
+    "title": "คำเตือนเนื้อหา",
+    "setupBody": "เลือกหัวข้อที่คุณอยากเลี่ยง เช่น หมาตาย หรือฉากตุ้งแช่ แล้วเราจะแจ้งเตือนเรื่องที่มีฉากแบบนั้น",
+    "setupLink": "เลือกหัวข้อ",
+    "checkAnyway": "ดูคำเตือนของเรื่องนี้",
+    "headsUp": "ระวัง",
+    "verdict": "{verdict, select, yes {มี} no {ไม่มี} other {ยังไม่ชัด}}",
+    "votes": "มี {yes} · ไม่มี {no}",
+    "noVotes": "ยังไม่มีคนโหวต",
+    "yourTopics": "หัวข้อของคุณ",
+    "seeAll": "ดูทุกหัวข้อ ({count})",
+    "group": "{verdict, select, yes {คนส่วนใหญ่บอกว่ามี} no {คนส่วนใหญ่บอกว่าไม่มี} other {ยังไม่ชัด}}",
+    "spoiler": "สปอยล์: แตะเพื่อดู",
+    "showComment": "อ่านความเห็น",
+    "none": "ยังไม่มีข้อมูลคำเตือน",
+    "error": "โหลดคำเตือนเนื้อหาไม่ได้ในตอนนี้ ลองใหม่อีกครั้ง",
+    "attribution": "ข้อมูลจาก <link>DoesTheDogDie.com</link>",
+    "details": "ดูผลโหวตทั้งหมดบน DoesTheDogDie",
+    "editTopics": "แก้ไขหัวข้อ",
+    "badge": "คำเตือนเนื้อหา: {topics}",
+    "settingsBody": "เลือกหัวข้อที่อยากเลี่ยง แล้วเราจะแจ้งเตือนเรื่องที่มีฉากแบบนั้น มีแค่คุณที่เห็นสิ่งที่เลือก",
+    "settingsCount": "{count, plural, =0 {ยังไม่ได้เลือกหัวข้อ} other {เลือกแล้ว # หัวข้อ}}",
+    "settingsLink": "เลือกหัวข้อ",
+    "pageTitle": "หัวข้อที่อยากเลี่ยง",
+    "pageIntro": "เลือกสิ่งที่อยากรู้ก่อนกดดู เรื่องที่คนส่วนใหญ่บอกว่ามีจะมีป้ายเตือนในคอลเลกชันและผลค้นหา พร้อมรายละเอียดในหน้าเรื่อง มีแค่คุณที่เห็นสิ่งที่เลือก",
+    "searchLabel": "ค้นหาหัวข้อ",
+    "searchPlaceholder": "ค้นหา เช่น spiders",
+    "chosen": "ที่เลือก ({count})",
+    "remove": "เอา {topic} ออก",
+    "clearAll": "ล้างทั้งหมด",
+    "saving": "กำลังบันทึก…",
+    "saved": "บันทึกแล้ว",
+    "saveError": "บันทึกไม่ได้ ลองใหม่อีกครั้ง",
+    "loadError": "โหลดรายการหัวข้อไม่ได้ในตอนนี้ ลองใหม่อีกครั้ง",
+    "noMatch": "ไม่มีหัวข้อที่ตรงกับ “{query}”",
+    "backToSettings": "กลับไปที่ตั้งค่า",
+    "categoryCount": "{count, plural, other {เลือก #}}"
+  },
+  "WarningTopics": {
+    "names": {
+      "dog-dies": "หมาตาย",
+      "cat-dies": "แมวตาย",
+      "animal-dies": "สัตว์ตาย",
+      "animal-cruelty": "การทารุณสัตว์",
+      "spiders": "แมงมุม",
+      "snakes": "งู",
+      "jump-scares": "ฉากตุ้งแช่",
+      "flashing-lights": "แสงกะพริบ",
+      "loud-noises": "เสียงดังกะทันหัน",
+      "claustrophobia": "ที่แคบและอึดอัด",
+      "blood-gore": "เลือดและฉากสยดสยอง",
+      "needles": "เข็มฉีดยา",
+      "vomit": "การอาเจียน",
+      "eye-injury": "การบาดเจ็บที่ดวงตา",
+      "seizure": "อาการชัก",
+      "gun-violence": "ความรุนแรงจากปืน",
+      "torture": "การทรมาน",
+      "drowning": "การจมน้ำ",
+      "car-crash": "รถชน",
+      "sexual-assault": "การล่วงละเมิดทางเพศ",
+      "suicide": "การฆ่าตัวตาย",
+      "self-harm": "การทำร้ายตัวเอง",
+      "child-abuse": "การทารุณเด็ก",
+      "domestic-violence": "ความรุนแรงในครอบครัว",
+      "sex-scenes": "ฉากเซ็กซ์",
+      "drug-use": "การใช้ยาเสพติด"
+    },
+    "questions": {
+      "dog-dies": "ใน {title} มีหมาตายไหม?",
+      "cat-dies": "ใน {title} มีแมวตายไหม?",
+      "animal-dies": "ใน {title} มีสัตว์ตายไหม?",
+      "animal-cruelty": "ใน {title} มีการทำร้ายสัตว์โดยตั้งใจไหม?",
+      "spiders": "ใน {title} มีแมงมุมไหม?",
+      "snakes": "ใน {title} มีงูไหม?",
+      "jump-scares": "ใน {title} มีฉากตุ้งแช่ไหม?",
+      "flashing-lights": "ใน {title} มีแสงหรือภาพกะพริบไหม?",
+      "loud-noises": "ใน {title} มีเสียงดังกะทันหันไหม?",
+      "claustrophobia": "ใน {title} มีคนติดอยู่ในที่แคบไหม?",
+      "blood-gore": "ใน {title} มีเลือดหรือฉากสยดสยองไหม?",
+      "needles": "ใน {title} มีการใช้เข็มฉีดยาไหม?",
+      "vomit": "ใน {title} มีคนอาเจียนไหม?",
+      "eye-injury": "ใน {title} มีคนบาดเจ็บที่ดวงตาไหม?",
+      "seizure": "ใน {title} มีคนชักไหม?",
+      "gun-violence": "ใน {title} มีความรุนแรงจากปืนไหม?",
+      "torture": "ใน {title} มีคนถูกทรมานไหม?",
+      "drowning": "ใน {title} มีคนจมน้ำไหม?",
+      "car-crash": "ใน {title} มีรถชนไหม?",
+      "sexual-assault": "ใน {title} มีคนถูกล่วงละเมิดทางเพศไหม?",
+      "suicide": "ใน {title} มีคนฆ่าตัวตายหรือพยายามฆ่าตัวตายไหม?",
+      "self-harm": "ใน {title} มีคนทำร้ายตัวเองไหม?",
+      "child-abuse": "ใน {title} มีเด็กถูกทารุณไหม?",
+      "domestic-violence": "ใน {title} มีความรุนแรงในครอบครัวไหม?",
+      "sex-scenes": "ใน {title} มีฉากเซ็กซ์ไหม?",
+      "drug-use": "ใน {title} มีคนใช้ยาเสพติดไหม?"
+    },
+    "categories": {
+      "animals": "สัตว์",
+      "scares": "ตกใจและประสาทสัมผัส",
+      "body": "ร่างกาย",
+      "violence": "ความรุนแรง",
+      "heavy": "เรื่องหนัก"
+    }
+  },
+  "SceneWarnings": {
+    "title": "คำเตือนรายฉาก",
+    "intro": "จุดที่มีฉากแบบนั้น จดไว้โดยคนที่{kind, select, book {อ่าน} manga {อ่าน} game {เล่น} other {ดู}}แล้ว จะได้ข้ามไปได้ คำเตือนจะได้รับการยืนยันเมื่อมีคนเห็นตรงกัน {count} คน",
+    "empty": "ยังไม่มีคำเตือนรายฉาก",
+    "yourTopic": "หัวข้อที่คุณเลี่ยง",
+    "confirmed": "ยืนยันแล้ว {count} คน",
+    "pending": "รอยืนยัน · {count} จาก {total}",
+    "disputed": "คนอื่นไม่เห็นฉากนี้",
+    "addedByYou": "คุณเพิ่มไว้",
+    "withdraw": "ถอนออก",
+    "sawIt": "เห็นจริง",
+    "notThere": "ไม่มีนะ",
+    "sawItLabel": "เห็นจริง: {topic}, {place}",
+    "notThereLabel": "ไม่มีนะ: {topic}, {place}",
+    "voteError": "บันทึกไม่ได้ ลองใหม่อีกครั้ง",
+    "add": "เพิ่มคำเตือน",
+    "addTitle": "เพิ่มคำเตือนรายฉาก",
+    "close": "ปิด",
+    "addHint": "เห็นฉากที่คนอื่นอาจอยากข้ามไหม? จดไว้ว่าอยู่ตรงไหน",
+    "needsSeen": "ตั้งสถานะเป็น{kind, select, book {กำลังอ่าน} manga {กำลังอ่าน} game {กำลังเล่น} other {กำลังดู}}หรือจบแล้ว เพื่อเพิ่มและยืนยันคำเตือน",
+    "topicLabel": "มีอะไร",
+    "topicPlaceholder": "เลือกหัวข้อ",
+    "whereLabel": "ตรงไหน (ไม่ใส่ก็ได้)",
+    "seasonLabel": "ซีซัน",
+    "episodeLabel": "ตอน",
+    "seasonOption": "ซีซัน {season}",
+    "episodeOption": "ตอนที่ {episode}",
+    "throughout": "ทั้งเรื่อง",
+    "fromLabel": "ตั้งแต่",
+    "toLabel": "ถึง",
+    "timeHint": "นาทีและวินาทีใน{kind, select, movie {หนัง} other {ตอนนั้น}} เช่น 41:10 หรือ 1:02:13",
+    "timeInvalid": "ใส่เป็นนาทีและวินาที เช่น 41:10",
+    "endBeforeStart": "เวลาจบมาก่อนเวลาเริ่ม",
+    "startMissing": "ใส่เวลาเริ่มด้วยนะ",
+    "unitLabel": "ใน",
+    "unit": "{unit, select, page {หน้า} volume {เล่ม} other {บท}}",
+    "positionLabel": "{unit, select, page {หน้าที่} volume {เล่มที่} other {บทที่}}",
+    "similar": "มีคนจดไว้แล้ว ถ้าเป็นฉากเดียวกัน ยืนยันอันนั้นแทนได้เลย:",
+    "confirmInstead": "ใช่อันนี้",
+    "save": "เพิ่มคำเตือน",
+    "saving": "กำลังเพิ่ม…",
+    "added": "เพิ่มแล้ว จะได้รับการยืนยันเมื่อมีคนที่เห็นฉากนี้เห็นด้วยอีก {count} คน",
+    "errorNotSeen": "เพิ่มเรื่องนี้ในคอลเลกชันเป็น{kind, select, book {กำลังอ่าน} manga {กำลังอ่าน} game {กำลังเล่น} other {กำลังดู}}หรือจบแล้วก่อน",
+    "errorDuplicate": "คุณเพิ่มคำเตือนนี้ไปแล้ว",
+    "errorLimit": "วันนี้เพิ่มเยอะมากแล้ว ลองใหม่พรุ่งนี้นะ",
+    "errorGeneric": "เพิ่มไม่ได้ ลองใหม่อีกครั้ง",
+    "episodeCode": "S{season} · E{episode}",
+    "timeRange": "{from}–{to}",
+    "position": "{unit, select, page {หน้า} volume {เล่ม} other {บทที่}} {position}",
+    "verdictsTitle": "คนที่จบแล้วบอกว่า",
+    "verdict": "{result, select, yes {มี} no {ไม่มี} other {เห็นไม่ตรงกัน}}",
+    "verdictCounts": "มี {yes} · ไม่มี {no}",
+    "quizLink": "ถามฉันเรื่องนี้หน่อย",
+    "loadError": "โหลดคำเตือนรายฉากไม่ได้ในตอนนี้ ลองใหม่อีกครั้ง"
+  },
+  "Quiz": {
+    "metaTitle": "ควิซคำเตือน",
+    "title": "ควิซคำเตือน",
+    "intro": "คำถามสั้นๆ เกี่ยวกับเรื่องที่คุณจบแล้ว คำตอบของคุณช่วยให้คนอื่นข้ามฉากที่ไม่อยากเห็นได้",
+    "back": "กลับหน้าแรก",
+    "noFinishesTitle": "จบสักเรื่องก่อนนะ",
+    "noFinishesBody": "ควิซจะถามเกี่ยวกับเรื่องที่คุณจบแล้ว ตั้งสถานะสักเรื่องเป็นจบแล้วในคอลเลกชัน แล้วกลับมาใหม่",
+    "toCollection": "ไปที่คอลเลกชัน",
+    "doneTitle": "ตอนนี้ตอบครบแล้ว",
+    "doneBody": "คุณตอบทุกคำถามที่มีสำหรับคุณแล้ว จบเรื่องใหม่ๆ แล้วจะมีคำถามเพิ่ม",
+    "pausedTitle": "ควิซพักสักครู่",
+    "pausedBody": "คำตอบเข้ามาเร็วกว่าที่ใครจะอ่านทัน ควิซจึงพักไว้ถึง {time}",
+    "tooFast": "อ่านคำถามให้จบก่อนนะ คำตอบเมื่อกี้ไม่ถูกนับ",
+    "warningLead": "คนที่{kind, select, book {อ่าน} manga {อ่าน} game {เล่น} other {ดู}} {title} แล้วจดไว้ว่า:",
+    "warningQuestion": "คุณเห็นฉากนี้ไหม?",
+    "yes": "มี",
+    "no": "ไม่มี",
+    "unsure": "จำไม่ได้",
+    "topicProgress": "{count, plural, =0 {ตอบเป็นคนแรกเลย · ได้ข้อสรุปเมื่อครบ {total} คำตอบ} other {ตอบแล้ว # จาก {total} คำตอบ}}",
+    "warningProgress": "ยืนยันแล้ว {count} จาก {total}",
+    "thanks": "ขอบคุณนะ ช่วยได้เยอะเลย",
+    "settled": "ได้ข้อสรุปแล้ว คนที่จบ {title} บอกว่า: {result, select, yes {มี} no {ไม่มี} other {เห็นไม่ตรงกัน}}",
+    "confirmedNow": "คำตอบนี้ทำให้คำเตือนได้รับการยืนยัน",
+    "answered": "ตอบไปแล้ว {count} ข้อ",
+    "error": "โหลดคำถามไม่ได้ ลองใหม่อีกครั้ง",
+    "retry": "ลองอีกครั้ง",
+    "homeTitle": "ควิซคำเตือน",
+    "homeBody": "ตอบคำถามสั้นๆ เกี่ยวกับเรื่องที่คุณจบแล้ว ช่วยให้คนอื่นข้ามฉากที่ไม่อยากเห็นได้",
+    "homeCta": "ตอบสักหน่อย",
+    "settingsBody": "ช่วยให้คนอื่นข้ามฉากที่ไม่อยากเห็น: ตอบคำถามสั้นๆ เกี่ยวกับเรื่องที่คุณจบแล้ว",
+    "settingsLink": "เล่นควิซคำเตือน"
+  },
+  "Challenges": {
+    "items": {
+      "new-chapter": {
+        "name": "New Chapter",
+        "how": "อ่านหนังสือหรือมังงะจบ 2 เล่มในเดือนนี้"
+      },
+      "love-stories": {
+        "name": "Love Stories",
+        "how": "ดูหรืออ่านเรื่องรักจบ 3 เรื่องในเดือนนี้"
+      },
+      "world-tour": {
+        "name": "World Tour",
+        "how": "ดูหรืออ่านเรื่องจาก 3 ภาษาต้นฉบับให้จบในเดือนนี้"
+      },
+      "laugh-lines": {
+        "name": "Laugh Lines",
+        "how": "ดูหรืออ่านเรื่องตลกจบ 3 เรื่องในเดือนนี้"
+      },
+      "anime-month": {
+        "name": "Anime Month",
+        "how": "ดูอนิเมะจบ 3 เรื่องในเดือนนี้"
+      },
+      "movie-marathon": {
+        "name": "Movie Marathon",
+        "how": "ดูหนังจบ 5 เรื่องในเดือนนี้"
+      },
+      "out-of-this-world": {
+        "name": "Out of This World",
+        "how": "ดูหรืออ่านไซไฟหรือแฟนตาซีจบ 3 เรื่องในเดือนนี้"
+      },
+      "box-set": {
+        "name": "Box Set",
+        "how": "ดูซีรีส์จบ 2 เรื่องในเดือนนี้"
+      },
+      "case-files": {
+        "name": "Case Files",
+        "how": "ดูหรืออ่านแนวสืบสวนจบ 3 เรื่องในเดือนนี้"
+      },
+      "fright-month": {
+        "name": "Fright Month",
+        "how": "ดูหรืออ่านเรื่องสยองขวัญจบ 3 เรื่องในเดือนนี้"
+      },
+      "kdrama-month": {
+        "name": "K-drama Month",
+        "how": "ดูซีรีส์เกาหลีจบ 2 เรื่องในเดือนนี้"
+      },
+      "triple-threat": {
+        "name": "Triple Threat",
+        "how": "ดูหรืออ่านให้จบครบ 3 ประเภทในเดือนนี้ (หนัง ซีรีส์ หนังสือ หรือมังงะ)"
+      },
+      "finish-four": {
+        "name": "Finish Four",
+        "how": "ดูหรืออ่านจบ 4 เรื่องในเดือนนี้"
+      },
+      "twenty-hours": {
+        "name": "Twenty Hours",
+        "how": "ดูและอ่านรวม 20 ชั่วโมงในเดือนนี้"
+      },
+      "twelve-days": {
+        "name": "Twelve Days",
+        "how": "บันทึกอะไรก็ได้ให้ครบ 12 วันในเดือนนี้"
+      }
+    },
+    "title": "ชาเลนจ์",
+    "daysLeft": "{count, plural, =0 {จบแล้ว} one {วันสุดท้าย!} other {เหลืออีก # วัน}}",
+    "join": "เข้าร่วม",
+    "joined": "เข้าร่วมแล้ว",
+    "leave": "ออก",
+    "completed": "สำเร็จแล้ว",
+    "completedOn": "สำเร็จเมื่อ {date}",
+    "progress": "{value} จาก {target} {unit, select, titles {เรื่อง} languages {ภาษา} kinds {ประเภท} hours {ชั่วโมง} other {วัน}}",
+    "counts": "{joined, plural, =0 {ยังไม่มีใครเข้าร่วม} other {เข้าร่วม # คน}}{completed, plural, =0 {} other { · สำเร็จ # คน}}",
+    "friends": "คนที่คุณติดตาม",
+    "friendProgress": "{value}/{target}",
+    "makeCard": "ทำการ์ด",
+    "patchesTitle": "แพตช์ของคุณ",
+    "patchesEmpty": "ทำชาเลนจ์ให้สำเร็จ แล้วแพตช์จะถูกเย็บติดไว้ตรงนี้",
+    "patchesCount": "{count} แพตช์",
+    "patchMonth": "{name} · {month}",
+    "hint": "ทุกเรื่องที่ดูหรืออ่านในเดือนนี้นับหมด แม้จะก่อนกดเข้าร่วม เดือนนับตามโซนเวลาของคุณ และชาเลนจ์ชุดใหม่เริ่มทุกวันที่ 1",
+    "problem": "{problem, select, closed {เดือนนั้นจบไปแล้ว นี่คือชาเลนจ์ชุดใหม่} limited {ช้าลงหน่อย แล้วลองใหม่อีกครั้ง} other {ทำไม่สำเร็จ ลองใหม่อีกครั้ง}}",
+    "homeTitle": "ชาเลนจ์เดือนนี้",
+    "homeInvite": "ชาเลนจ์ {count} อย่างสำหรับ{month} เข้าร่วมสักอย่างแล้วดูว่าไปได้ไกลแค่ไหน",
+    "homeMore": "{count, plural, =0 {} other {+ อีก # ชาเลนจ์}}",
+    "homeCta": "ดูชาเลนจ์",
+    "profileTitle": "แพตช์ชาเลนจ์",
+    "toClubs": "แฟนคลับ →"
+  },
+  "Clubs": {
+    "items": {
+      "kdrama": {
+        "name": "K-drama Club",
+        "tagline": "ซีรีส์เกาหลี ตั้งแต่โรแมนติกคอมเมดี้ถึงเรื่องล้างแค้น"
+      },
+      "anime": {
+        "name": "Anime Club",
+        "tagline": "ซีรีส์และหนังอนิเมะ"
+      },
+      "manga": {
+        "name": "Manga Club",
+        "tagline": "มังงะ มังฮวา และเว็บตูน"
+      },
+      "books": {
+        "name": "Book Club",
+        "tagline": "ทุกเล่มที่คุณอ่านจบ"
+      },
+      "games": {
+        "name": "Gamers",
+        "tagline": "ทุกเกมที่คุณเล่นจบ"
+      },
+      "cdrama": {
+        "name": "C-drama Club",
+        "tagline": "ซีรีส์ภาษาจีน"
+      },
+      "indian-cinema": {
+        "name": "Indian Cinema Club",
+        "tagline": "หนังจากบอลลีวูดและภาพยนตร์อินเดียทุกภาษา"
+      },
+      "horror": {
+        "name": "Horror Club",
+        "tagline": "สำหรับคนใจกล้า"
+      },
+      "romance": {
+        "name": "Romance Club",
+        "tagline": "เรื่องรักทั้งบนจอและบนชั้นหนังสือ"
+      },
+      "scifi": {
+        "name": "Sci-fi & Fantasy Club",
+        "tagline": "โลกอื่น ยานอวกาศ และมังกร"
+      },
+      "mystery": {
+        "name": "Mystery Club",
+        "tagline": "อาชญากรรม สืบสวน และระทึกขวัญ"
+      },
+      "comedy": {
+        "name": "Comedy Club",
+        "tagline": "อะไรก็ได้ที่ทำให้หัวเราะ"
+      },
+      "docs": {
+        "name": "Documentary Club",
+        "tagline": "เรื่องจริง"
+      }
+    },
+    "title": "แฟนคลับ",
+    "kicker": "หาคนที่ชอบเหมือนกัน",
+    "hint": "ทุกคลับเปิดให้ทุกคน เรื่องที่นับในคลับดูจากข้อมูลของเรื่อง (ประเภท แนว และภาษาต้นฉบับ) คอลเลกชันส่วนตัวนับแค่ในจำนวนสมาชิกเท่านั้น",
+    "members": "{count, plural, =0 {ยังไม่มีสมาชิก} other {สมาชิก # คน}}",
+    "join": "เข้าร่วมคลับ",
+    "joined": "คุณอยู่ในคลับแล้ว",
+    "leave": "ออกจากคลับ",
+    "signInToJoin": "เข้าสู่ระบบเพื่อเข้าร่วม",
+    "yourClubs": "คลับของคุณ",
+    "moreClubs": "หาแฟนด้อมของคุณ",
+    "fit": "{count, plural, other {เรื่องที่คุณจบแล้วเข้าคลับนี้ # เรื่อง}}",
+    "friends": "คนที่คุณติดตามในคลับนี้",
+    "trending": "กำลังฮิตในคลับช่วงนี้",
+    "trendingHint": "เรื่องที่สมาชิกดูหรืออ่านใน 30 วันที่ผ่านมา เมื่อมีสมาชิกอย่างน้อย 3 คน",
+    "trendingPeople": "{count, plural, other {สมาชิก # คน}}",
+    "feedTitle": "ล่าสุดจากสมาชิก",
+    "feedEmpty": "ยังไม่มีใครดูจบในคลับนี้ เข้าร่วมแล้วดูเรื่องที่เข้าคลับให้จบเป็นคนแรกได้เลย",
+    "back": "← คลับทั้งหมด",
+    "titleClubs": "คลับของเรื่องนี้",
+    "profileTitle": "คลับ",
+    "profileEmpty": "หาแฟนด้อมของคุณ",
+    "problem": "{problem, select, limited {ช้าลงหน่อย แล้วลองใหม่อีกครั้ง} other {ทำไม่สำเร็จ ลองใหม่อีกครั้ง}}",
+    "toChallenges": "ชาเลนจ์รายเดือน →"
+  },
+  "Offline": {
+    "offline": "คุณออฟไลน์อยู่ สิ่งที่บันทึกจะเก็บไว้ในเครื่องนี้ และซิงก์เมื่อกลับมาออนไลน์",
+    "offlineWaiting": "คุณออฟไลน์อยู่ · {count, plural, other {# การเปลี่ยนแปลง}}เก็บไว้ในเครื่องนี้ รอซิงก์",
+    "waiting": "{count, plural, other {# การเปลี่ยนแปลง}}รอซิงก์",
+    "syncNow": "ซิงก์เลย",
+    "failed": "{count, plural, other {# การเปลี่ยนแปลง}}บันทึกไม่สำเร็จ",
+    "retry": "ลองอีกครั้ง",
+    "discard": "ทิ้ง",
+    "signedOut": "เข้าสู่ระบบเพื่อซิงก์{count, plural, other {# การเปลี่ยนแปลง}}ที่เก็บไว้ในเครื่องนี้",
+    "signIn": "เข้าสู่ระบบ",
+    "otherAccount": "มี{count, plural, other {# การเปลี่ยนแปลง}}จากบัญชีอื่นรออยู่ในเครื่องนี้",
+    "synced": "กลับมาออนไลน์แล้ว: ซิงก์{count, plural, other {# การเปลี่ยนแปลง}}เรียบร้อย",
+    "searchOffline": "คุณออฟไลน์อยู่ ค้นหาได้อีกครั้งเมื่อเชื่อมต่ออินเทอร์เน็ต ระหว่างนี้เพิ่มเรื่องที่เพิ่งเห็นได้เลย",
+    "recentTitles": "ที่เพิ่งเห็นในเครื่องนี้",
+    "noRecent": "เรื่องที่คุณเปิดดูหรือค้นหาจะมาอยู่ตรงนี้ เพื่อให้เพิ่มได้แม้ออฟไลน์",
+    "signOutWaiting": "{count, plural, other {# การเปลี่ยนแปลง}}ยังไม่ได้ซิงก์ ถ้าออกจากระบบตอนนี้จะถูกลบออกจากเครื่องนี้",
+    "signOutAnyway": "ออกจากระบบเลย",
+    "pageStamp": "ออฟไลน์",
+    "pageTitle": "หน้านี้ยังไม่ได้บันทึกไว้ในเครื่องนี้",
+    "pageBody": "หน้าที่เคยเปิดแล้วยังใช้ได้ตอนออฟไลน์ และทุกอย่างที่บันทึกจะซิงก์เมื่อกลับมาออนไลน์",
+    "savedPages": "เปิดแบบออฟไลน์",
+    "metaTitle": "ออฟไลน์"
   }
 }

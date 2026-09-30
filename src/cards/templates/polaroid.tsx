@@ -1,6 +1,6 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
-import { CardFooter, CardRoot, footerUser, CardTitle, Poster, Review, Stars, useFinishedDate, useHeadline, type TemplateProps } from "../parts";
+import { CardFooter, CardRoot, footerUser, CardTitle, FinisherStamp, Poster, Review, Stars, useFinishedDate, useHeadline, type TemplateProps } from "../parts";
 
 /** Poster in a tilted polaroid frame with tape and a hand-written caption. Works for anything. */
 export function PolaroidCard({ data, size, palette, host }: TemplateProps) {
@@ -20,11 +20,15 @@ export function PolaroidCard({ data, size, palette, host }: TemplateProps) {
 
       <div
         className={cn(
-          "mt-[48px] flex shrink-0 rotate-[-2deg] flex-col gap-[20px] bg-[var(--card-paper)] p-[40px] text-[var(--card-ink)] shadow-[0_28px_70px_rgba(0,0,0,0.4)]",
+          "relative mt-[48px] flex shrink-0 rotate-[-2deg] flex-col gap-[20px] bg-[var(--card-paper)] p-[40px] text-[var(--card-ink)] shadow-[0_28px_70px_rgba(0,0,0,0.4)]",
           story ? "w-[800px] pb-[44px]" : "w-[860px] pb-[28px]",
         )}
       >
         <Poster url={data.posterUrl} className={story ? "aspect-[2/3] w-full" : "h-[580px] w-full"} />
+        <FinisherStamp
+          data={data}
+          className={cn("absolute rotate-[-12deg]", story ? "bottom-[150px] -left-[36px]" : "bottom-[96px] -left-[30px] origin-bottom-left scale-[0.8]")}
+        />
         <div className="flex items-center justify-between gap-[24px]">
           <p className="text-[52px] leading-none whitespace-nowrap [font-family:var(--card-hand)]">{date}</p>
           <Stars rating={data.rating} className="shrink-0 text-[48px] text-[var(--card-stamp)]" />
@@ -54,7 +58,7 @@ export function PolaroidCard({ data, size, palette, host }: TemplateProps) {
             )}
           </p>
         )}
-        <CardTitle data={data} size={size} className={story ? "line-clamp-2" : "line-clamp-2 text-[52px]"} />
+        <CardTitle data={data} size={size} className={cn("px-[12px]", story ? "line-clamp-2" : "line-clamp-2 text-[52px]")} />
         <Review
           text={data.review}
           className={cn(

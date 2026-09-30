@@ -40,6 +40,7 @@ export async function LegalPage({ doc }: { doc: Doc }) {
     ),
     operator: external(LEGAL.operatorSite),
     tmdb: external("https://www.themoviedb.org/"),
+    rawg: external("https://rawg.io/"),
   };
 
   return (

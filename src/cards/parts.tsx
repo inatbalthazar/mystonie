@@ -3,9 +3,12 @@
 import { StarIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import type { CSSProperties, ReactNode } from "react";
+import { cardImageUrl } from "@/core/catalog/images";
+import type { TitleKind } from "@/core/catalog/types";
+import { challengeUnit, findChallenge, isChallengeSlug } from "@/core/challenges";
 import { CARD_DIMENSIONS, type CardData, type CardRecap, type CardSize, type Palette } from "@/core/cards/types";
-import { titleSizeStep, watchMinutes } from "@/core/cards/text";
-import { recapFigures } from "@/core/stats/recap";
+import { finishedKey, gameHours, titleSizeStep, watchMinutes } from "@/core/cards/text";
+import { recapFigures, wholeMonth } from "@/core/stats/recap";
 import { cn } from "@/lib/utils";
 
 export type TemplateProps = { data: CardData; size: CardSize; palette: Palette; host: string };
@@ -48,7 +51,7 @@ export function CardRoot({ size, palette, className, children }: { size: CardSiz
   );
 }
 
-/** Poster image, or a palette gradient when there is none. */
+/** Poster image (RAWG's key art at card size, `cardImageUrl`), or a palette gradient when there is none. */
 export function Poster({ url, className }: { url?: string | null; className?: string }) {
   return (
     <div
@@ -57,7 +60,7 @@ export function Poster({ url, className }: { url?: string | null; className?: st
       {url && (
         // eslint-disable-next-line @next/next/no-img-element -- exported to PNG; must be a plain CORS image
         <img
-          src={url}
+          src={cardImageUrl(url)}
           alt=""
           crossOrigin="anonymous"
           onError={(e) => (e.currentTarget.style.display = "none")}
@@ -73,19 +76,31 @@ const TITLE_SIZES = {
   feed: ["text-[104px]", "text-[80px]", "text-[64px]", "text-[52px]"],
 } as const;
 
-/** "Sep 21 – 27" for a recap week; stats cards longer than a week add the year (calendar dates, so UTC). */
+/**
+ * "Sep 21 – 27" for a recap week, "September 2026" for a whole month; stats cards longer than a week add the year
+ * (calendar dates, so UTC).
+ */
 export function useRecapRange(recap: CardRecap | null | undefined): string {
   const format = useFormatter();
   if (!recap) return "";
   const date = (key: string) => new Date(`${key}T00:00:00Z`);
+  const month = wholeMonth(recap);
+  if (month) return format.dateTime(date(`${month}-01`), { month: "long", year: "numeric", timeZone: "UTC" });
   const year = recap.period && recap.period !== "week" ? "numeric" : undefined;
   return format.dateTimeRange(date(recap.from), date(recap.to), { month: "short", day: "numeric", year, timeZone: "UTC" });
 }
 
-/** What the card's big title says: the title's name, or the week on a recap. */
+/** A Challenge card's challenge name ("Finish Four"), or "" on other cards. */
+export function useChallengeName(data: CardData): string {
+  const t = useTranslations("Challenges");
+  return data.challenge && isChallengeSlug(data.challenge.slug) ? t(`items.${data.challenge.slug}.name`) : "";
+}
+
+/** What the card's big title says: the title's name, the week on a recap, the challenge on a Challenge card. */
 export function useCardName(data: CardData): string {
   const range = useRecapRange(data.recap);
-  return data.recap ? range : data.name;
+  const challenge = useChallengeName(data);
+  return data.recap ? range : data.challenge ? challenge : data.name;
 }
 
 /** Card headline, shrinking by length and clamped to 3 lines so nothing overflows. */
@@ -151,6 +166,16 @@ export function useStats(data: CardData): { value: string; label: string }[] {
   const format = useFormatter();
   const stats: { value: string; label: string }[] = [];
   const hidden = new Set(data.hide ?? []);
+  if (data.milestone) {
+    const { metric, value } = data.milestone;
+    return [{ value: format.number(value), label: t("milestoneLabel", { metric }) }];
+  }
+  if (data.challenge) {
+    // "4/4 titles finished", "20/20 hours": the target, met.
+    const rule = findChallenge(data.challenge.month, data.challenge.slug)?.rule;
+    const target = data.challenge.target;
+    return [{ value: `${format.number(target)}/${format.number(target)}`, label: t("challengeUnit", { unit: rule ? challengeUnit(rule) : "titles", count: target }) }];
+  }
   if (data.recap) {
     return recapFigures(data.recap, { time: hidden.has("time"), episodes: hidden.has("episodes") }).map(({ key, value }) => ({
       value: format.number(value),
@@ -168,6 +193,12 @@ export function useStats(data: CardData): { value: string; label: string }[] {
       );
     }
     return stats;
+  }
+  if (data.kind === "game") {
+    // A Finish card for a game: the hours the player gave, else RAWG's average playtime (labelled as an average).
+    const game = gameHours(data);
+    if (!game || hidden.has("time")) return stats;
+    return [{ value: format.number(game.hours), label: t(game.own ? "hoursPlayed" : "hoursAverage", { count: game.hours }) }];
   }
   if (data.kind === "book" || data.kind === "manga") {
     // A Finish card for a book or manga: its length.
@@ -213,12 +244,17 @@ export function useStats(data: CardData): { value: string; label: string }[] {
 export function useHeadline(data: CardData): string {
   const t = useTranslations("Card");
   const format = useFormatter();
+  // "100th title", "1,000 hours", "500 episodes".
+  if (data.milestone) return t("milestoneHeadline", { ...data.milestone, count: format.number(data.milestone.value) });
+  if (data.challenge) return t("challengeHeadline");
+  // "Imported 312 films", "Imported 48 books" (S2 Letterboxd import, S3 import & export).
+  if (data.recap?.imported) return t("importHeadline", { count: data.recap.titleCount, unit: data.recap.importedUnit ?? "film" });
   if (data.recap) return t("recapHeadline", { period: data.recap.period ?? "week" });
   if (data.reading) {
     const { milestone, unit, position } = data.reading;
     return milestone ? t("milestone", { milestone }) : t("readingHeadline", { unit, position: format.number(position) });
   }
-  if (!data.progress) return data.kind === "book" || data.kind === "manga" ? t("finishedRead") : t("finished");
+  if (!data.progress) return t(finishedKey(data.kind));
   const { milestone, season, episode } = data.progress;
   return milestone ? t("milestone", { milestone }) : t("episodeCode", { season, episode });
 }
@@ -240,8 +276,42 @@ export function CardFooter({ host, username, className }: { host: string; userna
 /** Footer props from the card data: the username unless the user hid it. */
 export const footerUser = (data: CardData) => (data.hide?.includes("username") ? null : data.username);
 
-/** Rubber "FINISHED" stamp (the collectible moment), optionally with the date. `read` for a book or manga. */
-export function FinishedStamp({ date, read = false, className }: { date?: string; read?: boolean; className?: string }) {
+/** The finisher number a Finish card prints (S3 finishers & the board), or null: none yet, hidden, or another card. */
+export function cardFinisherNo(data: CardData): number | null {
+  if (!data.finisherNo || data.hide?.includes("finisher")) return null;
+  return data.progress || data.reading || data.recap || data.milestone || data.challenge ? null : data.finisherNo;
+}
+
+/**
+ * "FINISHER #1,204": a round seal pressed onto the card, like a race number (S3 finishers & the board). Paper
+ * behind the ink so it reads on any poster. Renders nothing without a number.
+ */
+export function FinisherStamp({ data, className }: { data: CardData; className?: string }) {
+  const t = useTranslations("Card");
+  const format = useFormatter();
+  const no = cardFinisherNo(data);
+  if (!no) return null;
+  const value = `#${format.number(no)}`;
+  const digits = value.length <= 4 ? "text-[84px]" : value.length <= 6 ? "text-[64px]" : value.length <= 8 ? "text-[50px]" : "text-[38px]";
+  return (
+    <div
+      data-finisher=""
+      className={cn(
+        "flex size-[236px] shrink-0 items-center justify-center rounded-full border-[6px] border-current bg-[var(--card-paper)] p-[7px] text-[var(--card-stamp)] shadow-[0_12px_28px_rgba(0,0,0,0.3)]",
+        className,
+      )}
+    >
+      <div className="flex size-full flex-col items-center justify-center gap-[4px] rounded-full border-[2px] border-dashed border-current">
+        <span className="text-[24px] leading-none font-bold tracking-[0.22em] uppercase">{t("finisher")}</span>
+        <span className={cn(DISPLAY, digits, "leading-none font-extrabold tracking-[-0.02em] whitespace-nowrap")}>{value}</span>
+        <span className="text-[18px] leading-none font-bold tracking-[0.2em] uppercase opacity-80">{t("brand")}</span>
+      </div>
+    </div>
+  );
+}
+
+/** Rubber "FINISHED" stamp (the collectible moment), optionally with the date, in the kind's word (`finishedKey`). */
+export function FinishedStamp({ date, kind = "movie", className }: { date?: string; kind?: TitleKind; className?: string }) {
   const t = useTranslations("Card");
   return (
     <div
@@ -251,7 +321,7 @@ export function FinishedStamp({ date, read = false, className }: { date?: string
       )}
     >
       <div className="flex flex-col items-center rounded-[10px] border-[2px] border-current px-[26px] py-[10px]">
-        <span className={cn(DISPLAY, "text-[46px] leading-none font-extrabold tracking-[0.1em] uppercase")}>{read ? t("finishedRead") : t("finished")}</span>
+        <span className={cn(DISPLAY, "text-[46px] leading-none font-extrabold tracking-[0.1em] uppercase")}>{t(finishedKey(kind))}</span>
         {date && <span className="mt-[6px] text-[24px] font-bold tracking-[0.12em] whitespace-nowrap uppercase">{date}</span>}
       </div>
     </div>

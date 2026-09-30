@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<myanimelist>
+	<myinfo>
+		<user_id>123</user_id>
+		<user_name><![CDATA[someone]]></user_name>
+		<user_export_type>1</user_export_type>
+		<user_total_anime>7</user_total_anime>
+	</myinfo>
+	<anime>
+		<series_animedb_id>1</series_animedb_id>
+		<series_title><![CDATA[Cowboy Bebop]]></series_title>
+		<series_type>TV</series_type>
+		<series_episodes>26</series_episodes>
+		<my_id>0</my_id>
+		<my_watched_episodes>26</my_watched_episodes>
+		<my_start_date>2021-03-01</my_start_date>
+		<my_finish_date>2021-04-10</my_finish_date>
+		<my_score>9</my_score>
+		<my_status>Completed</my_status>
+		<my_comments><![CDATA[]]></my_comments>
+		<my_times_watched>0</my_times_watched>
+		<my_tags><![CDATA[]]></my_tags>
+		<update_on_import>0</update_on_import>
+	</anime>
+	<anime>
+		<series_animedb_id>5</series_animedb_id>
+		<series_title><![CDATA[Cowboy Bebop: Tengoku no Tobira]]></series_title>
+		<series_type>Movie</series_type>
+		<series_episodes>1</series_episodes>
+		<my_watched_episodes>1</my_watched_episodes>
+		<my_start_date>2020-06-01</my_start_date>
+		<my_finish_date>0000-00-00</my_finish_date>
+		<my_score>0</my_score>
+		<my_status>Completed</my_status>
+	</anime>
+	<anime>
+		<series_animedb_id>16498</series_animedb_id>
+		<series_title>Shingeki no Kyojin &amp; Friends</series_title>
+		<series_type>TV</series_type>
+		<series_episodes>25</series_episodes>
+		<my_watched_episodes>25</my_watched_episodes>
+		<my_start_date>0000-00-00</my_start_date>
+		<my_finish_date>0000-00-00</my_finish_date>
+		<my_score>0</my_score>
+		<my_status>Completed</my_status>
+	</anime>
+	<anime>
+		<series_animedb_id>9253</series_animedb_id>
+		<series_title><![CDATA[Steins;Gate]]></series_title>
+		<series_type>TV</series_type>
+		<series_episodes>24</series_episodes>
+		<my_watched_episodes>12</my_watched_episodes>
+		<my_start_date>2024-01-05</my_start_date>
+		<my_finish_date>0000-00-00</my_finish_date>
+		<my_score>8</my_score>
+		<my_status>Watching</my_status>
+	</anime>
+	<anime>
+		<series_animedb_id>30</series_animedb_id>
+		<series_title><![CDATA[Neon Genesis Evangelion: Death & Rebirth]]></series_title>
+		<series_type>OVA</series_type>
+		<series_episodes>1</series_episodes>
+		<my_watched_episodes>0</my_watched_episodes>
+		<my_start_date>0000-00-00</my_start_date>
+		<my_finish_date>0000-00-00</my_finish_date>
+		<my_score>0</my_score>
+		<my_status>Plan to Watch</my_status>
+	</anime>
+	<anime>
+		<series_animedb_id>31</series_animedb_id>
+		<series_title><![CDATA[Dropped Show]]></series_title>
+		<series_type>TV</series_type>
+		<my_watched_episodes>3</my_watched_episodes>
+		<my_start_date>2023-01-01</my_start_date>
+		<my_finish_date>0000-00-00</my_finish_date>
+		<my_score>3</my_score>
+		<my_status>Dropped</my_status>
+	</anime>
+	<anime>
+		<series_animedb_id>32</series_animedb_id>
+		<series_title><![CDATA[A Music Video]]></series_title>
+		<series_type>Music</series_type>
+		<my_watched_episodes>1</my_watched_episodes>
+		<my_start_date>2023-01-01</my_start_date>
+		<my_finish_date>2023-01-01</my_finish_date>
+		<my_score>7</my_score>
+		<my_status>Completed</my_status>
+	</anime>
+</myanimelist>

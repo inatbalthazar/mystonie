@@ -8,7 +8,7 @@ The roadmap gated each stage on the previous stage's pass criteria (e.g. stage 1
 ## Decision
 - The owner wants the product **beautiful and ready to use before anyone sees it**. Stages 0, 1 and 2 are built back to back and launched together after stage 2. Pass criteria become **success measures** after launch.
 - The agent does the **design pass** (logo, icons, tokens, type, polished screens, v1 card templates) from [design direction](../design/design-direction.md). A designer may refine it later; templates stay swappable through the registry.
-- Unchanged: one stage at a time in roadmap order; `docs/product/later/` stays gated on its own metrics and the owner's go; single Next.js app + Supabase.
+- Unchanged: one stage at a time in roadmap order; `docs/product/later/` stays gated on its own metrics and the owner's go; single Next.js app + Supabase. (Amended by [ADR 0036](0036-expansion-features-before-launch.md): most of `later/` is now stage 3, built before launch.)
 
 ## Consequences
 - Longer time to first user (roughly 3–5 months instead of 3–4 weeks), and no real-user feedback before stage 1/2 decisions. Analytics and the waitlist still ship, so measurement starts on day one.

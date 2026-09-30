@@ -27,7 +27,8 @@
   - Both work through the `mystonie_prefs` cookie, which exists only while signed in.
 - Profile: display name, username (with a link to the public page), photo (the Google photo can be removed; uploading a photo comes later).
 - Privacy toggle ("Public collection").
-- Export my data (JSON download: account, profile, entries, episode logs, cards, weekly recaps, deleted rows included) and delete my account (GDPR/PDPA/CCPA).
+- Content warnings (stage 2): how many topics are chosen, and a link to `/settings/warnings` ([S2 content warnings](S2-content-warnings.md)).
+- Export my data (JSON download: account, profile, entries, episode logs, reading logs, cards, weekly recaps, subscriptions, avoid-topics, and from stage 3 follows, Stamps, blocks, badges, each entry's finisher number, challenge joins and club memberships; deleted rows included), Export as CSV (stage 3: the live collection, episodes and reading logs as spreadsheets that import back, [S3 import & export](S3-import-export.md)) and delete my account (GDPR/PDPA/CCPA).
 
 ## Acceptance criteria
 - [x] RLS test: user B can't read user A's entries when A is private. (`supabase/tests/database/stage1_collection.test.sql`)

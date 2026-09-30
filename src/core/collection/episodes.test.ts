@@ -68,7 +68,15 @@ describe("parseEpisodeLog", () => {
           { id, season: 1, episode: 4 },
         ],
       }),
-    ).toEqual({ externalId: "66732", episodes: [{ id, season: 1, episode: 4 }] });
+    ).toMatchObject({ externalId: "66732", episodes: [{ id, season: 1, episode: 4 }] });
+  });
+
+  it("keeps when they were watched: the device's time for a log made offline, else now (ADR 0042)", () => {
+    const now = Date.parse("2026-09-27T20:00:00Z");
+    const body = { externalId: "66732", episodes: [{ id, season: 1, episode: 1 }] };
+    expect(parseEpisodeLog(body, now)?.watchedAt).toBe("2026-09-27T20:00:00.000Z");
+    expect(parseEpisodeLog({ ...body, watchedAt: "2026-09-26T21:30:00Z" }, now)?.watchedAt).toBe("2026-09-26T21:30:00.000Z");
+    expect(parseEpisodeLog({ ...body, watchedAt: "yesterday" }, now)).toBeNull();
   });
 
   it("rejects bad input", () => {

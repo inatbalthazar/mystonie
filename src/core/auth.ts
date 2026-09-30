@@ -2,7 +2,7 @@
 // Paths here are external URLs, so they may carry a locale prefix (`/th/settings`).
 
 /** App pages that need a signed-in user. Add new ones as they ship (collection, stats, …). */
-export const PROTECTED_PATHS = ["/home", "/collection", "/settings", "/title", "/recap"] as const;
+export const PROTECTED_PATHS = ["/home", "/collection", "/settings", "/title", "/recap", "/feed", "/people", "/board", "/challenges"] as const;
 
 /** `/th/settings` → { locale: "th", path: "/settings" }; unprefixed paths are the default locale. */
 export function splitLocale(pathname: string, locales: readonly string[], defaultLocale: string) {

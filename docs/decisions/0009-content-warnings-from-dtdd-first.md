@@ -1,6 +1,6 @@
 # ADR 0009: Content warnings from the DoesTheDogDie API first
 
-**Status:** Accepted · **Date:** 2026-09-23
+**Status:** Accepted · **Date:** 2026-09-23 · Our own timestamped warnings and the quiz were built in stage 3: [ADR 0043](0043-scene-warnings-and-quiz.md)
 
 ## Context
 Content warnings are a differentiator, but a community verification system (votes, thresholds, quizzes) needs thousands of active users before its data is trustworthy, and wrong data can hurt sensitive users. The owner asked to use an existing API for warning tags first, after the core features.

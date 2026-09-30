@@ -31,6 +31,6 @@ Stage 1 adds the user tables `entries`, `episode_logs` and `cards`, plus the TMD
 ## Consequences
 - App code must create ids with `uuidv7()`, set `finished_at` together with `status`, and remove rows by setting `deleted_at`. It must filter `deleted_at is null` in owner queries.
 - A future offline-sync upsert that "merges on conflict" (see [offline-sync](../architecture/offline-sync.md)) needs a server-side function, because clients can't update `id`, `user_id` or `title_id`.
-- New card kinds (milestone, monthly recap, year in review, survived) need a migration that widens the `kind` check. New sizes need one too.
+- New card kinds (milestone, monthly recap, year in review) need a migration that widens the `kind` check. New sizes need one too. (Survived turned out to be a `finish` card on its own template, so it needed no new kind: [ADR 0035](0035-content-warnings-cache-and-survived.md).)
 - `title_episodes` is written only by the service role (route handlers), like `titles`.
 - Tests: `supabase/tests/database/stage1_collection.test.sql`.

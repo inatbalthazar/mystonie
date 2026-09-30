@@ -1,0 +1,177 @@
+{
+  "item": {
+    "id": 15713,
+    "name": "John Wick",
+    "releaseYear": "2014",
+    "imdbId": "tt2911666"
+  },
+  "topicItemStats": [
+    {
+      "TopicId": 153,
+      "ItemId": 15713,
+      "yesSum": 1374,
+      "noSum": 131,
+      "numComments": 11,
+      "comment": "Yes, and it's terrible, BUT John Wick spends the rest of the movie deliberately, gloriously, and violently avenging the dog, so it feels really pro-dog overall. ",
+      "itemName": "John Wick",
+      "topic": {
+        "id": 153,
+        "name": "a dog dies",
+        "notName": "no dogs die",
+        "isSpoiler": false,
+        "isSensitive": false,
+        "isVisible": true,
+        "TopicCategory": {
+          "id": 56,
+          "name": "Animal Death"
+        }
+      }
+    },
+    {
+      "TopicId": 462,
+      "ItemId": 15713,
+      "yesSum": 0,
+      "noSum": 0,
+      "numComments": 0,
+      "comment": null,
+      "topic": {
+        "id": 462,
+        "name": "it's told from an abuser's point of view",
+        "notName": "it's not told from an abuser's point of view",
+        "isSpoiler": false,
+        "isSensitive": false,
+        "isVisible": true,
+        "TopicCategory": {
+          "id": 25,
+          "name": "Abuse"
+        }
+      }
+    },
+    {
+      "TopicId": 189,
+      "ItemId": 15713,
+      "yesSum": 298,
+      "noSum": 71,
+      "numComments": 1,
+      "comment": "yes his dog is shown dead after crawling to him off screen ",
+      "itemName": "John Wick",
+      "topic": {
+        "id": 189,
+        "name": "an animal dies",
+        "notName": "no animals die",
+        "isSpoiler": false,
+        "isSensitive": false,
+        "isVisible": true,
+        "TopicCategory": {
+          "id": 56,
+          "name": "Animal Death"
+        }
+      }
+    },
+    {
+      "TopicId": 186,
+      "ItemId": 15713,
+      "yesSum": 26,
+      "noSum": 212,
+      "numComments": 0,
+      "comment": null,
+      "itemName": "John Wick",
+      "topic": {
+        "id": 186,
+        "name": "a cat dies",
+        "notName": "no cats die",
+        "isSpoiler": false,
+        "isSensitive": false,
+        "isVisible": true,
+        "TopicCategory": {
+          "id": 56,
+          "name": "Animal Death"
+        }
+      }
+    },
+    {
+      "TopicId": 165,
+      "ItemId": 15713,
+      "yesSum": 4,
+      "noSum": 128,
+      "numComments": 0,
+      "comment": null,
+      "itemName": "John Wick",
+      "topic": {
+        "id": 165,
+        "name": "there are spiders",
+        "notName": "no spiders",
+        "isSpoiler": false,
+        "isSensitive": false,
+        "isVisible": true,
+        "TopicCategory": {
+          "id": 57,
+          "name": "Animal Phobia"
+        }
+      }
+    },
+    {
+      "TopicId": 161,
+      "ItemId": 15713,
+      "yesSum": 14,
+      "noSum": 69,
+      "numComments": 0,
+      "comment": null,
+      "itemName": "John Wick",
+      "topic": {
+        "id": 161,
+        "name": "there are jump scares",
+        "notName": "there are no jump scares",
+        "isSpoiler": false,
+        "isSensitive": false,
+        "isVisible": true,
+        "TopicCategory": {
+          "id": 10,
+          "name": "Fear"
+        }
+      }
+    },
+    {
+      "TopicId": 222,
+      "ItemId": 15713,
+      "yesSum": 2,
+      "noSum": 51,
+      "numComments": 0,
+      "comment": null,
+      "itemName": "John Wick",
+      "topic": {
+        "id": 222,
+        "name": "the ending is sad",
+        "notName": "the end is happy",
+        "isSpoiler": true,
+        "isSensitive": false,
+        "isVisible": true,
+        "TopicCategory": {
+          "id": 13,
+          "name": "Spoiler"
+        }
+      }
+    },
+    {
+      "TopicId": 188,
+      "ItemId": 15713,
+      "yesSum": 119,
+      "noSum": 2,
+      "numComments": 4,
+      "comment": "Thats like the entire movie  ",
+      "itemName": "John Wick",
+      "topic": {
+        "id": 188,
+        "name": "there's blood/gore",
+        "notName": "no blood/gore",
+        "isSpoiler": false,
+        "isSensitive": false,
+        "isVisible": true,
+        "TopicCategory": {
+          "id": 14,
+          "name": "Violence"
+        }
+      }
+    }
+  ]
+}

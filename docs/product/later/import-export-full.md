@@ -1,6 +1,6 @@
 # F08 · Data import / export
 
-> **Status: LATER (gated).** Not part of the current plan. See [later/README.md](README.md) for the gate. Written before the global, solo-sized plan: re-check against AGENTS.md before building.
+> **Status: BUILT** in stage 3 as [S3 import & export](../features/S3-import-export.md) ([ADR 0041](../../decisions/0041-import-export.md)), which differs from this old design: everything is read in the browser, there are no import tables, and MyAnimeList goes through AniList, not Jikan. Kept for history.
 
 **Phase:** M5 · **Priority:** Should-have (lowers the cost of switching)
 

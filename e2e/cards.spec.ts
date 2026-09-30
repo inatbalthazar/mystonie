@@ -32,7 +32,13 @@ test("every template × size × hard case stays inside the card", async ({ page 
   const cards = page.locator("[data-testid]");
   const count = await cards.count();
   // Finish fixtures: 3 finish templates + the sticker; progress, recap and stats fixtures: 2 templates + the sticker.
-  expect(count).toBe(5 * 4 * 2 + 2 * 3 * 2 + 3 * 3 * 2);
+  // Books add the spine and manga the spine and the manga panel (finish and reading progress).
+  // Milestones: Bold Stats, Stone + the sticker; a monthly recap as a weekly one; Year in Review adds the Yearbook.
+  // The Pro Film Strip draws the 7 movie and series finish and progress fixtures (the lab shows every template).
+  // The Survived fixture (S2 content warnings): the 3 finish templates, the sticker, the Film Strip and Survived.
+  // Challenges (S3 challenges & clubs): Bold Stats, the Calendar + the sticker.
+  // Games (S3 games): the 3 finish templates, the Cartridge + the sticker.
+  expect(count).toBe(5 * 4 * 2 + 2 * 3 * 2 + 3 * 3 * 2 + (5 + 6) * 2 + (5 + 4) * 2 + 2 * 3 * 2 + 3 * 2 + 2 * 4 * 2 + 7 * 2 + 6 * 2 + 2 * 3 * 2 + 2 * 5 * 2);
 
   for (let i = 0; i < count; i++) {
     const card = cards.nth(i);
@@ -99,7 +105,14 @@ test("Thai, Korean and Japanese text survive PNG export", async ({ page }, testI
   await page.locator("[data-card]").first().waitFor();
   await page.waitForTimeout(1500);
   await settle(page);
-  for (const id of ["long-title-thai.polaroid.story", "korean.ticket.story", "japanese-no-poster.boldStats.feed"]) {
+  // The spine prints its title sideways (vertical writing mode), the manga panel mixes Japanese and Latin.
+  for (const id of [
+    "long-title-thai.polaroid.story",
+    "korean.ticket.story",
+    "japanese-no-poster.boldStats.feed",
+    "reading-book-thai-halfway.spine.feed",
+    "manga-finish-japanese.mangaPanel.story",
+  ]) {
     const base64 = await page.evaluate((testId) => (window as unknown as { __exportCard: (id: string) => Promise<string> }).__exportCard(testId), id);
     const png = Buffer.from(base64, "base64");
     const [w, h] = id.endsWith(".feed") ? CARD_DIMENSIONS.feed : CARD_DIMENSIONS.story;

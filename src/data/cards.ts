@@ -20,7 +20,7 @@ export type SharedCard = {
 };
 
 /** Public URL of an object in the (public) cards bucket. */
-function publicImageUrl(path: string): string | null {
+export function publicImageUrl(path: string): string | null {
   const env = publicSupabaseEnv();
   return env ? `${env.url}/storage/v1/object/public/${BUCKET}/${path.split("/").map(encodeURIComponent).join("/")}` : null;
 }
@@ -35,10 +35,15 @@ export async function saveCard(
   userId: string,
   save: CardSave,
 ): Promise<{ uploadUrl: string | null } | null> {
-  const { data: profile, error: profileError } = await db.from("profiles").select("username").eq("id", userId).single();
+  const [{ data: profile, error: profileError }, finisherNo, completed] = await Promise.all([
+    db.from("profiles").select("username").eq("id", userId).single(),
+    cardFinisherNo(db, userId, save),
+    completedChallenge(db, userId, save),
+  ]);
   if (profileError) throw new Error(`profiles read failed: ${profileError.message}`);
+  if (!completed) return null;
   const hideName = save.data.hide?.includes("username");
-  const params = { ...save.data, username: hideName ? null : profile.username };
+  const params = { ...save.data, username: hideName ? null : profile.username, finisherNo };
   const path = cardImagePath(userId, save.id);
 
   const { data: existing, error: readError } = await db.from("cards").select("id, shared_at").eq("id", save.id).maybeSingle();
@@ -77,6 +82,37 @@ export async function saveCard(
     return { uploadUrl: null };
   }
   return { uploadUrl: signed.signedUrl };
+}
+
+/**
+ * Whether a card about a challenge (a Challenge card, or its sticker) is about one the user really completed (S3
+ * challenges & clubs). Cards about anything else pass.
+ */
+async function completedChallenge(db: UserClient, userId: string, save: CardSave): Promise<boolean> {
+  const challenge = save.data.challenge;
+  if (!challenge) return true;
+  const { data, error } = await db
+    .from("challenge_joins")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("month", `${challenge.month}-01`)
+    .eq("slug", challenge.slug)
+    .not("completed_at", "is", null)
+    .is("deleted_at", null)
+    .limit(1);
+  if (error) throw new Error(`challenge_joins read failed: ${error.message}`);
+  return data.length > 0;
+}
+
+/**
+ * The finisher number a card may print: the entry's own (S3 finishers & the board), only on a Finish card, and not
+ * when the user hid it. Whatever the browser sent is ignored.
+ */
+async function cardFinisherNo(db: UserClient, userId: string, save: CardSave): Promise<number | null> {
+  if (save.kind !== "finish" || !save.entryId || save.data.hide?.includes("finisher")) return null;
+  const { data, error } = await db.from("entries").select("finisher_no").eq("id", save.entryId).eq("user_id", userId).maybeSingle();
+  if (error) throw new Error(`entries read failed: ${error.message}`);
+  return data?.finisher_no ?? null;
 }
 
 type SharedCardRow = {

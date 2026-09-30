@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeAnilistDetails, normalizeAnilistSearch } from "./anilist";
+import { normalizeAnilistByMal, normalizeAnilistDetails, normalizeAnilistSearch } from "./anilist";
 import mangaChainsaw from "./fixtures/anilist-manga-105778.json";
 import mangaOnePiece from "./fixtures/anilist-manga-30013.json";
 import anilistSearch from "./fixtures/anilist-search-one-piece.json";
@@ -51,6 +51,40 @@ describe("AniList", () => {
   });
 });
 
+describe("AniList by MyAnimeList id", () => {
+  it("gives manga as results, anime as names to search TMDB with, and skips novels and adult titles", () => {
+    const media = (over: Record<string, unknown>) => ({
+      id: 1,
+      format: "TV",
+      isAdult: false,
+      countryOfOrigin: "JP",
+      genres: [],
+      title: { english: "Attack on Titan", romaji: "Shingeki no Kyojin", native: "進撃の巨人" },
+      startDate: { year: 2013 },
+      coverImage: {},
+      ...over,
+    });
+    const { manga, anime } = normalizeAnilistByMal({
+      data: {
+        Page: {
+          media: [
+            media({ idMal: 16498 }),
+            media({ idMal: 23390, id: 53390, format: "MANGA", title: { romaji: "Shingeki no Kyojin", native: "進撃の巨人" } }),
+            media({ idMal: 7, format: "NOVEL" }),
+            media({ idMal: 8, isAdult: true }),
+            media({ id: 9 }),
+          ],
+        },
+      },
+    });
+    expect(anime.get(16498)).toEqual({ format: "TV", names: ["Attack on Titan", "Shingeki no Kyojin", "進撃の巨人"], year: 2013 });
+    expect(manga.get(23390)).toMatchObject({ source: "anilist", externalId: "53390", kind: "manga", name: "Shingeki no Kyojin" });
+    expect(anime.size).toBe(1);
+    expect(manga.size).toBe(1);
+    expect(normalizeAnilistByMal(null)).toEqual({ manga: new Map(), anime: new Map() });
+  });
+});
+
 describe("Google Books", () => {
   it("normalizes a search: cover through our proxy, first author, no duplicates or mature books", () => {
     expect(normalizeGoogleBooksSearch(booksSearch)).toEqual([
@@ -85,6 +119,8 @@ describe("Google Books", () => {
       pageCount: 496,
       chapterCount: null,
       volumeCount: null,
+      playtimeHours: null,
+      platforms: [],
     });
     expect(normalizeGoogleBooksDetails(booksSearch.items[1])).toMatchObject({ pageCount: null, posterPath: null });
   });

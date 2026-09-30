@@ -12,7 +12,7 @@
     "searchError": "Search isn't working right now. Try again in a moment.",
     "rateLimited": "Slow down a little, then try again.",
     "trendingTitle": "Trending this week",
-    "titleMeta": "{kind, select, movie {Movie} series {Series} book {Book} manga {Manga} other {Title}}{year, select, none {} other { · {year}}}",
+    "titleMeta": "{kind, select, movie {Movie} series {Series} book {Book} manga {Manga} game {Game} other {Title}}{year, select, none {} other { · {year}}}",
     "detailsError": "Couldn't load the details.",
     "clearPick": "Clear selection",
     "headline": "Finished it? <mark>Mystonie it.</mark>",
@@ -27,9 +27,12 @@
     "addFirst": "Add what you just finished",
     "seeProfile": "See your page",
     "cardAlt": "Card: {name}",
-    "recapCard": "Weekly recap",
+    "recapCard": "Recap",
     "trending": "Trending this week",
     "trendingHint": "Seen one? Tap it to add it to your collection.",
+    "trendingOwnHint": "First what people on Mystonie are finishing this week, then what the world is watching. Tap one to add it.",
+    "trendingPeople": "{count, plural, one {# person} other {# people}} on Mystonie this week",
+    "addTrendingTitle": "Add {name} ({count, plural, one {# person} other {# people}} on Mystonie this week)",
     "addTitle": "Add {name}",
     "installTitle": "Keep Mystonie on your home screen",
     "installBody": "It opens like an app, and it can tell you when your weekly recap is ready.",
@@ -40,7 +43,12 @@
     "pushTitle": "Get your weekly recap as a notification",
     "pushBody": "Every Monday morning, when your recap card is ready.",
     "pushOn": "Turn on",
-    "pushError": "Couldn't turn notifications on. Try again from Settings."
+    "pushError": "Couldn't turn notifications on. Try again from Settings.",
+    "milestoneCard": "Milestone",
+    "yearCard": "Year in review",
+    "reviewTitle": "Your {year} in review is here",
+    "reviewBody": "Your year of watching and reading, page by page.",
+    "reviewCta": "Open my year"
   },
   "LocaleSwitcher": {
     "label": "Language"
@@ -50,13 +58,14 @@
     "backHome": "Back to home"
   },
   "Attribution": {
-    "tmdb": "This product uses the TMDB API but is not endorsed or certified by TMDB."
+    "tmdb": "This product uses the TMDB API but is not endorsed or certified by TMDB.",
+    "rawg": "Game data and images from RAWG"
   },
   "Card": {
     "finished": "Finished",
     "finishedOn": "Finished {date}",
     "admitOne": "Admit one",
-    "kind": "{kind, select, movie {Movie} series {Series} book {Book} manga {Manga} other {Title}}",
+    "kind": "{kind, select, movie {Movie} series {Series} book {Book} manga {Manga} game {Game} other {Title}}",
     "episodes": "{count, plural, one {episode} other {episodes}}",
     "seasons": "{count, plural, one {season} other {seasons}}",
     "hours": "hours",
@@ -69,7 +78,15 @@
       "polaroid": "Polaroid",
       "boldStats": "Bold Stats",
       "sticker": "Sticker",
-      "collage": "Collage"
+      "collage": "Collage",
+      "spine": "Spine",
+      "mangaPanel": "Manga Panel",
+      "stone": "Stone",
+      "yearbook": "Yearbook",
+      "filmStrip": "Film Strip",
+      "survived": "Survived",
+      "calendar": "Calendar",
+      "cartridge": "Cartridge"
     },
     "sizes": {
       "story": "Story 9:16",
@@ -101,11 +118,38 @@
     "titlesFinished": "{count, plural, one {finished} other {finished}}",
     "titlesWatched": "{count, plural, one {# title} other {# titles}} {period, select, month {this month} year {this year} all {so far} other {this week}}",
     "finishedRead": "Finished",
+    "finishedPlay": "Finished",
+    "finisher": "Finisher",
     "readingHeadline": "{unit, select, page {Page {position}} chapter {Chapter {position}} other {Volume {position}}}",
     "readingCount": "{unit, select, page {P} chapter {CH} other {VOL}} {position}/{total}",
     "pages": "{count, plural, one {page} other {pages}}",
     "chapters": "{count, plural, one {chapter} other {chapters}}",
-    "volumes": "{count, plural, one {volume} other {volumes}}"
+    "volumes": "{count, plural, one {volume} other {volumes}}",
+    "readHours": "hours read",
+    "readMinutes": "min read",
+    "playHours": "hours played",
+    "playMinutes": "min played",
+    "hoursPlayed": "{count, plural, one {hour played} other {hours played}}",
+    "hoursAverage": "{count, plural, one {hour, on average} other {hours, on average}}",
+    "hoursLabel": "Hours played",
+    "hoursHint": "Whole hours, as your console or launcher shows them.",
+    "hoursHintAverage": "Whole hours, as your console or launcher shows them. Left empty, the card shows the average ({hours} h).",
+    "milestoneHeadline": "{metric, select, titles {{value, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} title} hours {{count} hours} other {{count} episodes}}",
+    "milestoneLabel": "{metric, select, titles {titles finished} hours {hours watched} other {episodes watched}}",
+    "milestoneBy": "Reached with {name}",
+    "challengeHeadline": "Challenge complete",
+    "challengeUnit": "{unit, select, titles {{count, plural, one {title finished} other {titles finished}}} languages {languages} kinds {kinds of title} hours {hours} other {days}}",
+    "challengeBy": "Completed with {name}",
+    "yearInReview": "Year in review",
+    "topGenre": "Top genre",
+    "busiestMonth": "Busiest month",
+    "bestStreak": "Best streak",
+    "streakDays": "{count, plural, one {# day} other {# days}}",
+    "importHeadline": "Imported {unit, select, book {{count, plural, one {# book} other {# books}}} series {{count, plural, one {# show} other {# shows}}} manga {{count, plural, other {# manga}}} game {{count, plural, one {# game} other {# games}}} title {{count, plural, one {# title} other {# titles}}} other {{count, plural, one {# film} other {# films}}}}",
+    "filmEdge": "Mystonie 400 · Safety film",
+    "filmFrame": "▸ 12A",
+    "survivedBadge": "I survived",
+    "survivedHeadline": "Survived {scare, select, jumpScares {the jump scares} zombies {the zombies} possession {the possession} ghosts {the ghosts} clowns {the clowns} dolls {the creepy dolls} gore {the gore} spiders {the spiders} snakes {the snakes} sharks {the sharks} other {the needles}}"
   },
   "Waitlist": {
     "heading": "Want all your cards in one collection? Join the waitlist.",
@@ -139,11 +183,11 @@
       },
       "account": {
         "title": "Your account",
-        "body": "If you create an account, we store your email address, a username (made from your name or email; you can change it), the language and time zone you signed up with, and, if you sign in with Google, the name and profile picture Google shares with us. Sign-in happens through Supabase Auth: we never see or store a password, and each sign-in code is emailed to you and works once. We use this to run your account and to send you sign-in codes. Your page: while your collection is public (the default), anyone with its link can see your display name, username, profile picture, the cards you shared, your collection totals and what you're watching. You can make it private in Settings; cards you shared stay viewable by their link. While you're signed in, a small cookie remembers your chosen language and theme, and it's removed when you sign out. You can download all your data as a file in Settings (Export my data). You can delete your account at any time in Settings, which immediately removes your profile and everything you've logged."
+        "body": "If you create an account, we store your email address, a username (made from your name or email; you can change it), the language and time zone you signed up with, and, if you sign in with Google, the name and profile picture Google shares with us. Sign-in happens through Supabase Auth: we never see or store a password, and each sign-in code is emailed to you and works once. We use this to run your account and to send you sign-in codes. Your page: while your collection is public (the default), anyone with its link can see your display name, username, profile picture, the cards you shared, your collection totals and what you're watching. You can make it private in Settings; cards you shared stay viewable by their link. Totals across everyone include private collections, but never who: how many people finished a title (and the finisher number you got for it) and what's trending on Mystonie, which lists a title only once at least 3 people logged it that week. The same goes for how many people are in a fandom club or joined a monthly challenge, and what a club's members are on lately. While your collection is public, the clubs you joined and the challenges you completed show on your page, and your finishes of titles that fit a club you joined show on that club's page. While you're signed in, a small cookie remembers your chosen language and theme, and it's removed when you sign out. You can download all your data as a file in Settings (Export my data), and your collection as spreadsheets that import back into Mystonie (Export as CSV). You can delete your account at any time in Settings, which immediately removes your profile and everything you've logged."
       },
       "collect": {
         "title": "What we collect",
-        "body": "Waitlist: if you join, we store your email address, the language you used, where you signed up from (for example, from a shared card link) and the time you agreed to be emailed. Searches: the text you type is sent to our server and to TMDB to find titles; we don't store it with anything that identifies you. Reports: if you report a page or card, we store the reason, your note and, if you're signed in, your account id, and use them only to review the report. Notifications: if you turn on weekly recap notifications in the installed app, we store that device's push address and encryption keys, and delete them when you turn notifications off, sign out, or the device stops accepting them. Abuse protection: to stop automated abuse we count requests per visitor using a one-way, salted hash of your IP address. We never store the IP address itself, and these counters are deleted within a day. Usage and errors: we measure how the site is used (for example, how many cards are made or shared) and collect error reports, without advertising cookies and without building profiles across other sites."
+        "body": "Waitlist: if you join, we store your email address, the language you used, where you signed up from (for example, from a shared card link) and the time you agreed to be emailed. Searches: the text you type is sent to our server and to the catalogs (TMDB, Google Books, AniList, RAWG) to find titles; we don't store it with anything that identifies you. Imports: an export you import from another app (Letterboxd, Goodreads, MyAnimeList, TV Time) is read on your device. Only the names, years, authors, ISBNs and catalog ids needed to find your titles are sent to our server and the catalogs (TMDB, Google Books, AniList, RAWG), and only what you confirm is saved to your collection. Offline use: so the app works without a connection, the pages you open in it, the posters on them and the titles you looked at lately are kept in your browser's storage on your device, with changes you make while offline until they reach us. Signing out deletes them from the device. Reports: if you report a page or card, we store the reason, your note and, if you're signed in, your account id, and use them only to review the report. Notifications: if you turn on weekly recap notifications in the installed app, we store that device's push address and encryption keys, and delete them when you turn notifications off, sign out, or the device stops accepting them. Abuse protection: to stop automated abuse we count requests per visitor using a one-way, salted hash of your IP address. We never store the IP address itself, and these counters are deleted within a day. Usage and errors: we measure how the site is used (for example, how many cards are made or shared) and collect error reports, without advertising cookies and without building profiles across other sites. Content warnings: if you choose topics to avoid, we store them with your account and only you can see them. Titles are looked up on DoesTheDogDie from our server, never with anything that identifies you. Scene warnings and the warnings quiz: the warnings you add, your votes on them and your quiz answers are stored with your account. Others see the warnings and the totals, never who added or voted. If you delete your account, the warnings you added stay, without your name."
       },
       "use": {
         "title": "How we use it",
@@ -151,7 +195,7 @@
       },
       "processors": {
         "title": "Services we rely on",
-        "body": "Vercel (hosting), Supabase (database and sign-in), PostHog (privacy-friendly analytics), Sentry (error reports) and Resend (email delivery) process data on our behalf under their data processing terms. Posters and title information come from TMDB: your browser loads poster images directly from TMDB's servers, which see your IP address like any website you visit. If you sign in with Google, Google confirms who you are under its own privacy policy. Notifications you turn on are delivered by your device's push service (Apple, Google, Mozilla or Microsoft); they are encrypted so only your device can read them."
+        "body": "Vercel (hosting), Supabase (database and sign-in), PostHog (privacy-friendly analytics), Sentry (error reports) and Resend (email delivery) process data on our behalf under their data processing terms. Posters and title information come from TMDB (movies and series), AniList (manga), Google Books (books, through our server) and RAWG (games): your browser loads posters and game art directly from TMDB's, AniList's and RAWG's servers, which see your IP address like any website you visit. If you sign in with Google, Google confirms who you are under its own privacy policy. Notifications you turn on are delivered by your device's push service (Apple, Google, Mozilla or Microsoft); they are encrypted so only your device can read them."
       },
       "transfers": {
         "title": "Where data is stored",
@@ -189,7 +233,7 @@
       },
       "tmdb": {
         "title": "Titles and posters",
-        "body": "Title information and posters come from <tmdb>TMDB</tmdb>. This product uses the TMDB API but is not endorsed or certified by TMDB. Posters and titles belong to their owners; cards are meant for personal, non-commercial sharing."
+        "body": "Title information and posters come from <tmdb>TMDB</tmdb>. This product uses the TMDB API but is not endorsed or certified by TMDB. Game information and art come from <rawg>RAWG</rawg>. Posters and titles belong to their owners; cards are meant for personal, non-commercial sharing."
       },
       "use": {
         "title": "Fair use of the site",
@@ -248,19 +292,19 @@
       "ignore": "Didn't try to sign in? Ignore this email: nobody gets in without the code."
     },
     "recap": {
-      "subject": "Your week on Mystonie ({range})",
+      "subject": "{period, select, month {Your month on Mystonie ({range})} other {Your week on Mystonie ({range})}}",
       "preheader": "{summary}. Your recap card is ready.",
-      "stamp": "YOUR WEEK",
-      "heading": "Here's your week, {range}",
-      "body": "{titles, plural, one {# title} other {# titles}} went into your collection this week. Your recap card is ready to share, or to keep in your album.",
+      "stamp": "{period, select, month {YOUR MONTH} other {YOUR WEEK}}",
+      "heading": "{period, select, month {Here's your month, {range}} other {Here's your week, {range}}}",
+      "body": "{titles, plural, one {# title} other {# titles}} went into your collection this {period, select, month {month} other {week}}. Your recap card is ready to share, or to keep in your album.",
       "cta": "Open my recap card",
-      "why": "You're getting this because weekly recaps are on for your Mystonie account.",
+      "why": "You're getting this because recaps are on for your Mystonie account.",
       "unsubscribe": "Turn off recap emails"
     }
   },
   "Push": {
     "recap": {
-      "title": "Your week is in: {range}",
+      "title": "{period, select, month {Your month is in: {range}} other {Your week is in: {range}}}",
       "body": "{summary}. Tap to see your recap card."
     }
   },
@@ -315,6 +359,9 @@
     "providerEmail": "Email code",
     "language": "Language",
     "timeZone": "Time zone",
+    "country": "Country",
+    "countryNotSet": "Not set",
+    "countryHint": "For where to watch: the streaming services in this country.",
     "signOut": "Sign out",
     "deleteTitle": "Delete account",
     "deleteBody": "This deletes your profile and everything you've logged. It can't be undone.",
@@ -350,15 +397,25 @@
     "themeOption": "{theme, select, light {Light} dark {Dark} other {System}}",
     "useDeviceTimeZone": "Use this device's time zone ({zone})",
     "yourData": "Your data",
-    "exportBody": "Download everything you've logged (titles, episodes, cards and recaps) as a JSON file.",
+    "exportBody": "Download everything you've logged as a JSON file, or your collection as spreadsheets (CSV) that open anywhere and import back into Mystonie.",
     "exportButton": "Export my data",
+    "exportCsvButton": "Export as CSV",
     "notifications": "Notifications",
     "pushRecaps": "Weekly recap notifications",
     "pushRecapsHint": "On this device, every Monday morning when your recap card is ready.",
     "pushBlocked": "Notifications are blocked for Mystonie. Allow them in your device settings first.",
     "pushInstall": "Install Mystonie on this device (from your browser's menu), then open it from your home screen to get your weekly recap as a notification.",
     "pushInstallIos": "Add Mystonie to your Home Screen (Share, then “Add to Home Screen”), then open it from there to turn on notifications.",
-    "pushError": "Couldn't change notifications. Try again."
+    "pushError": "Couldn't change notifications. Try again.",
+    "importTitle": "Coming from another app?",
+    "importBody": "Bring your history over from Letterboxd, Goodreads, MyAnimeList or TV Time: what you've finished with dates and ratings, what you're watching and reading, and what's next.",
+    "importLink": "Import your history",
+    "proTitle": "Mystonie Pro",
+    "proStamp": "PRO",
+    "proBody": "Pro card styles, new ones first, and you keep Mystonie going.",
+    "proActive": "You're Pro. Thanks for keeping Mystonie going.",
+    "proLink": "See Pro",
+    "proManage": "Manage Pro"
   },
   "Collection": {
     "title": "Your collection",
@@ -370,7 +427,7 @@
     "close": "Close",
     "backToSearch": "Back to search",
     "status": "Status",
-    "statusLabel": "{status, select, finished {Finished} watching {{shelf, select, read {Reading} other {Watching}}} other {{shelf, select, read {Want to read} other {Want to watch}}}}",
+    "statusLabel": "{status, select, finished {Finished} watching {{shelf, select, read {Reading} play {Playing} other {Watching}}} other {{shelf, select, read {Want to read} play {Want to play} other {Want to watch}}}}",
     "finishedOn": "Finished on",
     "finishedDate": "Finished {date}",
     "addedDate": "Added {date}",
@@ -402,28 +459,39 @@
     "seriesEpisodes": "{total, select, none {{watched, plural, one {# episode} other {# episodes}}} other {{watched} / {total} episodes}}",
     "seriesLength": "{episodes} · {time}",
     "makeCard": "Make a card",
-    "searchLabel": "Search movies, series, books and manga",
+    "searchLabel": "Search movies, series, books, manga and games",
     "searchPlaceholder": "What did you just finish?",
     "searchTypes": "What to search",
-    "searchType": "{type, select, all {All} screen {Movies & TV} book {Books} other {Manga}}",
+    "searchType": "{type, select, all {All} screen {Movies & TV} book {Books} game {Games} other {Manga}}",
     "shelves": "Collection tabs",
-    "shelf": "{shelf, select, read {Read} other {Watch}}",
+    "shelf": "{shelf, select, read {Read} play {Play} other {Watch}}",
     "readTime": "Reading time",
     "titlesRead": "Finished",
     "readTimeHint": "Reading time is an estimate: 1.5 min a page, 5 min a manga chapter, 45 min a volume.",
+    "playTime": "Play time",
+    "gamesFinished": "Games finished",
+    "playTimeHint": "Play time is the hours you gave for each game, or its average playtime on RAWG when you didn't.",
+    "playedLength": "{time} played",
+    "averageLength": "About {time} on average",
+    "averageShort": "~{time} avg.",
     "pagesRead": "Pages",
     "chaptersRead": "Chapters",
     "volumesRead": "Volumes",
-    "emptyShelf": "{shelf, select, read {No books or manga yet} other {No movies or series yet}}",
-    "addToShelf": "{shelf, select, read {Add a book or manga} other {Add a movie or series}}",
+    "emptyShelf": "{shelf, select, read {No books or manga yet} play {No games yet} other {No movies or series yet}}",
+    "addToShelf": "{shelf, select, read {Add a book or manga} play {Add a game} other {Add a movie or series}}",
     "readingProgress": "Reading progress",
+    "aboutGame": "About this game",
+    "whereToWatch": "Where to watch",
     "readPages": "{total, select, none {Page {read}} other {Page {read} / {total}}}",
     "readChapters": "{total, select, none {Chapter {read}} other {Chapter {read} / {total}}}",
     "readVolumes": "{total, select, none {Volume {read}} other {Volume {read} / {total}}}",
     "pageCount": "{count, plural, one {# page} other {# pages}}",
     "chapterCount": "{count, plural, one {# chapter} other {# chapters}}",
     "volumeCount": "{count, plural, one {# volume} other {# volumes}}",
-    "readLength": "{progress} · {time} read"
+    "readLength": "{progress} · {time} read",
+    "importLink": "Coming from another app? Import your history",
+    "waitingToSync": "Waiting to sync",
+    "changedElsewhere": "“{name}” was changed on another device after this, so that change stays."
   },
   "Series": {
     "backToCollection": "← Your collection",
@@ -457,13 +525,31 @@
     "progressOffer": "Logged S{season} · E{episode}. Want a card?",
     "milestoneOffer": "{milestone, select, 25 {A quarter of the way! 🎉} 50 {Halfway there! 🎉} other {Almost done! 🎉}}",
     "makeProgressCard": "Make a card",
-    "makeFinishCard": "Make a Finish card"
+    "makeFinishCard": "Make a Finish card",
+    "waitingToSync": "Waiting to sync"
+  },
+  "Movie": {
+    "meta": "Movie{year, select, none {} other { · {year}}}",
+    "loadError": "Couldn't load this movie right now. Try again in a moment."
+  },
+  "WhereToWatch": {
+    "title": "Where to watch",
+    "country": "Country",
+    "chooseCountry": "Choose country",
+    "pickCountry": "Choose your country to see where this is streaming.",
+    "group": "{group, select, stream {Stream} free {Free} other {Rent or buy}}",
+    "provider": "{provider}: {group, select, stream {stream} free {watch free} other {rent or buy}} (opens TMDB)",
+    "none": "Not streaming, free or for sale in {country} right now.",
+    "error": "Couldn't load where to watch right now. Try again in a moment.",
+    "attribution": "Streaming data from <link>JustWatch</link>",
+    "saveError": "Couldn't save your country. Try again."
   },
   "Celebration": {
     "yourCard": "Your card",
     "skip": "Skip",
     "done": "Done",
     "finishedTitle": "You finished {name}!",
+    "finisherLine": "You're finisher #{number} on Mystonie",
     "progressTitle": "One more episode of {name}",
     "milestoneTitle": "{milestone, select, 25 {A quarter of the way through {name}} 50 {Halfway through {name}!} other {Almost done with {name}!}}",
     "styleLabel": "{style} · swipe for another style",
@@ -477,11 +563,22 @@
     "publishError": "Couldn't publish the card link. Try again, or use Download.",
     "linkCopied": "Link copied. Paste it anywhere.",
     "hideOnCard": "Hide on card",
-    "hideItem": "{item, select, username {@{username}} time {{shelf, select, read {Reading time} other {Watch time}}} episodes {{shelf, select, read {Progress} other {Episodes}}} other {Seasons}}",
+    "hideItem": "{item, select, username {@{username}} time {{shelf, select, read {Reading time} play {Play time} other {Watch time}}} episodes {{shelf, select, read {Progress} other {Episodes}}} finisher {Finisher #} other {Seasons}}",
     "notesTitle": "Rate it? (optional)",
     "recapTitle": "{period, select, month {Your month} year {Your year} all {Your watching so far} other {Your week}}, {range}",
     "finishedReadTitle": "You finished {name}!",
-    "readingTitle": "{unit, select, page {Page {position} of {name}} chapter {Chapter {position} of {name}} other {Volume {position} of {name}}}"
+    "finishedPlayTitle": "You finished {name}!",
+    "readingTitle": "{unit, select, page {Page {position} of {name}} chapter {Chapter {position} of {name}} other {Volume {position} of {name}}}",
+    "milestoneCardTitle": "{metric, select, titles {That's your {value, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} title!} hours {{count} hours of watching!} other {{count} episodes watched!}}",
+    "challengeCardTitle": "You completed {name}!",
+    "yearTitle": "Your {year} in review",
+    "importTitle": "{unit, select, book {{count, plural, one {# book} other {# books}}} series {{count, plural, one {# show} other {# shows}}} manga {{count, plural, other {# manga}}} game {{count, plural, one {# game} other {# games}}} title {{count, plural, one {# title} other {# titles}}} other {{count, plural, one {# film} other {# films}}}} imported, {range}",
+    "styleLabelPro": "{style} (Pro) · swipe for another style",
+    "proLocked": "{style} is a Pro style. Share and download it with Pro.",
+    "proUnlock": "Unlock",
+    "survivedOffer": "You made it through {scare, select, jumpScares {the jump scares} zombies {the zombies} possession {the possession} ghosts {the ghosts} clowns {the clowns} dolls {the creepy dolls} gore {the gore} spiders {the spiders} snakes {the snakes} sharks {the sharks} other {the needles}}.",
+    "survivedTry": "Make it a Survived card",
+    "shareOffline": "Share once you're online"
   },
   "SharedCard": {
     "notFoundTitle": "Card not found · Mystonie",
@@ -497,11 +594,12 @@
     "makeYourOwn": "Make your own card",
     "startCollection": "Start your collection",
     "recapLine": "{period, select, month {A month of watching} year {A year of watching} all {Watching so far} other {A week of watching}}, {range}",
-    "byUserLink": "From <link>@{username}</link>'s collection"
+    "byUserLink": "From <link>@{username}</link>'s collection",
+    "importLine": "{unit, select, book {{count, plural, one {# book} other {# books}}} series {{count, plural, one {# show} other {# shows}}} manga {{count, plural, other {# manga}}} game {{count, plural, one {# game} other {# games}}} title {{count, plural, one {# title} other {# titles}}} other {{count, plural, one {# film} other {# films}}}} imported, {range}"
   },
   "Recap": {
-    "pageTitle": "Your weekly recap",
-    "noteTitle": "Your week is in: {range}",
+    "pageTitle": "Your recap",
+    "noteTitle": "{period, select, month {Your month is in: {range}} other {Your week is in: {range}}}",
     "noteCta": "See your recap card"
   },
   "Stats": {
@@ -543,11 +641,20 @@
     "emptyCta": "Log your first title",
     "emptyPeriod": "Nothing logged in this period yet.",
     "reading": "Books & manga",
+    "games": "Games",
     "readingTime": "Reading time",
     "pagesRead": "Pages read",
     "chaptersRead": "Chapters read",
     "volumesRead": "Volumes read",
-    "readingHint": "Reading time is an estimate: 1.5 min a page, 5 min a manga chapter, 45 min a volume."
+    "readingHint": "Reading time is an estimate: 1.5 min a page, 5 min a manga chapter, 45 min a volume.",
+    "playTime": "Play time",
+    "gamesFinished": "Games finished",
+    "playHint": "Play time is the hours you gave for each game, or its average playtime on RAWG.",
+    "milestones": "Milestones",
+    "milestonesHint": "Round numbers you've reached. Tap one to make its card.",
+    "milestoneOn": "{date} · {name}",
+    "milestonesEmpty": "Your first milestone comes at 10 titles finished.",
+    "yearReviewLink": "See your {year} in review"
   },
   "Profile": {
     "metaTitle": "{name} (@{username})",
@@ -555,7 +662,7 @@
     "handle": "@{username}",
     "collectingSince": "Collecting since {date}",
     "statsTitle": "The collection so far",
-    "watchingNow": "Watching now",
+    "watchingNow": "Right now",
     "gallery": "Card gallery",
     "galleryEmpty": "No cards shared yet.",
     "cardAlt": "Card: {name}",
@@ -566,7 +673,212 @@
     "openSettings": "Change it in Settings",
     "ctaTitle": "Start your own collection",
     "ctaBody": "Log what you finish and get a card for each one.",
-    "ctaButton": "Make your first card"
+    "ctaButton": "Make your first card",
+    "milestoneCard": "Milestone",
+    "yearCard": "Year in review",
+    "followers": "<b>{count}</b> {count, plural, one {follower} other {followers}}",
+    "followingCount": "<b>{count}</b> following",
+    "findPeople": "Find people to follow",
+    "blockedTitle": "You blocked @{username}",
+    "blockedBody": "You don't see each other's collections, finishes or cards, and neither of you can follow the other.",
+    "shelf": "The shelf",
+    "shelfHint": "Everything finished, newest first.",
+    "shelfMore": "+ {count} more finished",
+    "shelfItem": "{name} ({kind, select, movie {movie} series {series} book {book} manga {manga} game {game} other {title}})"
+  },
+  "Social": {
+    "follow": "Follow",
+    "following": "Following",
+    "problem": "{problem, select, limited {Slow down a little, then try again.} gone {This person isn't available any more.} other {Couldn't do that. Try again in a moment.}}",
+    "stamp": "Stamp",
+    "stamped": "Stamped",
+    "unstamp": "Take back your Stamp",
+    "stampCount": "{count, plural, one {# Stamp} other {# Stamps}}",
+    "block": "Block",
+    "unblock": "Unblock",
+    "blocking": "Blocking…",
+    "blockTitle": "Block @{username}?",
+    "blockBody": "You won't see each other's collections, finishes or cards, and any follows and Stamps between you are removed. They aren't told.",
+    "blockConfirm": "Block @{username}",
+    "close": "Close",
+    "you": "You",
+    "handle": "@{username}",
+    "finishedWhen": "finished {when}",
+    "finishedLabel": "Finished",
+    "rated": "Rated {rating} out of 5",
+    "cardAlt": "Card: {name}",
+    "loadMore": "Load more",
+    "loading": "Loading…",
+    "feedTitle": "Following",
+    "feedKicker": "What your people finished",
+    "findPeople": "Find people",
+    "feedEmpty": "Follow people to see what they finish, and give them a Stamp.",
+    "activityTitle": "Lately",
+    "activityStamp": "<b>{name}</b> stamped your finish of <b>{title}</b>",
+    "activityFollow": "<b>{name}</b> started following you",
+    "peopleTitle": "Find people",
+    "peopleHint": "Search by username or name. Only public collections show up.",
+    "backToFeed": "← Following",
+    "searchLabel": "Search people",
+    "searchPlaceholder": "@username or name",
+    "searching": "Searching…",
+    "noPeople": "Nobody found for “{query}”.",
+    "finishedNote": " · {count} finished",
+    "followingTitle": "You follow {count}",
+    "followingEmpty": "You don't follow anyone yet.",
+    "blockedTitle": "Blocked",
+    "blockedHint": "They can't see your collection and you can't see theirs.",
+    "homeTitle": "From people you follow",
+    "seeFeed": "See all",
+    "homeEmpty": "Collect with friends",
+    "homeEmptyHint": "Follow people to see what they finish and give them a Stamp.",
+    "friendFinished": "<b>{name}</b> finished <b>{title}</b>",
+    "finisherNo": "Finisher #{number}",
+    "toBoard": "The board",
+    "toChallenges": "Challenges",
+    "toClubs": "Clubs",
+    "communityLabel": "Community"
+  },
+  "Board": {
+    "title": "The board",
+    "kicker": "You and your people",
+    "toFeed": "← Following",
+    "periodLabel": "Board period",
+    "period": "{period, select, month {This month} other {This week}}",
+    "boardTitle": "{period, select, month {This month's board} other {This week's board}}",
+    "you": "You",
+    "place": "Number {rank}",
+    "noRank": "–",
+    "unranked": "Not on the board yet",
+    "details": "{finished, plural, one {# finished} other {# finished}}{episodes, plural, =0 {} one { · # episode} other { · # episodes}}",
+    "minutes": "{count} min",
+    "hours": "{count} h",
+    "finishedOnly": "{count} finished",
+    "nothing": "–",
+    "quiet": "A quiet {period, select, month {month} other {week}} so far. Finish something to take #1.",
+    "empty": "Follow people to race them here.",
+    "findPeople": "Find people",
+    "hint": "Ranked by time spent watching and reading, then by titles finished. Only public collections show up. {period, select, month {A new board starts on the 1st.} other {A new board starts every Monday.}}",
+    "homeTitle": "This week's board",
+    "homePlace": "You're #{rank} of {count} this week",
+    "homeUnranked": "{count, plural, =0 {Nobody's on the board yet this week.} one {# friend is on the board this week.} other {# friends are on the board this week.}} Finish something to join in.",
+    "seeBoard": "See the board"
+  },
+  "Finishers": {
+    "title": "Finishers",
+    "mine": "You're finisher",
+    "number": "#{number}",
+    "count": "{count, plural, =0 {Nobody has finished this on Mystonie yet.} one {# person finished this on Mystonie.} other {# people finished this on Mystonie.}}",
+    "next": "{first, select, true {Be the first: finish it and you're finisher #1.} other {Finish it and you'd be finisher #{number}.}}",
+    "friends": "People you follow",
+    "friendWhen": "finished {when}",
+    "hint": "Everyone who finishes a title gets the next number, and keeps it for good."
+  },
+  "Badges": {
+    "items": {
+      "first-movie": {
+        "name": "Opening Night",
+        "how": "Finish your first movie."
+      },
+      "first-series": {
+        "name": "Season Finale",
+        "how": "Finish your first series."
+      },
+      "first-book": {
+        "name": "First Chapter",
+        "how": "Finish your first book."
+      },
+      "first-manga": {
+        "name": "First Volume",
+        "how": "Finish your first manga."
+      },
+      "first-game": {
+        "name": "Player One",
+        "how": "Finish your first game."
+      },
+      "film-buff": {
+        "name": "Film Buff",
+        "how": "Finish 25 movies."
+      },
+      "binge-master": {
+        "name": "Binge Master",
+        "how": "Finish 10 series."
+      },
+      "rookie-bookworm": {
+        "name": "Rookie Bookworm",
+        "how": "Finish 5 books."
+      },
+      "bookworm": {
+        "name": "Bookworm",
+        "how": "Finish 25 books."
+      },
+      "manga-marathon": {
+        "name": "Manga Marathon",
+        "how": "Finish 10 manga."
+      },
+      "level-up": {
+        "name": "Level Up",
+        "how": "Finish 10 games."
+      },
+      "triple-feature": {
+        "name": "Triple Feature",
+        "how": "Finish 3 movies in one day."
+      },
+      "kdrama-fan": {
+        "name": "K-drama Fan",
+        "how": "Finish 5 Korean series."
+      },
+      "anime-fan": {
+        "name": "Anime Fan",
+        "how": "Finish 10 anime series or movies."
+      },
+      "fear-conqueror": {
+        "name": "Fear Conqueror",
+        "how": "Finish 10 horror titles."
+      },
+      "laugh-track": {
+        "name": "Laugh Track",
+        "how": "Finish 10 comedies."
+      },
+      "stargazer": {
+        "name": "Stargazer",
+        "how": "Finish 10 sci-fi titles."
+      },
+      "hopeless-romantic": {
+        "name": "Hopeless Romantic",
+        "how": "Finish 10 romances."
+      },
+      "sleuth": {
+        "name": "Sleuth",
+        "how": "Finish 10 crime or mystery titles."
+      },
+      "subtitles-on": {
+        "name": "Subtitles On",
+        "how": "Finish titles in 5 original languages."
+      },
+      "genre-hopper": {
+        "name": "Genre Hopper",
+        "how": "Finish titles across 10 genres."
+      },
+      "all-rounder": {
+        "name": "All-Rounder",
+        "how": "Finish a movie, a series, a book and a manga."
+      }
+    },
+    "album": "Sticker album",
+    "albumHint": "Stickers you earn from what you finish. Tap one to see how.",
+    "albumCount": "{count} of {total} stuck in",
+    "progress": "{progress} of {target}",
+    "earnedOn": "Earned {date}",
+    "earnedWith": "Earned {date} with {name}",
+    "notYet": "Not yet: {progress} of {target}",
+    "close": "Close",
+    "newSticker": "{count, plural, one {New sticker!} other {# new stickers!}}",
+    "newStickerWith": "for finishing {name}",
+    "seeAlbum": "See your album",
+    "stickers": "Stickers",
+    "stickersCount": "{count} of {total}",
+    "earnedInFeed": "Earned the {name} sticker"
   },
   "Report": {
     "button": "Report",
@@ -616,6 +928,559 @@
     "milestoneOffer": "{milestone, select, 25 {A quarter of the way! 🎉} 50 {Halfway there! 🎉} other {Almost done! 🎉}}",
     "makeProgressCard": "Make a card",
     "makeFinishCard": "Make a Finish card",
-    "count": "{unit, select, page {{count, plural, one {# page} other {# pages}}} chapter {{count, plural, one {# chapter} other {# chapters}}} other {{count, plural, one {# volume} other {# volumes}}}}"
+    "count": "{unit, select, page {{count, plural, one {# page} other {# pages}}} chapter {{count, plural, one {# chapter} other {# chapters}}} other {{count, plural, one {# volume} other {# volumes}}}}",
+    "waitingToSync": "waiting to sync"
+  },
+  "Game": {
+    "backToCollection": "← Your collection",
+    "loadError": "Couldn't load this game right now. Try again in a moment.",
+    "meta": "Game{year, select, none {} other { · {year}}}",
+    "average": "Average playtime: about {time}",
+    "status": "{status, select, watching {Playing} other {Want to play}}, on your Play shelf",
+    "finishedOn": "Finished {date}",
+    "hoursPlayed": "{time} played",
+    "notInCollection": "Not in your collection yet",
+    "openCollection": "Open your collection",
+    "addFromCollection": "Add it to your collection",
+    "credit": "Game data and art from <rawg>RAWG</rawg>."
+  },
+  "Review": {
+    "pageTitle": "{year} in review",
+    "stamp": "Year in review",
+    "cover": "{complete, select, true {Your {year}} other {Your {year} so far}}",
+    "coverBody": "Every show, movie, book and manga you finished or kept up with, pasted into one album.",
+    "numbers": "The numbers",
+    "watchTime": "Watch time",
+    "readingTime": "Reading time",
+    "gamesFinished": "Games finished",
+    "playTime": "Play time",
+    "titlesFinished": "Titles finished",
+    "episodes": "Episodes",
+    "pagesRead": "Pages read",
+    "chaptersRead": "Chapters read",
+    "activeDays": "Days with something on",
+    "top": "Most time with",
+    "topHint": "Ranked by time: watch time, reading time for books and manga, play time for games.",
+    "taste": "Your taste",
+    "records": "Records",
+    "bookends": "First and last",
+    "firstFinish": "First finish of the year",
+    "lastFinish": "{complete, select, true {Last finish of the year} other {Latest finish}}",
+    "milestones": "Milestones this year",
+    "share": "Share my year",
+    "shareHint": "One card with the whole year on it.",
+    "emptyTitle": "Nothing in {year} yet",
+    "emptyBody": "Finish a show, a movie or a book, and this album starts filling in.",
+    "emptyCta": "Add what you just finished",
+    "byMonth": "Month by month"
+  },
+  "Import": {
+    "title": "Import your history",
+    "back": "Settings",
+    "intro": "Bring over what you've watched and read in another app: finishes with their dates and ratings, what you're in the middle of, and what you want to see next.",
+    "fromLabel": "Where from?",
+    "howTitle": "Get your {source} export",
+    "sources": {
+      "letterboxd": {
+        "name": "Letterboxd",
+        "how1": "On letterboxd.com, open Settings, then Data, and choose Export your data.",
+        "how2": "Pick the ZIP file here as it is (no need to unzip it), or the CSV files from inside it.",
+        "brings": "Films you've watched with the date and your rating, plus your watchlist."
+      },
+      "goodreads": {
+        "name": "Goodreads",
+        "how1": "On goodreads.com, open My Books, then Import and export (under Tools), and choose Export Library.",
+        "how2": "When it's ready, download goodreads_library_export.csv and pick it here.",
+        "brings": "Books you've read with the date and your rating, what you're reading, and your to-read shelf."
+      },
+      "mal": {
+        "name": "MyAnimeList",
+        "how1": "On myanimelist.net, open Settings, then Export (myanimelist.net/panel.php?go=export), and export your anime list, your manga list, or both.",
+        "how2": "Pick the downloaded .xml.gz files here as they are (no need to unzip them).",
+        "brings": "Anime and manga you've completed with the date and your score, what you're watching or reading, and your plan-to lists. Dropped titles stay behind."
+      },
+      "tvtime": {
+        "name": "TV Time",
+        "how1": "TV Time closed in July 2026. If you downloaded your data before then (its GDPR export), find that ZIP file.",
+        "how2": "Pick the ZIP here as it is. Only your shows, episodes and movies are read: the account and device files inside it are never opened.",
+        "brings": "Every episode you checked in, with its date, the movies you watched, and the shows you followed."
+      },
+      "mystonie": {
+        "name": "Mystonie",
+        "how1": "In Settings, under Your data, choose Export as CSV (this account or another one).",
+        "how2": "Pick the ZIP here as it is, or the CSV files from inside it.",
+        "brings": "Your whole collection back: statuses, finish times, ratings, reviews, episodes and reading progress."
+      }
+    },
+    "pick": "Choose your export",
+    "dropHint": "or drop it here",
+    "reading": "Reading",
+    "privacy": "Your export is read on this device. Only names, years, authors, ISBNs and catalog ids are sent, to find your titles.",
+    "problem": {
+      "notExport": "That doesn't look like an export we know. Pick the file as it downloaded from Letterboxd, Goodreads, MyAnimeList or TV Time, or a Mystonie CSV export.",
+      "empty": "There's nothing to import in this export yet.",
+      "unreadable": "Couldn't read that file. Try again, or pick the files from inside the ZIP.",
+      "match": "Couldn't reach the catalogs. What's found so far is kept.",
+      "save": "Couldn't save everything. What's saved stays saved.",
+      "signedOut": "You've been signed out. Sign in again, then import once more (nothing is added twice)."
+    },
+    "retry": "Try again",
+    "matching": "Finding your titles… {done, number} of {total, number}",
+    "saving": "Adding to your collection… {done, number} of {total, number}",
+    "stayHere": "Keep this page open until it's done.",
+    "waiting": "Taking a short break so the catalogs keep up. It carries on by itself.",
+    "things": "{unit, select, book {{count, plural, one {# book} other {# books}}} series {{count, plural, one {# show} other {# shows}}} manga {{count, plural, other {# manga}}} game {{count, plural, one {# game} other {# games}}} title {{count, plural, one {# title} other {# titles}}} other {{count, plural, one {# film} other {# films}}}}",
+    "previewStamp": "PREVIEW",
+    "previewTitle": "{things} in your export",
+    "statReady": "Ready",
+    "statCheck": "To check",
+    "statMissing": "Not found",
+    "cut": "Your export has {total, number} titles. The {max, number} most recent are imported.",
+    "haveNote": "{count, plural, one {# title is} other {# titles are}} already in your collection. Nothing is added twice: they keep what you logged here, only move forward (wanted, watching, finished), and get a date, rating or episodes they're missing.",
+    "mergedNote": "{count, plural, one {# row is} other {# rows are}} the same title as another row (an anime's seasons are one series here), so they're joined.",
+    "checkTitle": "Which one is it?",
+    "checkBody": "These fit more than one title. Tap the right poster, or find it yourself.",
+    "missingTitle": "Not found",
+    "missingBody": "These weren't found by their name. Find them another way, or leave them out.",
+    "readyTitle": "Ready to import ({count, number})",
+    "readyBody": "Untick anything you'd rather leave out.",
+    "show": "Show",
+    "include": "Import {name}",
+    "watchedOn": "Watched {date}",
+    "readOn": "Read {date}",
+    "finishedUndated": "Finished (no date, so it's dated by its year)",
+    "watching": "Watching",
+    "watchlist": "Watchlist",
+    "wantRead": "Want to read",
+    "episodes": "{count, plural, one {# episode} other {# episodes}}",
+    "readingAt": "{unit, select, page {page} chapter {chapter} other {volume}} {position, number}",
+    "rating": "★ {rating}",
+    "picked": "{name} ({year})",
+    "have": "In your collection",
+    "findIt": "Find it",
+    "leaveOut": "Leave out",
+    "findTitle": "Find “{name}”",
+    "findLabel": "Search the catalog",
+    "close": "Close",
+    "importButton": "Import {things}",
+    "importNone": "Pick titles to import",
+    "doneStamp": "IMPORTED",
+    "doneTitle": "Pasted into your collection",
+    "done": {
+      "added": "{things} added",
+      "updated": "{things} updated",
+      "kept": "{things} {count, plural, one {was} other {were}} already there",
+      "failed": "{things} couldn't be saved. Import again to retry: nothing is added twice.",
+      "episodes": "{count, plural, one {# episode} other {# episodes}} logged",
+      "reading": "{count, plural, one {# reading bookmark} other {# reading bookmarks}} added"
+    },
+    "seeCollection": "See your collection",
+    "makeCard": "Make the card",
+    "again": "Import another export"
+  },
+  "Pro": {
+    "title": "Mystonie Pro",
+    "stamp": "PRO",
+    "intro": "Extra styles for your cards, for people who want their album to look even more like theirs.",
+    "whatYouGet": "What Pro adds",
+    "featureTemplates": "Pro card styles, starting with Film Strip: your poster as a frame of 35 mm film taped into the album.",
+    "featureFirst": "New Pro styles land here first.",
+    "featureSupport": "You keep Mystonie independent and ad-free.",
+    "freeStaysFree": "Logging, the base card styles, recaps, stats and sharing stay free.",
+    "plan": "{plan, select, yearly {Yearly} other {Monthly}}",
+    "price": "{price} {plan, select, yearly {a year} other {a month}}",
+    "save": "Save {percent}%",
+    "choose": "Go Pro {plan, select, yearly {yearly} other {monthly}}",
+    "signInFirst": "Sign in to go Pro",
+    "opening": "Opening…",
+    "unlocking": "Unlocking Pro… this takes a few seconds.",
+    "slowWebhook": "Your payment went through, but Pro hasn't switched on yet. Refresh in a minute; if it still isn't on, contact us.",
+    "youArePro": "You're Pro. Thank you!",
+    "renewsOn": "Renews on {date}.",
+    "endsOn": "Cancelled: Pro stays on until {date}.",
+    "manage": "Manage subscription",
+    "error": "Something went wrong. Try again in a moment.",
+    "pricesUnavailable": "Plans can't be shown right now. Try again in a moment.",
+    "fineprint": "Prices in USD, billed by Stripe. Cancel any time: Pro stays on until the end of the period you've paid for."
+  },
+  "Warnings": {
+    "title": "Content warnings",
+    "setupBody": "Choose topics you'd rather avoid, like a dog dying or jump scares, and we'll flag titles that have them.",
+    "setupLink": "Choose topics",
+    "checkAnyway": "Show this title's warnings",
+    "headsUp": "Heads up",
+    "verdict": "{verdict, select, yes {Yes} no {No} other {Unclear}}",
+    "votes": "{yes} yes · {no} no",
+    "noVotes": "No votes yet",
+    "yourTopics": "Your topics",
+    "seeAll": "See all topics ({count})",
+    "group": "{verdict, select, yes {People said yes} no {People said no} other {Not clear yet}}",
+    "spoiler": "Spoiler: tap to show",
+    "showComment": "Read a comment",
+    "none": "No warning data yet.",
+    "error": "Couldn't load content warnings right now. Try again in a moment.",
+    "attribution": "Powered by <link>DoesTheDogDie.com</link>",
+    "details": "See every vote on DoesTheDogDie",
+    "editTopics": "Edit topics",
+    "badge": "Content warning: {topics}",
+    "settingsBody": "Choose topics you'd rather avoid, and we'll flag titles that have them. Only you can see your choices.",
+    "settingsCount": "{count, plural, =0 {No topics chosen yet} one {# topic chosen} other {# topics chosen}}",
+    "settingsLink": "Choose topics",
+    "pageTitle": "Topics to avoid",
+    "pageIntro": "Pick anything you'd rather know about before you press play. Titles where people said yes get a warning badge in your collection and search, with the details on their page. Only you can see these.",
+    "searchLabel": "Search topics",
+    "searchPlaceholder": "Search, e.g. spiders",
+    "chosen": "Chosen ({count})",
+    "remove": "Remove {topic}",
+    "clearAll": "Clear all",
+    "saving": "Saving…",
+    "saved": "Saved",
+    "saveError": "Couldn't save. Try again.",
+    "loadError": "Couldn't load the topic list right now. Try again in a moment.",
+    "noMatch": "No topics match “{query}”.",
+    "backToSettings": "Back to settings",
+    "categoryCount": "{count, plural, one {# chosen} other {# chosen}}"
+  },
+  "WarningTopics": {
+    "names": {
+      "dog-dies": "a dog dies",
+      "cat-dies": "a cat dies",
+      "animal-dies": "an animal dies",
+      "animal-cruelty": "animal cruelty",
+      "spiders": "spiders",
+      "snakes": "snakes",
+      "jump-scares": "jump scares",
+      "flashing-lights": "flashing lights",
+      "loud-noises": "sudden loud noises",
+      "claustrophobia": "tight, enclosed spaces",
+      "blood-gore": "blood and gore",
+      "needles": "needles",
+      "vomit": "vomiting",
+      "eye-injury": "an eye injury",
+      "seizure": "a seizure",
+      "gun-violence": "gun violence",
+      "torture": "torture",
+      "drowning": "drowning",
+      "car-crash": "a car crash",
+      "sexual-assault": "sexual assault",
+      "suicide": "suicide",
+      "self-harm": "self-harm",
+      "child-abuse": "child abuse",
+      "domestic-violence": "domestic violence",
+      "sex-scenes": "sex scenes",
+      "drug-use": "drug use"
+    },
+    "questions": {
+      "dog-dies": "Does a dog die in {title}?",
+      "cat-dies": "Does a cat die in {title}?",
+      "animal-dies": "Does an animal die in {title}?",
+      "animal-cruelty": "Is an animal hurt on purpose in {title}?",
+      "spiders": "Are there spiders in {title}?",
+      "snakes": "Are there snakes in {title}?",
+      "jump-scares": "Are there jump scares in {title}?",
+      "flashing-lights": "Are there flashing lights or images in {title}?",
+      "loud-noises": "Are there sudden loud noises in {title}?",
+      "claustrophobia": "Is someone trapped in a tight space in {title}?",
+      "blood-gore": "Is there blood or gore in {title}?",
+      "needles": "Are needles or syringes used in {title}?",
+      "vomit": "Does someone vomit in {title}?",
+      "eye-injury": "Is someone's eye hurt in {title}?",
+      "seizure": "Does someone have a seizure in {title}?",
+      "gun-violence": "Is there gun violence in {title}?",
+      "torture": "Is someone tortured in {title}?",
+      "drowning": "Does someone drown in {title}?",
+      "car-crash": "Is there a car crash in {title}?",
+      "sexual-assault": "Is someone sexually assaulted in {title}?",
+      "suicide": "Does someone die by suicide or attempt it in {title}?",
+      "self-harm": "Does someone self-harm in {title}?",
+      "child-abuse": "Is a child abused in {title}?",
+      "domestic-violence": "Is there domestic violence in {title}?",
+      "sex-scenes": "Are there sex scenes in {title}?",
+      "drug-use": "Does someone use drugs in {title}?"
+    },
+    "categories": {
+      "animals": "Animals",
+      "scares": "Scares and senses",
+      "body": "Body",
+      "violence": "Violence",
+      "heavy": "Heavy themes"
+    }
+  },
+  "SceneWarnings": {
+    "title": "Scene warnings",
+    "intro": "Where things happen, noted by people who {kind, select, book {read it} manga {read it} game {played it} other {watched it}}, so you can skip ahead. A warning is confirmed once {count} people saw it.",
+    "empty": "No scene warnings yet.",
+    "yourTopic": "One of your topics",
+    "confirmed": "Confirmed by {count}",
+    "pending": "Needs confirmation · {count} of {total}",
+    "disputed": "Others didn't see this",
+    "addedByYou": "Added by you",
+    "withdraw": "Withdraw",
+    "sawIt": "Saw it",
+    "notThere": "Not there",
+    "sawItLabel": "Saw it: {topic}, {place}",
+    "notThereLabel": "Not there: {topic}, {place}",
+    "voteError": "Couldn't save that. Try again.",
+    "add": "Add a warning",
+    "addTitle": "Add a scene warning",
+    "close": "Close",
+    "addHint": "Saw something others might want to skip? Note where it happens.",
+    "needsSeen": "Mark it as {kind, select, book {reading} manga {reading} game {playing} other {watching}} or finished to add warnings and confirm them.",
+    "topicLabel": "What happens",
+    "topicPlaceholder": "Choose a topic",
+    "whereLabel": "Where (optional)",
+    "seasonLabel": "Season",
+    "episodeLabel": "Episode",
+    "seasonOption": "Season {season}",
+    "episodeOption": "Episode {episode}",
+    "throughout": "Throughout",
+    "fromLabel": "From",
+    "toLabel": "To",
+    "timeHint": "Minutes and seconds into the {kind, select, movie {movie} other {episode}}, like 41:10 or 1:02:13.",
+    "timeInvalid": "Use minutes and seconds, like 41:10.",
+    "endBeforeStart": "The end comes before the start.",
+    "startMissing": "Add when it starts, too.",
+    "unitLabel": "In",
+    "unit": "{unit, select, page {Page} volume {Volume} other {Chapter}}",
+    "positionLabel": "{unit, select, page {Page} volume {Volume} other {Chapter}} number",
+    "similar": "Someone already noted this. If it's the same scene, confirm theirs instead:",
+    "confirmInstead": "That's the one",
+    "save": "Add warning",
+    "saving": "Adding…",
+    "added": "Added. It's confirmed once {count, plural, one {# more person} other {# more people}} who saw it agree.",
+    "errorNotSeen": "Add it to your collection as {kind, select, book {reading} manga {reading} game {playing} other {watching}} or finished first.",
+    "errorDuplicate": "You've already added that one.",
+    "errorLimit": "That's a lot for one day. Try again tomorrow.",
+    "errorGeneric": "Couldn't add that. Try again.",
+    "episodeCode": "S{season} · E{episode}",
+    "timeRange": "{from}–{to}",
+    "position": "{unit, select, page {Page} volume {Volume} other {Chapter}} {position}",
+    "verdictsTitle": "People who finished it say",
+    "verdict": "{result, select, yes {Yes} no {No} other {They disagree}}",
+    "verdictCounts": "{yes} yes · {no} no",
+    "quizLink": "Quiz me about this one",
+    "loadError": "Couldn't load scene warnings right now. Try again in a moment."
+  },
+  "Quiz": {
+    "metaTitle": "Warnings quiz",
+    "title": "Warnings quiz",
+    "intro": "Quick questions about things you've finished. Your answers help people skip scenes they'd rather not see.",
+    "back": "Back to Home",
+    "noFinishesTitle": "Finish something first",
+    "noFinishesBody": "The quiz asks about titles you've finished. Mark one as finished in your collection, then come back.",
+    "toCollection": "Go to your collection",
+    "doneTitle": "That's everything for now",
+    "doneBody": "You've answered every question there is for you. Finish more titles to get new ones.",
+    "pausedTitle": "The quiz is taking a break",
+    "pausedBody": "Answers came in faster than anyone can read, so the quiz is paused until {time}.",
+    "tooFast": "Take a moment to read each question: that answer didn't count.",
+    "warningLead": "Someone who {kind, select, book {read} manga {read} game {played} other {watched}} {title} noted this:",
+    "warningQuestion": "Did you see it?",
+    "yes": "Yes",
+    "no": "No",
+    "unsure": "Don't remember",
+    "topicProgress": "{count, plural, =0 {Be the first to answer · {total} answers settle it} other {# of {total} answers so far}}",
+    "warningProgress": "{count} of {total} confirmations",
+    "thanks": "Thanks, that helps.",
+    "settled": "That settled it. People who finished {title} say: {result, select, yes {yes} no {no} other {they disagree}}.",
+    "confirmedNow": "That confirmed it.",
+    "answered": "{count, plural, one {# answer} other {# answers}} this visit",
+    "error": "Couldn't load a question. Try again.",
+    "retry": "Try again",
+    "homeTitle": "Warnings quiz",
+    "homeBody": "A few quick questions about things you've finished help others skip what they'd rather not see.",
+    "homeCta": "Answer a few",
+    "settingsBody": "Help others skip what they'd rather not see: answer quick questions about things you've finished.",
+    "settingsLink": "Take the warnings quiz"
+  },
+  "Challenges": {
+    "items": {
+      "new-chapter": {
+        "name": "New Chapter",
+        "how": "Finish 2 books or manga this month."
+      },
+      "love-stories": {
+        "name": "Love Stories",
+        "how": "Finish 3 romances this month."
+      },
+      "world-tour": {
+        "name": "World Tour",
+        "how": "Finish titles in 3 original languages this month."
+      },
+      "laugh-lines": {
+        "name": "Laugh Lines",
+        "how": "Finish 3 comedies this month."
+      },
+      "anime-month": {
+        "name": "Anime Month",
+        "how": "Finish 3 anime series or movies this month."
+      },
+      "movie-marathon": {
+        "name": "Movie Marathon",
+        "how": "Finish 5 movies this month."
+      },
+      "out-of-this-world": {
+        "name": "Out of This World",
+        "how": "Finish 3 sci-fi or fantasy titles this month."
+      },
+      "box-set": {
+        "name": "Box Set",
+        "how": "Finish 2 series this month."
+      },
+      "case-files": {
+        "name": "Case Files",
+        "how": "Finish 3 crime or mystery titles this month."
+      },
+      "fright-month": {
+        "name": "Fright Month",
+        "how": "Finish 3 horror titles this month."
+      },
+      "kdrama-month": {
+        "name": "K-drama Month",
+        "how": "Finish 2 Korean series this month."
+      },
+      "triple-threat": {
+        "name": "Triple Threat",
+        "how": "Finish 3 kinds of title this month: movies, series, books or manga."
+      },
+      "finish-four": {
+        "name": "Finish Four",
+        "how": "Finish 4 titles this month."
+      },
+      "twenty-hours": {
+        "name": "Twenty Hours",
+        "how": "Spend 20 hours watching and reading this month."
+      },
+      "twelve-days": {
+        "name": "Twelve Days",
+        "how": "Log something on 12 different days this month."
+      }
+    },
+    "title": "Challenges",
+    "daysLeft": "{count, plural, =0 {Over} one {Last day!} other {# days left}}",
+    "join": "Join",
+    "joined": "Joined",
+    "leave": "Leave",
+    "completed": "Completed",
+    "completedOn": "Completed {date}",
+    "progress": "{value} of {target} {unit, select, titles {titles} languages {languages} kinds {kinds} hours {hours} other {days}}",
+    "counts": "{joined, plural, =0 {Nobody has joined yet} one {# joined} other {# joined}}{completed, plural, =0 {} other { · # completed}}",
+    "friends": "People you follow",
+    "friendProgress": "{value}/{target}",
+    "makeCard": "Make the card",
+    "patchesTitle": "Your patches",
+    "patchesEmpty": "Complete a challenge to sew its patch in here.",
+    "patchesCount": "{count, plural, one {# patch} other {# patches}}",
+    "patchMonth": "{name} · {month}",
+    "hint": "Everything you finish, watch or read this month counts, even from before you joined. Months follow your time zone, and a new lineup starts on the 1st.",
+    "problem": "{problem, select, closed {That month is over. Here's the new lineup.} limited {Slow down a little, then try again.} other {Couldn't do that. Try again in a moment.}}",
+    "homeTitle": "This month's challenges",
+    "homeInvite": "{count} challenges for {month}. Join one and see how far you get.",
+    "homeMore": "{count, plural, =0 {} one {+ # more challenge} other {+ # more challenges}}",
+    "homeCta": "See challenges",
+    "profileTitle": "Challenge patches",
+    "toClubs": "Fandom clubs →"
+  },
+  "Clubs": {
+    "items": {
+      "kdrama": {
+        "name": "K-drama Club",
+        "tagline": "Korean series, from rom-coms to revenge sagas."
+      },
+      "anime": {
+        "name": "Anime Club",
+        "tagline": "Anime series and movies."
+      },
+      "manga": {
+        "name": "Manga Club",
+        "tagline": "Manga, manhwa and webtoons."
+      },
+      "books": {
+        "name": "Book Club",
+        "tagline": "Every book you finish."
+      },
+      "games": {
+        "name": "Gamers",
+        "tagline": "Every game you finish."
+      },
+      "cdrama": {
+        "name": "C-drama Club",
+        "tagline": "Chinese-language series."
+      },
+      "indian-cinema": {
+        "name": "Indian Cinema Club",
+        "tagline": "Movies from Bollywood and beyond."
+      },
+      "horror": {
+        "name": "Horror Club",
+        "tagline": "For the brave."
+      },
+      "romance": {
+        "name": "Romance Club",
+        "tagline": "Love stories on every screen and shelf."
+      },
+      "scifi": {
+        "name": "Sci-fi & Fantasy Club",
+        "tagline": "Other worlds, spaceships and dragons."
+      },
+      "mystery": {
+        "name": "Mystery Club",
+        "tagline": "Crime, mysteries and thrillers."
+      },
+      "comedy": {
+        "name": "Comedy Club",
+        "tagline": "Anything that makes you laugh."
+      },
+      "docs": {
+        "name": "Documentary Club",
+        "tagline": "True stories."
+      }
+    },
+    "title": "Fandom clubs",
+    "kicker": "Find your people",
+    "hint": "Every club is open to everyone. What counts in a club comes from each title's catalog data (kind, genre, original language). Private collections count only in the member total.",
+    "members": "{count, plural, =0 {No members yet} one {# member} other {# members}}",
+    "join": "Join the club",
+    "joined": "You're in",
+    "leave": "Leave the club",
+    "signInToJoin": "Sign in to join",
+    "yourClubs": "Your clubs",
+    "moreClubs": "Find your fandom",
+    "fit": "{count, plural, one {# of your finishes fits} other {# of your finishes fit}}",
+    "friends": "People you follow here",
+    "trending": "Big in the club lately",
+    "trendingHint": "What members finished, watched or read in the last 30 days, once at least 3 members did.",
+    "trendingPeople": "{count, plural, one {# member} other {# members}}",
+    "feedTitle": "Latest from members",
+    "feedEmpty": "No finishes here yet. Join and finish something that fits to be the first.",
+    "back": "← All clubs",
+    "titleClubs": "Clubs for this",
+    "profileTitle": "Clubs",
+    "profileEmpty": "Find your fandom",
+    "problem": "{problem, select, limited {Slow down a little, then try again.} other {Couldn't do that. Try again in a moment.}}",
+    "toChallenges": "Monthly challenges →"
+  },
+  "Offline": {
+    "offline": "You're offline. What you log is saved on this device and syncs when you're back.",
+    "offlineWaiting": "You're offline · {count, plural, one {# change} other {# changes}} saved on this device, waiting to sync",
+    "waiting": "{count, plural, one {# change is} other {# changes are}} waiting to sync",
+    "syncNow": "Sync now",
+    "failed": "{count, plural, one {# change} other {# changes}} couldn't be saved",
+    "retry": "Try again",
+    "discard": "Discard",
+    "signedOut": "Sign in to sync {count, plural, one {# change} other {# changes}} saved on this device",
+    "signIn": "Sign in",
+    "otherAccount": "{count, plural, one {# change from another account is} other {# changes from another account are}} waiting on this device",
+    "synced": "Back online: {count, plural, one {# change} other {# changes}} synced",
+    "searchOffline": "You're offline, so search will work when you reconnect. Add something you've seen lately instead.",
+    "recentTitles": "Seen lately on this device",
+    "noRecent": "Titles you open or search for show up here, so you can add them offline.",
+    "signOutWaiting": "{count, plural, one {# change hasn't} other {# changes haven't}} synced yet. Signing out deletes {count, plural, one {it} other {them}} from this device.",
+    "signOutAnyway": "Sign out anyway",
+    "pageStamp": "Offline",
+    "pageTitle": "This page isn't saved on this device yet",
+    "pageBody": "Pages you've opened before still work offline, and anything you log syncs when you're back.",
+    "savedPages": "Open offline",
+    "metaTitle": "Offline"
   }
 }

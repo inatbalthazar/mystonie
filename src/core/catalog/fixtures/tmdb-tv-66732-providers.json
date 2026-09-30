@@ -1,0 +1,33 @@
+{
+  "id": 66732,
+  "results": {
+    "TH": {
+      "link": "https://www.themoviedb.org/tv/66732-stranger-things/watch?locale=TH",
+      "flatrate": [
+        {
+          "logo_path": "/rK1KljqmbvO9HQa1PBFLILWah72.png",
+          "provider_id": 8,
+          "provider_name": "Netflix",
+          "display_priority": 0
+        }
+      ]
+    },
+    "US": {
+      "link": "https://www.themoviedb.org/tv/66732-stranger-things/watch?locale=US",
+      "flatrate": [
+        {
+          "logo_path": "/rK1KljqmbvO9HQa1PBFLILWah72.png",
+          "provider_id": 8,
+          "provider_name": "Netflix",
+          "display_priority": 3
+        },
+        {
+          "logo_path": "/eGUwOOIxcazwEBxqJpSN5sWEu6V.png",
+          "provider_id": 1796,
+          "provider_name": "Netflix Standard with Ads",
+          "display_priority": 151
+        }
+      ]
+    }
+  }
+}

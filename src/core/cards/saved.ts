@@ -1,7 +1,11 @@
 // Saved cards (S1 share artwork): what `POST /api/cards` accepts, what `cards.params` holds, and the
 // Progress card's milestones. The params are a snapshot of the card's inputs, so `/c/[id]` and the profile
 // gallery can re-render it without the entry (which may change later).
+import { isSurvivedKey, type SurvivedKey } from "../catalog/dtdd";
+import { findChallenge, isMonth } from "../challenges";
 import { isCardPosterUrl } from "../catalog/images";
+import { isTitleKind } from "../catalog/types";
+import { MAX_HOURS_PLAYED } from "../collection/entries";
 import {
   isReadingUnit,
   MAX_READING_POSITION,
@@ -15,22 +19,29 @@ import {
 } from "../collection/reading";
 import { isUuidV7 } from "../ids";
 import { reviewLength } from "./edit";
-import { isTemplateId, templateFits, type TemplateId } from "./templates";
+import { isSurvivedTemplate, isTemplateId, templateFits, type TemplateId } from "./templates";
 import {
   CARD_HIDEABLE,
   CARD_KINDS,
+  IMPORT_UNITS,
+  MILESTONE_METRICS,
   MILESTONES,
   RECAP_COLLAGE_MAX,
   REVIEW_MAX_CHARS,
   STATS_PERIODS,
+  type CardChallenge,
   type CardData,
   type CardHideable,
   type CardKind,
+  type CardMilestone,
   type CardProgress,
   type CardReading,
   type CardRecap,
   type CardSize,
+  type ImportUnit,
   type Milestone,
+  type MilestoneMetric,
+  type RecapHighlights,
   type StatsPeriod,
 } from "./types";
 
@@ -77,7 +88,7 @@ export type CardSave = {
   episodeLogId: string | null;
   /** The reading log a reading Progress card was made from. */
   readingLogId: string | null;
-  /** The weekly recap a recap card (or its sticker) was made from; the server links it to the card. */
+  /** The weekly or monthly recap a recap card (or its sticker) was made from; the server links it to the card. */
   recapId: string | null;
   /** Card inputs without `username` (the server adds it from the profile). */
   data: CardData;
@@ -94,7 +105,6 @@ const orNull = <T>(v: T | undefined): T | null => (v === undefined ? null : v);
 const num = (...values: unknown[]) => values.filter((v) => v !== undefined && v !== null).length;
 
 const isPoster = (v: unknown) => v === undefined || v === null || (typeof v === "string" && isCardPosterUrl(v));
-const KINDS: readonly unknown[] = ["movie", "series", "book", "manga"];
 const DATE_RE = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
 /** `undefined` = invalid; null = none. */
@@ -140,7 +150,7 @@ function parseReading(v: unknown): CardReading | null | undefined {
  */
 export function parseRecap(v: unknown): CardRecap | null {
   if (!isObject(v)) return null;
-  const { period, from, to, minutes, episodes, finished, titleCount, titles } = v;
+  const { period, from, to, minutes, episodes, finished, titleCount, titles, readMinutes, highlights, imported, importedUnit } = v;
   if (period !== undefined && !(STATS_PERIODS as readonly unknown[]).includes(period)) return null;
   if (typeof from !== "string" || !DATE_RE.test(from) || typeof to !== "string" || !DATE_RE.test(to) || to < from) return null;
   // All-time stats cards can hold years of watching.
@@ -148,9 +158,14 @@ export function parseRecap(v: unknown): CardRecap | null {
   if (!Array.isArray(titles) || titles.length > RECAP_COLLAGE_MAX || titles.length > (titleCount as number)) return null;
   const collage: CardRecap["titles"] = [];
   for (const t of titles) {
-    if (!isObject(t) || !text(t.name, 300) || !KINDS.includes(t.kind) || !isPoster(t.posterUrl)) return null;
+    if (!isObject(t) || !text(t.name, 300) || !isTitleKind(t.kind) || !isPoster(t.posterUrl)) return null;
     collage.push({ name: (t.name as string).trim(), kind: t.kind as CardData["kind"], posterUrl: orNull(t.posterUrl as string | null | undefined) });
   }
+  if (readMinutes !== undefined && !int(readMinutes, 0, 10_000_000)) return null;
+  if (imported !== undefined && (imported !== true || period !== "all")) return null;
+  if (importedUnit !== undefined && (!imported || !(IMPORT_UNITS as readonly unknown[]).includes(importedUnit))) return null;
+  const standouts = parseHighlights(highlights);
+  if (standouts === undefined) return null;
   return {
     ...(period === undefined ? {} : { period: period as StatsPeriod }),
     from,
@@ -160,17 +175,63 @@ export function parseRecap(v: unknown): CardRecap | null {
     finished: finished as number,
     titleCount: titleCount as number,
     titles: collage,
+    ...(readMinutes ? { readMinutes: readMinutes as number } : {}),
+    ...(standouts ? { highlights: standouts } : {}),
+    ...(imported ? { imported: true } : {}),
+    ...(importedUnit ? { importedUnit: importedUnit as ImportUnit } : {}),
   };
+}
+
+const MONTH_RE = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+/** A Year in Review's highlights. `undefined` = invalid; null = none. */
+function parseHighlights(v: unknown): RecapHighlights | null | undefined {
+  if (v === undefined || v === null) return null;
+  if (!isObject(v)) return undefined;
+  const { genre, month, streak } = v;
+  if (genre !== undefined && !text(genre, 40)) return undefined;
+  if (month !== undefined && (typeof month !== "string" || !MONTH_RE.test(month))) return undefined;
+  if (streak !== undefined && !int(streak, 1, 366)) return undefined;
+  return {
+    ...(genre === undefined ? {} : { genre: (genre as string).trim() }),
+    ...(month === undefined ? {} : { month: month as string }),
+    ...(streak === undefined ? {} : { streak: streak as number }),
+  };
+}
+
+/** A Milestone card's milestone. `undefined` = invalid; null = none. */
+function parseMilestone(v: unknown): CardMilestone | null | undefined {
+  if (v === undefined || v === null) return null;
+  if (!isObject(v)) return undefined;
+  const { metric, value } = v;
+  if (!(MILESTONE_METRICS as readonly unknown[]).includes(metric) || !int(value, 1, 1_000_000)) return undefined;
+  return { metric: metric as MilestoneMetric, value: value as number };
+}
+
+/** A Challenge card's challenge: one of that month's lineup, its target, the calendar's days. `undefined` = invalid. */
+function parseChallenge(v: unknown): CardChallenge | null | undefined {
+  if (v === undefined || v === null) return null;
+  if (!isObject(v)) return undefined;
+  const { slug, month, target, days } = v;
+  if (!isMonth(month)) return undefined;
+  const challenge = findChallenge(month, slug);
+  if (!challenge || target !== challenge.rule.target) return undefined;
+  if (!Array.isArray(days) || days.length > 31 || !days.every((d) => int(d, 1, 31))) return undefined;
+  return { slug: challenge.slug, month, target: challenge.rule.target, days: [...new Set(days as number[])].sort((a, b) => a - b) };
 }
 
 /** Card inputs from a request, or null when anything is off. `username` is always dropped. */
 export function parseCardData(v: unknown): CardData | null {
   if (!isObject(v)) return null;
   const { kind, name, year, posterUrl, genres, runtimeMin, episodeCount, seasonCount, pageCount, chapterCount, volumeCount, rating, review, finishedOn, hide } = v;
-  if (!KINDS.includes(kind)) return null;
+  const { playtimeHours, hoursPlayed } = v;
+  if (!isTitleKind(kind)) return null;
   if (!text(name, 300) || typeof finishedOn !== "string" || !DATE_RE.test(finishedOn)) return null;
   // Books go back further than film (1000: the oldest year Google Books dates we keep).
   if (!optInt(year, kind === "book" ? 1000 : 1870, 2200) || !optInt(runtimeMin, 0, 1440)) return null;
+  // Hours belong to a game (RAWG's average, the player's own).
+  if (!optInt(playtimeHours, 1, 10_000) || !optInt(hoursPlayed, 1, MAX_HOURS_PLAYED)) return null;
+  if (kind !== "game" && num(playtimeHours, hoursPlayed) > 0) return null;
   if (!optInt(episodeCount, 0, 100000) || !optInt(seasonCount, 0, 1000)) return null;
   if (!optInt(pageCount, 0, MAX_READING_POSITION) || !optInt(chapterCount, 0, MAX_READING_POSITION) || !optInt(volumeCount, 0, 10_000)) return null;
   if (!isPoster(posterUrl)) return null;
@@ -189,7 +250,17 @@ export function parseCardData(v: unknown): CardData | null {
   if (progress === undefined || reading === undefined) return null;
   const recap = v.recap === undefined || v.recap === null ? null : parseRecap(v.recap);
   if (recap === null && v.recap !== undefined && v.recap !== null) return null;
-  if (num(progress, reading, recap) > 1) return null;
+  const milestone = parseMilestone(v.milestone);
+  const challenge = parseChallenge(v.challenge);
+  if (milestone === undefined || challenge === undefined) return null;
+  if (num(progress, reading, recap, milestone, challenge) > 1) return null;
+  const survived = v.survived ?? null;
+  if (survived !== null && (!isSurvivedKey(survived) || (kind !== "movie" && kind !== "series") || num(progress, reading, recap, milestone, challenge) > 0)) {
+    return null;
+  }
+  // Only a Finish card has a finisher number.
+  const finisherNo = v.finisherNo ?? null;
+  if (finisherNo !== null && (!int(finisherNo, 1, 1_000_000_000) || num(progress, reading, recap, milestone, challenge) > 0)) return null;
   return {
     kind: kind as CardData["kind"],
     name: (name as string).trim(),
@@ -202,12 +273,17 @@ export function parseCardData(v: unknown): CardData | null {
     pageCount: orNull(pageCount as number | null | undefined),
     chapterCount: orNull(chapterCount as number | null | undefined),
     volumeCount: orNull(volumeCount as number | null | undefined),
+    ...(kind === "game" ? { playtimeHours: orNull(playtimeHours as number | null | undefined), hoursPlayed: orNull(hoursPlayed as number | null | undefined) } : {}),
     rating: orNull(rating as number | null | undefined),
     review: review ? (review as string).trim() : null,
     finishedOn,
     progress,
     reading,
     recap,
+    milestone,
+    challenge,
+    survived: survived as SurvivedKey | null,
+    finisherNo: finisherNo as number | null,
     hide: [...new Set((hide as CardHideable[] | undefined) ?? [])],
   };
 }
@@ -221,20 +297,29 @@ export function parseCardSave(body: unknown): CardSave | null {
   const { id, kind, templateId, size, entryId, episodeLogId, readingLogId, recapId, share } = body;
   if (typeof id !== "string" || !isUuidV7(id)) return null;
   if (!(CARD_KINDS as readonly unknown[]).includes(kind) || (size !== "story" && size !== "feed")) return null;
-  if (!isTemplateId(templateId) || !templateFits(templateId, kind as CardKind, size)) return null;
+  if (!isTemplateId(templateId)) return null;
   const uuidOrNull = (v: unknown) => v === undefined || v === null || (typeof v === "string" && isUuidV7(v));
   if (!uuidOrNull(entryId) || !uuidOrNull(episodeLogId) || !uuidOrNull(readingLogId) || !uuidOrNull(recapId)) return null;
   if (num(entryId, episodeLogId, readingLogId, recapId) > 1) return null;
   const data = parseCardData(body.data);
-  if (!data) return null;
+  if (!data || !templateFits(templateId, kind as CardKind, size, data.kind)) return null;
   const reading = data.kind === "book" || data.kind === "manga";
-  if (kind === "finish" && (!entryId || data.progress || data.reading || data.recap)) return null;
+  if (kind === "finish" && (!entryId || data.progress || data.reading || data.recap || data.milestone || data.challenge)) return null;
   if (kind === "progress" && !(reading ? data.reading : data.progress && data.kind === "series")) return null;
   if (episodeLogId && !data.progress) return null;
   if (readingLogId && !data.reading) return null;
-  if (kind === "weekly_recap" && (!data.recap || data.recap.period || entryId || episodeLogId || readingLogId)) return null;
-  if (kind === "stats" && (!data.recap?.period || entryId || episodeLogId || readingLogId || recapId)) return null;
-  if (recapId && (!data.recap || data.recap.period)) return null;
+  const sourced = !!(entryId || episodeLogId || readingLogId);
+  if (kind === "weekly_recap" && (!data.recap || data.recap.period || sourced)) return null;
+  if (kind === "monthly_recap" && (data.recap?.period !== "month" || sourced)) return null;
+  if (kind === "stats" && (!data.recap?.period || sourced || recapId)) return null;
+  if (kind === "year_review" && (data.recap?.period !== "year" || sourced || recapId)) return null;
+  if (kind === "milestone" && (!data.milestone || sourced || recapId)) return null;
+  if (kind === "challenge" && (!data.challenge || sourced || recapId)) return null;
+  // A Survived card is a finish on the Survived template, and that template draws nothing else.
+  if (!!data.survived !== isSurvivedTemplate(templateId) || (data.survived && kind !== "finish")) return null;
+  // Highlights belong to a Year in Review; a recap id to a weekly or monthly recap.
+  if (data.recap?.highlights && kind !== "year_review" && kind !== "sticker") return null;
+  if (recapId && (!data.recap || (data.recap.period && data.recap.period !== "month"))) return null;
   return {
     id,
     kind: kind as CardKind,

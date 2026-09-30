@@ -95,6 +95,8 @@ function rankedList(body: unknown, kind?: TmdbKind): { result: SearchResult; pop
     if (c.originalLanguage) result.originalLanguage = c.originalLanguage;
     if (c.year) result.year = c.year;
     if (c.posterPath) result.imageUrl = tmdbImageUrl(c.posterPath, "w342");
+    const votes = isObject(raw) ? count(raw.vote_count) : undefined;
+    if (votes) result.votes = votes;
     const popularity = isObject(raw) && typeof raw.popularity === "number" ? raw.popularity : 0;
     return [{ result, popularity }];
   });
@@ -134,6 +136,8 @@ export function normalizeTmdbDetails(kind: TmdbKind, body: unknown): Title | nul
     pageCount: null,
     chapterCount: null,
     volumeCount: null,
+    playtimeHours: null,
+    platforms: [],
   };
 }
 

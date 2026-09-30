@@ -8,6 +8,7 @@ import {
   type TmdbKind,
 } from "@/core/catalog/tmdb";
 import type { Episode, SearchResult, Title } from "@/core/catalog/types";
+import { normalizeTmdbWatchProviders, type WatchProviders } from "@/core/catalog/watch-providers";
 import { CatalogError } from "./catalog-error";
 
 const API = "https://api.themoviedb.org/3";
@@ -41,6 +42,27 @@ export async function searchTitles(query: string): Promise<SearchResult[]> {
   return mergeTmdbSearch(movies, series);
 }
 
+/** Movies only, in TMDB's order, optionally first released in `year` (the Letterboxd import's matching). */
+export async function searchMovies(query: string, year: number | null): Promise<SearchResult[]> {
+  const params: Record<string, string> = { query, include_adult: "false", page: "1" };
+  if (year !== null) params.primary_release_year = String(year);
+  return normalizeTmdbList(await tmdb("/search/movie", params, DAY), "movie");
+}
+
+/** Series only, in TMDB's order, optionally first aired in `year` (the TV Time and MyAnimeList imports). */
+export async function searchSeries(query: string, year: number | null): Promise<SearchResult[]> {
+  const params: Record<string, string> = { query, include_adult: "false", page: "1" };
+  if (year !== null) params.first_air_date_year = String(year);
+  return normalizeTmdbList(await tmdb("/search/tv", params, DAY), "series");
+}
+
+/** The series TMDB knows under a TheTVDB id (`/find`; the TV Time import). */
+export async function seriesByTvdb(tvdbId: string): Promise<SearchResult[]> {
+  const body = await tmdb(`/find/${tvdbId}`, { external_source: "tvdb_id" }, DAY);
+  const results = typeof body === "object" && body !== null ? (body as { tv_results?: unknown }).tv_results : undefined;
+  return normalizeTmdbList({ results: Array.isArray(results) ? results : [] }, "series");
+}
+
 export async function trendingTitles(): Promise<SearchResult[]> {
   return normalizeTmdbList(await tmdb("/trending/all/week", {}, 3600));
 }
@@ -55,4 +77,12 @@ export async function titleDetails(kind: TmdbKind, externalId: string): Promise<
 /** Episodes of one season of a series (`/tv/{id}/season/{n}`). */
 export async function seasonEpisodes(externalId: string, season: number): Promise<Episode[]> {
   return normalizeTmdbSeason(await tmdb(`/tv/${externalId}/season/${season}`, {}, DAY));
+}
+
+/**
+ * Where a movie or series streams, every country at once (`/{movie|tv}/{id}/watch/providers`, data by JustWatch).
+ * Next's fetch cache keeps it only an hour: our own cache (`title_providers`) is what keeps it a day.
+ */
+export async function watchProviders(kind: TmdbKind, externalId: string): Promise<WatchProviders> {
+  return normalizeTmdbWatchProviders(await tmdb(`/${tmdbMediaType(kind)}/${externalId}/watch/providers`, {}, 3600));
 }

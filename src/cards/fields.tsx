@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { useId } from "react";
 import { clampReview, nextRating, reviewLength } from "@/core/cards/edit";
 import { REVIEW_MAX_CHARS } from "@/core/cards/types";
+import { cn } from "@/lib/utils";
 
 const inputClass =
   "h-12 w-full rounded-xl border border-input bg-background px-4 text-base outline-none focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-ring/20";
@@ -52,6 +53,38 @@ export function RatingField({ rating, onChange }: { rating: number | null; onCha
       </div>
       <p className="text-xs text-muted-foreground">{t("ratingHint")}</p>
     </fieldset>
+  );
+}
+
+/**
+ * A game's hours played (S3 games): whole hours, optional. Left empty, the card shows the game's average playtime
+ * (`average`, RAWG's) when there is one.
+ */
+export function HoursField({ hours, onChange, average }: { hours: string; onChange: (hours: string) => void; average: number | null }) {
+  const t = useTranslations("Card");
+  const id = useId();
+  const hintId = useId();
+  return (
+    <div className="flex flex-col gap-1">
+      <label htmlFor={id} className="text-sm font-semibold">
+        {t("hoursLabel")}
+      </label>
+      <input
+        id={id}
+        type="text"
+        inputMode="numeric"
+        autoComplete="off"
+        value={hours}
+        onChange={(e) => onChange(e.target.value.replace(/\D/g, "").replace(/^0+/, "").slice(0, 4))}
+        placeholder={average ? String(average) : undefined}
+        aria-describedby={hintId}
+        enterKeyHint="done"
+        className={cn(inputClass, "tabular-nums")}
+      />
+      <p id={hintId} className="text-xs text-muted-foreground">
+        {average ? t("hoursHintAverage", { hours: average }) : t("hoursHint")}
+      </p>
+    </div>
   );
 }
 

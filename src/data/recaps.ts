@@ -1,12 +1,11 @@
-// Weekly recaps (ADR 0025). Server only: creating and notifying run with the service role from the cron route;
-// reading a recap runs as the user (RLS: owners read their own).
-import { posterUrl } from "@/core/catalog/images";
-import type { TitleKind } from "@/core/catalog/types";
+// Weekly recaps (ADR 0025) and monthly recaps (ADR 0031), both in `weekly_recaps` (`period`). Server only:
+// creating and notifying run with the service role from the cron route; reading a recap runs as the user (RLS:
+// owners read their own).
 import { parseRecap } from "@/core/cards/saved";
 import type { CardRecap } from "@/core/cards/types";
 import { uuidv7 } from "@/core/ids";
-import { recapRange, weeklyRecap, type RecapTitle } from "@/core/stats/recap";
-import type { StatsEntry, StatsEpisodeLog } from "@/core/stats/summary";
+import type { RecapPeriod } from "@/core/stats/recap";
+import { ActivityReadError, periodRecaps } from "./activity";
 import { adminClient, type AdminClient } from "./supabase-admin";
 import type { UserClient } from "./supabase-server";
 
@@ -30,93 +29,46 @@ function maybe<T>(result: { data: T | null; error: { message: string } | null },
   return result.data;
 }
 
-/** One user's week, computed from their rows (a few small queries; a week of logs stays far below row limits). */
-async function computeRecap(db: AdminClient, userId: string, timeZone: string, weekStart: string): Promise<CardRecap | null> {
-  const range = recapRange(weekStart, timeZone);
-  const from = new Date(range.from).toISOString();
-  const to = new Date(range.to).toISOString();
-  const [logs, entries] = await Promise.all([
-    db
-      .from("episode_logs")
-      .select("id, title_id, runtime_min, watched_at")
-      .eq("user_id", userId)
-      .is("deleted_at", null)
-      .gte("watched_at", from)
-      .lt("watched_at", to)
-      .then((r) => check(r, "episode_logs read")),
-    db
-      .from("entries")
-      .select("id, title_id, status, finished_at")
-      .eq("user_id", userId)
-      .is("deleted_at", null)
-      .eq("status", "finished")
-      .gte("finished_at", from)
-      .lt("finished_at", to)
-      .then((r) => check(r, "entries read")),
-  ]);
-  const titleIds = [...new Set([...logs.map((l) => l.title_id), ...entries.map((e) => e.title_id)])];
-  if (titleIds.length === 0) return null;
-  const titles = check(
-    await db.from("titles").select("id, source, kind, name, poster_path, runtime_min, episode_count").in("id", titleIds),
-    "titles read",
-  );
-
-  // A series finished this week counts its logged episodes; only one never logged counts all of them
-  // (as its Finish card does). So those need to know about logs from before the week too.
-  const finishedSeries = entries.map((e) => e.title_id).filter((id) => titles.find((t) => t.id === id)?.kind === "series");
-  const earlier = finishedSeries.length
-    ? check(
-        await db
-          .from("episode_logs")
-          .select("id, title_id, runtime_min, watched_at")
-          .eq("user_id", userId)
-          .is("deleted_at", null)
-          .in("title_id", finishedSeries)
-          .lt("watched_at", from)
-          .limit(1000),
-        "episode_logs read",
-      )
-    : [];
-
-  const recapTitles: RecapTitle[] = titles.map((t) => ({
-    id: t.id,
-    kind: t.kind as TitleKind,
-    name: t.name,
-    posterUrl: posterUrl(t.source, t.poster_path),
-    runtimeMin: t.runtime_min,
-    episodeCount: t.episode_count,
-  }));
-  const statsEntries: StatsEntry[] = entries.map((e) => ({ id: e.id, titleId: e.title_id, status: "finished", finishedAt: e.finished_at }));
-  const statsLogs: StatsEpisodeLog[] = [...logs, ...earlier].map((l) => ({
-    id: l.id,
-    titleId: l.title_id,
-    runtimeMin: l.runtime_min,
-    watchedAt: l.watched_at,
-  }));
-  return weeklyRecap(weekStart, timeZone, recapTitles, statsEntries, statsLogs);
+/** One user's week or month, computed from their rows (the same reader the board uses). */
+async function computeRecap(db: AdminClient, userId: string, timeZone: string, period: RecapPeriod, start: string): Promise<CardRecap | null> {
+  try {
+    return (await periodRecaps(db, [userId], period, start, timeZone)).get(userId) ?? null;
+  } catch (error) {
+    throw error instanceof ActivityReadError ? new RecapsUnavailableError(error.message) : error;
+  }
 }
 
+type Due = { userId: string; timeZone: string; period: RecapPeriod; start: string };
+
 /**
- * Creates the recaps due at `now` (at most `limit` users per call; the hourly job picks up the rest).
- * Idempotent: a user and week that already have a recap are skipped. Returns how many were created.
+ * Creates the recaps due at `now`: weeks (local Monday from 09:00) and months (the local 1st from 09:00), at most
+ * `limit` users of each per call (the hourly job picks up the rest). Idempotent: a user, period and start that
+ * already have a recap are skipped. Returns how many were created.
  */
 export async function createDueRecaps(now: Date, limit: number): Promise<number> {
   const db = admin();
-  const due = check(await db.rpc("weekly_recap_candidates", { p_now: now.toISOString(), p_limit: limit }), "recap candidates");
+  const [weeks, months] = await Promise.all([
+    db.rpc("weekly_recap_candidates", { p_now: now.toISOString(), p_limit: limit }).then((r) => check(r, "recap candidates")),
+    db.rpc("monthly_recap_candidates", { p_now: now.toISOString(), p_limit: limit }).then((r) => check(r, "monthly recap candidates")),
+  ]);
+  const due: Due[] = [
+    ...weeks.map((w) => ({ userId: w.user_id, timeZone: w.time_zone, period: "week" as const, start: w.week_start })),
+    ...months.map((m) => ({ userId: m.user_id, timeZone: m.time_zone, period: "month" as const, start: m.month_start })),
+  ];
   let created = 0;
   // A few users at a time: enough to finish well inside the route's time limit without flooding Postgres.
   for (let i = 0; i < due.length; i += 5) {
     const batch = due.slice(i, i + 5);
     const rows = await Promise.all(
       batch.map(async (u) => {
-        const stats = await computeRecap(db, u.user_id, u.time_zone, u.week_start);
-        return stats && { id: uuidv7(), user_id: u.user_id, week_start: u.week_start, stats };
+        const stats = await computeRecap(db, u.userId, u.timeZone, u.period, u.start);
+        return stats && { id: uuidv7(), user_id: u.userId, period: u.period, week_start: u.start, stats };
       }),
     );
     const fresh = rows.filter((r) => r !== null);
     if (fresh.length === 0) continue;
     const inserted = check(
-      await db.from("weekly_recaps").upsert(fresh, { onConflict: "user_id,week_start", ignoreDuplicates: true }).select("id"),
+      await db.from("weekly_recaps").upsert(fresh, { onConflict: "user_id,period,week_start", ignoreDuplicates: true }).select("id"),
       "weekly_recaps write",
     );
     created += inserted.length;
@@ -166,7 +118,7 @@ export async function userRecap(db: UserClient, id: string): Promise<UserRecap |
   return row && toUserRecap(row);
 }
 
-/** The user's newest recap if it was made in the last `days` days (the collection page's "your week" note). */
+/** The user's newest recap (week or month) if it was made in the last `days` days (Home's "your week" note). */
 export async function latestRecap(db: UserClient, userId: string, days = 7): Promise<UserRecap | null> {
   const since = new Date(Date.now() - days * 86_400_000).toISOString();
   const row = maybe(
@@ -175,7 +127,7 @@ export async function latestRecap(db: UserClient, userId: string, days = 7): Pro
       .select("id, week_start, created_at, stats")
       .eq("user_id", userId)
       .gte("created_at", since)
-      .order("week_start", { ascending: false })
+      .order("created_at", { ascending: false })
       .limit(1)
       .maybeSingle(),
     "weekly_recaps read",

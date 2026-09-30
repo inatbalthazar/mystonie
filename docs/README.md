@@ -21,6 +21,7 @@
 | 0 | [S0 · Mystonie Card: card maker](product/features/S0-card-maker.md) |
 | 1 | [S1 · Auth](product/features/S1-auth.md) · [S1 · Collection](product/features/S1-collections.md) · [S1 · Share artwork](product/features/S1-share-artwork.md) · [S1 · Stats](product/features/S1-stats.md) · [S1 · Profile & privacy](product/features/S1-profile-privacy.md) |
 | 2 | [S2 · Content warnings (DTDD)](product/features/S2-content-warnings.md) · [S2 · Books & manga](product/features/S2-books-manga.md) · [S2 · Pro](product/features/S2-pro-subscription.md) · [S2 · Where to watch](product/features/S2-where-to-watch.md) · [S2 · Letterboxd import](product/features/S2-letterboxd-import.md) |
+| 3 | [S3 · Social](product/features/S3-social.md) · [S3 · Badges & shelf](product/features/S3-badges-shelf.md) · [S3 · Finishers & the board](product/features/S3-finishers-board.md) · [S3 · Challenges & clubs](product/features/S3-challenges-clubs.md) · [S3 · Import & export](product/features/S3-import-export.md) · [S3 · Offline](product/features/S3-offline.md) · [S3 · Warnings & quiz](product/features/S3-warnings-quiz.md) · [S3 · Games](product/features/S3-games.md) |
 | Later | [Gated features](product/later/README.md) |
 
 ## Owner's brief

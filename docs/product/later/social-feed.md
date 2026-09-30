@@ -1,6 +1,6 @@
 # F10 · Social community feed
 
-> **Status: LATER (gated).** Not part of the current plan. See [later/README.md](README.md) for the gate. Written before the global, solo-sized plan: re-check against AGENTS.md before building.
+> **Status: BUILT in stage 3** as [S3 social](../features/S3-social.md) ([ADR 0037](../../decisions/0037-social-follows-stamps-blocks.md)): follows, the Following feed, Stamps (the kudos), blocks and find people. That spec is the source of truth. Still open from this design: badge and "Help verify" items in the feed (they come with their own stage 3 tasks).
 
 **Phase:** M5 · **Priority:** Nice-to-have
 

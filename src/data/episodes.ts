@@ -3,7 +3,7 @@ import type { Episode } from "@/core/catalog/types";
 import type { EpisodeLogRequest, EpisodeRef } from "@/core/collection/episodes";
 import type { EntryStatus } from "@/core/collection/entries";
 import type { WatchLog } from "@/core/collection/view";
-import { uuidv7 } from "@/core/ids";
+import { startWatching } from "./entries";
 import { adminClient } from "./supabase-admin";
 import type { UserClient } from "./supabase-server";
 import { saveTitle } from "./titles";
@@ -125,8 +125,8 @@ export async function episodeLogs(db: UserClient, userId: string, titleIds: stri
 
 /**
  * Logs episodes (already logged ones are skipped) with the runtime of each episode, else the series'
- * typical runtime. Logging puts the series in the collection as "watching" (a "want" entry moves on too).
- * Returns every live log of the series and the entry's status.
+ * typical runtime, watched at the request's time. Logging puts the series in the collection as "watching"
+ * (`startWatching`). Returns every live log of the series and the entry's status.
  */
 export async function logEpisodes(
   db: UserClient,
@@ -147,30 +147,14 @@ export async function logEpisodes(
         season: e.season,
         episode: e.episode,
         runtime_min: runtimes.perEpisode.get(`${e.season}:${e.episode}`) ?? runtimes.typical,
+        watched_at: request.watchedAt,
       })),
     );
     // 23505: a parallel request logged one of them first; the re-read below has it.
     if (error && error.code !== "23505") throw new Error(`episode_logs insert failed: ${error.message}`);
   }
 
-  const { data: entry, error: entryError } = await db
-    .from("entries")
-    .select("id, status")
-    .eq("user_id", userId)
-    .eq("title_id", titleId)
-    .is("deleted_at", null)
-    .maybeSingle();
-  if (entryError) throw new Error(`entries read failed: ${entryError.message}`);
-  let status = (entry?.status ?? "watching") as EntryStatus;
-  if (!entry) {
-    const { error } = await db.from("entries").insert({ id: uuidv7(), title_id: titleId, status: "watching", finished_at: null });
-    if (error && error.code !== "23505") throw new Error(`entries insert failed: ${error.message}`);
-  } else if (entry.status === "want") {
-    const { error } = await db.from("entries").update({ status: "watching", finished_at: null }).eq("id", entry.id);
-    if (error) throw new Error(`entries update failed: ${error.message}`);
-    status = "watching";
-  }
-
+  const status = await startWatching(db, userId, titleId, request.watchedAt);
   const logs = (await episodeLogs(db, userId, [titleId])).get(titleId) ?? [];
   return { logs, status };
 }

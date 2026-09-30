@@ -57,7 +57,7 @@ Sort: finished_at (default, newest first), title, runtime.
   - Logged episodes count even without an entry. Soft-deleted rows never count.
 - Runtimes are shown with `formatRuntime` (`2h 36m`) and `formatMinutes` (`156 min`) from `src/core/format/runtime.ts`.
 - Optimistic UI: the list updates instantly, then syncs.
-- "Trending" on Home uses TMDB `/trending/all/week` (no own data yet): 9 movies and series. Tapping one opens quick add on its status step (`/collection?add=1&pick=movie:496243`), so a trending title is two taps from finished ([ADR 0028](../../decisions/0028-home-pwa-web-push.md)).
+- "Trending" on Home uses TMDB `/trending/all/week`: 9 movies and series. Since stage 3, what people on Mystonie finished this week comes first ([S3 finishers & the board](S3-finishers-board.md)), and `pick` takes every kind. Tapping one opens quick add on its status step (`/collection?add=1&pick=movie:496243`), so a trending title is two taps from finished ([ADR 0028](../../decisions/0028-home-pwa-web-push.md)).
 
 ## Acceptance criteria
 - [x] Adding a finished movie takes ≤ 3 taps from Home and appears at the top instantly. (`e2e/collection.spec.ts`: header ➕ → result → Finished from `/`, row shown before the server answers.)

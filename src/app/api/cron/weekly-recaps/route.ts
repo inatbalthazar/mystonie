@@ -3,7 +3,7 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import { bearerAuthorized } from "@/app/api/_lib/http";
 import { recapCtaUrl, recapEmail, type RecapCopy } from "@/core/email/recap";
 import { unsubscribeLinks, unsubscribeToken } from "@/core/email/unsubscribe";
-import { recapFigures } from "@/core/stats/recap";
+import { recapFigures, wholeMonth } from "@/core/stats/recap";
 import type { CardRecap } from "@/core/cards/types";
 import { localizedPath } from "@/core/auth";
 import type { PushMessage } from "@/core/push";
@@ -26,10 +26,16 @@ const utcDate = (key: string) => new Date(`${key}T00:00:00Z`);
 
 const recapLocale = (locale: string): Locale => (hasLocale(routing.locales, locale) ? locale : routing.defaultLocale);
 
-/** The week's dates and numbers in the recipient's language: "Sep 21 – 27", "2 hours · 1 finished". */
+/**
+ * The recap's dates and numbers in the recipient's language: "Sep 21 – 27" (a week) or "September 2026" (a month),
+ * "2 hours · 1 finished".
+ */
 async function recapWords(locale: Locale, recap: CardRecap) {
   const [tc, format] = await Promise.all([getTranslations({ locale, namespace: "Card" }), getFormatter({ locale })]);
-  const range = format.dateTimeRange(utcDate(recap.from), utcDate(recap.to), { month: "short", day: "numeric", timeZone: "UTC" });
+  const month = wholeMonth(recap);
+  const range = month
+    ? format.dateTime(utcDate(`${month}-01`), { month: "long", year: "numeric", timeZone: "UTC" })
+    : format.dateTimeRange(utcDate(recap.from), utcDate(recap.to), { month: "short", day: "numeric", timeZone: "UTC" });
   const figures = recapFigures(recap).map(({ key, value }) => ({
     value: format.number(value),
     label: key === "finished" ? tc("titlesFinished", { count: value }) : key === "episodes" ? tc("episodes", { count: value }) : tc(key),
@@ -42,7 +48,7 @@ async function pushFor(r: RecapToPush): Promise<PushMessage> {
   const locale = recapLocale(r.locale);
   const [t, { range, summary }] = await Promise.all([getTranslations({ locale, namespace: "Push.recap" }), recapWords(locale, r.recap)]);
   return {
-    title: t("title", { range }),
+    title: t("title", { range, period: r.recap.period ?? "week" }),
     body: t("body", { summary }),
     url: localizedPath(`/recap/${r.id}`, locale, routing.defaultLocale),
     tag: `recap-${r.recap.from}`,
@@ -56,12 +62,13 @@ async function renderFor(r: RecapToNotify, secret: string, site: URL): Promise<O
     recapWords(locale, r.recap),
   ]);
   const { recap } = r;
+  const period = recap.period ?? "week";
   const copy: RecapCopy = {
-    subject: t("subject", { range }),
+    subject: t("subject", { range, period }),
     preheader: t("preheader", { summary }),
-    stamp: t("stamp"),
-    heading: t("heading", { range }),
-    body: t("body", { titles: recap.titleCount }),
+    stamp: t("stamp", { period }),
+    heading: t("heading", { range, period }),
+    body: t("body", { titles: recap.titleCount, period }),
     cta: t("cta"),
     why: t("why"),
     unsubscribe: t("unsubscribe"),
@@ -86,7 +93,7 @@ async function renderFor(r: RecapToNotify, secret: string, site: URL): Promise<O
     to: r.email,
     ...email,
     headers: { "List-Unsubscribe": `<${links.oneClick}>`, "List-Unsubscribe-Post": "List-Unsubscribe=One-Click" },
-    tags: [{ name: "campaign", value: "weekly_recap" }],
+    tags: [{ name: "campaign", value: period === "month" ? "monthly_recap" : "weekly_recap" }],
   };
 }
 
@@ -100,7 +107,8 @@ function runAt(body: unknown): Date {
 
 /**
  * POST /api/cron/weekly-recaps, `Authorization: Bearer $CRON_SECRET` → { created, pushed, sent }.
- * Called hourly by pg_cron (ADR 0025). Creates the recaps that are due (local Monday from 09:00), pushes new ones
+ * Called hourly by pg_cron (ADR 0025). Creates the recaps that are due (local Monday from 09:00 for last week, the
+ * local 1st from 09:00 for last month, ADR 0031), pushes new ones
  * to installed apps that turned notifications on (ADR 0028), then emails the unsent ones (≤ 100 per run) with a
  * link to the recap card. Safe to call again: recaps are unique per
  * user and week, and the batch's idempotency key stops a retried send. Without email set up (and outside

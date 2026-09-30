@@ -25,6 +25,8 @@ export function titleFromRow(row: Row): Title {
     pageCount: row.page_count,
     chapterCount: row.chapter_count,
     volumeCount: row.volume_count,
+    playtimeHours: row.playtime_hours,
+    platforms: row.platforms,
   };
 }
 
@@ -69,6 +71,8 @@ export async function saveTitle(title: Title, raw: unknown): Promise<string | nu
       page_count: title.pageCount,
       chapter_count: title.chapterCount,
       volume_count: title.volumeCount,
+      playtime_hours: title.playtimeHours,
+      platforms: title.platforms,
       raw: raw as Json,
       fetched_at: new Date().toISOString(),
     },
@@ -79,7 +83,7 @@ export async function saveTitle(title: Title, raw: unknown): Promise<string | nu
 }
 
 /**
- * The `titles` row id for a title (from its kind's catalog: TMDB, AniList or Google Books), fetching and caching it
+ * The `titles` row id for a title (from its kind's catalog: TMDB, AniList, Google Books or RAWG), fetching and caching it
  * first when needed (adding to the collection). A cached copy is good enough even when stale. Null when the catalog
  * doesn't know the title; throws `CatalogError` when the catalog fails.
  */

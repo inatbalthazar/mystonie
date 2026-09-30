@@ -22,7 +22,7 @@ const saved = (page: Page) =>
   page.waitForResponse((r) => new URL(r.url()).pathname.startsWith("/api/entries") && r.request().method() !== "GET");
 
 async function pickResult(page: Page, query: string, name: string) {
-  await page.getByRole("dialog").getByLabel("Search movies, series, books and manga").fill(query);
+  await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill(query);
   await page.getByRole("dialog").getByRole("button", { name: new RegExp(`^${name} Movie`) }).first().click();
 }
 

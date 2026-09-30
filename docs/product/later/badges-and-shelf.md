@@ -1,6 +1,6 @@
 # F06 · Badges, achievements & visual shelf
 
-> **Status: LATER (gated).** Not part of the current plan. See [later/README.md](README.md) for the gate. Written before the global, solo-sized plan: re-check against AGENTS.md before building.
+> **Status: BUILT in stage 3** as [S3 badges & shelf](../features/S3-badges-shelf.md) ([ADR 0038](../../decisions/0038-badges-and-shelf.md)). That spec is the source of truth: the catalogue is code, not a `badges` table, and country-specific badges (like the provinces one below) were dropped.
 
 **Phase:** M5 · **Priority:** Nice-to-have (engagement)
 

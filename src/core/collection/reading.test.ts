@@ -54,13 +54,18 @@ describe("finishRemainder", () => {
 describe("parseReadingLog", () => {
   const id = uuidv7();
   it("accepts a chapter of a manga and a page of a book", () => {
-    expect(parseReadingLog({ id, kind: "manga", externalId: "30013", unit: "chapter", position: 1100 })).toEqual({
+    const now = Date.parse("2026-09-27T20:00:00Z");
+    expect(parseReadingLog({ id, kind: "manga", externalId: "30013", unit: "chapter", position: 1100 }, now)).toEqual({
       id,
       kind: "manga",
       externalId: "30013",
       unit: "chapter",
       position: 1100,
+      readAt: "2026-09-27T20:00:00.000Z",
     });
+    // A log made offline keeps its own time (ADR 0042).
+    const offline = { id, kind: "manga", externalId: "30013", unit: "chapter", position: 3, readAt: "2026-09-26T21:30:00Z" };
+    expect(parseReadingLog(offline, now)?.readAt).toBe("2026-09-26T21:30:00.000Z");
     expect(parseReadingLog({ id, kind: "book", externalId: "3fzJEAAAQBAJ", unit: "page", position: 1 })).not.toBeNull();
   });
 
@@ -75,6 +80,7 @@ describe("parseReadingLog", () => {
       { ...ok, position: 0 },
       { ...ok, position: 1.5 },
       { ...ok, position: 100_001 },
+      { ...ok, readAt: "tomorrow" },
       null,
     ]) {
       expect(parseReadingLog(bad), JSON.stringify(bad)).toBeNull();

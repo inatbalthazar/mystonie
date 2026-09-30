@@ -27,6 +27,6 @@ RLS ([ADR 0021](0021-collection-tables-rules-in-the-database.md)) would let the 
 - **Sheets use the native `<dialog>`** (`src/components/sheet.tsx`), which provides the focus trap, Esc and an inert background. Rejected: adding a dialog component to the design system for two sheets.
 
 ## Consequences
-- Offline sync (later) will need its own outbox or upsert path. These routes are online-only, like the rest of stage 1.
+- Offline sync (later) will need its own outbox or upsert path. These routes are online-only, like the rest of stage 1. (Built in stage 3: an outbox replays these same routes, [ADR 0042](0042-offline-first.md).)
 - New write flows (episode logs, cards) follow the same pattern: a route handler, `userClient()`, and validation in `src/core`.
-- Navigating away while a write is still pending can lose it, as on any web form. The e2e waits for the answer before reloading.
+- Navigating away while a write is still pending can lose it, as on any web form. The e2e waits for the answer before reloading. (Since stage 3 the write waits in the outbox and is sent on the next page.)

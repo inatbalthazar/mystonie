@@ -70,7 +70,7 @@ flowchart LR
 
 ## Day-one rules
 1. RLS on every table. Server-only tables have no client write policies.
-2. User rows use client-generated UUID v7, server-stamped `updated_at` and soft delete (`deleted_at`), so offline sync can be added later ([offline-sync](offline-sync.md)).
+2. User rows use client-generated UUID v7, server-stamped `updated_at` and soft delete (`deleted_at`), which offline sync relies on ([offline-sync](offline-sync.md)).
 3. Timestamps are stored in UTC and displayed in the user's time zone ([i18n](i18n.md)).
 4. External data is attributed as its terms require (TMDB, JustWatch, DTDD).
 5. Anything money- or reward-related is decided on the server ([ADR 0003](../decisions/0003-server-authoritative-economy.md), relevant from stage 2 Pro onward).

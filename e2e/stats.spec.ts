@@ -18,7 +18,7 @@ test("stats: empty state, then numbers that match the collection, and Share stat
   await page.getByRole("link", { name: "Log your first title" }).click();
   await expect(page).toHaveURL(/\/collection\?add=1$/);
 
-  await page.getByRole("dialog").getByLabel("Search movies, series, books and manga").fill("Parasite");
+  await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Parasite");
   await page.getByRole("dialog").getByRole("button", { name: /^Parasite Movie/ }).first().click();
   const added = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/entries" && r.request().method() === "POST");
   await page.getByRole("button", { name: "Finished", exact: true }).click();

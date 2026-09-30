@@ -4,6 +4,7 @@
 import type { ReadingKind, TitleKind } from "../catalog/types";
 import { isExternalId } from "../catalog/types";
 import { isUuidV7 } from "../ids";
+import { actionTime } from "./entries";
 
 export const READING_UNITS = ["page", "chapter", "volume"] as const;
 export type ReadingUnit = (typeof READING_UNITS)[number];
@@ -98,16 +99,23 @@ export type ReadingLogRequest = {
   externalId: string;
   unit: ReadingUnit;
   position: number;
+  /** When it was read, by the device's clock (a log made offline arrives later, ADR 0042). */
+  readAt: string;
 };
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
 
-/** POST /api/reading body: `{ id, kind, externalId, unit, position }` (a v7 id; the unit must suit the kind). */
-export function parseReadingLog(body: unknown): ReadingLogRequest | null {
+/**
+ * POST /api/reading body: `{ id, kind, externalId, unit, position, readAt? }` (a v7 id; the unit must suit the kind;
+ * `readAt` defaults to now).
+ */
+export function parseReadingLog(body: unknown, now: number = Date.now()): ReadingLogRequest | null {
   if (!isObject(body)) return null;
   const { id, kind, externalId, unit, position } = body;
   if (typeof id !== "string" || !isUuidV7(id) || (kind !== "book" && kind !== "manga")) return null;
   if (!isExternalId(kind, externalId) || !isReadingUnit(unit) || !unitsFor(kind).includes(unit)) return null;
   if (typeof position !== "number" || !Number.isInteger(position) || position < 1 || position > MAX_READING_POSITION) return null;
-  return { id, kind, externalId, unit, position };
+  const readAt = actionTime(body.readAt, now);
+  if (!readAt) return null;
+  return { id, kind, externalId, unit, position, readAt };
 }

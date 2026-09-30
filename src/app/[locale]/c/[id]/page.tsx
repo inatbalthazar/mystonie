@@ -19,7 +19,7 @@ async function cardLine(card: SharedCard, locale: Locale): Promise<string> {
     const day = (key: string) => new Date(`${key}T00:00:00Z`);
     const year = recap.period && recap.period !== "week" ? "numeric" : undefined;
     const range = format.dateTimeRange(day(recap.from), day(recap.to), { month: "short", day: "numeric", year, timeZone: "UTC" });
-    return t("recapLine", { period: recap.period ?? "week", range });
+    return recap.imported ? t("importLine", { count: recap.titleCount, unit: recap.importedUnit ?? "film", range }) : t("recapLine", { period: recap.period ?? "week", range });
   }
   const p = card.data.progress;
   if (!p) return t("finishedLine", { name: card.data.name });

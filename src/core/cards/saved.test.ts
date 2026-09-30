@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { cardImagePath, crossedMilestone, parseCardData, parseCardSave, parseRecap, readingProgress } from "./saved";
-import { templateFits, templatesFor } from "./templates";
+import { defaultTemplate, templateFits, templatesFor } from "./templates";
 
 const ID = "01926000-0000-7000-8000-000000000001";
 const ENTRY = "01926000-0000-7000-8000-000000000002";
@@ -67,7 +67,7 @@ describe("parseCardData", () => {
 
   it("rejects bad inputs", () => {
     const bad = [
-      { ...data, kind: "game" },
+      { ...data, kind: "podcast" },
       { ...data, name: " " },
       { ...data, finishedOn: "2026-13-01" },
       { ...data, posterUrl: "https://evil.example/x.jpg" },
@@ -80,6 +80,33 @@ describe("parseCardData", () => {
       { ...data, progress: { ...progress, milestone: 60 } },
     ];
     for (const b of bad) expect(parseCardData(b), JSON.stringify(b)).toBeNull();
+  });
+});
+
+describe("a game's Finish card (S3 games)", () => {
+  const game = {
+    kind: "game",
+    name: "The Witcher 3: Wild Hunt",
+    year: 2015,
+    posterUrl: "https://media.rawg.io/media/resize/640/-/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg",
+    finishedOn: "2026-09-30",
+    playtimeHours: 43,
+    hoursPlayed: 187,
+  };
+
+  it("keeps RAWG art and the hours, and saves on the cartridge", () => {
+    expect(parseCardData(game)).toMatchObject({ kind: "game", playtimeHours: 43, hoursPlayed: 187, posterUrl: game.posterUrl });
+    expect(parseCardData({ ...game, hoursPlayed: null })).toMatchObject({ hoursPlayed: null });
+    expect(parseCardSave({ id: ID, kind: "finish", templateId: "cartridge", size: "story", entryId: ENTRY, data: game })).toMatchObject({ templateId: "cartridge" });
+  });
+
+  it("rejects hours out of range or on anything but a game, and a game on the cartridge's neighbours' templates it can't take", () => {
+    for (const bad of [{ ...game, hoursPlayed: 0 }, { ...game, hoursPlayed: 10_000 }, { ...game, playtimeHours: 1.5 }, { ...data, hoursPlayed: 3 }, { ...data, playtimeHours: 3 }]) {
+      expect(parseCardData(bad), JSON.stringify(bad)).toBeNull();
+    }
+    // No Progress cards for games (there's no progress to log), and no Film Strip.
+    expect(parseCardSave({ id: ID, kind: "progress", templateId: "boldStats", size: "story", data: game })).toBeNull();
+    expect(parseCardSave({ id: ID, kind: "finish", templateId: "filmStrip", size: "story", entryId: ENTRY, data: game })).toBeNull();
   });
 });
 
@@ -155,6 +182,9 @@ describe("parseRecap", () => {
     expect(parseRecap(recap)).toEqual(recap);
     expect(parseRecap({ ...recap, period: "all", minutes: 250_000 })).toMatchObject({ period: "all", minutes: 250_000 });
     expect(parseRecap({ ...recap, titles: [{ name: "M", kind: "movie" }] })).toMatchObject({ titles: [{ name: "M", posterUrl: null }] });
+    // An "Imported N books" card (S3 import & export).
+    const imported = { ...recap, period: "all", imported: true, importedUnit: "book" };
+    expect(parseRecap(imported)).toMatchObject({ imported: true, importedUnit: "book" });
   });
 
   it("rejects malformed recaps", () => {
@@ -165,8 +195,10 @@ describe("parseRecap", () => {
       { ...recap, titles: Array(5).fill(recap.titles[0]) },
       { ...recap, titleCount: 0 },
       { ...recap, titles: [{ ...recap.titles[0], posterUrl: "https://evil.example/x.jpg" }] },
-      { ...recap, titles: [{ ...recap.titles[0], kind: "game" }] },
+      { ...recap, titles: [{ ...recap.titles[0], kind: "podcast" }] },
       { ...recap, period: "decade" },
+      { ...recap, period: "all", imported: true, importedUnit: "podcast" },
+      { ...recap, importedUnit: "book" },
     ];
     for (const b of bad) expect(parseRecap(b), JSON.stringify(b)).toBeNull();
   });
@@ -174,12 +206,52 @@ describe("parseRecap", () => {
 
 describe("templates", () => {
   it("lists templates per card kind", () => {
-    expect(templatesFor("finish")).toEqual(["ticket", "polaroid", "boldStats"]);
-    expect(templatesFor("progress")).toEqual(["polaroid", "boldStats"]);
-    expect(templatesFor("weekly_recap")).toEqual(["boldStats", "collage"]);
-    expect(templatesFor("stats")).toEqual(["boldStats", "collage"]);
-    expect(templatesFor("sticker")).toEqual(["sticker"]);
-    expect(templateFits("ticket", "progress", "story")).toBe(false);
+    expect(templatesFor("finish", "movie")).toEqual(["ticket", "polaroid", "boldStats", "filmStrip"]);
+    expect(templatesFor("progress", "series")).toEqual(["polaroid", "boldStats", "filmStrip"]);
+    expect(templatesFor("weekly_recap", "series")).toEqual(["boldStats", "collage"]);
+    expect(templatesFor("stats", "movie")).toEqual(["boldStats", "collage"]);
+    expect(templatesFor("sticker", "movie")).toEqual(["sticker"]);
+    expect(templateFits("ticket", "progress", "story", "series")).toBe(false);
+  });
+
+  it("adds the spine for books and manga, and the manga panel for manga only (S2 books & manga)", () => {
+    expect(templatesFor("finish", "book")).toEqual(["ticket", "polaroid", "boldStats", "spine"]);
+    expect(templatesFor("finish", "manga")).toEqual(["ticket", "polaroid", "boldStats", "spine", "mangaPanel"]);
+    expect(templatesFor("progress", "manga")).toEqual(["polaroid", "boldStats", "spine", "mangaPanel"]);
+    expect(templatesFor("progress", "book")).toEqual(["polaroid", "boldStats", "spine"]);
+    expect(templatesFor("sticker", "manga")).toEqual(["sticker"]);
+    expect(templateFits("spine", "finish", "feed", "movie")).toBe(false);
+    expect(templateFits("mangaPanel", "progress", "story", "book")).toBe(false);
+    expect(templateFits("mangaPanel", "progress", "story", "manga")).toBe(true);
+    expect(templateFits("spine", "weekly_recap", "story", "book")).toBe(false);
+  });
+
+  it("adds the cartridge for a game's finish, and opens on it (S3 games)", () => {
+    expect(templatesFor("finish", "game")).toEqual(["ticket", "polaroid", "boldStats", "cartridge"]);
+    expect(defaultTemplate("finish", "game")).toBe("cartridge");
+    expect(templateFits("cartridge", "finish", "feed", "game")).toBe(true);
+    expect(templateFits("cartridge", "finish", "story", "movie")).toBe(false);
+    expect(templateFits("cartridge", "progress", "story", "game")).toBe(false);
+    expect(templateFits("filmStrip", "finish", "story", "game")).toBe(false);
+  });
+
+  it("opens a new card on the template made for its title", () => {
+    expect(defaultTemplate("finish", "movie")).toBe("polaroid");
+    expect(defaultTemplate("progress", "series")).toBe("boldStats");
+    expect(defaultTemplate("finish", "book")).toBe("spine");
+    expect(defaultTemplate("progress", "book")).toBe("spine");
+    expect(defaultTemplate("finish", "manga")).toBe("mangaPanel");
+    expect(defaultTemplate("progress", "manga")).toBe("mangaPanel");
+    expect(defaultTemplate("weekly_recap", "series")).toBe("collage");
+    expect(defaultTemplate("stats", "movie")).toBe("boldStats");
+    expect(defaultTemplate("sticker", "manga")).toBe("sticker");
+    // Every default is one the card can actually use.
+    for (const kind of ["finish", "progress"] as const) {
+      for (const title of ["movie", "series", "book", "manga"] as const) {
+        if (kind === "progress" && title === "movie") continue;
+        expect(templatesFor(kind, title)).toContain(defaultTemplate(kind, title));
+      }
+    }
   });
 
   it("builds the storage path", () => {
@@ -204,6 +276,8 @@ describe("reading Progress cards (S2 books & manga)", () => {
     const save = { id: ID, kind: "progress", templateId: "boldStats", size: "story", readingLogId: LOG, data: { ...manga, reading }, share: true };
     expect(parseCardSave(save)).toMatchObject({ kind: "progress", readingLogId: LOG, episodeLogId: null, data: { kind: "manga", reading } });
     expect(parseCardSave({ ...save, templateId: "polaroid" })).not.toBeNull();
+    expect(parseCardSave({ ...save, templateId: "mangaPanel" })).not.toBeNull();
+    expect(parseCardSave({ ...save, templateId: "spine" })).not.toBeNull();
   });
 
   it("marks milestones when the length is known, and drops a total the reader is already past", () => {
@@ -220,6 +294,10 @@ describe("reading Progress cards (S2 books & manga)", () => {
   it("accepts a book's Finish card and rejects reading progress that doesn't add up", () => {
     const book = { kind: "book", name: "Project Hail Mary", posterUrl: "/api/covers/3fzJEAAAQBAJ", pageCount: 496, finishedOn: "2026-09-27" };
     expect(parseCardSave({ id: ID, kind: "finish", templateId: "ticket", size: "feed", entryId: ENTRY, data: book })).toMatchObject({ data: { pageCount: 496 } });
+    expect(parseCardSave({ id: ID, kind: "finish", templateId: "spine", size: "feed", entryId: ENTRY, data: book })).not.toBeNull();
+    // The manga panel is for manga, and neither reading template draws a movie.
+    expect(parseCardSave({ id: ID, kind: "finish", templateId: "mangaPanel", size: "feed", entryId: ENTRY, data: book })).toBeNull();
+    expect(parseCardSave({ id: ID, kind: "finish", templateId: "spine", size: "feed", entryId: ENTRY, data: { ...book, kind: "movie", pageCount: null } })).toBeNull();
     const reading = { unit: "chapter", position: 1100, total: null, readMin: 5500, milestone: null };
     const progress = { id: ID, kind: "progress", templateId: "boldStats", size: "story", readingLogId: LOG, data: { ...manga, reading } };
     for (const bad of [
@@ -234,5 +312,69 @@ describe("reading Progress cards (S2 books & manga)", () => {
     ]) {
       expect(parseCardSave(bad), JSON.stringify(bad)).toBeNull();
     }
+  });
+});
+
+describe("Survived cards (S2 content warnings)", () => {
+  const finish = { id: ID, kind: "finish", templateId: "survived", size: "story", entryId: ENTRY, data: { ...data, survived: "jumpScares" } };
+
+  it("offers the Survived template first, only when there's a scare", () => {
+    expect(templatesFor("finish", "movie", { survived: true })).toEqual(["survived", "ticket", "polaroid", "boldStats", "filmStrip"]);
+    expect(templatesFor("finish", "book", { survived: true })).not.toContain("survived");
+    expect(templatesFor("progress", "series", { survived: true })).not.toContain("survived");
+  });
+
+  it("saves a finish on the Survived template with its scare", () => {
+    expect(parseCardSave(finish)?.data.survived).toBe("jumpScares");
+    expect(parseCardData(data)?.survived).toBeNull();
+  });
+
+  it("rejects a scare on another template, the template without one, and unknown scares", () => {
+    expect(parseCardSave({ ...finish, templateId: "polaroid" })).toBeNull();
+    expect(parseCardSave({ ...finish, data })).toBeNull();
+    expect(parseCardSave({ ...finish, data: { ...data, survived: "taxes" } })).toBeNull();
+    expect(parseCardData({ ...data, kind: "book", survived: "gore" })).toBeNull();
+    expect(parseCardData({ ...data, survived: "gore", progress })).toBeNull();
+    expect(parseCardSave({ ...finish, kind: "sticker", templateId: "sticker", entryId: null })).toBeNull();
+  });
+});
+
+describe("Finisher numbers (S3 finishers & the board)", () => {
+  it("keeps a finish card's number and lets it be hidden", () => {
+    expect(parseCardData({ ...data, finisherNo: 1204 })?.finisherNo).toBe(1204);
+    expect(parseCardData(data)?.finisherNo).toBeNull();
+    expect(parseCardData({ ...data, finisherNo: 3, hide: ["finisher"] })?.hide).toEqual(["finisher"]);
+  });
+
+  it("rejects odd numbers and numbers on anything but a finish", () => {
+    for (const finisherNo of [0, -1, 1.5, "12", 2_000_000_000]) {
+      expect(parseCardData({ ...data, finisherNo }), String(finisherNo)).toBeNull();
+    }
+    expect(parseCardData({ ...data, finisherNo: 3, progress })).toBeNull();
+  });
+});
+
+describe("Challenge cards (S3 challenges & clubs)", () => {
+  const challenge = { slug: "fright-month", month: "2026-10", target: 3, days: [9, 2, 2, 24] };
+  const save = { id: ID, kind: "challenge", templateId: "calendar", size: "story", data: { ...data, challenge }, share: true };
+
+  it("accepts a challenge of that month's lineup, with its calendar days sorted", () => {
+    expect(parseCardSave(save)).toMatchObject({ kind: "challenge", templateId: "calendar", entryId: null });
+    expect(parseCardData({ ...data, challenge })?.challenge).toEqual({ slug: "fright-month", month: "2026-10", target: 3, days: [2, 9, 24] });
+    expect(parseCardSave({ ...save, templateId: "boldStats" })).not.toBeNull();
+    expect(parseCardSave({ ...save, kind: "sticker", templateId: "sticker" })).not.toBeNull();
+  });
+
+  it("rejects another month's challenge, a wrong target, odd days and mixing", () => {
+    expect(parseCardData({ ...data, challenge: { ...challenge, month: "2026-11" } })).toBeNull();
+    expect(parseCardData({ ...data, challenge: { ...challenge, target: 1 } })).toBeNull();
+    expect(parseCardData({ ...data, challenge: { ...challenge, days: [0] } })).toBeNull();
+    expect(parseCardData({ ...data, challenge: { ...challenge, days: [32] } })).toBeNull();
+    expect(parseCardData({ ...data, challenge, progress })).toBeNull();
+    expect(parseCardData({ ...data, challenge, finisherNo: 3 })).toBeNull();
+    expect(parseCardSave({ ...save, data })).toBeNull();
+    expect(parseCardSave({ ...save, entryId: ENTRY })).toBeNull();
+    expect(parseCardSave({ ...save, templateId: "stone" })).toBeNull();
+    expect(parseCardSave({ ...save, kind: "finish", entryId: ENTRY, templateId: "ticket" })).toBeNull();
   });
 });

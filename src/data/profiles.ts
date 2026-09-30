@@ -4,7 +4,8 @@ import { posterUrl } from "@/core/catalog/images";
 import type { UserClient } from "./supabase-server";
 
 export type PublicProfile =
-  | { isPrivate: true; username: string }
+  /** `blockedId`: the viewer blocked this profile (their page offers Unblock). */
+  | { isPrivate: true; username: string; blockedId?: string }
   | {
       isPrivate: false;
       id: string;
@@ -20,9 +21,18 @@ export async function publicProfile(db: UserClient, username: string): Promise<P
   if (error) throw new Error(`public_profile failed: ${error.message}`);
   // Generated types say non-null; a private profile returns nulls for everything but the name.
   const row = data[0] as
-    | { id: string | null; username: string; display_name: string | null; avatar_url: string | null; is_private: boolean; created_at: string | null }
+    | {
+        id: string | null;
+        username: string;
+        display_name: string | null;
+        avatar_url: string | null;
+        is_private: boolean;
+        created_at: string | null;
+        blocked_by_me: boolean;
+      }
     | undefined;
   if (!row) return null;
+  if (row.blocked_by_me && row.id) return { isPrivate: true, username: row.username, blockedId: row.id };
   if (row.is_private || !row.id || !row.created_at) return { isPrivate: true, username: row.username };
   return {
     isPrivate: false,
@@ -68,7 +78,25 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
       return data ?? [];
     });
 
-  const [profile, entries, episodeLogs, readingLogs, cards, weeklyRecaps] = await Promise.all([
+  const [
+    profile,
+    entries,
+    episodeLogs,
+    readingLogs,
+    cards,
+    weeklyRecaps,
+    subscriptions,
+    avoidTopics,
+    follows,
+    stamps,
+    blocks,
+    badges,
+    challenges,
+    clubs,
+    sceneWarnings,
+    sceneWarningVotes,
+    quizAnswers,
+  ] = await Promise.all([
     db
       .from("profiles")
       .select("username, display_name, avatar_url, locale, time_zone, country, visibility, theme, email_recaps, created_at, updated_at")
@@ -81,7 +109,7 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
     table((from, to) =>
       db
         .from("entries")
-        .select("id, status, finished_at, rating, review, created_at, updated_at, deleted_at, title:titles(source, kind, external_id, name, year)")
+        .select("id, status, finished_at, rating, review, hours_played, finisher_no, created_at, updated_at, deleted_at, title:titles(source, kind, external_id, name, year)")
         .eq("user_id", user.id)
         .order("id")
         .range(from, to),
@@ -118,6 +146,100 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
         .order("id")
         .range(from, to),
     ),
+    // Pro (ADR 0034): what Stripe told us, no payment details (those stay at Stripe).
+    table((from, to) =>
+      db
+        .from("subscriptions")
+        .select("stripe_subscription_id, status, price_id, current_period_end, cancel_at_period_end, created_at, updated_at")
+        .eq("user_id", user.id)
+        .order("created_at")
+        .range(from, to),
+    ),
+    // Content warnings (ADR 0035): the DTDD topic ids the user avoids, unticked ones included.
+    table((from, to) =>
+      db
+        .from("user_avoid_topics")
+        .select("id, topic_id, created_at, updated_at, deleted_at")
+        .eq("user_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
+    // Social (ADR 0037): whom the user follows, the Stamps they gave and whom they blocked (profile and entry ids).
+    table((from, to) =>
+      db
+        .from("follows")
+        .select("id, followee_id, created_at, updated_at, deleted_at")
+        .eq("follower_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
+    table((from, to) =>
+      db
+        .from("stamps")
+        .select("id, entry_id, created_at, updated_at, deleted_at")
+        .eq("user_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
+    table((from, to) =>
+      db
+        .from("blocks")
+        .select("id, blocked_id, created_at, updated_at, deleted_at")
+        .eq("blocker_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
+    // Badges (ADR 0038): the stickers awarded, when they were earned and by which title's finish.
+    table((from, to) =>
+      db
+        .from("user_badges")
+        .select("id, badge, earned_at, created_at, title:titles(source, kind, external_id, name)")
+        .eq("user_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
+    // Challenges and clubs (ADR 0040): the monthly challenges joined (progress, completion) and the clubs joined.
+    table((from, to) =>
+      db
+        .from("challenge_joins")
+        .select("id, month, slug, progress, completed_at, created_at, updated_at, deleted_at, title:titles(source, kind, external_id, name)")
+        .eq("user_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
+    table((from, to) =>
+      db
+        .from("club_members")
+        .select("id, club, created_at, updated_at, deleted_at")
+        .eq("user_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
+    // Scene warnings and the quiz (ADR 0043): the warnings the user added, their votes and their quiz answers.
+    table((from, to) =>
+      db
+        .from("scene_warnings")
+        .select("id, topic, season, episode, start_sec, end_sec, unit, position, status, confirms, disputes, created_at, updated_at, deleted_at, title:titles(source, kind, external_id, name)")
+        .eq("user_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
+    table((from, to) =>
+      db
+        .from("scene_warning_votes")
+        .select("id, warning_id, vote, created_at, updated_at, deleted_at")
+        .eq("user_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
+    table((from, to) =>
+      db
+        .from("quiz_answers")
+        .select("id, warning_id, choice, served_at, answered_at, counted, too_fast, question:quiz_questions(topic, title:titles(source, kind, external_id, name))")
+        .eq("user_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
   ]);
 
   return {
@@ -131,5 +253,16 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
     readingLogs,
     cards,
     weeklyRecaps,
+    subscriptions,
+    avoidTopics,
+    follows,
+    stamps,
+    blocks,
+    badges,
+    challenges,
+    clubs,
+    sceneWarnings,
+    sceneWarningVotes,
+    quizAnswers,
   };
 }

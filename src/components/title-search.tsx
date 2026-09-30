@@ -1,9 +1,10 @@
 "use client";
 
 import Image from "next/image";
-import { useTranslations } from "next-intl";
+import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { SearchResult, SearchType } from "@/core/catalog/types";
+import { WarningBadge } from "./warnings/warning-badge";
 
 const DEBOUNCE_MS = 250;
 export const MIN_SEARCH_CHARS = 2;
@@ -60,20 +61,26 @@ export function SearchStatus({ query, search }: { query: string; search: SearchS
 }
 
 /** A search result as a poster tile: the kind is always spelled out (a manga and its anime share a name). */
-export function PosterButton({ result, onPick }: { result: SearchResult; onPick: (r: SearchResult) => void }) {
+export function PosterButton({ result, onPick, warning }: { result: SearchResult; onPick: (r: SearchResult) => void; warning?: string | null }) {
   const t = useTranslations("Home");
+  const format = useFormatter();
   return (
     <button type="button" onClick={() => onPick(result)} className="group flex w-full flex-col gap-1.5 text-left">
       <span className="relative aspect-[2/3] w-full overflow-hidden rounded-xl bg-muted shadow-sm ring-1 ring-black/5 transition-transform group-hover:-translate-y-0.5">
         {result.imageUrl && (
           <Image src={result.imageUrl} alt="" fill unoptimized crossOrigin="anonymous" sizes="(min-width: 640px) 25vw, 33vw" className="object-cover" />
         )}
+        {warning && <WarningBadge label={warning} className="absolute top-1.5 right-1.5" />}
       </span>
       <span className="line-clamp-2 text-sm font-medium">{result.name}</span>
       <span className="text-xs text-muted-foreground">
         {t("titleMeta", { kind: result.kind, year: result.year ?? "none" })}
       </span>
       {result.creator && <span className="-mt-1 line-clamp-1 text-xs text-muted-foreground">{t("byCreator", { creator: result.creator })}</span>}
+      {result.platforms?.length ? (
+        <span className="-mt-1 line-clamp-1 text-xs text-muted-foreground">{format.list(result.platforms, { type: "unit" })}</span>
+      ) : null}
+      {warning && <span className="sr-only">{warning}</span>}
     </button>
   );
 }

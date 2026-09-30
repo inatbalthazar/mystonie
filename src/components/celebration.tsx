@@ -1,39 +1,40 @@
 "use client";
 
-import { DownloadIcon, LinkIcon, PaletteIcon, Share2Icon, StickerIcon } from "lucide-react";
+import { DownloadIcon, LinkIcon, LockIcon, PaletteIcon, Share2Icon, SparklesIcon, StickerIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { usePro } from "@/components/pro/use-pro";
 import { useCanShareFiles } from "@/cards/can-share";
 import { CardPreview } from "@/cards/card-preview";
 import { downloadBlob, usePrerenderedCard } from "@/cards/export";
-import { RatingField, ReviewField } from "@/cards/fields";
-import { useHeadline, useRecapRange } from "@/cards/parts";
-import { DEFAULT_TEMPLATE, type TemplateId } from "@/cards/registry";
+import { HoursField, RatingField, ReviewField } from "@/cards/fields";
+import { useChallengeName, useHeadline, useRecapRange } from "@/cards/parts";
+import type { TemplateId } from "@/cards/registry";
 import { usePosterPalette } from "@/cards/use-poster-palette";
+import { isSurvivedKey, type SurvivedKey } from "@/core/catalog/dtdd";
+import type { TmdbKind } from "@/core/catalog/tmdb";
 import { cardShareUrl, clampReview, cycle, finalReview } from "@/core/cards/edit";
-import { templatesFor } from "@/core/cards/templates";
+import { gameHours } from "@/core/cards/text";
+import { defaultTemplate, isProTemplate, templatesFor } from "@/core/cards/templates";
 import type { CardData, CardHideable, CardSize } from "@/core/cards/types";
-import type { EntryNotes } from "@/core/collection/entries";
+import { isReadingKind } from "@/core/catalog/types";
+import { isHoursPlayed, type EntryNotes } from "@/core/collection/entries";
+import { shelfOfKind } from "@/core/collection/view";
 import { uuidv7 } from "@/core/ids";
+import { Link } from "@/i18n/navigation";
 import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { useOnline } from "./offline/outbox";
 
 /**
- * What the card is about: a finished entry, a logged episode, a week (recap) or a stats period (Share stats).
- * `ready` = saved on the server.
+ * What the card is about: a finished entry, a logged episode, a week or month (recap), a stats period (Share
+ * stats), a milestone, a completed monthly challenge or a year (Year in Review). `ready` = saved on the server.
  */
 export type CelebrationSource =
   | { kind: "finish"; entryId: string; ready: boolean }
   | { kind: "progress"; episodeLogId: string | null; readingLogId?: string | null; ready: boolean }
-  | { kind: "weekly_recap"; recapId: string; ready: boolean }
-  | { kind: "stats"; ready: boolean };
-
-const FIRST_TEMPLATE: Record<CelebrationSource["kind"], TemplateId> = {
-  finish: DEFAULT_TEMPLATE,
-  progress: "boldStats",
-  weekly_recap: "collage",
-  stats: "boldStats",
-};
+  | { kind: "weekly_recap" | "monthly_recap"; recapId: string; ready: boolean }
+  | { kind: "stats" | "milestone" | "challenge" | "year_review"; ready: boolean };
 
 type Props = {
   data: CardData;
@@ -42,9 +43,32 @@ type Props = {
   animate?: boolean;
   username: string | null;
   host: string;
-  /** Closes the celebration. `notes` is set when the rating or review changed (finish cards). */
+  /** Closes the celebration. `notes` is set when the rating or review (or a game's hours) changed (finish cards). */
   onClose: (notes: EntryNotes | null) => void;
+  /**
+   * A finished movie or series: asks DTDD (through `/api/warnings`) whether it has a scare to survive, and if so
+   * offers the Survived card (S2 content warnings).
+   */
+  survivedFor?: { kind: TmdbKind; externalId: string };
 };
+
+/** The scare this finished movie or series can have a Survived card about, once the server has answered. */
+function useSurvived(target: { kind: TmdbKind; externalId: string } | undefined): SurvivedKey | null {
+  const [survived, setSurvived] = useState<SurvivedKey | null>(null);
+  const key = target ? `${target.kind}/${target.externalId}` : "";
+  useEffect(() => {
+    if (!key) return;
+    const controller = new AbortController();
+    fetch(`/api/warnings/${key}`, { signal: controller.signal })
+      .then((res) => (res.ok ? (res.json() as Promise<{ survived?: unknown }>) : null))
+      .then((body) => {
+        if (body && isSurvivedKey(body.survived)) setSurvived(body.survived);
+      })
+      .catch(() => {});
+    return () => controller.abort();
+  }, [key]);
+  return survived;
+}
 
 const SWIPE_PX = 40;
 
@@ -54,24 +78,34 @@ const SWIPE_PX = 40;
  * Skip is always visible. Share publishes the card at `/c/[id]` (inputs + PNG) while the share sheet opens.
  * Mount it only while open (a new card id each time).
  */
-export function Celebration({ data, source, animate = false, username, host, onClose }: Props) {
+export function Celebration({ data, source, animate = false, username, host, onClose, survivedFor }: Props) {
   const t = useTranslations("Celebration");
   const tc = useTranslations("Card");
   const format = useFormatter();
   const dialog = useRef<HTMLDialogElement>(null);
   const [cardId] = useState(uuidv7);
-  const styles = templatesFor(source.kind);
-  const [template, setTemplate] = useState<TemplateId>(FIRST_TEMPLATE[source.kind]);
+  const pro = usePro();
+  const survived = useSurvived(source.kind === "finish" ? survivedFor : undefined);
+  // Pro templates (ADR 0034) show only where Pro can be bought; without Pro they're a locked preview.
+  const styles = templatesFor(source.kind, data.kind, { survived: !!survived }).filter((id) => !isProTemplate(id) || pro?.available);
+  const [template, setTemplate] = useState<TemplateId>(() => defaultTemplate(source.kind, data.kind));
   const range = useRecapRange(data.recap);
   const headline = useHeadline(data);
+  const challengeName = useChallengeName(data);
   const [sticker, setSticker] = useState(false);
   const [size, setSize] = useState<CardSize>("story");
   const [rating, setRating] = useState<number | null>(data.rating ?? null);
   const [review, setReview] = useState(() => clampReview(data.review ?? ""));
+  // A game's hours played (S3 games), asked with the rating: the card shows them at once.
+  const asksHours = source.kind === "finish" && data.kind === "game";
+  const [hours, setHours] = useState(() => (data.hoursPlayed ? String(data.hoursPlayed) : ""));
+  const hoursPlayed = isHoursPlayed(Number(hours)) ? Number(hours) : null;
   const [hide, setHide] = useState<CardHideable[]>([]);
   const [delivered, setDelivered] = useState(false);
   const [notice, setNotice] = useState("");
   const canShare = useCanShareFiles();
+  // Offline (S3 offline): Download works; sharing waits until the card can be published.
+  const online = useOnline();
 
   const templateId: TemplateId = sticker ? "sticker" : template;
   const kind = sticker ? "sticker" : source.kind;
@@ -79,13 +113,16 @@ export function Celebration({ data, source, animate = false, username, host, onC
     ...data,
     rating: source.kind === "finish" ? rating : null,
     review: source.kind === "finish" ? finalReview(review) : null,
+    ...(asksHours ? { hoursPlayed } : {}),
     username: hide.includes("username") ? null : username,
     hide,
+    survived: templateId === "survived" ? survived : null,
   };
   const palette = usePosterPalette(data.posterUrl);
   const cardRef = useRef<HTMLDivElement>(null);
   const png = usePrerenderedCard(cardRef, size, JSON.stringify([templateId, size, card, palette]));
-  const ready = !!png && source.ready;
+  const locked = isProTemplate(templateId) && !pro?.pro;
+  const ready = !!png && source.ready && !locked;
 
   useEffect(() => {
     dialog.current?.showModal();
@@ -97,8 +134,9 @@ export function Celebration({ data, source, animate = false, username, host, onC
   }, []);
 
   function close() {
-    const changed = source.kind === "finish" && (rating !== (data.rating ?? null) || finalReview(review) !== (data.review ?? null));
-    onClose(changed ? { rating, review: finalReview(review) } : null);
+    const hoursChanged = asksHours && hoursPlayed !== (data.hoursPlayed ?? null);
+    const changed = source.kind === "finish" && (rating !== (data.rating ?? null) || finalReview(review) !== (data.review ?? null) || hoursChanged);
+    onClose(changed ? { rating, review: finalReview(review), ...(asksHours ? { hoursPlayed } : {}) } : null);
   }
 
   function changeStyle(step: 1 | -1 = 1) {
@@ -136,7 +174,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
         entryId: source.kind === "finish" ? source.entryId : null,
         episodeLogId: source.kind === "progress" ? source.episodeLogId : null,
         readingLogId: source.kind === "progress" ? (source.readingLogId ?? null) : null,
-        recapId: source.kind === "weekly_recap" ? source.recapId : null,
+        recapId: source.kind === "weekly_recap" || source.kind === "monthly_recap" ? source.recapId : null,
         data: inputs,
         share: !!blob,
       }),
@@ -156,7 +194,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
   };
 
   function download(fallback = false) {
-    if (!png) return;
+    if (!png || locked) return;
     downloadBlob(png, filename());
     setDelivered(true);
     track("card_downloaded", { tpl: templateId, size, fallback, card: kind });
@@ -199,12 +237,36 @@ export function Celebration({ data, source, animate = false, username, host, onC
   function toggleHide(item: CardHideable) {
     setHide((cur) => (cur.includes(item) ? cur.filter((h) => h !== item) : [...cur, item]));
   }
-  const read = data.kind === "book" || data.kind === "manga";
+  const read = isReadingKind(data.kind);
+  // Milestone and Challenge cards have only the username to hide; a book's Finish card has no time on it, and a game's
+  // has one only with its hours (the player's or the average).
+  const onlyUser = !!(data.milestone || data.challenge);
+  const noTime = data.recap ? false : (read && !data.reading) || (data.kind === "game" && !gameHours(card));
   const hideable: CardHideable[] = [
     ...(username ? (["username"] as const) : []),
-    ...(read && !data.reading ? [] : (["time"] as const)),
-    ...((data.recap ? data.recap.episodes > 0 : data.kind === "series" || read) ? (["episodes"] as const) : []),
+    ...(onlyUser || noTime ? [] : (["time"] as const)),
+    ...(!onlyUser && (data.recap ? data.recap.episodes > 0 : data.kind === "series" || read) ? (["episodes"] as const) : []),
+    ...(source.kind === "finish" && data.finisherNo ? (["finisher"] as const) : []),
   ];
+
+  /** The line under the stamp: what this card celebrates. */
+  function title(): string {
+    if (data.milestone) return t("milestoneCardTitle", { ...data.milestone, count: format.number(data.milestone.value) });
+    if (data.challenge) return t("challengeCardTitle", { name: challengeName });
+    if (source.kind === "year_review" && data.recap) return t("yearTitle", { year: data.recap.from.slice(0, 4) });
+    if (source.kind === "finish") {
+      return read ? t("finishedReadTitle", { name: data.name }) : data.kind === "game" ? t("finishedPlayTitle", { name: data.name }) : t("finishedTitle", { name: data.name });
+    }
+    if (data.recap?.imported) return t("importTitle", { count: data.recap.titleCount, unit: data.recap.importedUnit ?? "film", range });
+    if (data.recap) return t("recapTitle", { period: data.recap.period ?? "week", range });
+    if (data.reading) {
+      const { milestone, unit, position } = data.reading;
+      return milestone
+        ? t("milestoneTitle", { name: data.name, milestone })
+        : t("readingTitle", { name: data.name, unit, position: format.number(position) });
+    }
+    return data.progress?.milestone ? t("milestoneTitle", { name: data.name, milestone: data.progress.milestone }) : t("progressTitle", { name: data.name });
+  }
 
   return (
     <dialog
@@ -236,20 +298,14 @@ export function Celebration({ data, source, animate = false, username, host, onC
             {headline}
           </p>
           <h2 id="celebration-title" className="mt-1 font-hand text-2xl leading-tight text-balance">
-            {source.kind === "finish"
-              ? read
-                ? t("finishedReadTitle", { name: data.name })
-                : t("finishedTitle", { name: data.name })
-              : data.recap
-                ? t("recapTitle", { period: data.recap.period ?? "week", range })
-                : data.reading
-                  ? data.reading.milestone
-                    ? t("milestoneTitle", { name: data.name, milestone: data.reading.milestone })
-                    : t("readingTitle", { name: data.name, unit: data.reading.unit, position: format.number(data.reading.position) })
-                  : data.progress?.milestone
-                    ? t("milestoneTitle", { name: data.name, milestone: data.progress.milestone })
-                    : t("progressTitle", { name: data.name })}
+            {title()}
           </h2>
+          {source.kind === "finish" && data.finisherNo && (
+            // The number arrives with the saved entry, a moment after the stamp.
+            <p className="rounded-full bg-brand-soft px-3 py-1 text-sm font-bold text-brand motion-safe:animate-rise">
+              {t("finisherLine", { number: format.number(data.finisherNo) })}
+            </p>
+          )}
         </header>
 
         <div
@@ -263,9 +319,35 @@ export function Celebration({ data, source, animate = false, username, host, onC
             <CardPreview template={templateId} data={card} size={size} palette={palette} host={host} cardRef={cardRef} />
           </div>
           <p className="mt-2 text-center text-xs text-muted-foreground" aria-live="polite">
-            {sticker ? t("stickerHint") : t("styleLabel", { style: tc(`templates.${template}`) })}
+            {sticker ? t("stickerHint") : t(isProTemplate(template) ? "styleLabelPro" : "styleLabel", { style: tc(`templates.${template}`) })}
           </p>
         </div>
+
+        {survived && template !== "survived" && !sticker && (
+          <button
+            type="button"
+            onClick={() => {
+              setTemplate("survived");
+              track("template_switched", { tpl: "survived", via: "offer" });
+            }}
+            className="flex min-h-11 items-center gap-3 rounded-2xl bg-brand-soft/60 p-3 text-left ring-1 ring-brand/30 hover:bg-brand-soft"
+          >
+            <SparklesIcon className="size-5 shrink-0 text-brand" aria-hidden="true" />
+            <span className="flex-1 text-sm">
+              {t("survivedOffer", { scare: survived })} <span className="font-bold text-brand">{t("survivedTry")}</span>
+            </span>
+          </button>
+        )}
+
+        {locked && (
+          <div className="flex items-center gap-3 rounded-2xl bg-brand-soft/60 p-3 ring-1 ring-brand/30">
+            <LockIcon className="size-5 shrink-0 text-brand" aria-hidden="true" />
+            <p className="flex-1 text-sm">{t("proLocked", { style: tc(`templates.${template}`) })}</p>
+            <Link href="/pro" className="inline-flex h-11 shrink-0 items-center rounded-xl bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90">
+              {t("proUnlock")}
+            </Link>
+          </div>
+        )}
 
         <button
           type="button"
@@ -274,10 +356,10 @@ export function Celebration({ data, source, animate = false, username, host, onC
           className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-brand px-4 text-lg font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60"
         >
           {canShare ? <Share2Icon className="size-5" aria-hidden="true" /> : <LinkIcon className="size-5" aria-hidden="true" />}
-          {!ready ? t("preparing") : canShare ? t("share") : t("shareLink")}
+          {!ready && !locked ? (online ? t("preparing") : t("shareOffline")) : canShare ? t("share") : t("shareLink")}
         </button>
         <div className="grid grid-cols-3 gap-2">
-          <SecondaryAction onClick={() => download()} disabled={!png} icon={<DownloadIcon className="size-5" aria-hidden="true" />}>
+          <SecondaryAction onClick={() => download()} disabled={!png || locked} icon={<DownloadIcon className="size-5" aria-hidden="true" />}>
             {t("download")}
           </SecondaryAction>
           <SecondaryAction onClick={() => changeStyle()} disabled={styles.length < 2} icon={<PaletteIcon className="size-5" aria-hidden="true" />}>
@@ -303,7 +385,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
             <span className="text-sm font-semibold">{t("hideOnCard")}</span>
             {hideable.map((item) => (
               <Chip key={item} pressed={hide.includes(item)} onClick={() => toggleHide(item)} className="ring-1 ring-border">
-                {t("hideItem", { item, username: username ?? "", shelf: read ? "read" : "watch" })}
+                {t("hideItem", { item, username: username ?? "", shelf: shelfOfKind(data.kind) })}
               </Chip>
             ))}
           </div>
@@ -315,6 +397,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
               {t("notesTitle")}
             </h3>
             <RatingField rating={rating} onChange={setRating} />
+            {asksHours && <HoursField hours={hours} onChange={setHours} average={data.playtimeHours ?? null} />}
             <ReviewField review={review} onChange={setReview} />
           </section>
         )}

@@ -55,26 +55,39 @@ Legend: `[ ]` todo · `[x]` done · `[~]` in progress (add branch name) · 🧑 
 - **Success measures:** ≥ 1,000 sign-ups · D30 retention ≥ 15% · ≥ 25% of finishes shared.
 
 ## Stage 2: Warnings, reading, revenue (2–3 months)
-- [ ] 🧑 Get a DTDD API key and confirm terms. Then: DTDD provider + matching + cache, avoid-topics settings, warning block + badges, Survived card. ([S2 warnings](product/features/S2-content-warnings.md), [ADR 0009](decisions/0009-content-warnings-from-dtdd-first.md)) · ⚡ high (title matching + new external API)
+- [x] 🧑 Get a DTDD API key and confirm terms (key in `.env.local`, terms recorded in [external APIs](architecture/external-apis.md) on 2026-09-29: the free tier is non-commercial only).
+- [x] DTDD provider + matching + cache, avoid-topics settings, warning block + badges, Survived card. ([S2 warnings](product/features/S2-content-warnings.md), [ADR 0009](decisions/0009-content-warnings-from-dtdd-first.md), [ADR 0035](decisions/0035-content-warnings-cache-and-survived.md)) · ⚡ high (title matching + new external API)
+- [ ] 🧑 Warnings go-live ([ADR 0035](decisions/0035-content-warnings-cache-and-survived.md)): add `DTDD_API_KEY` in Vercel (Sensitive) and apply `20261001090000_stage2_content_warnings.sql` to the remote project (an agent can, when asked). Free until Pro takes money; then the DTDD Commercial tier (in the Pro go-live below).
 - [x] Books (Google Books) + manga (AniList), reading progress, Read tab + stats. ([S2 books & manga](product/features/S2-books-manga.md), [ADR 0029](decisions/0029-books-manga-reading-progress.md)) · ⚡ high (two new catalogs, data-shape ADR for reading progress)
 - [ ] 🧑 Books go-live ([ADR 0029](decisions/0029-books-manga-reading-progress.md)): create a Google Cloud API key restricted to the Books API (the anonymous quota is 0) and add it in Vercel as `GOOGLE_BOOKS_API_KEY` (Sensitive). Apply `20260927170000_stage2_reading.sql` to the remote project (an agent can, when asked).
-- [ ] Book and manga card templates: **Spine** (a book spine on a shelf) and **Manga panel** (the cover in comic panels with a speech bubble), for Finish and reading Progress cards. ([S2 books & manga](product/features/S2-books-manga.md)) · ⚡ medium (two templates, card-lab hard cases)
-- [ ] Milestone cards, Monthly Recap, **Year in Review** (ship by early December). · ⚡ high (builds on the recap pipeline; many card designs)
-- [ ] 🧑 TMDB commercial terms, Vercel Pro. Then: Stripe Pro subscription + premium templates. ([S2 Pro](product/features/S2-pro-subscription.md)) · ⚡ max (webhooks, entitlements, money is server-authoritative)
-- [ ] Where to watch by country. ([S2 where to watch](product/features/S2-where-to-watch.md)) · ⚡ medium (one TMDB endpoint + cache + attribution)
-- [ ] Letterboxd import. ([S2 import](product/features/S2-letterboxd-import.md)) · ⚡ max (messy CSVs, fuzzy matching, preview/commit)
+- [x] Book and manga card templates: **Spine** (a book spine on a shelf) and **Manga panel** (the cover in comic panels with a speech bubble), for Finish and reading Progress cards. ([S2 books & manga](product/features/S2-books-manga.md), [ADR 0030](decisions/0030-book-manga-card-templates.md)) · ⚡ medium (two templates, card-lab hard cases)
+- [x] Milestone cards, Monthly Recap, **Year in Review** (ship by early December). ([S2 milestones & recaps](product/features/S2-milestones-recaps.md), [ADR 0031](decisions/0031-milestones-monthly-recap-year-in-review.md)) · ⚡ high (builds on the recap pipeline; many card designs)
+- [x] Stripe Pro subscription + premium templates, built and tested in Stripe test mode, off behind `PRO_ENABLED`: Checkout, Customer Portal, signed subscription webhooks → `subscriptions`, the Pro page, the **Film Strip** Pro template. ([S2 Pro](product/features/S2-pro-subscription.md), [ADR 0034](decisions/0034-pro-subscription.md)) · ⚡ max (webhooks, entitlements, money is server-authoritative)
+- [ ] 🧑 Pro go-live ([ADR 0034](decisions/0034-pro-subscription.md)): TMDB commercial terms, Vercel Pro and the DTDD Commercial tier (all needed before taking money), a refund policy in Terms. In Stripe: products with a monthly and a yearly price (USD), a webhook endpoint `https://<domain>/api/billing/webhook` for `customer.subscription.created`, `.updated` and `.deleted`, and the Customer Portal (cancel at period end, switch plans, update card). In Vercel (Sensitive): `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_MONTHLY`, `STRIPE_PRICE_YEARLY`, then `PRO_ENABLED=true`. Apply `20260930090000_stage2_pro.sql` to the remote project (an agent can, when asked). Checkout, the webhook and the Customer Portal were already tried end to end locally with the owner's Stripe **test** keys (2026-09-29): create live-mode products, the webhook endpoint and the portal settings again, since test-mode ones don't carry over.
+- [x] Where to watch by country. ([S2 where to watch](product/features/S2-where-to-watch.md), [ADR 0032](decisions/0032-where-to-watch.md)) · ⚡ medium (one TMDB endpoint + cache + attribution)
+- [x] Letterboxd import. ([S2 import](product/features/S2-letterboxd-import.md), [ADR 0033](decisions/0033-letterboxd-import.md)) · ⚡ max (messy CSVs, fuzzy matching, preview/commit)
+- **Success measures (after launch):** WAU ≥ 1,000 · revenue covers infrastructure.
+
+## Stage 3: The community album, before launch
+The owner's call on 2026-09-29: don't wait for users, make the product as good as possible first ([ADR 0036](decisions/0036-expansion-features-before-launch.md)). These were expansion features gated on user numbers; they are now built before launch, in this order. Each task writes its spec into `product/features/` (starting from the old design in [product/later/](product/later/README.md), re-checked against AGENTS.md).
+- [x] Follows, the Following feed, **Stamps** (kudos on a finish), blocks, find people. ([S3 social](product/features/S3-social.md)) · ⚡ high (RLS across users, blocks, a feed RPC)
+- [x] Badges ("stickers" earned from what you finish) and the **Shelf** on public profiles. ([S3 badges & shelf](product/features/S3-badges-shelf.md), [ADR 0038](decisions/0038-badges-and-shelf.md)) · ⚡ high (badge catalogue, server-side awards)
+- [x] **Finisher #N** stamps on finish cards, trending from our own logs, friend leaderboards. ([S3 finishers & the board](product/features/S3-finishers-board.md), [ADR 0039](decisions/0039-finishers-trending-board.md)) · ⚡ high (numbering must be race-free)
+- [x] Monthly challenges (patches, the Calendar Challenge card) and fandom clubs. ([S3 challenges & clubs](product/features/S3-challenges-clubs.md), [ADR 0040](decisions/0040-challenges-and-clubs.md)) · ⚡ high
+- [x] Import from Goodreads, MyAnimeList and TV Time; CSV export. ([S3 import & export](product/features/S3-import-export.md), [ADR 0041](decisions/0041-import-export.md)) · ⚡ max (messy files, three matchers)
+- [x] Offline-first: the app opens and logs offline, then syncs. ([S3 offline](product/features/S3-offline.md), [ADR 0042](decisions/0042-offline-first.md), [offline sync](architecture/offline-sync.md)) · ⚡ max
+- [x] Our own timestamped warnings (S02E05 · 00:41) with votes, and the warnings quiz (no Gems: those stay gated). ([S3 warnings & quiz](product/features/S3-warnings-quiz.md), [ADR 0043](decisions/0043-scene-warnings-and-quiz.md)) · ⚡ max
+- [ ] 🧑 Games ([ADR 0044](decisions/0044-games-rawg.md)): ~~get a RAWG API key~~ (done 2026-09-30, in `.env.local`) and add it in Vercel as `RAWG_API_KEY` (Sensitive), and in `.env.local` to try game search locally. Confirm the commercial terms before Pro takes money: RAWG's pricing says the free plan is non-commercial, its API terms say free under 100,000 MAU (ask api@rawg.io if unsure). ~~Decide on HowLongToBeat~~: no scraper; ask HowLongToBeat (contact form on howlongtobeat.com) for permission, and until then games show RAWG's average playtime (ADR 0044). Apply `20261008090000_stage3_games.sql` to the remote project (an agent can, when asked; the remote still has only the stage 0 migrations, so this comes with the full go-live).
+- [x] Games (RAWG, + HowLongToBeat if the owner approves it). ([S3 games](product/features/S3-games.md), [ADR 0044](decisions/0044-games-rawg.md); HowLongToBeat waits for the owner's approval) · ⚡ high (a fifth catalog)
 - **Launch** after this stage. **Success measures:** WAU ≥ 1,000 · revenue covers infrastructure.
 
-## Expansion gates
-Build these **only** when the gate is met and the owner approves. Specs are in [product/later/](product/later/README.md).
+## Still gated (owner's go needed)
+These cost money, face outward or need new accounts, so they wait for the owner's explicit go even before launch. Specs are in [product/later/](product/later/README.md).
 
-| Feature | Gate |
+| Feature | Why it waits |
 |---|---|
-| Social feed, follows, Kudos ("Stamp") | WAU ≥ 1,000 + user demand |
-| Own trending data, numbered "Finisher #N" stamps, friend leaderboards | ≥ 200 logs/week on a popular title |
-| Monthly challenges, fandom clubs | WAU ≥ 2,000 |
-| Expo app, widgets, direct IG Stories share | WAU ≥ 3,000 or measured web-share drop-off |
-| Games (RAWG + HLTB) | Top request in feature vote |
-| Own timestamped warnings + quiz + Scene Alert | MAU ≥ 5,000 or DTDD data insufficient |
-| Full offline sync | Users ask for it |
-| Gems, wheel, merch, ads, affiliate, AI assistant, travel | MAU ≥ 20,000 + stable revenue |
+| Native app (Expo), widgets, direct IG Stories share | App Store / Play fees and a new runtime (ADR needed) |
+| Gems, lucky wheel, merch store | A virtual economy and physical goods; Pro comes first |
+| Native ads, affiliate links | Outward-facing; hurts the polish before launch |
+| AI assistant | A paid API per use |
+| Travel module | Not core ([open questions](open-questions.md)) |

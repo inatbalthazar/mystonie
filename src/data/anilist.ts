@@ -1,7 +1,15 @@
 // Server-side AniList GraphQL client (manga). No key needed. AniList allows about 30 requests a minute per server
 // (checked 2026-09-27: `X-RateLimit-Limit: 30`), so responses are cached hard in Next's fetch cache: its API only
 // answers POST, which Next caches when asked to (`force-cache`).
-import { ANILIST_DETAILS_QUERY, ANILIST_SEARCH_QUERY, normalizeAnilistDetails, normalizeAnilistSearch } from "@/core/catalog/anilist";
+import {
+  ANILIST_BY_MAL_QUERY,
+  ANILIST_DETAILS_QUERY,
+  ANILIST_SEARCH_QUERY,
+  normalizeAnilistByMal,
+  normalizeAnilistDetails,
+  normalizeAnilistSearch,
+  type AnilistAnime,
+} from "@/core/catalog/anilist";
 import type { SearchResult, Title } from "@/core/catalog/types";
 import { CatalogError } from "./catalog-error";
 
@@ -32,4 +40,13 @@ export async function mangaDetails(externalId: string): Promise<{ title: Title; 
   const raw = await anilist(ANILIST_DETAILS_QUERY, { id: Number(externalId) }, DAY);
   const title = normalizeAnilistDetails(raw);
   return title ? { title, raw } : null;
+}
+
+/** Anime or manga by MyAnimeList id (≤ 50 in one request; the MyAnimeList import). */
+export async function anilistByMal(
+  ids: readonly number[],
+  type: "ANIME" | "MANGA",
+): Promise<{ manga: Map<number, SearchResult>; anime: Map<number, AnilistAnime> }> {
+  if (ids.length === 0) return { manga: new Map(), anime: new Map() };
+  return normalizeAnilistByMal(await anilist(ANILIST_BY_MAL_QUERY, { ids: [...ids].sort((a, b) => a - b), type }, DAY));
 }

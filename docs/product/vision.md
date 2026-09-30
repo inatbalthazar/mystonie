@@ -12,21 +12,22 @@ Competitors are **databases with a UI** (Letterboxd: film only; Serializd, TV Ti
 
 ## Product principles
 1. **One core loop:** finish → card → share. If a feature doesn't serve it, it waits.
-2. **Single-player value first.** Features must be useful with zero friends on the app. Network-effect features (feed, rankings, community warnings) are gated by metrics ([roadmap](../roadmap.md#expansion-gates)).
+2. **Single-player value first.** Features must be useful with zero friends on the app. Network-effect features (feed, Stamps, rankings, community warnings) are built before launch too ([ADR 0036](../decisions/0036-expansion-features-before-launch.md)), but each one still has to work for someone who follows nobody (their own finishes, an invitation to find people).
 3. **Global from day one.** English is the default. Other languages (Thai first) are optional locales. There are no region-specific core features, and dates, times and numbers follow the user's locale and time zone ([i18n](../architecture/i18n.md)).
 4. **Reuse before build.** Use TMDB for titles and DoesTheDogDie for warnings, and use Supabase for the backend.
 5. **Log in ≤ 3 taps. Celebrate first, ask later.**
-6. **Solo-founder sized.** Minimal services and near-zero cost until revenue. Polished before launch: stages 0–2 ship together, and each stage has success measures for after launch.
+6. **Solo-founder sized.** Minimal services and near-zero cost until revenue. Polished before launch: stages 0–3 ship together, and each stage has success measures for after launch.
 
 ## Glossary
 
 | Term | Meaning |
 |---|---|
-| **Title** | A movie, series (incl. anime and K-drama), book or manga. Cached from TMDB, Google Books or AniList. Table `titles`. |
-| **Entry** | A user's record of a title with status `want` / `watching` / `finished`, rating, one-line review and editable `finished_at`. Table `entries`. |
+| **Title** | A movie, series (incl. anime and K-drama), book, manga or game. Cached from TMDB, Google Books, AniList or RAWG. Table `titles`. |
+| **Entry** | A user's record of a title with status `want` / `watching` / `finished` (the UI says reading or playing for books, manga and games), rating, one-line review, editable `finished_at`, and for a game the hours played. Table `entries`. |
 | **Episode log** | A user marking one episode as watched. Table `episode_logs`. |
 | **Reading log** | A user marking how far they have read a book or manga (a page, chapter or volume reached). Table `reading_logs`. |
 | **Card** | Generated share artwork (Finish, Progress, Weekly Recap, Stats Sticker, …). Rendered in the browser. |
 | **Template** | A card design (Ticket, Polaroid, Bold Stats, …) defined in code + data. |
 | **Recap** | An automatic weekly, monthly or yearly summary card. Weeks follow the user's local time zone. |
 | **Content warning** | Stage 2: sensitive-content data (e.g. "a dog dies", "jump scares") from the DoesTheDogDie API, shown for the user's chosen avoid-topics. |
+| **Scene warning** | Stage 3: our own warning, added by someone who watched or read the title, with where it happens (S2 · E5 · 41:10, a chapter). Confirmed once 5 people saw it. Table `scene_warnings`. |

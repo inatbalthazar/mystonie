@@ -85,7 +85,7 @@ test("profile settings, export, the public page, reports and privacy", async ({ 
   const guest = await visitor.newPage();
   await guest.goto(`/u/${username}`);
   await expect(guest.getByRole("heading", { level: 1 })).toHaveText("Pat Profile");
-  await expect(guest.getByRole("region", { name: "Watching now" })).toContainText("Dune: Part Two");
+  await expect(guest.getByRole("region", { name: "Right now" })).toContainText("Dune: Part Two");
   await expect(guest.getByRole("region", { name: "Card gallery" }).getByRole("link", { name: "Card: Parasite" })).toHaveAttribute(
     "href",
     `/c/${cardId}`,
@@ -159,6 +159,7 @@ test("language and theme apply at once and stick to the account", async ({ page,
 
   // Signing out drops the saved preferences on this device.
   await main.getByRole("button", { name: "Sign out" }).click();
+  await expect(page).toHaveURL(/\/$/);
   await page.goto("/th");
   await expect(page).toHaveURL(/\/th$/);
 });

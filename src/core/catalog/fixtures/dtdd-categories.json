@@ -1,0 +1,114 @@
+[
+  {
+    "id": 153,
+    "name": "a dog dies",
+    "isSpoiler": false,
+    "isSensitive": false,
+    "isVisible": true,
+    "mergedIntoTopicId": null,
+    "status": "official",
+    "ordering": 100,
+    "TopicCategory": {
+      "id": 56,
+      "name": "Animal Death"
+    }
+  },
+  {
+    "id": 462,
+    "name": "it's told from an abuser's point of view",
+    "isSpoiler": false,
+    "isSensitive": false,
+    "isVisible": true,
+    "mergedIntoTopicId": null,
+    "status": "official",
+    "ordering": 100000,
+    "TopicCategory": {
+      "id": 25,
+      "name": "Abuse"
+    }
+  },
+  {
+    "id": 186,
+    "name": "a cat dies",
+    "isSpoiler": false,
+    "isSensitive": false,
+    "isVisible": true,
+    "mergedIntoTopicId": null,
+    "status": "official",
+    "ordering": 150,
+    "TopicCategory": {
+      "id": 56,
+      "name": "Animal Death"
+    }
+  },
+  {
+    "id": 189,
+    "name": "an animal dies",
+    "isSpoiler": false,
+    "isSensitive": false,
+    "isVisible": true,
+    "mergedIntoTopicId": null,
+    "status": "official",
+    "ordering": 250,
+    "TopicCategory": {
+      "id": 56,
+      "name": "Animal Death"
+    }
+  },
+  {
+    "id": 165,
+    "name": "there are spiders",
+    "isSpoiler": false,
+    "isSensitive": false,
+    "isVisible": true,
+    "mergedIntoTopicId": null,
+    "status": "official",
+    "ordering": 100000,
+    "TopicCategory": {
+      "id": 57,
+      "name": "Animal Phobia"
+    }
+  },
+  {
+    "id": 161,
+    "name": "there are jump scares",
+    "isSpoiler": false,
+    "isSensitive": false,
+    "isVisible": true,
+    "mergedIntoTopicId": null,
+    "status": "official",
+    "ordering": 100000,
+    "TopicCategory": {
+      "id": 10,
+      "name": "Fear"
+    }
+  },
+  {
+    "id": 222,
+    "name": "the ending is sad",
+    "isSpoiler": true,
+    "isSensitive": false,
+    "isVisible": true,
+    "mergedIntoTopicId": null,
+    "status": "official",
+    "ordering": 100000,
+    "TopicCategory": {
+      "id": 13,
+      "name": "Spoiler"
+    }
+  },
+  {
+    "id": 188,
+    "name": "there's blood/gore",
+    "isSpoiler": false,
+    "isSensitive": false,
+    "isVisible": true,
+    "mergedIntoTopicId": null,
+    "status": "official",
+    "ordering": 100000,
+    "TopicCategory": {
+      "id": 14,
+      "name": "Violence"
+    }
+  }
+]

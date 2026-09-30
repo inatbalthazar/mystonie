@@ -1,6 +1,6 @@
 # ADR 0028: Home, an installable PWA and recap web push without an SDK
 
-**Status:** Accepted · **Date:** 2026-09-27
+**Status:** Accepted. The service worker part is replaced by [ADR 0042](0042-offline-first.md): the worker now also keeps pages for offline use and is registered for everyone · **Date:** 2026-09-27
 
 ## Context
 The last stage 1 task asks for:

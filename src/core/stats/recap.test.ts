@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { addDays, lastWeekStart, recapCardData, recapFigures, recapRange, weeklyRecap, type RecapTitle } from "./recap";
+import { parseCardSave } from "../cards/saved";
+import { addDays, lastMonthStart, lastWeekStart, periodRecap, recapCardData, recapFigures, recapRange, weeklyRecap, type RecapTitle } from "./recap";
+import { summarizeReading } from "./reading";
 
 const BKK = "Asia/Bangkok";
 const poster = (p: string) => `https://image.tmdb.org/t/p/w342/${p}.jpg`;
@@ -102,5 +104,75 @@ describe("weeklyRecap", () => {
   it("makes card data from the top title", () => {
     const recap = weeklyRecap("2026-09-21", BKK, titles, [], [log("l1", "bb", inWeek)])!;
     expect(recapCardData(recap)).toMatchObject({ kind: "series", name: "Bluey", posterUrl: poster("bb"), finishedOn: "2026-09-27", recap });
+  });
+});
+
+describe("monthly recaps (S2 milestones & recaps)", () => {
+  const manga: RecapTitle = { id: "op", kind: "manga", name: "One Piece", runtimeMin: null, episodeCount: null, chapterCount: null, posterUrl: null };
+  const book: RecapTitle = { id: "hm", kind: "book", name: "Project Hail Mary", runtimeMin: null, episodeCount: null, pageCount: 496, posterUrl: null };
+  const all = [...titles, manga, book];
+  const read = (id: string, titleId: string, unit: "page" | "chapter", position: number, readAt: string) => ({ id, titleId, unit, position, readAt });
+
+  it("covers a calendar month in the user's time zone, and the month before on the 1st", () => {
+    const range = recapRange("2026-09-01", BKK, "month");
+    expect(new Date(range.from).toISOString()).toBe("2026-08-31T17:00:00.000Z");
+    expect(new Date(range.to).toISOString()).toBe("2026-09-30T17:00:00.000Z");
+    // 1 Oct 09:00 in Bangkok is still 30 Sep in New York.
+    expect(lastMonthStart(Date.parse("2026-10-01T02:00:00Z"), BKK)).toBe("2026-09-01");
+    expect(lastMonthStart(Date.parse("2026-10-01T02:00:00Z"), "America/New_York")).toBe("2026-08-01");
+    expect(lastMonthStart(Date.parse("2027-01-01T02:00:00Z"), BKK)).toBe("2026-12-01");
+  });
+
+  it("adds reading: time, activity and finishes, with a log counting only what it adds", () => {
+    const logs = [
+      read("r0", "op", "chapter", 1000, "2026-08-15T10:00:00Z"), // before the month
+      read("r1", "op", "chapter", 1100, "2026-09-10T10:00:00Z"), // +100 chapters in September
+    ];
+    const entries = [
+      { id: "e1", titleId: "hm", status: "finished" as const, finishedAt: "2026-09-20T10:00:00Z" }, // all 496 pages
+      { id: "e2", titleId: "pa", status: "finished" as const, finishedAt: "2026-09-05T10:00:00Z" },
+    ];
+    const recap = periodRecap("month", "2026-09-01", BKK, all, entries, [], logs)!;
+    // 100 chapters × 5 min + 496 pages × 1.5 min = 500 + 744.
+    expect(recap).toMatchObject({ period: "month", from: "2026-09-01", to: "2026-09-30", minutes: 133, episodes: 0, finished: 2, titleCount: 3 });
+    expect(recap.readMinutes).toBe(1244);
+    expect(recap.titles.map((t) => t.name)).toEqual(["Project Hail Mary", "One Piece", "Parasite"]);
+    // The same reading time as the Read tab's header for September.
+    expect(recap.readMinutes).toBe(summarizeReading(all, entries, logs, recapRange("2026-09-01", BKK, "month")).minutes);
+    // A reading-only week is still a recap; a weekly recap has no period.
+    const week = weeklyRecap("2026-09-07", BKK, all, [], [], logs)!;
+    expect(week.period).toBeUndefined();
+    expect(week).toMatchObject({ minutes: 0, readMinutes: 500, titleCount: 1 });
+  });
+
+  it("shows reading time in the figures, keeping three at most", () => {
+    const recap = { from: "2026-09-01", to: "2026-09-30", minutes: 600, episodes: 12, finished: 2, titleCount: 4, titles: [], readMinutes: 90 };
+    expect(recapFigures(recap)).toEqual([
+      { key: "hours", value: 10 },
+      { key: "readMinutes", value: 90 },
+      { key: "finished", value: 2 },
+    ]);
+    expect(recapFigures({ ...recap, readMinutes: 300 }, { time: true })).toEqual([
+      { key: "episodes", value: 12 },
+      { key: "finished", value: 2 },
+    ]);
+    expect(recapFigures({ ...recap, readMinutes: 300, minutes: 0 })[0]).toEqual({ key: "readHours", value: 5 });
+  });
+
+  it("saves as a monthly_recap card linked to its recap", () => {
+    const recap = periodRecap("month", "2026-09-01", BKK, all, [{ id: "e2", titleId: "pa", status: "finished", finishedAt: "2026-09-05T10:00:00Z" }], [])!;
+    const card = {
+      id: "01926000-0000-7000-8000-000000000001",
+      kind: "monthly_recap",
+      templateId: "collage",
+      size: "story",
+      recapId: "01926000-0000-7000-8000-000000000002",
+      data: recapCardData(recap),
+    };
+    expect(parseCardSave(card)).toMatchObject({ kind: "monthly_recap", recapId: card.recapId, data: { recap: { period: "month" } } });
+    expect(parseCardSave({ ...card, kind: "sticker", templateId: "sticker" })).not.toBeNull();
+    expect(parseCardSave({ ...card, kind: "weekly_recap" })).toBeNull(); // a week has no period
+    expect(parseCardSave({ ...card, data: recapCardData({ ...recap, period: "year" }) })).toBeNull();
+    expect(parseCardSave({ ...card, templateId: "stone" })).toBeNull();
   });
 });

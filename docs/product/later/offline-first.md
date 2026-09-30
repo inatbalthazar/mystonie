@@ -1,6 +1,6 @@
 # F09 · Offline-first & PWA
 
-> **Status: LATER (gated).** Not part of the current plan. See [later/README.md](README.md) for the gate. Written before the global, solo-sized plan: re-check against AGENTS.md before building.
+> **Status: BUILT in stage 3** as [S3 offline](../features/S3-offline.md) ([ADR 0042](../../decisions/0042-offline-first.md)). That spec is the source of truth, and it differs from this old design: there is no local copy of the database (the service worker keeps the pages people open, and an outbox replays the app's own writes), and the later change wins by the time it was made on the device, not by when it reached the server. Kept for history.
 
 **Phase:** M3 (IDs and `updated_at` columns are needed from M1) · **Priority:** Must-have for the mobile experience
 

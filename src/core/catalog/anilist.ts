@@ -19,6 +19,14 @@ export const ANILIST_SEARCH_QUERY = `query ($q: String) {
   }
 }`;
 
+/**
+ * Titles by MyAnimeList id (`$ids`, ≤ 50; `$type` ANIME or MANGA), for the MyAnimeList import (ADR 0041): manga
+ * are ours on AniList, anime give their names, format and year for the TMDB search.
+ */
+export const ANILIST_BY_MAL_QUERY = `query ($ids: [Int], $type: MediaType) {
+  Page(perPage: 50) { media(idMal_in: $ids, type: $type) { idMal ${MEDIA_FIELDS} } }
+}`;
+
 /** One manga by AniList id (`$id`). */
 export const ANILIST_DETAILS_QUERY = `query ($id: Int) { Media(id: $id, type: MANGA) { ${MEDIA_FIELDS} } }`;
 
@@ -68,20 +76,52 @@ function media(raw: unknown): Media | null {
   };
 }
 
+function result(m: Media): SearchResult {
+  const r: SearchResult = { source: "anilist", externalId: m.externalId, kind: "manga", name: m.name };
+  if (m.originalName) r.originalName = m.originalName;
+  if (m.originalLanguage) r.originalLanguage = m.originalLanguage;
+  if (m.year) r.year = m.year;
+  if (m.cover) r.imageUrl = m.cover;
+  return r;
+}
+
+const pageMedia = (body: unknown): unknown[] => {
+  const page = isObject(body) && isObject(body.data) && isObject(body.data.Page) ? body.data.Page : null;
+  return page && Array.isArray(page.media) ? page.media : [];
+};
+
 /** `Page.media` of a search → results. */
 export function normalizeAnilistSearch(body: unknown): SearchResult[] {
-  const page = isObject(body) && isObject(body.data) && isObject(body.data.Page) ? body.data.Page : null;
-  if (!page || !Array.isArray(page.media)) return [];
-  return page.media.flatMap((raw) => {
+  return pageMedia(body).flatMap((raw) => {
     const m = media(raw);
-    if (!m) return [];
-    const result: SearchResult = { source: "anilist", externalId: m.externalId, kind: "manga", name: m.name };
-    if (m.originalName) result.originalName = m.originalName;
-    if (m.originalLanguage) result.originalLanguage = m.originalLanguage;
-    if (m.year) result.year = m.year;
-    if (m.cover) result.imageUrl = m.cover;
-    return [result];
+    return m ? [result(m)] : [];
   });
+}
+
+/** An anime as the MyAnimeList import needs it: its names (English, romanized, Japanese), format and year. */
+export type AnilistAnime = { format: string | null; names: string[]; year: number | null };
+
+/**
+ * `ANILIST_BY_MAL_QUERY`'s answer, by MyAnimeList id: manga as search results (adult ones and novels left out, as
+ * everywhere), anime as names to search TMDB with.
+ */
+export function normalizeAnilistByMal(body: unknown): { manga: Map<number, SearchResult>; anime: Map<number, AnilistAnime> } {
+  const manga = new Map<number, SearchResult>();
+  const anime = new Map<number, AnilistAnime>();
+  for (const raw of pageMedia(body)) {
+    if (!isObject(raw) || typeof raw.idMal !== "number" || !Number.isInteger(raw.idMal)) continue;
+    const m = media(raw);
+    if (m) {
+      manga.set(raw.idMal, result(m));
+      continue;
+    }
+    if (raw.isAdult === true || FORMATS.has(raw.format as string) || raw.format === "NOVEL") continue;
+    const title = isObject(raw.title) ? raw.title : {};
+    const names = [...new Set([text(title.english), text(title.romaji), text(title.native)].filter((n): n is string => !!n))];
+    const year = isObject(raw.startDate) ? count(raw.startDate.year) : undefined;
+    if (names.length) anime.set(raw.idMal, { format: text(raw.format) ?? null, names, year: year ?? null });
+  }
+  return { manga, anime };
 }
 
 /** `Media` → the `titles` row we cache. Chapters and volumes stay null while a series is running. */
@@ -105,5 +145,7 @@ export function normalizeAnilistDetails(body: unknown): Title | null {
     pageCount: null,
     chapterCount: m.chapters ?? null,
     volumeCount: m.volumes ?? null,
+    playtimeHours: null,
+    platforms: [],
   };
 }

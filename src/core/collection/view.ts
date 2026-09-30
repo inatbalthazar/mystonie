@@ -1,8 +1,9 @@
-// The collection page (S1 collection → Collection view): the Watch and Read tabs (S2 books & manga), year/status
-// filters, sort, per-row numbers and the summary header. The header is always the sum of the visible rows (both come
-// from `titleWatch`, or `titleRead` on the Read tab).
+// The collection page (S1 collection → Collection view): the Watch, Read (S2 books & manga) and Play (S3 games) tabs,
+// year/status filters, sort, per-row numbers and the summary header. The header is always the sum of the visible rows
+// (both come from `titleWatch`, `titleRead` on the Read tab or `titlePlay` on the Play tab).
 import { isReadingKind, type TitleKind } from "../catalog/types";
 import { localDate, safeTimeZone, startOfLocalDay, type TimeRange } from "../stats/period";
+import { titlePlay, type PlayTotals } from "../stats/play";
 import { titleRead, type ReadTotals, type StatsReadingLog } from "../stats/reading";
 import { titleWatch, type StatsEpisodeLog, type WatchTotals } from "../stats/summary";
 import { sortCollection, titleKey, type CollectionItem, type EntryStatus } from "./entries";
@@ -14,11 +15,12 @@ export type CollectionSort = (typeof COLLECTION_SORTS)[number];
 export const COLLECTION_LAYOUTS = ["list", "tiles"] as const;
 export type CollectionLayout = (typeof COLLECTION_LAYOUTS)[number];
 
-/** Watch = movies and series, Read = books and manga. */
-export const COLLECTION_SHELVES = ["watch", "read"] as const;
+/** Watch = movies and series, Read = books and manga, Play = games. */
+export const COLLECTION_SHELVES = ["watch", "read", "play"] as const;
 export type CollectionShelf = (typeof COLLECTION_SHELVES)[number];
 
-export const shelfOf = (item: { title: { kind: TitleKind } }): CollectionShelf => (isReadingKind(item.title.kind) ? "read" : "watch");
+export const shelfOfKind = (kind: TitleKind): CollectionShelf => (isReadingKind(kind) ? "read" : kind === "game" ? "play" : "watch");
+export const shelfOf = (item: { title: { kind: TitleKind } }): CollectionShelf => shelfOfKind(item.title.kind);
 
 export type CollectionFilter = {
   /** A calendar year in the user's time zone; null = all time. */
@@ -38,13 +40,18 @@ export type CollectionRow<T extends CollectionItem = CollectionItem> = {
   item: T;
   /** What this title adds to the header for the filter's year (all time without one). */
   watch: WatchTotals;
-  /** What a book or manga adds to the Read tab's header for the filter's year (zeros for movies and series). */
+  /** What a book or manga adds to the Read tab's header for the filter's year (zeros for everything else). */
   read: ReadTotals;
+  /** What a game adds to the Play tab's header for the filter's year (zeros for everything else). */
+  play: PlayTotals;
   /** Logged episodes of a series, all time (the "12 / 42" progress). */
   episodesLogged: number;
   /** How far a book or manga is, all time: the furthest page, chapter and volume logged. */
   reached: { page: number; chapter: number; volume: number };
-  /** Shown length: a movie's runtime, a series' watched time, or a book's or manga's reading time for the filter's year. */
+  /**
+   * Shown length: a movie's runtime, a series' watched time, a book's or manga's reading time for the filter's year, or
+   * a game's hours (the player's own, else RAWG's average).
+   */
   lengthMin: number | null;
 };
 
@@ -112,22 +119,33 @@ export function collectionRows<T extends CollectionItem>(
       pageCount: title.pageCount ?? null,
       chapterCount: title.chapterCount ?? null,
       volumeCount: title.volumeCount ?? null,
+      playtimeHours: title.playtimeHours ?? null,
     };
-    const entry = { id: item.id, titleId: id, status: item.status, finishedAt: item.finishedAt };
+    const entry = { id: item.id, titleId: id, status: item.status, finishedAt: item.finishedAt, hoursPlayed: item.hoursPlayed ?? null };
     const watch = titleWatch(stats, entry, titleLogs, range);
     const read = titleRead(stats, entry, titleReads, range);
+    const play = titlePlay(stats, entry, range);
+    const hours = item.hoursPlayed ?? title.playtimeHours ?? null;
     if (range && watch.finished === 0 && watch.episodes === 0 && read.pages + read.chapters + read.volumes === 0) continue;
     rows.push({
       item,
       watch,
       read,
+      play,
       episodesLogged: titleLogs.length,
       reached: {
         page: readingPosition(titleReads, "page"),
         chapter: readingPosition(titleReads, "chapter"),
         volume: readingPosition(titleReads, "volume"),
       },
-      lengthMin: title.kind === "movie" ? (title.runtimeMin ?? null) : isReadingKind(title.kind) ? read.minutes : watch.minutes,
+      lengthMin:
+        title.kind === "movie"
+          ? (title.runtimeMin ?? null)
+          : isReadingKind(title.kind)
+            ? read.minutes
+            : title.kind === "game"
+              ? hours && hours * 60
+              : watch.minutes,
     });
   }
   return rows;
@@ -143,6 +161,11 @@ export function summarizeRows(rows: readonly CollectionRow[]): WatchTotals {
     }),
     { minutes: 0, episodes: 0, finished: 0 },
   );
+}
+
+/** The Play tab's header: the sum of the rows' play. */
+export function summarizePlayRows(rows: readonly CollectionRow[]): PlayTotals {
+  return rows.reduce((sum, { play }) => ({ minutes: sum.minutes + play.minutes, finished: sum.finished + play.finished }), { minutes: 0, finished: 0 });
 }
 
 /** The Read tab's header: the sum of the rows' reading. */

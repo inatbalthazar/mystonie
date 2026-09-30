@@ -16,20 +16,29 @@ const nextConfig: NextConfig = {
       { source: "/ingest/:path*", destination: `${posthogHost}/:path*` },
     ];
   },
-  // The service worker (public/sw.js, ADR 0028) must never be cached, so fixes reach installed apps at once.
+  // The service worker (public/sw.js, ADR 0028) must never be cached, so fixes reach installed apps at once. Its own
+  // fetches follow this policy: it keeps posters from the catalogs' image hosts for offline use (ADR 0042).
   async headers() {
     return [
       {
         source: "/sw.js",
         headers: [
           { key: "Cache-Control", value: "no-cache, no-store, must-revalidate" },
-          { key: "Content-Security-Policy", value: "default-src 'self'; script-src 'self'" },
+          {
+            key: "Content-Security-Policy",
+            value: "default-src 'self'; script-src 'self'; connect-src 'self' https://image.tmdb.org https://s4.anilist.co https://media.rawg.io",
+          },
         ],
       },
     ];
   },
   // PostHog's API uses trailing slashes; don't redirect them away.
   skipTrailingSlashRedirect: true,
+  experimental: {
+    // Development only: React's debug info comes inside the page, as in production builds, instead of over a
+    // WebSocket that a page opened offline never gets, which stops it from hydrating (S3 offline, ADR 0042).
+    reactDebugChannel: false,
+  },
 };
 
 export default withSentryConfig(withNextIntl(nextConfig), {

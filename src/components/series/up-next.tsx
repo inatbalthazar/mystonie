@@ -6,9 +6,12 @@ import { useState } from "react";
 import type { Episode } from "@/core/catalog/types";
 import { nextEpisode } from "@/core/collection/episodes";
 import { uuidv7 } from "@/core/ids";
+import type { OpTitle } from "@/core/sync/ops";
+import { overlayEpisodes } from "@/core/sync/overlay";
 import { localDateKey } from "@/core/stats/period";
 import { Link } from "@/i18n/navigation";
-import { postEpisodes, type Logged } from "./series-episodes";
+import { send, useOverlayOps } from "../offline/outbox";
+import type { Logged } from "./series-episodes";
 
 export type UpNextSeries = {
   externalId: string;
@@ -18,31 +21,33 @@ export type UpNextSeries = {
   logs: Logged[];
 };
 
-/** "Up next" (S1 collection): the next episode of every series being watched, logged in one tap. */
-export function UpNext({ series, timeZone }: { series: UpNextSeries[]; timeZone: string }) {
+const seriesTitle = (s: UpNextSeries): OpTitle => ({ source: "tmdb", kind: "series", externalId: s.externalId, name: s.name, year: null, posterUrl: s.posterUrl });
+
+/**
+ * "Up next" (S1 collection): the next episode of every series being watched, logged in one tap. Logs go through the
+ * outbox (S3 offline), so this works offline too; the server's logs come with the page, the ones waiting on this
+ * device are laid over them.
+ */
+export function UpNext({ userId, series, timeZone }: { userId: string; series: UpNextSeries[]; timeZone: string }) {
   const t = useTranslations("Series");
   const [today] = useState(() => localDateKey(Date.now(), timeZone));
-  const [logs, setLogs] = useState(() => new Map(series.map((s) => [s.externalId, s.logs])));
   const [notice, setNotice] = useState("");
+  const ops = useOverlayOps(userId);
 
   const cards = series.flatMap((s) => {
-    const next = nextEpisode(s.episodes, logs.get(s.externalId) ?? [], today);
+    const next = nextEpisode(s.episodes, overlayEpisodes(seriesTitle(s), s.logs, ops), today);
     return next ? [{ ...s, next }] : [];
   });
   if (cards.length === 0 && !notice) return null;
 
   async function log(s: UpNextSeries, next: Episode) {
-    const before = logs.get(s.externalId) ?? [];
-    const entry = { id: uuidv7(), season: next.season, episode: next.episode, pending: true };
-    setLogs((cur) => new Map(cur).set(s.externalId, [...before, entry]));
     setNotice(t("loggedNamed", { name: s.name, season: next.season, episode: next.episode }));
-    try {
-      const result = await postEpisodes(s.externalId, [entry]);
-      setLogs((cur) => new Map(cur).set(s.externalId, result.logs));
-    } catch {
-      setLogs((cur) => new Map(cur).set(s.externalId, before));
-      setNotice(t("logError"));
-    }
+    const saved = await send(userId, {
+      type: "episodes.log",
+      title: seriesTitle(s),
+      episodes: [{ id: uuidv7(), season: next.season, episode: next.episode, runtimeMin: next.runtimeMin }],
+    });
+    if (!saved.ok) setNotice(t("logError"));
   }
 
   return (

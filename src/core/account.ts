@@ -2,6 +2,8 @@
 // mirrors a signed-in user's saved language and theme. The database stays the authority: it re-checks the
 // username format, the name blocklist and the time zone.
 
+import { isCountryCode, type CountryCode } from "./countries";
+
 export const THEMES = ["system", "light", "dark"] as const;
 export type Theme = (typeof THEMES)[number];
 export const isTheme = (v: unknown): v is Theme => (THEMES as readonly unknown[]).includes(v);
@@ -27,6 +29,7 @@ export type AccountPatch = {
   avatar_url?: null;
   locale?: string;
   time_zone?: string;
+  country?: CountryCode;
   theme?: Theme;
   visibility?: Visibility;
   email_recaps?: boolean;
@@ -34,7 +37,7 @@ export type AccountPatch = {
 
 /**
  * Validates a PATCH /api/account body: any of `username`, `displayName` (empty or null clears it),
- * `avatarUrl` (only null: remove the photo), `locale`, `timeZone`, `theme`, `visibility`, `emailRecaps`.
+ * `avatarUrl` (only null: remove the photo), `locale`, `timeZone`, `country` (ISO 3166-1, for where to watch), `theme`, `visibility`, `emailRecaps`.
  * Null when anything sent is invalid or nothing is.
  */
 export function parseAccountPatch(body: unknown, locales: readonly string[]): AccountPatch | null {
@@ -68,6 +71,10 @@ export function parseAccountPatch(body: unknown, locales: readonly string[]): Ac
   if ("timeZone" in b) {
     if (typeof b.timeZone !== "string" || !TIME_ZONE_RE.test(b.timeZone)) return null;
     patch.time_zone = b.timeZone;
+  }
+  if ("country" in b) {
+    if (!isCountryCode(b.country)) return null;
+    patch.country = b.country;
   }
   if ("theme" in b) {
     if (!isTheme(b.theme)) return null;

@@ -64,6 +64,12 @@ export function Headline({ report, period, children }: { report: StatsReport; pe
     { label: t("volumesRead"), value: reading.volumes.toLocaleString(locale), show: reading.volumes > 0 },
   ].filter((s) => s.show);
   const hasReading = reading.minutes > 0 || reading.finished > 0;
+  // Games (S3 games), once one was finished in the period: the same numbers as the Play tab's header.
+  const { play } = report;
+  const played = [
+    { label: t("playTime"), value: runtime(play.minutes) },
+    { label: t("gamesFinished"), value: play.finished.toLocaleString(locale) },
+  ];
   return (
     <PaperCard className="flex flex-col gap-4">
       <p className="font-hand text-2xl leading-none text-muted-foreground">{t("headline", { period })}</p>
@@ -74,6 +80,12 @@ export function Headline({ report, period, children }: { report: StatsReport; pe
           <p className="text-xs text-muted-foreground">{t("readingHint")}</p>
         </div>
       )}
+      {play.finished > 0 && (
+        <div className="flex flex-col gap-2 border-t-2 border-dashed border-border pt-4">
+          <Figures stats={played} />
+          <p className="text-xs text-muted-foreground">{t("playHint")}</p>
+        </div>
+      )}
       {report.card ? children : <p className="text-sm text-muted-foreground">{t("emptyPeriod")}</p>}
     </PaperCard>
   );
@@ -81,7 +93,12 @@ export function Headline({ report, period, children }: { report: StatsReport; pe
 
 function Figures({ stats }: { stats: { label: string; value: string }[] }) {
   return (
-    <dl className={cn("grid divide-x-2 divide-dashed divide-border", stats.length > 3 ? "grid-cols-2 gap-y-3 sm:grid-cols-4" : "grid-cols-3")}>
+    <dl
+      className={cn(
+        "grid divide-x-2 divide-dashed divide-border",
+        stats.length > 3 ? "grid-cols-2 gap-y-3 sm:grid-cols-4" : stats.length === 2 ? "grid-cols-2" : "grid-cols-3",
+      )}
+    >
       {stats.map((s) => (
         <div key={s.label} className="flex min-w-0 flex-col gap-1 px-2 first:pl-0 last:pr-0">
           <dt className="text-[11px] leading-tight font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">{s.label}</dt>
@@ -178,17 +195,21 @@ function RankedList({ title, items, name }: { title: string; items: Ranked[]; na
   );
 }
 
-/** Movies vs series vs books & manga (watching vs reading time), top genres and top original languages in the period. */
+/**
+ * Movies vs series vs books & manga vs games (watching, reading and play time), top genres and top original languages
+ * in the period.
+ */
 export function Taste({ report }: { report: StatsReport }) {
   const t = useTranslations("Stats");
   const locale = useLocale();
   const runtime = useRuntime();
-  const { movie, series, reading } = report.split;
-  const total = movie.minutes + series.minutes + reading.minutes;
+  const { movie, series, reading, play } = report.split;
+  const total = movie.minutes + series.minutes + reading.minutes + play.minutes;
   const kinds = [
     [t("movies"), movie, "bg-chart-1"],
     [t("series"), series, "bg-chart-3"],
     ...(reading.minutes > 0 || reading.finished > 0 ? [[t("reading"), reading, "bg-chart-4"] as const] : []),
+    ...(play.minutes > 0 || play.finished > 0 ? [[t("games"), play, "bg-chart-2"] as const] : []),
   ] as const;
   const languages = (() => {
     try {

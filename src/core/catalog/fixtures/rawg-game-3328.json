@@ -1,0 +1,149 @@
+{
+  "id": 3328,
+  "slug": "the-witcher-3-wild-hunt",
+  "name": "The Witcher 3: Wild Hunt",
+  "name_original": "The Witcher 3: Wild Hunt",
+  "released": "2015-05-18",
+  "tba": false,
+  "background_image": "https://media.rawg.io/media/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg",
+  "background_image_additional": "https://media.rawg.io/media/screenshots/3e4/3e4576a772b3df47bfc52b86e4cf7e03.jpg",
+  "website": "https://thewitcher.com/en/witcher3",
+  "rating": 4.64,
+  "rating_top": 5,
+  "metacritic": 92,
+  "playtime": 43,
+  "added": 22371,
+  "updated": "2026-09-29T05:08:41",
+  "esrb_rating": {
+    "id": 4,
+    "name": "Mature",
+    "slug": "mature"
+  },
+  "alternative_names": [
+    "Wiedźmin 3: Dziki Gon",
+    "Ведьмак 3",
+    "Ведьмак 3: Дикая Охота"
+  ],
+  "description_raw": "The third game in a series, it holds nothing back from the player. Open world adventures of the renowned monster slayer Geralt of Rivia are now even on a larger",
+  "genres": [
+    {
+      "id": 4,
+      "name": "Action",
+      "slug": "action"
+    },
+    {
+      "id": 5,
+      "name": "RPG",
+      "slug": "role-playing-games-rpg"
+    }
+  ],
+  "developers": [
+    {
+      "id": 9023,
+      "name": "CD PROJEKT RED",
+      "slug": "cd-projekt-red"
+    }
+  ],
+  "publishers": [
+    {
+      "id": 7411,
+      "name": "CD PROJEKT RED",
+      "slug": "cd-projekt-red"
+    }
+  ],
+  "tags": [
+    {
+      "id": 31,
+      "name": "Singleplayer",
+      "slug": "singleplayer",
+      "language": "eng",
+      "games_count": 252230
+    },
+    {
+      "id": 40836,
+      "name": "Full controller support",
+      "slug": "full-controller-support",
+      "language": "eng",
+      "games_count": 24413
+    },
+    {
+      "id": 13,
+      "name": "Atmospheric",
+      "slug": "atmospheric",
+      "language": "eng",
+      "games_count": 40076
+    },
+    {
+      "id": 42,
+      "name": "Great Soundtrack",
+      "slug": "great-soundtrack",
+      "language": "eng",
+      "games_count": 3450
+    },
+    {
+      "id": 24,
+      "name": "RPG",
+      "slug": "rpg",
+      "language": "eng",
+      "games_count": 26899
+    },
+    {
+      "id": 118,
+      "name": "Story Rich",
+      "slug": "story-rich",
+      "language": "eng",
+      "games_count": 27502
+    },
+    {
+      "id": 36,
+      "name": "Open World",
+      "slug": "open-world",
+      "language": "eng",
+      "games_count": 9346
+    },
+    {
+      "id": 149,
+      "name": "Third Person",
+      "slug": "third-person",
+      "language": "eng",
+      "games_count": 14837
+    }
+  ],
+  "parent_platforms": [
+    {
+      "platform": {
+        "id": 1,
+        "name": "PC",
+        "slug": "pc"
+      }
+    },
+    {
+      "platform": {
+        "id": 2,
+        "name": "PlayStation",
+        "slug": "playstation"
+      }
+    },
+    {
+      "platform": {
+        "id": 3,
+        "name": "Xbox",
+        "slug": "xbox"
+      }
+    },
+    {
+      "platform": {
+        "id": 5,
+        "name": "Apple Macintosh",
+        "slug": "mac"
+      }
+    },
+    {
+      "platform": {
+        "id": 7,
+        "name": "Nintendo",
+        "slug": "nintendo"
+      }
+    }
+  ]
+}

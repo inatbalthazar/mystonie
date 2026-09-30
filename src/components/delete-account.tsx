@@ -3,6 +3,7 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { clearOfflineData } from "./offline/offline-data";
 
 type Status = "idle" | "confirm" | "deleting" | "done" | "error";
 
@@ -15,6 +16,8 @@ export function DeleteAccount() {
     setStatus("deleting");
     try {
       const res = await fetch("/api/account", { method: "DELETE" });
+      // Nothing of the account stays on this device either (S3 offline).
+      if (res.ok) await clearOfflineData().catch(() => {});
       setStatus(res.ok ? "done" : "error");
     } catch {
       setStatus("error");

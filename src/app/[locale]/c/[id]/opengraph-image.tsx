@@ -2,9 +2,9 @@ import { readFile } from "node:fs/promises";
 import { join } from "node:path";
 import { createTranslator } from "next-intl";
 import { ImageResponse } from "next/og";
-import { isLatinSafe, watchMinutes } from "@/core/cards/text";
+import { finishedKey, gameHours, isLatinSafe, watchMinutes } from "@/core/cards/text";
 import { formatRuntime } from "@/core/format/runtime";
-import { recapFigures } from "@/core/stats/recap";
+import { recapFigures, wholeMonth } from "@/core/stats/recap";
 import en from "../../../../../messages/en.json";
 import { siteUrl } from "@/lib/site";
 import { loadCard } from "./load";
@@ -47,7 +47,13 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
   const recap = data?.recap;
   const headline = !data
     ? en.Metadata.title
-    : recap
+    : data.survived
+      ? t("survivedHeadline", { scare: data.survived })
+    : data.milestone
+      ? t("milestoneHeadline", { ...data.milestone, count: data.milestone.value.toLocaleString("en") })
+      : recap?.imported
+      ? t("importHeadline", { count: recap.finished })
+      : recap
       ? t("recapHeadline", { period: recap.period ?? "week" })
       : data.reading
         ? data.reading.milestone
@@ -57,17 +63,21 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
           ? data.progress.milestone
             ? t("milestone", { milestone: data.progress.milestone })
             : t("episodeCode", { season: data.progress.season, episode: data.progress.episode })
-          : data.kind === "book" || data.kind === "manga"
-            ? t("finishedRead")
-            : t("finished");
+          : t(finishedKey(data.kind));
   const day = (key: string) => new Date(`${key}T00:00:00Z`);
-  const name = recap
-    ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" }).formatRange(day(recap.from), day(recap.to))
-    : data && isLatinSafe(data.name)
-      ? data.name
-      : null;
-  const minutes = data ? (data.reading ? data.reading.readMin : data.progress ? data.progress.watchedMin : watchMinutes(data)) : null;
-  const facts = recap
+  const month = recap && wholeMonth(recap);
+  const name = month
+    ? new Intl.DateTimeFormat("en", { month: "long", year: "numeric", timeZone: "UTC" }).format(day(`${month}-01`))
+    : recap
+      ? new Intl.DateTimeFormat("en", { month: "short", day: "numeric", timeZone: "UTC" }).formatRange(day(recap.from), day(recap.to))
+      : data && isLatinSafe(data.name)
+        ? data.name
+        : null;
+  const game = data && gameHours(data);
+  const minutes = data ? (data.reading ? data.reading.readMin : data.progress ? data.progress.watchedMin : game ? game.hours * 60 : watchMinutes(data)) : null;
+  const facts = data?.milestone
+    ? [`${data.milestone.value.toLocaleString("en")} ${t("milestoneLabel", { metric: data.milestone.metric })}`]
+    : recap
     ? recapFigures(recap, { time: hidden.has("time"), episodes: hidden.has("episodes") }).map(({ key, value }) =>
         key === "finished"
           ? `${value} ${t("titlesFinished", { count: value })}`

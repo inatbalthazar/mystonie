@@ -1,6 +1,6 @@
 # F15 · Crowdsourcing quiz
 
-> **Status: LATER (gated).** Not part of the current plan. See [later/README.md](README.md) for the gate. Written before the global, solo-sized plan: re-check against AGENTS.md before building.
+> **Status: BUILT in stage 3, without Gems,** as [S3 warnings & quiz](../features/S3-warnings-quiz.md) ([ADR 0043](../../decisions/0043-scene-warnings-and-quiz.md)). That spec is the source of truth: the quiz rewards nothing (the Gem economy stays gated), so the daily earning cap and the ledger are left out; waiting scene warnings are asked first (the answer is a vote on them); the 10-answer rule, the 1.5 s speed rule and the one-hour pause are as below. Kept for history.
 
 **Phase:** M4 · **Priority:** Core (feeds [F05](crowdsourced-warnings.md) data quality)
 

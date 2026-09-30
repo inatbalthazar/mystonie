@@ -9,7 +9,8 @@ import { readLogs } from "./reading";
 import type { StatsReadingLog } from "@/core/stats/reading";
 import type { UserClient } from "./supabase-server";
 
-const TITLE_COLUMNS = "id, source, kind, name, poster_path, genres, original_language, runtime_min, episode_count, page_count, chapter_count, volume_count";
+const TITLE_COLUMNS =
+  "id, source, kind, name, poster_path, genres, original_language, runtime_min, episode_count, page_count, chapter_count, volume_count, playtime_hours";
 
 type TitleRow = Pick<
   Database["public"]["Tables"]["titles"]["Row"],
@@ -25,6 +26,7 @@ type TitleRow = Pick<
   | "page_count"
   | "chapter_count"
   | "volume_count"
+  | "playtime_hours"
 >;
 
 function titleFromRow(row: TitleRow): ReportTitle {
@@ -40,6 +42,7 @@ function titleFromRow(row: TitleRow): ReportTitle {
     pageCount: row.page_count,
     chapterCount: row.chapter_count,
     volumeCount: row.volume_count,
+    playtimeHours: row.playtime_hours,
   };
 }
 
@@ -50,7 +53,7 @@ export async function statsRows(db: UserClient, userId: string): Promise<StatsRo
   const [{ data, error }, logs, reads] = await Promise.all([
     db
       .from("entries")
-      .select(`id, title_id, status, finished_at, title:titles!inner(${TITLE_COLUMNS})`)
+      .select(`id, title_id, status, finished_at, hours_played, title:titles!inner(${TITLE_COLUMNS})`)
       .eq("user_id", userId)
       .is("deleted_at", null)
       .limit(5000),
@@ -62,7 +65,7 @@ export async function statsRows(db: UserClient, userId: string): Promise<StatsRo
   const titles = new Map<string, ReportTitle>();
   const entries: StatsEntry[] = data.map((row) => {
     titles.set(row.title_id, titleFromRow(row.title));
-    return { id: row.id, titleId: row.title_id, status: row.status as StatsEntry["status"], finishedAt: row.finished_at };
+    return { id: row.id, titleId: row.title_id, status: row.status as StatsEntry["status"], finishedAt: row.finished_at, hoursPlayed: row.hours_played };
   });
   // Episodes logged on a series without a live entry still count, as in the collection summary.
   const missing = [...new Set([...logs, ...reads].map((l) => l.titleId))].filter((id) => !titles.has(id));

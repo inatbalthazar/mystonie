@@ -8,7 +8,17 @@ import { CARD_FIXTURES } from "./fixtures";
 import { templatesFor } from "@/core/cards/templates";
 import type { TemplateId } from "./registry";
 import { usePosterPalette } from "./use-poster-palette";
-import type { CardData } from "@/core/cards/types";
+import type { CardData, CardKind } from "@/core/cards/types";
+
+/** Which card a fixture is: its template list comes from the card kind. */
+function labKind(data: CardData): CardKind {
+  if (data.milestone) return "milestone";
+  if (data.challenge) return "challenge";
+  if (data.recap?.highlights) return "year_review";
+  if (data.recap?.period === "month") return "monthly_recap";
+  if (data.recap) return "weekly_recap";
+  return data.progress || data.reading ? "progress" : "finish";
+}
 
 /** Dev-only grid of every template × size × fixture (screenshot tests run against it). */
 export function CardLab({ host }: { host: string }) {
@@ -35,7 +45,7 @@ export function CardLab({ host }: { host: string }) {
         <section key={f.id} className="flex flex-col gap-2">
           <h2 className="font-mono text-sm">{f.id}</h2>
           <div className="flex flex-wrap items-start gap-4">
-            {[...templatesFor(f.data.recap ? "weekly_recap" : f.data.progress ? "progress" : "finish"), ...templatesFor("sticker")].flatMap((id) =>
+            {[...templatesFor(labKind(f.data), f.data.kind, { survived: !!f.data.survived }), ...templatesFor("sticker", f.data.kind)].flatMap((id) =>
               (Object.keys(CARD_DIMENSIONS) as CardSize[]).map((size) => (
                 <div key={`${id}-${size}`} data-testid={`${f.id}.${id}.${size}`} className="w-[216px]">
                   <LabCard template={id} size={size} data={f.data} host={host} />

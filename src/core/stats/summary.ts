@@ -17,6 +17,8 @@ export type StatsTitle = {
   pageCount?: number | null;
   chapterCount?: number | null;
   volumeCount?: number | null;
+  /** Games: RAWG's average playtime, hours (play totals, `titlePlay`). */
+  playtimeHours?: number | null;
 };
 
 export type StatsEntry = {
@@ -25,6 +27,8 @@ export type StatsEntry = {
   status: EntryStatus;
   finishedAt: string | null;
   deletedAt?: string | null;
+  /** A game: the hours the player gave (play totals, `titlePlay`). */
+  hoursPlayed?: number | null;
 };
 
 export type StatsEpisodeLog = {
@@ -51,7 +55,8 @@ const live = <T extends { deletedAt?: string | null }>(row: T) => !row.deletedAt
 /**
  * What one title adds to the totals. Only finished entries and logged episodes count (S1 collection):
  * - a movie counts its runtime when it was finished in the range;
- * - a book or manga counts as finished, with no watch time (its reading is `titleRead`'s);
+ * - a book or manga counts as finished, with no watch time (its reading is `titleRead`'s), and so does a game (its
+ *   play time is `titlePlay`'s);
  * - a series counts its logged episodes in the range. A series marked finished without any logged
  *   episodes counts all its episodes (runtime × episode count) on its finish date, as its Finish card does.
  * `logs` are this title's episode logs (any range; deleted ones are ignored).

@@ -1,15 +1,25 @@
 // Account data outside RLS (service role). Server only.
 import { deleteCardImages } from "./cards";
+import { cancelSubscriptionNow, stripeConfig } from "./stripe";
+import { liveSubscriptionIds } from "./subscriptions";
 import { adminClient } from "./supabase-admin";
 import { publicSupabaseEnv } from "./supabase-server";
 
 /**
  * Deletes the auth user; `profiles` (and every user table after it) cascades from `auth.users`.
  * Also removes the user's shared card images and a waitlist row with the same email, so no personal data is left behind (GDPR/PDPA/CCPA).
+ * A Pro subscription is cancelled at Stripe first: otherwise it would keep charging an account that's gone.
  */
 export async function deleteAccount(userId: string, email: string | undefined): Promise<void> {
   const db = adminClient();
   if (!db) throw new Error("Supabase is not configured");
+  // Before anything is deleted: if Stripe can't be reached, the account stays and the user can try again.
+  const stripe = stripeConfig();
+  const subscriptions = await liveSubscriptionIds(userId);
+  if (subscriptions.length > 0) {
+    if (!stripe) throw new Error("live Stripe subscriptions but Pro is switched off");
+    for (const id of subscriptions) await cancelSubscriptionNow(stripe, id);
+  }
   // Shared card PNGs sit in a public bucket; the rows cascade, the files don't.
   await deleteCardImages(userId).catch((error) => console.error("card image cleanup after account deletion failed", error));
   const { error } = await db.auth.admin.deleteUser(userId);

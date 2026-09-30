@@ -1,6 +1,6 @@
 // Collection entries: validation of quick-add / edit requests, the finish date, and list order
 // (S1 collection, ADR 0021). Shared by the route handlers (authoritative) and the optimistic UI.
-import { isExternalId, sourceForKind, type CatalogSource, type TitleKind } from "../catalog/types";
+import { isExternalId, isTitleKind, sourceForKind, type CatalogSource, type TitleKind } from "../catalog/types";
 import { isUuidV7 } from "../ids";
 import { localDateKey, safeTimeZone, startOfLocalDay } from "../stats/period";
 
@@ -29,6 +29,8 @@ export type CollectionTitle = {
   pageCount?: number | null;
   chapterCount?: number | null;
   volumeCount?: number | null;
+  /** Games: RAWG's average playtime, hours. */
+  playtimeHours?: number | null;
 };
 
 export type CollectionItem = {
@@ -40,6 +42,10 @@ export type CollectionItem = {
   /** 0.5–5 in half steps, and the one-line review (asked after the celebration). */
   rating?: number | null;
   review?: string | null;
+  /** A game: the hours the player says it took (asked after the celebration too). */
+  hoursPlayed?: number | null;
+  /** "Finisher #N": set by the database the first time the user finishes the title, and kept for good. */
+  finisherNo?: number | null;
   title: CollectionTitle;
 };
 
@@ -63,6 +69,17 @@ function validFinishedAt(value: unknown, now: number): string | null {
   const t = Date.parse(value);
   if (Number.isNaN(t) || t < EARLIEST || t > now + MAX_AHEAD_MS) return null;
   return new Date(t).toISOString();
+}
+
+/**
+ * When the user made a change, by the device's clock (`editedAt`, `watchedAt`, `readAt`). A change made offline reaches
+ * the server later but keeps its own time (S3 offline, ADR 0042). Missing means now; a time a little ahead (clock drift)
+ * is clamped to now; null for anything else.
+ */
+export function actionTime(value: unknown, now: number = Date.now()): string | null {
+  if (value === undefined || value === null) return new Date(now).toISOString();
+  const valid = validFinishedAt(value, now);
+  return valid && new Date(Math.min(Date.parse(valid), now)).toISOString();
 }
 
 /**
@@ -93,6 +110,8 @@ export type NewEntry = {
   title: Pick<CollectionTitle, "source" | "kind" | "externalId">;
   status: EntryStatus;
   finishedAt: string | null;
+  /** When the user made the change (`actionTime`): an older change doesn't replace a newer one. */
+  editedAt: string;
 };
 
 const isObject = (v: unknown): v is Record<string, unknown> => typeof v === "object" && v !== null && !Array.isArray(v);
@@ -103,48 +122,68 @@ export function parseNewEntry(body: unknown, now: number = Date.now()): NewEntry
   const { id, status, finishedAt } = body;
   const { source, kind, externalId } = body.title;
   if (typeof id !== "string" || !isUuidV7(id) || !isEntryStatus(status)) return null;
-  if (kind !== "movie" && kind !== "series" && kind !== "book" && kind !== "manga") return null;
-  if (source !== sourceForKind(kind) || !isExternalId(kind, externalId)) return null;
+  if (!isTitleKind(kind) || source !== sourceForKind(kind) || !isExternalId(kind, externalId)) return null;
+  const editedAt = actionTime(body.editedAt, now);
+  if (!editedAt) return null;
   let date: string | null = null;
   if (finishedAt !== undefined && finishedAt !== null) {
     date = validFinishedAt(finishedAt, now);
     if (!date) return null;
   }
-  return { id, title: { source: sourceForKind(kind), kind, externalId }, ...statusColumns(status, date, now) };
+  return { id, title: { source: sourceForKind(kind), kind, externalId }, ...statusColumns(status, date, Date.parse(editedAt)), editedAt };
 }
 
-export type EntryNotes = { rating: number | null; review: string | null };
+/**
+ * What's asked after the celebration: the rating and review, and for a game the hours played (absent: left as it is).
+ */
+export type EntryNotes = { rating: number | null; review: string | null; hoursPlayed?: number | null };
 
-export type EntryPatch =
+/** Most hours a game's entry takes (the database's limit). */
+export const MAX_HOURS_PLAYED = 9999;
+
+/** Whether `v` is an hours-played value: a whole number of hours, 1–9999. */
+export const isHoursPlayed = (v: unknown): v is number => typeof v === "number" && Number.isInteger(v) && v >= 1 && v <= MAX_HOURS_PLAYED;
+
+export type EntryPatch = (
   | { deleted: true }
   | { deleted?: false; status: EntryStatus; finishedAt: string | null }
-  | { deleted?: false; notes: EntryNotes };
+  | { deleted?: false; notes: EntryNotes }
+) & {
+  /** When the user made the change (`actionTime`): an older change doesn't replace a newer one. */
+  editedAt: string;
+};
 
 /** Longest review the database accepts (characters). The card prints at most `REVIEW_MAX_CHARS` of it. */
 export const ENTRY_REVIEW_MAX = 280;
 
-/** `{ rating, review }` from the celebration: a half-step rating or null, a trimmed review or null. */
+/**
+ * `{ rating, review, hoursPlayed? }` from the celebration: a half-step rating or null, a trimmed review or null, and
+ * optionally whole hours played (1–9999) or null.
+ */
 function parseNotes(body: Record<string, unknown>): EntryNotes | null {
-  const { rating, review } = body;
+  const { rating, review, hoursPlayed } = body;
   if (rating !== null && !(typeof rating === "number" && rating >= 0.5 && rating <= 5 && Number.isInteger(rating * 2))) {
     return null;
   }
   if (review !== null && typeof review !== "string") return null;
   const text = review?.replace(/\s+/g, " ").trim() || null;
   if (text && [...text].length > ENTRY_REVIEW_MAX) return null;
-  return { rating, review: text };
+  if (hoursPlayed !== undefined && hoursPlayed !== null && !isHoursPlayed(hoursPlayed)) return null;
+  return { rating, review: text, ...(hoursPlayed === undefined ? {} : { hoursPlayed }) };
 }
 
 /**
- * PATCH /api/entries/[id] body: `{ status, finishedAt? }`, `{ rating, review }` (both, null clears) or
- * `{ deleted: true }` (soft delete).
+ * PATCH /api/entries/[id] body: `{ status, finishedAt? }`, `{ rating, review, hoursPlayed? }` (null clears) or
+ * `{ deleted: true }` (soft delete), each with an optional `editedAt` (when the change was made, default now).
  */
 export function parseEntryPatch(body: unknown, now: number = Date.now()): EntryPatch | null {
   if (!isObject(body)) return null;
-  if (body.deleted === true) return { deleted: true };
+  const editedAt = actionTime(body.editedAt, now);
+  if (!editedAt) return null;
+  if (body.deleted === true) return { deleted: true, editedAt };
   if (body.status === undefined && "rating" in body && "review" in body) {
     const notes = parseNotes(body);
-    return notes && { notes };
+    return notes && { notes, editedAt };
   }
   if (!isEntryStatus(body.status)) return null;
   let date: string | null = null;
@@ -152,5 +191,5 @@ export function parseEntryPatch(body: unknown, now: number = Date.now()): EntryP
     date = validFinishedAt(body.finishedAt, now);
     if (!date) return null;
   }
-  return statusColumns(body.status, date, now);
+  return { ...statusColumns(body.status, date, Date.parse(editedAt)), editedAt };
 }

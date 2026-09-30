@@ -20,6 +20,12 @@ UI decides whether people adopt Mystonie, and the share artwork decides whether 
 | **Ticket** | cinema ticket stub with perforation, seat/row replaced by stats | movies |
 | **Polaroid** | poster in a polaroid frame, handwritten-style review | anything |
 | **Bold Stats** | Strava-like: huge numbers, minimal poster crop | series, recaps |
+| **Spine** (stage 2) | a book spine on a shelf, cover facing out, stamp or bookmark | books, manga |
+| **Manga Panel** (stage 2) | ink panels on paper, speech bubble, screentone, focus lines | manga |
+| **Stone** (stage 2) | the number carved into Stonie's tablet, the title that got there pasted below | milestones |
+| **Yearbook** (stage 2) | the year in huge type, the top posters pasted across, three standouts | Year in Review |
+| **Film Strip** (stage 2, Pro) | the poster as a frame of 35 mm film taped into the album, with a paper label | movies, series |
+| **Survived** (stage 2) | a stitched "I SURVIVED" merit patch with the scare's emoji, sewn next to the taped-in poster; offered only when DTDD says the title has a fun scare ([ADR 0035](../decisions/0035-content-warnings-cache-and-survived.md)) | scary movies and series |
 
 Sizes: 9:16 (Stories/TikTok) and 4:5 (feed). Footer: `mystonie · @username` + short link. No QR.
 

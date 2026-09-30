@@ -1,0 +1,60 @@
+{
+  "items": [
+    {
+      "id": 15713,
+      "name": "John Wick",
+      "cleanName": "john wick",
+      "releaseYear": "2014",
+      "ItemTypeId": 15,
+      "tmdbid": 245891,
+      "imdbId": "tt2911666",
+      "posterImage": "wXqWR7dHncNRbxoEGybEy7QTe9h.jpg",
+      "itemType": {
+        "id": 15,
+        "name": "Movie"
+      }
+    },
+    {
+      "id": 22955,
+      "name": "John Wick: Chapter 4",
+      "cleanName": "john wick iv",
+      "releaseYear": "2023",
+      "ItemTypeId": 15,
+      "tmdbid": 603692,
+      "imdbId": "tt10366206",
+      "posterImage": "vZloFAK7NmvMGKE7VkF5UHaz0I.jpg",
+      "itemType": {
+        "id": 15,
+        "name": "Movie"
+      }
+    },
+    {
+      "id": 22348,
+      "name": "John Wick: Chapter 3 - Parabellum",
+      "cleanName": "john wick iiiparabellum",
+      "releaseYear": "2019",
+      "ItemTypeId": 15,
+      "tmdbid": 458156,
+      "imdbId": "tt6146586",
+      "posterImage": "ziEuG1essDuWuC5lpWUaw1uXY2O.jpg",
+      "itemType": {
+        "id": 15,
+        "name": "Movie"
+      }
+    },
+    {
+      "id": 1652075,
+      "name": "The Continental: From the World of John Wick",
+      "cleanName": "continental from world john wick",
+      "releaseYear": "2023",
+      "ItemTypeId": 16,
+      "tmdbid": 72710,
+      "imdbId": null,
+      "posterImage": "2urdwqEL9FRkGMKAkhfvWTALG00.jpg",
+      "itemType": {
+        "id": 16,
+        "name": "TV Show"
+      }
+    }
+  ]
+}

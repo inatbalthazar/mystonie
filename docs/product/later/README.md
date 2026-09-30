@@ -1,18 +1,18 @@
 # Later: gated features
 
-**Do not build these until their gate in the [roadmap](../../roadmap.md#expansion-gates) is met and the owner says go.** They are kept as designs so nothing from the original idea is lost. Some details (e.g. Thai-market specifics, Supabase Edge Functions as the only server runtime) predate the global, solo-sized plan. Re-check them against [AGENTS.md](../../../AGENTS.md) before implementing.
+**Most of these are now approved to build before launch** ([ADR 0036](../../decisions/0036-expansion-features-before-launch.md)): they are tasks in [roadmap stage 3](../../roadmap.md#stage-3-the-community-album-before-launch), built in that order, and each task moves its spec into `product/features/`. The rest (ads, affiliate links, merch, Gems and the wheel, the AI assistant, the native app, travel) still need the owner's go ([still gated](../../roadmap.md#still-gated-owners-go-needed)). The gates below were the old plan. They are kept as designs so nothing from the original idea is lost. Some details (e.g. Thai-market specifics, Supabase Edge Functions as the only server runtime) predate the global, solo-sized plan. Re-check them against [AGENTS.md](../../../AGENTS.md) before implementing.
 
 | Spec | Gate (summary) |
 |---|---|
 | [social-feed.md](social-feed.md): follows, feed, Kudos ("Stamp") | WAU ≥ 1,000 + user demand |
-| Trending from our own data, numbered "Finisher #N" stamps, friend leaderboards | ≥ 200 logs/week on a popular title |
-| Monthly challenges, fandom clubs | WAU ≥ 2,000 |
+| Trending from our own data, numbered "Finisher #N" stamps, friend leaderboards: **built in stage 3** as [S3 finishers & the board](../features/S3-finishers-board.md) | ≥ 200 logs/week on a popular title |
+| Monthly challenges, fandom clubs: **built in stage 3** as [S3 challenges & clubs](../features/S3-challenges-clubs.md) | WAU ≥ 2,000 |
 | Native app (Expo), widgets, direct IG Stories share | WAU ≥ 3,000 or web sharing friction |
-| Games (RAWG + HowLongToBeat via cached server job, see [ADR 0005](../../decisions/0005-hltb-via-edge-function-cache.md)) | Top request in feature vote |
-| [crowdsourced-warnings.md](crowdsourced-warnings.md) + [quiz.md](quiz.md): our own timestamped warnings + quiz | MAU ≥ 5,000 or DTDD data insufficient |
-| [offline-first.md](offline-first.md) | Users complain about logging offline |
+| Games: **built in stage 3** as [S3 games](../features/S3-games.md) from RAWG ([ADR 0044](../../decisions/0044-games-rawg.md)); HowLongToBeat waits for the owner's approval | Top request in feature vote |
+| Our own timestamped warnings + the quiz ([crowdsourced-warnings.md](crowdsourced-warnings.md), [quiz.md](quiz.md)): **built in stage 3** as [S3 warnings & quiz](../features/S3-warnings-quiz.md), without Gems | MAU ≥ 5,000 or DTDD data insufficient |
+| Offline-first ([offline-first.md](offline-first.md)): **built in stage 3** as [S3 offline](../features/S3-offline.md) | Users complain about logging offline |
 | [badges-and-shelf.md](badges-and-shelf.md) | After social feed |
-| [import-export-full.md](import-export-full.md): Goodreads, MAL, TV Time | After books/manga |
+| Goodreads, MyAnimeList, TV Time imports and the CSV export: **built in stage 3** as [S3 import & export](../features/S3-import-export.md) | After books/manga |
 | [gem-wallet.md](gem-wallet.md), [lucky-wheel.md](lucky-wheel.md), [merch-store.md](merch-store.md) | MAU ≥ 20,000 + stable revenue |
 | [native-ads.md](native-ads.md), [affiliate-links.md](affiliate-links.md) | MAU ≥ 20,000 |
 | [ai-assistant.md](ai-assistant.md): help chat / natural-language search | MAU ≥ 20,000 |

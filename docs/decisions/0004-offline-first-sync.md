@@ -1,6 +1,6 @@
 # ADR 0004: Offline-first with a local store + outbox, last-write-wins
 
-**Status:** Deferred. The data rules (UUID v7, server `updated_at`, soft delete) apply from day one; the sync engine is gated · **Date:** 2026-09-23
+**Status:** Superseded by [ADR 0042](0042-offline-first.md) (built in stage 3 without a local copy of the database; the later change wins by device time, not by arrival). The data rules (UUID v7, server `updated_at`, soft delete) still apply · **Date:** 2026-09-23
 
 ## Context
 Users log entries without connectivity (planes, handheld gaming). The app must accept writes offline and sync later, on web now and on Expo later.

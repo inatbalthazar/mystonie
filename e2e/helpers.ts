@@ -63,13 +63,24 @@ export type SeedReadingTitle = {
   volumeCount?: number | null;
 };
 
-/** Caches titles in the local `titles` table, so adding them never needs TMDB. */
-export async function seedTitles(request: APIRequestContext, titles: (SeedTitle | SeedReadingTitle)[]): Promise<void> {
+/** A game (RAWG) to cache; `posterPath` is a RAWG media path (`games/…/….jpg`). */
+export type SeedGameTitle = {
+  kind: "game";
+  externalId: string;
+  name: string;
+  year: number;
+  posterPath: string | null;
+  playtimeHours: number | null;
+  platforms: string[];
+};
+
+/** Caches titles in the local `titles` table, so adding them never needs TMDB (or the other catalogs). */
+export async function seedTitles(request: APIRequestContext, titles: (SeedTitle | SeedReadingTitle | SeedGameTitle)[]): Promise<void> {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
   const res = await request.post(`${process.env.NEXT_PUBLIC_SUPABASE_URL}/rest/v1/titles?on_conflict=source,kind,external_id`, {
     headers: { apikey: key, Authorization: `Bearer ${key}`, Prefer: "resolution=merge-duplicates" },
     data: titles.map((t) => ({
-      source: t.kind === "book" ? "google_books" : t.kind === "manga" ? "anilist" : "tmdb",
+      source: t.kind === "book" ? "google_books" : t.kind === "manga" ? "anilist" : t.kind === "game" ? "rawg" : "tmdb",
       kind: t.kind,
       external_id: t.externalId,
       name: t.name,
@@ -79,6 +90,8 @@ export async function seedTitles(request: APIRequestContext, titles: (SeedTitle 
       page_count: "pageCount" in t ? (t.pageCount ?? null) : null,
       chapter_count: "chapterCount" in t ? (t.chapterCount ?? null) : null,
       volume_count: "volumeCount" in t ? (t.volumeCount ?? null) : null,
+      playtime_hours: "playtimeHours" in t ? t.playtimeHours : null,
+      platforms: "platforms" in t ? t.platforms : [],
       fetched_at: new Date().toISOString(),
     })),
   });
