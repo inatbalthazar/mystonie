@@ -207,7 +207,7 @@
       },
       "account": {
         "title": "Your account",
-        "body": "If you create an account, we store your email address, a username (made from your name or email; you can change it), the language and time zone you signed up with, and, if you sign in with Google, the name and profile picture Google shares with us. Sign-in happens through Supabase Auth: we never see or store a password, and each sign-in code is emailed to you and works once. We use this to run your account and to send you sign-in codes. Your page: while your collection is public (the default), anyone with its link can see your display name, username, profile picture, bio, the cards you shared, your collection totals and what you're watching. You can make it private in Settings; cards you shared stay viewable by their link. Totals across everyone include private collections, but never who: how many people finished a title (and the finisher number you got for it) and what's trending on Mystonie, which lists a title only once at least 3 people logged it that week. The same goes for how many people are in a fandom club or joined a monthly challenge, and what a club's members are on lately. While your collection is public, the clubs you joined and the challenges you completed show on your page, and your finishes of titles that fit a club you joined show on that club's page. While you're signed in, a small cookie remembers your chosen language and theme, and it's removed when you sign out. You can download all your data as a file in Settings (Export my data), and your collection as spreadsheets that import back into Mystonie (Export as CSV). You can delete your account at any time in Settings, which immediately removes your profile and everything you've logged."
+        "body": "If you create an account, we store your email address, a username (made from your name or email; you can change it), the language and time zone you signed up with, and, if you sign in with Google or Facebook, the name and profile picture it shares with us. Profile photo: we keep a copy of that picture, or a photo you upload in Settings, in our storage, cropped and resized to 320 pixels; you can change or remove it in Settings at any time, and it is deleted with your account. Sign-in happens through Supabase Auth: we never see or store a password, and each sign-in code is emailed to you and works once. We use this to run your account and to send you sign-in codes. Your page: while your collection is public (the default), anyone with its link can see your display name, username, profile picture, bio, the cards you shared, your collection totals and what you're watching. You can make it private in Settings; cards you shared stay viewable by their link. Totals across everyone include private collections, but never who: how many people finished a title (and the finisher number you got for it) and what's trending on Mystonie, which lists a title only once at least 3 people logged it that week. The same goes for how many people are in a fandom club or joined a monthly challenge, and what a club's members are on lately. While your collection is public, the clubs you joined and the challenges you completed show on your page, and your finishes of titles that fit a club you joined show on that club's page. While you're signed in, a small cookie remembers your chosen language and theme, and it's removed when you sign out. You can download all your data as a file in Settings (Export my data), and your collection as spreadsheets that import back into Mystonie (Export as CSV). You can delete your account at any time in Settings, which immediately removes your profile and everything you've logged."
       },
       "collect": {
         "title": "What we collect",
@@ -219,7 +219,7 @@
       },
       "processors": {
         "title": "Services we rely on",
-        "body": "Vercel (hosting), Supabase (database and sign-in), PostHog (privacy-friendly analytics), Sentry (error reports) and Resend (email delivery) process data on our behalf under their data processing terms. Posters and title information come from TMDB (movies and series), AniList (manga), Google Books (books, through our server) and RAWG (games): your browser loads posters, photos of cast and crew, and game art directly from TMDB's, AniList's and RAWG's servers, which see your IP address like any website you visit. If you sign in with Google, Google confirms who you are under its own privacy policy. Notifications you turn on are delivered by your device's push service (Apple, Google, Mozilla or Microsoft); they are encrypted so only your device can read them."
+        "body": "Vercel (hosting), Supabase (database and sign-in), PostHog (privacy-friendly analytics), Sentry (error reports) and Resend (email delivery) process data on our behalf under their data processing terms. Posters and title information come from TMDB (movies and series), AniList (manga), Google Books (books, through our server) and RAWG (games): your browser loads posters, photos of cast and crew, and game art directly from TMDB's, AniList's and RAWG's servers, which see your IP address like any website you visit. If you sign in with Google or Facebook, Google or Meta confirms who you are under its own privacy policy; we ask Facebook only for your name, email address and profile picture. Notifications you turn on are delivered by your device's push service (Apple, Google, Mozilla or Microsoft); they are encrypted so only your device can read them."
       },
       "transfers": {
         "title": "Where data is stored",
@@ -397,8 +397,9 @@
     "error": "Something went wrong. Try again in a moment.",
     "unavailable": "Sign-in isn't available right now.",
     "errorLink": "That sign-in link has expired or was already used. Send yourself a new code.",
-    "errorOauth": "Google sign-in didn't finish. Try again, or use your email.",
-    "terms": "By continuing you agree to the <terms>Terms</terms> and the <privacy>Privacy Policy</privacy>."
+    "errorOauth": "Sign-in didn't finish. Try again, or use your email.",
+    "terms": "By continuing you agree to the <terms>Terms</terms> and the <privacy>Privacy Policy</privacy>.",
+    "facebook": "Continue with Facebook"
   },
   "AuthConfirm": {
     "title": "Almost in",
@@ -414,6 +415,7 @@
     "email": "Email",
     "signedInWith": "Signed in with",
     "providerGoogle": "Google",
+    "providerFacebook": "Facebook",
     "providerEmail": "Email code",
     "language": "Language",
     "timeZone": "Time zone",
@@ -489,8 +491,20 @@
     "gettingStarted": "Getting started",
     "supportTitle": "Support Mystonie",
     "supportBody": "Mystonie is free and made by one person. If it brings you joy, a coffee helps keep it running. Tips don't unlock anything: everything stays free. Tip with your account's email and you get the Supporter sticker.",
+    "aboutTitle": "About Mystonie",
     "atlasPublic": "Show my Atlas on my profile",
-    "atlasPublicHint": "Visitors see the countries you've been to and lived in, never where you want to go. Off until you turn it on."
+    "atlasPublicHint": "Visitors see the countries you've been to and lived in, never where you want to go. Off until you turn it on.",
+    "addPhoto": "Add photo",
+    "changePhoto": "Change photo",
+    "photoTitle": "Your photo",
+    "photoFrame": "Your photo, framed for your profile",
+    "photoHow": "Drag to move it. The circle is what people see.",
+    "photoZoom": "Zoom",
+    "photoUse": "Use this photo",
+    "photoAnother": "Pick another",
+    "photoCancel": "Cancel",
+    "photoUnreadable": "That file isn't a photo this browser can open. Try a JPEG or PNG.",
+    "photoError": "The photo couldn't be saved. Try again in a moment."
   },
   "Collection": {
     "title": "Your collection",

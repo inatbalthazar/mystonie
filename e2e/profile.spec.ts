@@ -158,18 +158,108 @@ test("language and theme apply at once and stick to the account", async ({ page,
   await page.reload();
   await expect(page.locator("html")).toHaveAttribute("data-theme", "dark");
 
-  // Back to English and the system theme, from the footer switcher this time.
+  // Signed in, the footer is an app's: only the data credits, no language menu or legal links (ADR 0065).
+  const footer = page.getByRole("contentinfo");
+  await expect(footer.getByRole("link", { name: /RAWG/ })).toBeVisible();
+  await expect(footer.getByLabel("ภาษา")).toBeHidden();
+  await expect(footer.getByRole("link", { name: "ความเป็นส่วนตัว" })).toBeHidden();
+
+  // Back to English and the system theme.
   await expect(async () => {
-    await page.getByRole("contentinfo").getByLabel("ภาษา").selectOption("en", { timeout: 2000 });
+    await main.getByLabel("ภาษา").selectOption("en", { timeout: 2000 });
     await expect(page).toHaveURL(/^https?:\/\/[^/]+\/settings$/,{ timeout: 3000 });
   }).toPass();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Settings");
   await main.locator("label", { hasText: "System" }).click();
   await expect(page.locator("html")).not.toHaveAttribute("data-theme");
 
+  // The legal pages and the data credits live in Settings → About instead.
+  const about = main.getByRole("navigation", { name: "About Mystonie" });
+  await expect(about.getByRole("link", { name: "Privacy" })).toHaveAttribute("href", "/privacy");
+  await expect(about.getByRole("link", { name: "Terms" })).toHaveAttribute("href", "/terms");
+  await expect(main.getByRole("link", { name: /not endorsed or certified by TMDB/ })).toBeVisible();
+
   // Signing out drops the saved preferences on this device.
   await main.getByRole("button", { name: "Sign out" }).click();
   await expect(page).toHaveURL(/\/$/);
   await page.goto("/th");
   await expect(page).toHaveURL(/\/th$/);
+});
+
+test("a profile photo: picked, framed and uploaded, shown on the profile, then removed (ADR 0064)", async ({ page, request }) => {
+  test.skip(!(await mailpitUp(request)) || !canSeed(), "local Supabase (Mailpit, service role key) is not available");
+  await signUp(page, request, "photo", "/settings");
+
+  // Only real images go in, from signed-in people.
+  const svg = await page.request.post("/api/account/avatar", { data: "<svg xmlns='http://www.w3.org/2000/svg'/>", headers: { "Content-Type": "image/png" } });
+  expect(svg.status()).toBe(400);
+  expect((await request.post("/api/account/avatar", { data: "x" })).status()).toBe(401);
+
+  // A landscape picture made in the page (left half coral, right half blue).
+  const png = await page.evaluate(() => {
+    const canvas = document.createElement("canvas");
+    canvas.width = 900;
+    canvas.height = 600;
+    const ctx = canvas.getContext("2d")!;
+    ctx.fillStyle = "#e8553f";
+    ctx.fillRect(0, 0, 450, 600);
+    ctx.fillStyle = "#2560c4";
+    ctx.fillRect(450, 0, 450, 600);
+    return canvas.toDataURL("image/png").split(",")[1]!;
+  });
+  const main = page.getByRole("main");
+  const chooser = page.waitForEvent("filechooser");
+  await main.getByRole("button", { name: "Add photo" }).click();
+  await (await chooser).setFiles({ name: "me.png", mimeType: "image/png", buffer: Buffer.from(png, "base64") });
+
+  const sheet = page.getByRole("dialog", { name: "Your photo" });
+  const frame = sheet.getByRole("img", { name: "Your photo, framed for your profile" });
+  await expect(frame).toBeVisible();
+  await sheet.getByRole("slider", { name: "Zoom" }).fill("2");
+  // Drag the picture right, so its coral half fills the frame.
+  const box = (await frame.boundingBox())!;
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width, box.y + box.height / 2, { steps: 5 });
+  await page.mouse.up();
+  const upload = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/account/avatar" && r.request().method() === "POST");
+  await sheet.getByRole("button", { name: "Use this photo" }).click();
+  const uploaded = await upload;
+  expect(uploaded.status()).toBe(200);
+  expect(uploaded.request().headers()["content-type"]).toMatch(/^image\/(webp|jpeg)$/);
+  const { avatarUrl } = (await uploaded.json()) as { avatarUrl: string };
+  expect(avatarUrl).toMatch(/\/storage\/v1\/object\/public\/avatars\/[0-9a-f-]+\/[0-9a-f-]+\.(webp|jpg)$/);
+  await expect(sheet).toHaveCount(0);
+
+  // The stored photo is a 320 px square of the coral half.
+  const photo = main.getByRole("img", { name: "Your profile photo" });
+  await expect(photo).toHaveAttribute("src", avatarUrl);
+  const pixel = await page.evaluate(async (src) => {
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.src = src;
+    await img.decode();
+    const canvas = document.createElement("canvas");
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const ctx = canvas.getContext("2d")!;
+    ctx.drawImage(img, 0, 0);
+    return { width: img.naturalWidth, height: img.naturalHeight, rgb: [...ctx.getImageData(160, 160, 1, 1).data.slice(0, 3)] };
+  }, avatarUrl);
+  expect(pixel).toMatchObject({ width: 320, height: 320 });
+  expect(pixel.rgb[0]).toBeGreaterThan(200);
+  expect(pixel.rgb[2]).toBeLessThan(100);
+
+  // Changing it replaces the file; the profile page shows the new one.
+  const exported = await page.request.get("/api/account/export");
+  const username = ((await exported.json()) as { profile: { username: string } }).profile.username;
+  await page.goto(`/u/${username}`);
+  await expect(page.getByRole("main").locator(`img[src="${avatarUrl}"]`)).toBeVisible();
+
+  // Removing it goes back to the initial and deletes the file.
+  await page.goto("/settings");
+  await main.getByRole("button", { name: "Remove photo" }).click();
+  await expect(main.getByRole("img", { name: "Your profile photo" })).toHaveCount(0);
+  await expect(main.getByRole("button", { name: "Add photo" })).toBeVisible();
+  await expect.poll(async () => (await request.get(avatarUrl)).status()).toBeGreaterThanOrEqual(400);
 });

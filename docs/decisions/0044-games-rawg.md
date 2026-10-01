@@ -69,7 +69,7 @@ What we found (checked 2026-09-30):
   - RAWG's credit.
 
   For a game not in the collection yet, it links to quick add on that game's status step (`?add=1&pick=game:<id>`).
-- RAWG is credited in every page's footer ("Game data and images from RAWG", linked), and on the game page with a link to the game on RAWG.
+- RAWG is credited in every page's footer ("Game data and images from RAWG", linked), and on the game page with a link to the game on RAWG. (Since [ADR 0065](0065-app-footer.md) the signed-in footer is only this credit and TMDB's logo.)
 
 **Cards: Finish cards only, with a Cartridge.**
 - Games have no Progress cards (there's no progress to log).

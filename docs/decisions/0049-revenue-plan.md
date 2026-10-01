@@ -16,6 +16,6 @@ In phases, cheapest first:
 - Rejected: **banner ads.** A niche consumer site earns maybe $1–3 per 1,000 views (10,000 views ≈ $20/month), ad networks need a consent banner the app avoids (cookieless analytics), they slow pages below the Lighthouse ≥ 90 target and clash with the scrapbook look. If ever, only on public pages visitors land on (shared cards), never in the app.
 
 ## Consequences
-- The footer and Settings carry the tip link from now on; the Terms say what a tip is.
+- The footer and Settings carry the tip link from now on; the Terms say what a tip is. (Since [ADR 0065](0065-app-footer.md) the footer's is signed out only; signed in, it's in Settings.)
 - Rough maths: 2–5 % of users pay; 1,000 monthly users × 3 % × $20/year ≈ $50/month. Pro covers costs from about 5,000 monthly users.
 - The roadmap lists the later phases as owner-gated tasks.

@@ -4,7 +4,7 @@
 
 ## Context
 Stage 1 needs accounts ([S1 auth](../product/features/S1-auth.md)). The requirements:
-- Google and email sign-in through Supabase Auth.
+- Google and email sign-in through Supabase Auth (Facebook too since [ADR 0064](0064-facebook-sign-in-and-photos.md)).
 - A localized (en/th) confirmation email.
 - Sign-in that works in an installed PWA.
 - A `profiles` row with locale and time zone for every user.

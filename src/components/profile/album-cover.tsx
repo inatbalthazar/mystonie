@@ -33,7 +33,7 @@ export function AlbumCover({
         <div className="relative shrink-0 rotate-[-3deg] rounded-md bg-card p-1.5 pb-4 shadow-md ring-1 ring-border">
           <span aria-hidden="true" className="absolute -top-2 left-1/2 h-4 w-12 -translate-x-1/2 rotate-[4deg] rounded-[2px] bg-brand-soft/90 ring-1 ring-brand/15 dark:bg-brand/30" />
           {profile.avatarUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element -- the Google profile photo, shown as is
+            // eslint-disable-next-line @next/next/no-img-element -- the profile photo: a 320 px square from our storage (or an older provider link)
             <img src={profile.avatarUrl} alt="" width={72} height={72} referrerPolicy="no-referrer" className="size-18 rounded-sm object-cover" />
           ) : (
             <span aria-hidden="true" className="flex size-18 items-center justify-center rounded-sm bg-brand-soft font-display text-3xl font-extrabold text-brand uppercase">

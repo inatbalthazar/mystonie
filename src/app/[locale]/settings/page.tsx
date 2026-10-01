@@ -1,4 +1,4 @@
-import { DownloadIcon, FileSpreadsheetIcon, TriangleAlertIcon, UploadIcon } from "lucide-react";
+import { ChevronRightIcon, DownloadIcon, FileSpreadsheetIcon, TriangleAlertIcon, UploadIcon } from "lucide-react";
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -7,6 +7,7 @@ import { DeleteAccount } from "@/components/delete-account";
 import { ShowGettingStarted } from "@/components/getting-started";
 import { PaperCard } from "@/components/paper-card";
 import { PushSwitch } from "@/components/pwa/push";
+import { RawgAttribution } from "@/components/rawg-attribution";
 import { SignOutForm } from "@/components/pwa/sign-out-form";
 import { Preferences } from "@/components/settings/preferences";
 import { ProfileForm } from "@/components/settings/profile-form";
@@ -17,6 +18,7 @@ import { countryOptions, isCountryCode } from "@/core/countries";
 import { pushConfig } from "@/data/push";
 import { getProState } from "@/data/subscriptions";
 import { SupportLink } from "@/components/support-link";
+import { TmdbAttribution } from "@/components/tmdb-attribution";
 import { userClient } from "@/data/supabase-server";
 import { avoidTopicIds } from "@/data/warnings";
 import { Link, redirect } from "@/i18n/navigation";
@@ -44,7 +46,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
   const user = supabase ? (await supabase.auth.getUser()).data.user : null;
   if (!supabase || !user) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
-  const [{ data: profile }, t, tw, avoid] = await Promise.all([
+  const [{ data: profile }, t, tw, tl, avoid] = await Promise.all([
     supabase
       .from("profiles")
       .select("username, display_name, bio, avatar_url, time_zone, country, theme, visibility, email_recaps, reel_reminders, atlas_public")
@@ -52,13 +54,21 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
       .single(),
     getTranslations("Settings"),
     getTranslations("Warnings"),
+    getTranslations("Legal"),
     avoidTopicIds(supabase, user.id),
   ]);
   const pushKey = pushConfig()?.publicKey;
   const pro = await getProState(supabase, user.id).catch(() => null);
   const rows: [string, string][] = [
     [t("email"), user.email ?? ""],
-    [t("signedInWith"), user.app_metadata.provider === "google" ? t("providerGoogle") : t("providerEmail")],
+    [
+      t("signedInWith"),
+      user.app_metadata.provider === "google"
+        ? t("providerGoogle")
+        : user.app_metadata.provider === "facebook"
+          ? t("providerFacebook")
+          : t("providerEmail"),
+    ],
   ];
 
   return (
@@ -148,6 +158,27 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
         <h2 className="font-display text-lg font-bold">{t("supportTitle")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("supportBody")}</p>
         <SupportLink place="settings" />
+      </PaperCard>
+      {/* What a website keeps in its footer; signed in, the footer only credits the data (ADR 0065). */}
+      <PaperCard>
+        <h2 className="font-display text-lg font-bold">{t("aboutTitle")}</h2>
+        <nav aria-label={t("aboutTitle")} className="mt-2 divide-y divide-dashed divide-border">
+          {(
+            [
+              ["/privacy", tl("privacy")],
+              ["/terms", tl("terms")],
+            ] as const
+          ).map(([href, label]) => (
+            <Link key={href} href={href} className="flex h-12 items-center justify-between gap-3 font-semibold hover:text-brand">
+              {label}
+              <ChevronRightIcon className="size-4 text-muted-foreground" aria-hidden="true" />
+            </Link>
+          ))}
+        </nav>
+        <div className="mt-4 flex flex-col gap-3 border-t border-dashed border-border pt-4">
+          <TmdbAttribution />
+          <RawgAttribution className="text-left" />
+        </div>
       </PaperCard>
       <PaperCard>
         <h2 className="font-display text-lg font-bold">{t("importTitle")}</h2>

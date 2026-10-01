@@ -22,7 +22,7 @@
 
 ## Settings
 - Language (`en` default, `th`), time zone (IANA list, plus "use this device's time zone"), theme (system/light/dark). Each saves as soon as it changes.
-  - The saved language redirects the signed-in user to that locale, and the footer language menu saves it too.
+  - The saved language redirects the signed-in user to that locale, and the footer language menu (signed out only since [ADR 0065](../../decisions/0065-app-footer.md)) saves it too.
   - A saved light/dark theme applies before first paint on every page.
   - Both work through the `mystonie_prefs` cookie, which exists only while signed in.
 - Profile: display name, username (with a link to the public page), bio (plain text, ≤ 160 characters and 4 lines, shown under the name on the public page; links aren't linked, [ADR 0057](../../decisions/0057-profile-bio.md)), photo (the Google photo can be removed; uploading a photo comes later).

@@ -5,6 +5,7 @@ import { useId, useState, type FormEvent } from "react";
 import { BIO_MAX, bioFits, DISPLAY_NAME_MAX, normalizeBio, normalizeUsername, USERNAME_RE } from "@/core/account";
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { AvatarPicker } from "./avatar-picker";
 import { saveAccount, type SaveResult } from "./save-account";
 
 type Status = { kind: "idle" | "saving" | "saved" } | { kind: "error"; result: Extract<SaveResult, { ok: false }> | "format" | "bio" };
@@ -12,7 +13,7 @@ type Status = { kind: "idle" | "saving" | "saved" } | { kind: "error"; result: E
 const inputClass =
   "h-11 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-base text-foreground focus-visible:outline-2 focus-visible:outline-ring aria-invalid:border-destructive";
 
-/** Settings → Profile: photo, display name, username and bio (ADR 0057), saved together. */
+/** Settings → Profile: the photo (uploaded on its own, ADR 0064), then display name, username and bio (ADR 0057), saved together. */
 export function ProfileForm({
   username: savedUsername,
   displayName: savedName,
@@ -51,10 +52,11 @@ export function ProfileForm({
 
   async function removePhoto() {
     setStatus({ kind: "saving" });
-    const result = await saveAccount({ avatarUrl: null });
-    if (!result.ok) return setStatus({ kind: "error", result });
+    const res = await fetch("/api/account/avatar", { method: "DELETE" }).catch(() => null);
+    if (!res?.ok) return setStatus({ kind: "error", result: { ok: false, error: "unavailable" } });
     setPhoto(null);
     setStatus({ kind: "idle" });
+    router.refresh();
   }
 
   const error = status.kind === "error" ? status.result : null;
@@ -81,7 +83,7 @@ export function ProfileForm({
     <form onSubmit={submit} className="flex flex-col gap-4" noValidate>
       <div className="flex items-center gap-4">
         {photo ? (
-          // eslint-disable-next-line @next/next/no-img-element -- the Google profile photo, shown as is
+          // eslint-disable-next-line @next/next/no-img-element -- a 320 px photo from our storage (or a provider's, from before)
           <img src={photo} alt={t("photoAlt")} width={64} height={64} referrerPolicy="no-referrer" className="size-16 rounded-full object-cover ring-2 ring-card shadow" />
         ) : (
           <span aria-hidden="true" className="flex size-16 items-center justify-center rounded-full bg-brand-soft font-display text-2xl font-extrabold text-brand uppercase">
@@ -95,16 +97,25 @@ export function ProfileForm({
           <span className="truncate text-sm text-muted-foreground">{tp("handle", { username: savedUsername })}</span>
         </div>
       </div>
-      {photo && (
-        <button
-          type="button"
-          onClick={removePhoto}
-          disabled={status.kind === "saving"}
-          className="h-11 self-start rounded-xl px-4 text-sm font-semibold ring-1 ring-border hover:bg-muted disabled:opacity-60"
-        >
-          {t("removePhoto")}
-        </button>
-      )}
+      <div className="flex flex-wrap gap-2">
+        <AvatarPicker
+          hasPhoto={photo !== null}
+          onSaved={(url) => {
+            setPhoto(url);
+            router.refresh();
+          }}
+        />
+        {photo && (
+          <button
+            type="button"
+            onClick={removePhoto}
+            disabled={status.kind === "saving"}
+            className="h-11 self-start rounded-xl px-4 text-sm font-semibold text-muted-foreground hover:bg-muted disabled:opacity-60"
+          >
+            {t("removePhoto")}
+          </button>
+        )}
+      </div>
 
       <div className="flex flex-col gap-1">
         <label htmlFor={`${id}-name`} className="text-sm font-semibold">

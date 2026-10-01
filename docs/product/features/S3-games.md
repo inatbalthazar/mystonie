@@ -53,7 +53,7 @@ Games join movies, series, books and manga as a fifth kind of title. People find
 - **The Shelf** on public profiles shows a finished game as a game case: its art under a platform band.
 - **Imports:** "Imported 12 games". Mystonie's CSV export carries `hours_played`; exports made before games still import.
 - **Offline:** games are added and finished offline like everything else. Their art is kept on the device, and the hours travel with the notes.
-- **Attribution:** "Game data and images from RAWG" (linked) in every page's footer, as RAWG's terms ask. The Privacy Policy and Terms name RAWG.
+- **Attribution:** "Game data and images from RAWG" (linked) in every page's footer, signed in too ([ADR 0065](../../decisions/0065-app-footer.md)), as RAWG's terms ask. The Privacy Policy and Terms name RAWG.
 
 ## Acceptance criteria
 - [x] Searching finds games from RAWG, under Games and in All, labelled as games with their platforms, best known first. (`src/core/catalog/rawg.test.ts` with RAWG's own game objects and its live answer for "zelda"; `catalogs.test.ts` for the merge; `e2e/games.spec.ts`; checked live with the key on 2026-09-30)

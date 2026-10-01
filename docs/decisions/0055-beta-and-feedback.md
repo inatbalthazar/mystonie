@@ -12,7 +12,7 @@ Before this change:
 ## Decision
 **One flag.** `BETA` in `src/lib/site.ts` (true for now) turns on all the beta signs. At launch it becomes false, and one deploy turns them off.
 - **Header:** a small coral **BETA** stamp next to the logo, on every page. It opens `/feedback`.
-- **Footer:** "Mystonie is in beta. Report a problem".
+- **Footer:** "Mystonie is in beta. Report a problem" (signed out only since [ADR 0065](0065-app-footer.md)).
 - **Settings:** a "Mystonie is in beta" card (stamped BETA) with a **Report a problem** button.
 - **`/feedback`:** explains what beta means:
   - your collection is safe and can be exported

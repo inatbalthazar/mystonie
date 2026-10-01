@@ -1,4 +1,6 @@
 // Account data outside RLS (service role). Server only.
+import { enabledProviders, type OAuthProvider } from "@/core/avatar";
+import { deleteAvatars } from "./avatars";
 import { deleteCardImages } from "./cards";
 import { cancelSubscriptionNow, stripeConfig } from "./stripe";
 import { liveSubscriptionIds } from "./subscriptions";
@@ -22,6 +24,7 @@ export async function deleteAccount(userId: string, email: string | undefined): 
   }
   // Shared card PNGs sit in a public bucket; the rows cascade, the files don't.
   await deleteCardImages(userId).catch((error) => console.error("card image cleanup after account deletion failed", error));
+  await deleteAvatars(userId).catch((error) => console.error("avatar cleanup after account deletion failed", error));
   const { error } = await db.auth.admin.deleteUser(userId);
   if (error) throw error;
   if (email) {
@@ -30,20 +33,18 @@ export async function deleteAccount(userId: string, email: string | undefined): 
   }
 }
 
-/** Whether Google sign-in is switched on in Supabase Auth (the sign-in page hides the button otherwise). */
-export async function googleSignInEnabled(): Promise<boolean> {
+/** The sign-in providers switched on in Supabase Auth (the sign-in page shows a button for each, ADR 0064). */
+export async function oauthProviders(): Promise<OAuthProvider[]> {
   const env = publicSupabaseEnv();
-  if (!env) return false;
+  if (!env) return [];
   try {
     const res = await fetch(`${env.url}/auth/v1/settings`, {
       headers: { apikey: env.anonKey },
       next: { revalidate: 300 },
       signal: AbortSignal.timeout(3000),
     });
-    if (!res.ok) return false;
-    const settings = (await res.json()) as { external?: { google?: boolean } };
-    return settings.external?.google === true;
+    return res.ok ? enabledProviders(await res.json()) : [];
   } catch {
-    return false;
+    return [];
   }
 }

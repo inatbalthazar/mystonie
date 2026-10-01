@@ -337,6 +337,14 @@ client_id = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_CLIENT_ID)"
 secret = "env(SUPABASE_AUTH_EXTERNAL_GOOGLE_SECRET)"
 skip_nonce_check = true
 
+# Facebook sign-in (ADR 0064). Off locally unless you create a Meta app for localhost; then set enabled = true and the
+# two env vars (Valid OAuth Redirect URI: http://127.0.0.1:54321/auth/v1/callback).
+# Production: Supabase dashboard → Authentication → Sign In / Providers → Facebook.
+[auth.external.facebook]
+enabled = false
+client_id = "env(SUPABASE_AUTH_EXTERNAL_FACEBOOK_CLIENT_ID)"
+secret = "env(SUPABASE_AUTH_EXTERNAL_FACEBOOK_SECRET)"
+
 [auth.external.apple]
 enabled = false
 client_id = ""

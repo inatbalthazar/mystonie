@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useId, useState, type FormEvent } from "react";
 import { PREFS_COOKIE } from "@/core/account";
 import { localizedPath } from "@/core/auth";
+import type { OAuthProvider } from "@/core/avatar";
 import { EMAIL_MAX, isValidEmail, normalizeEmail } from "@/core/waitlist";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -12,7 +13,7 @@ import { browserClient } from "@/lib/supabase-browser";
 import { cn } from "@/lib/utils";
 
 type Notice = "invalidEmail" | "invalidCode" | "rateLimited" | "error" | "unavailable" | "resent" | "errorLink" | "errorOauth";
-type Busy = "google" | "send" | "verify" | null;
+type Busy = OAuthProvider | "send" | "verify" | null;
 
 function timeZone(): string {
   try {
@@ -32,11 +33,11 @@ const input =
 const primary = "h-12 w-full rounded-xl bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60";
 
 /**
- * Passwordless sign-in (ADR 0020): Google, or an emailed code. The code is typed here, which also works in an
+ * Passwordless sign-in (ADR 0020): Google or Facebook (ADR 0064) when switched on, or an emailed code. The code is typed here, which also works in an
  * installed PWA (where a tapped email link would open the browser instead); the email's link is for people
  * reading it on the same device. New and returning people take the same path.
  */
-export function AuthForm({ next, google, initialError }: { next: string; google: boolean; initialError: "link" | "oauth" | null }) {
+export function AuthForm({ next, providers, initialError }: { next: string; providers: readonly OAuthProvider[]; initialError: "link" | "oauth" | null }) {
   const t = useTranslations("Auth");
   const locale = useLocale();
   const id = useId();
@@ -48,15 +49,19 @@ export function AuthForm({ next, google, initialError }: { next: string; google:
     initialError === "link" ? "errorLink" : initialError === "oauth" ? "errorOauth" : null,
   );
 
-  async function withGoogle() {
+  async function withProvider(provider: OAuthProvider) {
     const supabase = browserClient();
     if (!supabase) return setNotice("unavailable");
-    setBusy("google");
+    setBusy(provider);
     const { error } = await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: `${window.location.origin}/api/auth/callback?${new URLSearchParams({ next, tz: timeZone() })}` },
+      provider,
+      options: {
+        redirectTo: `${window.location.origin}/api/auth/callback?${new URLSearchParams({ next, tz: timeZone() })}`,
+        // Facebook: the name, email and photo only (`public_profile` comes with every login).
+        ...(provider === "facebook" ? { scopes: "email" } : {}),
+      },
     });
-    // On success the browser is already leaving for Google.
+    // On success the browser is already leaving for the provider.
     if (error) {
       setBusy(null);
       setNotice(noticeFor(error, "error"));
@@ -168,17 +173,30 @@ export function AuthForm({ next, google, initialError }: { next: string; google:
 
   return (
     <div className="flex flex-col gap-4">
-      {google && (
+      {providers.length > 0 && (
         <>
-          <button
-            type="button"
-            onClick={withGoogle}
-            disabled={busy !== null}
-            className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-background font-semibold ring-1 ring-input hover:bg-muted disabled:opacity-60"
-          >
-            <GoogleMark />
-            {t("google")}
-          </button>
+          {providers.includes("google") && (
+            <button
+              type="button"
+              onClick={() => withProvider("google")}
+              disabled={busy !== null}
+              className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-background font-semibold ring-1 ring-input hover:bg-muted disabled:opacity-60"
+            >
+              <GoogleMark />
+              {t("google")}
+            </button>
+          )}
+          {providers.includes("facebook") && (
+            <button
+              type="button"
+              onClick={() => withProvider("facebook")}
+              disabled={busy !== null}
+              className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-[#1877f2] font-semibold text-white hover:bg-[#166fe5] disabled:opacity-60"
+            >
+              <FacebookMark />
+              {t("facebook")}
+            </button>
+          )}
           <div className="flex items-center gap-3 text-xs text-muted-foreground" aria-hidden="true">
             <span className="h-px flex-1 bg-border" />
             {t("or")}
@@ -228,6 +246,18 @@ export function AuthForm({ next, google, initialError }: { next: string; google:
         })}
       </p>
     </div>
+  );
+}
+
+/** Facebook's "f" logo: white on its blue button, as its brand guidelines ask. */
+function FacebookMark() {
+  return (
+    <svg viewBox="0 0 24 24" className="size-5" aria-hidden="true">
+      <path
+        fill="currentColor"
+        d="M24 12.07C24 5.41 18.63 0 12 0S0 5.41 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.33l-.53 3.49h-2.8V24C19.61 23.1 24 18.1 24 12.07"
+      />
+    </svg>
   );
 }
 

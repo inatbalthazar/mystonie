@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { AuthForm } from "@/components/auth-form";
 import { PaperCard } from "@/components/paper-card";
 import { localizedPath, safeNextPath } from "@/core/auth";
-import { googleSignInEnabled } from "@/data/account";
+import { oauthProviders } from "@/data/account";
 import { userClient } from "@/data/supabase-server";
 import { routing } from "@/i18n/routing";
 
@@ -26,7 +26,7 @@ export default async function AuthPage({ params, searchParams }: PageProps<"/[lo
   const claims = supabase ? (await supabase.auth.getClaims()).data?.claims : null;
   if (claims) redirect(next);
 
-  const [t, google] = await Promise.all([getTranslations("Auth"), googleSignInEnabled()]);
+  const [t, providers] = await Promise.all([getTranslations("Auth"), oauthProviders()]);
   const error = query.error === "link" || query.error === "oauth" ? query.error : null;
 
   return (
@@ -37,7 +37,7 @@ export default async function AuthPage({ params, searchParams }: PageProps<"/[lo
       </div>
       <PaperCard stamp={t("stamp")}>
         <div className="pt-8">
-          <AuthForm next={next} google={google} initialError={error} />
+          <AuthForm next={next} providers={providers} initialError={error} />
         </div>
       </PaperCard>
     </main>

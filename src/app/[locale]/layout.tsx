@@ -97,24 +97,31 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
           <SyncProvider />
           <SyncStatus />
           {children}
-          <footer className="mt-auto flex flex-col items-center gap-4 border-t border-border px-4 pt-8 pb-10">
-            <LocaleSwitcher />
-            {/* The beta, and "Report a problem" from the page it's on (ADR 0055). */}
-            <p className="flex flex-wrap justify-center gap-x-1.5 text-center text-sm text-muted-foreground">
-              {BETA && <span>{tb("footer")}</span>}
-              <FeedbackLink place="footer" />
-            </p>
-            <nav className="flex gap-4 text-sm text-muted-foreground">
-              <Link href="/privacy" className="underline-offset-4 hover:underline">
-                {t("privacy")}
-              </Link>
-              <Link href="/terms" className="underline-offset-4 hover:underline">
-                {t("terms")}
-              </Link>
-            </nav>
-            <SupportLink place="footer" />
-            <TmdbAttribution />
-            <RawgAttribution />
+          {/* Signed out, a website's footer. Signed in, an app's: only the data credits RAWG asks for on every page, clear of
+              the getting-started button (pb-20); the language, the legal pages, the beta and the tip link are in Settings
+              (ADR 0065). */}
+          <footer className="mt-auto flex flex-col items-center gap-4 border-t border-border px-4 pt-8 pb-10 signed-in:border-t-0 signed-in:pt-6 signed-in:pb-20">
+            <div className="contents signed-in:hidden">
+              <LocaleSwitcher />
+              {/* The beta, and "Report a problem" from the page it's on (ADR 0055). */}
+              <p className="flex flex-wrap justify-center gap-x-1.5 text-center text-sm text-muted-foreground">
+                {BETA && <span>{tb("footer")}</span>}
+                <FeedbackLink place="footer" />
+              </p>
+              <nav className="flex gap-4 text-sm text-muted-foreground">
+                <Link href="/privacy" className="underline-offset-4 hover:underline">
+                  {t("privacy")}
+                </Link>
+                <Link href="/terms" className="underline-offset-4 hover:underline">
+                  {t("terms")}
+                </Link>
+              </nav>
+              <SupportLink place="footer" />
+            </div>
+            <div className="flex flex-col items-center gap-4 signed-in:flex-row signed-in:flex-wrap signed-in:justify-center signed-in:gap-x-3 signed-in:gap-y-1">
+              <TmdbAttribution compact />
+              <RawgAttribution />
+            </div>
           </footer>
           {/* Signed in: Home · Collection · ➕ · Feed · Me, floating at the bottom (ADR 0050, ADR 0053). */}
           <NavIsland />
