@@ -8,7 +8,7 @@ import { prefsCookieOptions } from "@/lib/prefs";
 const noStore = { "Cache-Control": "no-store" };
 
 /**
- * PATCH /api/account { username?, displayName?, avatarUrl?: null, locale?, timeZone?, country?, theme?, visibility?, emailRecaps? }
+ * PATCH /api/account { username?, displayName?, bio?, avatarUrl?: null, locale?, timeZone?, country?, theme?, visibility?, emailRecaps?, reelReminders?, atlasPublic? }
  * → the saved settings | 400 invalid | 401 | 409 username_taken | 422 name_not_allowed { field } | 503.
  * Settings are written as the user (RLS + column grants); the database re-checks the username, the name
  * blocklist and the time zone. The preferences cookie is refreshed, so the saved language and theme apply at once.
@@ -26,7 +26,7 @@ export async function PATCH(request: Request) {
     .from("profiles")
     .update(patch)
     .eq("id", userId)
-    .select("username, display_name, avatar_url, locale, time_zone, country, theme, visibility, email_recaps")
+    .select("username, display_name, bio, avatar_url, locale, time_zone, country, theme, visibility, email_recaps, reel_reminders, atlas_public")
     .single();
   if (error) {
     if (error.code === "23505") return Response.json({ error: "username_taken" }, { status: 409, headers: noStore });
@@ -46,6 +46,7 @@ export async function PATCH(request: Request) {
     {
       username: data.username,
       displayName: data.display_name,
+      bio: data.bio,
       avatarUrl: data.avatar_url,
       locale: data.locale,
       timeZone: data.time_zone,
@@ -53,6 +54,8 @@ export async function PATCH(request: Request) {
       theme: data.theme,
       visibility: data.visibility,
       emailRecaps: data.email_recaps,
+      reelReminders: data.reel_reminders,
+      atlasPublic: data.atlas_public,
     },
     { headers: noStore },
   );

@@ -8,11 +8,22 @@ UI decides whether people adopt Mystonie, and the share artwork decides whether 
 - **Posters are the colour.** Neutral surfaces. Cards pull their palette from the poster, so every card is unique yet on-brand.
 
 ## Foundations
-- **Mobile-first:** design at 360–430px, bottom tab bar **Home · Collection · ➕ · Me**, side rail at ≥ 1024px.
+- **Mobile-first, above everything else** ([ADR 0050](../decisions/0050-mobile-first-nav-island.md)): people use Mystonie on their phones, even though it's a website. Design at 360–430px first; tablets and desktops get the same single column, centred. The installed app (PWA) is the best home for it.
+- **The nav island:** signed in, a paper pill floats above the bottom edge on every page and at every width: **Home · Collection · ➕ · Feed · Me** ([ADR 0053](../decisions/0053-feed-tab-stats-in-me.md)). It has a hairline ring, a soft shadow and a strip of coral tape holding it to the page, and the page fades out behind it. On phones the tabs are icons only; from 640px their names show under them. The tab you're on gets a heavier icon and a coral tape strip under it. ➕ in the middle is a coral rubber stamp (quick add). Me is your own album, with Settings on it and two divider tabs under its cover: Album and Stats. Feed stays lit on the community pages and the Journal's articles, which the feed lists ([ADR 0062](../decisions/0062-journal-in-the-feed.md)). Something new about you (a Stamp, a follower) puts a small coral dot on Feed's icon: brand coral with a ring in the island's colour, never alarm red, never a count, and on no other tab ([ADR 0054](../decisions/0054-feed-dot-reel-reminders.md)). The header keeps only the logo (plus Sign in when signed out); on a page under a tab the logo makes way for an iOS-style back button, a coral chevron and the name of the page before, "‹ Atlas" ([ADR 0061](../decisions/0061-back-button.md)). Pages don't add their own back links.
 - **Dark mode is first-class** (people log at night after watching). All colours are theme tokens (CSS variables / Tailwind theme, shadcn convention). No raw hex in components.
 - **Typography:** one bold display face for numbers and card headlines, one highly legible UI sans, and Noto fallbacks for Thai, Korean and Japanese. Test long titles and non-Latin reviews.
 - **Motion:** short, springy stamp animation on "Finished". Haptics where supported. Honour `prefers-reduced-motion`.
 - **Accessibility:** WCAG 2.1 AA contrast in both themes, touch targets ≥ 44px, and warning badges never rely on colour alone.
+
+## Mobile checklist (every page, every change)
+- **Thumb first:** the main action of a screen sits in the lower half or in a bottom sheet (`Sheet`), never only in a top corner. Pickers and forms open as bottom sheets on phones.
+- **The island's room:** every page still works with the nav island over its last 5rem. Anything fixed or sticky at the bottom sits above it with `--island-space` (see the sticker toast and the import bar).
+- **Short pages:** a grid or list that keeps growing (stickers, milestones) shows two rows, the best first, then "Show all (N)" (`ShowAll` and `previewClass` in `src/components/show-all.tsx`).
+- **Safe areas:** the page runs edge to edge (`viewport-fit=cover`), so anything fixed to an edge pads with `env(safe-area-inset-*)`.
+- **Touch:** targets ≥ 44px and apart, visible `:active` feedback, nothing that needs hover, swipe only as a shortcut for a visible button.
+- **Typing:** text fields are 16px or larger (iOS zooms into smaller ones), with the right `type`, `inputMode`, `autoComplete` and `enterKeyHint`. The island hides while one has focus on a touch screen.
+- **Check:** screenshots at 360px in light and dark (and Thai for long words), e2e on a phone (Playwright runs as a Pixel 7), and the owner's real-device pass on iPhone Safari and Android Chrome, in the browser and installed.
+- **Speed:** Lighthouse mobile ≥ 90, images sized for a phone, no layout shift when data arrives.
 
 ## Card templates (stage 0)
 | Template | Idea | Best for |

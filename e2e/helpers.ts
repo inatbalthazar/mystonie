@@ -22,6 +22,18 @@ export async function lastEmail(request: APIRequestContext, to: string): Promise
   throw new Error(`no email to ${to}`);
 }
 
+/** The nav island (ADR 0050): the signed-in app's main navigation, floating at the bottom of every page. */
+export const navIsland = (page: Page) => page.getByRole("navigation", { name: "Main" });
+
+/**
+ * Taps the island's ➕ and waits for quick add. One tap, however early: before the page is ready it opens quick add as
+ * soon as it is (or loads /collection?add=1), so a second tap would only race the first.
+ */
+export async function openQuickAdd(page: Page): Promise<void> {
+  await navIsland(page).getByRole("link", { name: "Add a title" }).click();
+  await expect(page.getByRole("dialog", { name: "Add a title" })).toBeVisible({ timeout: 15_000 });
+}
+
 export const uniqueEmail = (tag: string) => `${tag}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
 
 /** Signs up a new account with the English email-code flow and lands on `next`. */
@@ -49,7 +61,16 @@ if (!process.env.SUPABASE_SERVICE_ROLE_KEY) {
 
 export const canSeed = () => !!(process.env.NEXT_PUBLIC_SUPABASE_URL && process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-export type SeedTitle = { kind: "movie" | "series"; externalId: string; name: string; year: number; posterPath: string | null; runtimeMin: number };
+export type SeedTitle = {
+  kind: "movie" | "series";
+  externalId: string;
+  name: string;
+  year: number;
+  posterPath: string | null;
+  runtimeMin: number;
+  /** `titles.credits` (stage 4): `{ role, id, name, image }` items. */
+  credits?: { role: string; id: string; name: string; image: string | null }[];
+};
 
 /** A book (Google Books) or manga (AniList) to cache; `posterPath` is a volume id or a full AniList cover URL. */
 export type SeedReadingTitle = {
@@ -92,6 +113,7 @@ export async function seedTitles(request: APIRequestContext, titles: (SeedTitle 
       volume_count: "volumeCount" in t ? (t.volumeCount ?? null) : null,
       playtime_hours: "playtimeHours" in t ? t.playtimeHours : null,
       platforms: "platforms" in t ? t.platforms : [],
+      credits: "credits" in t ? (t.credits ?? null) : null,
       fetched_at: new Date().toISOString(),
     })),
   });

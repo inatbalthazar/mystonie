@@ -21,6 +21,7 @@
   },
   "HomeApp": {
     "title": "Home",
+    "reelCard": "Reel of the Day #{number}",
     "greeting": "Hi, {name}",
     "recentCards": "Your recent cards",
     "recentCardsEmpty": "Finish something and your cards land here.",
@@ -48,14 +49,17 @@
     "yearCard": "Year in review",
     "reviewTitle": "Your {year} in review is here",
     "reviewBody": "Your year of watching and reading, page by page.",
-    "reviewCta": "Open my year"
+    "reviewCta": "Open my year",
+    "atlasCard": "Atlas of {count, plural, one {# country} other {# countries}}",
+    "atlasRegionsCard": "Atlas of {country}"
   },
   "LocaleSwitcher": {
     "label": "Language"
   },
   "NotFound": {
     "title": "Page not found",
-    "backHome": "Back to home"
+    "backHome": "Back to home",
+    "brokenLink": "Followed a link here? Tell us it's broken."
   },
   "Attribution": {
     "tmdb": "This product uses the TMDB API but is not endorsed or certified by TMDB.",
@@ -86,7 +90,9 @@
       "filmStrip": "Film Strip",
       "survived": "Survived",
       "calendar": "Calendar",
-      "cartridge": "Cartridge"
+      "cartridge": "Cartridge",
+      "reel": "Film Frames",
+      "atlas": "Scratch map"
     },
     "sizes": {
       "story": "Story 9:16",
@@ -138,18 +144,31 @@
     "milestoneLabel": "{metric, select, titles {titles finished} hours {hours watched} other {episodes watched}}",
     "milestoneBy": "Reached with {name}",
     "challengeHeadline": "Challenge complete",
+    "reelHeadline": "Reel of the Day",
+    "reelName": "#{number}",
+    "reelScore": "{solved, select, true {Guesses} other {Missed it}}",
+    "reelStreak": "{count, plural, one {Day streak} other {Day streak}}",
     "challengeUnit": "{unit, select, titles {{count, plural, one {title finished} other {titles finished}}} languages {languages} kinds {kinds of title} hours {hours} other {days}}",
     "challengeBy": "Completed with {name}",
     "yearInReview": "Year in review",
     "topGenre": "Top genre",
     "busiestMonth": "Busiest month",
     "bestStreak": "Best streak",
+    "favourite": "{role, select, actor {Favourite actor} director {Favourite director} studio {Favourite studio} author {Favourite author} developer {Favourite developer} other {Favourite}}",
     "streakDays": "{count, plural, one {# day} other {# days}}",
     "importHeadline": "Imported {unit, select, book {{count, plural, one {# book} other {# books}}} series {{count, plural, one {# show} other {# shows}}} manga {{count, plural, other {# manga}}} game {{count, plural, one {# game} other {# games}}} title {{count, plural, one {# title} other {# titles}}} other {{count, plural, one {# film} other {# films}}}}",
     "filmEdge": "Mystonie 400 · Safety film",
     "filmFrame": "▸ 12A",
     "survivedBadge": "I survived",
-    "survivedHeadline": "Survived {scare, select, jumpScares {the jump scares} zombies {the zombies} possession {the possession} ghosts {the ghosts} clowns {the clowns} dolls {the creepy dolls} gore {the gore} spiders {the spiders} snakes {the snakes} sharks {the sharks} other {the needles}}"
+    "survivedHeadline": "Survived {scare, select, jumpScares {the jump scares} zombies {the zombies} possession {the possession} ghosts {the ghosts} clowns {the clowns} dolls {the creepy dolls} gore {the gore} spiders {the spiders} snakes {the snakes} sharks {the sharks} other {the needles}}",
+    "areaHeadline": "{area, select, watch {All I've watched} read {All I've read} play {All I've played} other {All time}}",
+    "atlasName": "My Atlas",
+    "atlasHeadline": "Places I've been",
+    "atlasCountries": "{count, plural, one {country} other {countries}}",
+    "atlasContinents": "{count, plural, one {continent} other {continents}}",
+    "atlasStories": "{count, plural, one {country} other {countries}} in my stories",
+    "atlasRegionsOf": "of {total} {many}",
+    "atlasRegionsShare": "of {country}"
   },
   "Waitlist": {
     "heading": "Want all your cards in one collection? Join the waitlist.",
@@ -169,6 +188,11 @@
     "lastUpdated": "Last updated {date}",
     "backHome": "Back to Mystonie"
   },
+  "Support": {
+    "footer": "Buy Stonie a coffee",
+    "link": "Buy me a coffee",
+    "newTab": "(opens in a new tab)"
+  },
   "Privacy": {
     "title": "Privacy Policy",
     "intro": "Mystonie lets you make artwork for the shows and movies you finish. We collect as little as we can. This page explains what we collect, why, and what you can do about it.",
@@ -183,11 +207,11 @@
       },
       "account": {
         "title": "Your account",
-        "body": "If you create an account, we store your email address, a username (made from your name or email; you can change it), the language and time zone you signed up with, and, if you sign in with Google, the name and profile picture Google shares with us. Sign-in happens through Supabase Auth: we never see or store a password, and each sign-in code is emailed to you and works once. We use this to run your account and to send you sign-in codes. Your page: while your collection is public (the default), anyone with its link can see your display name, username, profile picture, the cards you shared, your collection totals and what you're watching. You can make it private in Settings; cards you shared stay viewable by their link. Totals across everyone include private collections, but never who: how many people finished a title (and the finisher number you got for it) and what's trending on Mystonie, which lists a title only once at least 3 people logged it that week. The same goes for how many people are in a fandom club or joined a monthly challenge, and what a club's members are on lately. While your collection is public, the clubs you joined and the challenges you completed show on your page, and your finishes of titles that fit a club you joined show on that club's page. While you're signed in, a small cookie remembers your chosen language and theme, and it's removed when you sign out. You can download all your data as a file in Settings (Export my data), and your collection as spreadsheets that import back into Mystonie (Export as CSV). You can delete your account at any time in Settings, which immediately removes your profile and everything you've logged."
+        "body": "If you create an account, we store your email address, a username (made from your name or email; you can change it), the language and time zone you signed up with, and, if you sign in with Google, the name and profile picture Google shares with us. Sign-in happens through Supabase Auth: we never see or store a password, and each sign-in code is emailed to you and works once. We use this to run your account and to send you sign-in codes. Your page: while your collection is public (the default), anyone with its link can see your display name, username, profile picture, bio, the cards you shared, your collection totals and what you're watching. You can make it private in Settings; cards you shared stay viewable by their link. Totals across everyone include private collections, but never who: how many people finished a title (and the finisher number you got for it) and what's trending on Mystonie, which lists a title only once at least 3 people logged it that week. The same goes for how many people are in a fandom club or joined a monthly challenge, and what a club's members are on lately. While your collection is public, the clubs you joined and the challenges you completed show on your page, and your finishes of titles that fit a club you joined show on that club's page. While you're signed in, a small cookie remembers your chosen language and theme, and it's removed when you sign out. You can download all your data as a file in Settings (Export my data), and your collection as spreadsheets that import back into Mystonie (Export as CSV). You can delete your account at any time in Settings, which immediately removes your profile and everything you've logged."
       },
       "collect": {
         "title": "What we collect",
-        "body": "Waitlist: if you join, we store your email address, the language you used, where you signed up from (for example, from a shared card link) and the time you agreed to be emailed. Searches: the text you type is sent to our server and to the catalogs (TMDB, Google Books, AniList, RAWG) to find titles; we don't store it with anything that identifies you. Imports: an export you import from another app (Letterboxd, Goodreads, MyAnimeList, TV Time) is read on your device. Only the names, years, authors, ISBNs and catalog ids needed to find your titles are sent to our server and the catalogs (TMDB, Google Books, AniList, RAWG), and only what you confirm is saved to your collection. Offline use: so the app works without a connection, the pages you open in it, the posters on them and the titles you looked at lately are kept in your browser's storage on your device, with changes you make while offline until they reach us. Signing out deletes them from the device. Reports: if you report a page or card, we store the reason, your note and, if you're signed in, your account id, and use them only to review the report. Notifications: if you turn on weekly recap notifications in the installed app, we store that device's push address and encryption keys, and delete them when you turn notifications off, sign out, or the device stops accepting them. Abuse protection: to stop automated abuse we count requests per visitor using a one-way, salted hash of your IP address. We never store the IP address itself, and these counters are deleted within a day. Usage and errors: we measure how the site is used (for example, how many cards are made or shared) and collect error reports, without advertising cookies and without building profiles across other sites. Content warnings: if you choose topics to avoid, we store them with your account and only you can see them. Titles are looked up on DoesTheDogDie from our server, never with anything that identifies you. Scene warnings and the warnings quiz: the warnings you add, your votes on them and your quiz answers are stored with your account. Others see the warnings and the totals, never who added or voted. If you delete your account, the warnings you added stay, without your name."
+        "body": "Waitlist: if you join, we store your email address, the language you used, where you signed up from (for example, from a shared card link) and the time you agreed to be emailed. Searches: the text you type is sent to our server and to the catalogs (TMDB, Google Books, AniList, RAWG) to find titles; we don't store it with anything that identifies you. Imports: an export you import from another app (Letterboxd, Goodreads, MyAnimeList, TV Time) is read on your device. Only the names, years, authors, ISBNs and catalog ids needed to find your titles are sent to our server and the catalogs (TMDB, Google Books, AniList, RAWG), and only what you confirm is saved to your collection. Offline use: so the app works without a connection, the pages you open in it, the posters on them and the titles you looked at lately are kept in your browser's storage on your device, with changes you make while offline until they reach us. Signing out deletes them from the device. Reports: if you report a page or card, we store the reason, your note and, if you're signed in, your account id, and use them only to review the report. Problem reports: if you use Report a problem, we store your message, the page you sent it from, your browser's name and version and, if you're signed in, your account id, and email them to ourselves. We use them only to fix and improve Mystonie and to reply to you, and delete them with your account. Notifications: if you turn on weekly recap notifications in the installed app, we store that device's push address and encryption keys, and delete them when you turn notifications off, sign out, or the device stops accepting them. Abuse protection: to stop automated abuse we count requests per visitor using a one-way, salted hash of your IP address. We never store the IP address itself, and these counters are deleted within a day. Usage and errors: we measure how the site is used (for example, how many cards are made or shared) and collect error reports, without advertising cookies and without building profiles across other sites. Content warnings: if you choose topics to avoid, we store them with your account and only you can see them. Titles are looked up on DoesTheDogDie from our server, never with anything that identifies you. Scene warnings and the warnings quiz: the warnings you add, your votes on them and your quiz answers are stored with your account. Others see the warnings and the totals, never who added or voted. If you delete your account, the warnings you added stay, without your name. Reel of the Day: signed in, your guesses and results are stored with your account (for your streak and stats) and only you can see them; signed out, they stay in your browser. The Journal: signed in, the articles you Stamp or save are stored with your account. Only you see which ones; everyone sees how many Stamps an article has, never who gave them. Tips: if you tip through Buy Me a Coffee, it tells us the email you paid with. If a Mystonie account uses that email, we give it the Supporter sticker; we don't keep the email or anything else about the tip."
       },
       "use": {
         "title": "How we use it",
@@ -195,7 +219,7 @@
       },
       "processors": {
         "title": "Services we rely on",
-        "body": "Vercel (hosting), Supabase (database and sign-in), PostHog (privacy-friendly analytics), Sentry (error reports) and Resend (email delivery) process data on our behalf under their data processing terms. Posters and title information come from TMDB (movies and series), AniList (manga), Google Books (books, through our server) and RAWG (games): your browser loads posters and game art directly from TMDB's, AniList's and RAWG's servers, which see your IP address like any website you visit. If you sign in with Google, Google confirms who you are under its own privacy policy. Notifications you turn on are delivered by your device's push service (Apple, Google, Mozilla or Microsoft); they are encrypted so only your device can read them."
+        "body": "Vercel (hosting), Supabase (database and sign-in), PostHog (privacy-friendly analytics), Sentry (error reports) and Resend (email delivery) process data on our behalf under their data processing terms. Posters and title information come from TMDB (movies and series), AniList (manga), Google Books (books, through our server) and RAWG (games): your browser loads posters, photos of cast and crew, and game art directly from TMDB's, AniList's and RAWG's servers, which see your IP address like any website you visit. If you sign in with Google, Google confirms who you are under its own privacy policy. Notifications you turn on are delivered by your device's push service (Apple, Google, Mozilla or Microsoft); they are encrypted so only your device can read them."
       },
       "transfers": {
         "title": "Where data is stored",
@@ -243,6 +267,10 @@
         "title": "Mystonie",
         "body": "The Mystonie name, logo, mascot and card designs belong to us. You may share cards you made with them as they are."
       },
+      "tips": {
+        "title": "Tips",
+        "body": "You can tip the maker through <bmc>Buy Me a Coffee</bmc>. A tip is a voluntary gift, paid to and handled by Buy Me a Coffee under its own terms. It doesn't unlock features. If you tip with the email of your Mystonie account, the account gets the Supporter sticker."
+      },
       "liability": {
         "title": "No warranty",
         "body": "To the extent the law allows, Mystonie is provided without warranties, and we're not liable for indirect or consequential losses from using it. Nothing here limits rights you have under consumer laws that can't be waived."
@@ -258,7 +286,30 @@
     }
   },
   "Nav": {
-    "home": "Mystonie home"
+    "home": "Mystonie home",
+    "showAll": "Show all ({count})",
+    "showLess": "Show less"
+  },
+  "Back": {
+    "back": "Back",
+    "backTo": "Back to {page}",
+    "profile": "@{username}",
+    "pages": {
+      "landing": "Mystonie",
+      "home": "Home",
+      "collection": "Collection",
+      "atlas": "Atlas",
+      "feed": "Feed",
+      "me": "Me",
+      "stats": "Stats",
+      "settings": "Settings",
+      "people": "People",
+      "board": "The board",
+      "challenges": "Challenges",
+      "clubs": "Clubs",
+      "reel": "Reel of the Day",
+      "pro": "Pro"
+    }
   },
   "Unsubscribe": {
     "title": "Unsubscribe",
@@ -306,15 +357,22 @@
     "recap": {
       "title": "{period, select, month {Your month is in: {range}} other {Your week is in: {range}}}",
       "body": "{summary}. Tap to see your recap card."
+    },
+    "reel": {
+      "title": "🔥 Keep your {count}-day streak",
+      "body": "Today’s Reel of the Day ends in {hours, plural, one {# hour} other {# hours}}. Can you name it?"
     }
   },
   "Account": {
     "signIn": "Sign in",
-    "yourAccount": "Your account",
     "collection": "Collection",
     "add": "Add a title",
     "stats": "Stats",
-    "home": "Home"
+    "feed": "Feed",
+    "feedNews": "Feed, new activity",
+    "home": "Home",
+    "me": "Me",
+    "nav": "Main"
   },
   "Auth": {
     "title": "Open your collection",
@@ -380,6 +438,11 @@
     "displayName": "Display name",
     "displayNameHint": "Shown on your page. Leave empty to show your username.",
     "usernameHint": "3–20 lower-case letters, numbers or _.",
+    "bio": "Bio",
+    "bioPlaceholder": "What do you love to watch, read or play?",
+    "bioHint": "On your page, under your name. Up to {max} characters and 4 lines. Links aren't clickable.",
+    "bioCount": "{count}/{max}",
+    "bioTooLong": "Keep your bio to {max} characters and 4 lines.",
     "save": "Save",
     "saving": "Saving…",
     "saved": "Saved.",
@@ -403,6 +466,8 @@
     "notifications": "Notifications",
     "pushRecaps": "Weekly recap notifications",
     "pushRecapsHint": "On this device, every Monday morning when your recap card is ready.",
+    "reelReminders": "Reel of the Day reminders",
+    "reelRemindersHint": "A nudge when today’s reel would end a winning streak of 2 days or more, at most once a day.",
     "pushBlocked": "Notifications are blocked for Mystonie. Allow them in your device settings first.",
     "pushInstall": "Install Mystonie on this device (from your browser's menu), then open it from your home screen to get your weekly recap as a notification.",
     "pushInstallIos": "Add Mystonie to your Home Screen (Share, then “Add to Home Screen”), then open it from there to turn on notifications.",
@@ -415,7 +480,17 @@
     "proBody": "Pro card styles, new ones first, and you keep Mystonie going.",
     "proActive": "You're Pro. Thanks for keeping Mystonie going.",
     "proLink": "See Pro",
-    "proManage": "Manage Pro"
+    "betaStamp": "BETA",
+    "betaTitle": "Mystonie is in beta",
+    "feedbackTitle": "Feedback",
+    "betaBody": "Found a bug, or have an idea? Tell us: we read every report.",
+    "proSoon": "Not on sale during the beta. See what it will add.",
+    "proManage": "Manage Pro",
+    "gettingStarted": "Getting started",
+    "supportTitle": "Support Mystonie",
+    "supportBody": "Mystonie is free and made by one person. If it brings you joy, a coffee helps keep it running. Tips don't unlock anything: everything stays free. Tip with your account's email and you get the Supporter sticker.",
+    "atlasPublic": "Show my Atlas on my profile",
+    "atlasPublicHint": "Visitors see the countries you've been to and lived in, never where you want to go. Off until you turn it on."
   },
   "Collection": {
     "title": "Your collection",
@@ -465,6 +540,7 @@
     "searchType": "{type, select, all {All} screen {Movies & TV} book {Books} game {Games} other {Manga}}",
     "shelves": "Collection tabs",
     "shelf": "{shelf, select, read {Read} play {Play} other {Watch}}",
+    "shelfAtlas": "Atlas",
     "readTime": "Reading time",
     "titlesRead": "Finished",
     "readTimeHint": "Reading time is an estimate: 1.5 min a page, 5 min a manga chapter, 45 min a volume.",
@@ -491,7 +567,12 @@
     "readLength": "{progress} · {time} read",
     "importLink": "Coming from another app? Import your history",
     "waitingToSync": "Waiting to sync",
-    "changedElsewhere": "“{name}” was changed on another device after this, so that change stays."
+    "changedElsewhere": "“{name}” was changed on another device after this, so that change stays.",
+    "checkedClear": "Checked: nothing from your avoid list",
+    "areaWatched": "Watched",
+    "areaRead": "Read",
+    "areaPlayed": "Played",
+    "areaFinished": "{count, plural, one {# finished} other {# finished}}"
   },
   "Series": {
     "backToCollection": "← Your collection",
@@ -571,6 +652,7 @@
     "readingTitle": "{unit, select, page {Page {position} of {name}} chapter {Chapter {position} of {name}} other {Volume {position} of {name}}}",
     "milestoneCardTitle": "{metric, select, titles {That's your {value, selectordinal, one {#st} two {#nd} few {#rd} other {#th}} title!} hours {{count} hours of watching!} other {{count} episodes watched!}}",
     "challengeCardTitle": "You completed {name}!",
+    "reelCardTitle": "Reel of the Day #{number}",
     "yearTitle": "Your {year} in review",
     "importTitle": "{unit, select, book {{count, plural, one {# book} other {# books}}} series {{count, plural, one {# show} other {# shows}}} manga {{count, plural, other {# manga}}} game {{count, plural, one {# game} other {# games}}} title {{count, plural, one {# title} other {# titles}}} other {{count, plural, one {# film} other {# films}}}} imported, {range}",
     "styleLabelPro": "{style} (Pro) · swipe for another style",
@@ -578,7 +660,10 @@
     "proUnlock": "Unlock",
     "survivedOffer": "You made it through {scare, select, jumpScares {the jump scares} zombies {the zombies} possession {the possession} ghosts {the ghosts} clowns {the clowns} dolls {the creepy dolls} gore {the gore} spiders {the spiders} snakes {the snakes} sharks {the sharks} other {the needles}}.",
     "survivedTry": "Make it a Survived card",
-    "shareOffline": "Share once you're online"
+    "shareOffline": "Share once you're online",
+    "areaTitle": "{area, select, watch {Everything you've watched} read {Everything you've read} play {Everything you've played} other {Your collection}}, {range}",
+    "atlasCardTitle": "{count, plural, one {# country} other {# countries}} on your Atlas",
+    "atlasRegionCardTitle": "{done} of {total} {many} in {country}"
   },
   "SharedCard": {
     "notFoundTitle": "Card not found · Mystonie",
@@ -594,8 +679,11 @@
     "makeYourOwn": "Make your own card",
     "startCollection": "Start your collection",
     "recapLine": "{period, select, month {A month of watching} year {A year of watching} all {Watching so far} other {A week of watching}}, {range}",
+    "reelLine": "Reel of the Day #{number}",
     "byUserLink": "From <link>@{username}</link>'s collection",
-    "importLine": "{unit, select, book {{count, plural, one {# book} other {# books}}} series {{count, plural, one {# show} other {# shows}}} manga {{count, plural, other {# manga}}} game {{count, plural, one {# game} other {# games}}} title {{count, plural, one {# title} other {# titles}}} other {{count, plural, one {# film} other {# films}}}} imported, {range}"
+    "importLine": "{unit, select, book {{count, plural, one {# book} other {# books}}} series {{count, plural, one {# show} other {# shows}}} manga {{count, plural, other {# manga}}} game {{count, plural, one {# game} other {# games}}} title {{count, plural, one {# title} other {# titles}}} other {{count, plural, one {# film} other {# films}}}} imported, {range}",
+    "atlasLine": "An Atlas of {count, plural, one {# country} other {# countries}}",
+    "atlasRegionsLine": "{done} of {total} {many} of {country}"
   },
   "Recap": {
     "pageTitle": "Your recap",
@@ -604,7 +692,6 @@
   },
   "Stats": {
     "title": "Stats",
-    "subtitle": "Your album in numbers.",
     "periodsLabel": "Period",
     "period": "{period, select, week {This week} month {This month} year {This year} other {All time}}",
     "headline": "{period, select, week {Your week} month {Your month} year {Your year} other {All time so far}}",
@@ -627,6 +714,10 @@
     "topGenres": "Top genres",
     "topLanguages": "Top languages",
     "titleCount": "{count, plural, one {# title} other {# titles}}",
+    "favourites": "Favourites",
+    "favouritesHint": "Who made the titles you finished in this period.",
+    "favouriteRole": "{role, select, actor {Actors} director {Directors & creators} studio {Studios} author {Authors} developer {Developers} other {People}}",
+    "personDetail": "{count, plural, one {# title} other {# titles}} · {time}",
     "tasteEmpty": "Genres and languages show up once something is watched in this period.",
     "records": "Records",
     "longestMovie": "Longest movie",
@@ -654,7 +745,10 @@
     "milestonesHint": "Round numbers you've reached. Tap one to make its card.",
     "milestoneOn": "{date} · {name}",
     "milestonesEmpty": "Your first milestone comes at 10 titles finished.",
-    "yearReviewLink": "See your {year} in review"
+    "yearReviewLink": "See your {year} in review",
+    "shareCollection": "Share my collection",
+    "shareArea": "{area, select, watch {Watched} read {Read} play {Played} other {All}}",
+    "shareAreaAll": "{area, select, watch {Share all I've watched} read {Share all I've read} play {Share all I've played} other {Share my collection}}"
   },
   "Profile": {
     "metaTitle": "{name} (@{username})",
@@ -676,6 +770,7 @@
     "ctaButton": "Make your first card",
     "milestoneCard": "Milestone",
     "yearCard": "Year in review",
+    "reelCard": "Reel of the Day #{number}",
     "followers": "<b>{count}</b> {count, plural, one {follower} other {followers}}",
     "followingCount": "<b>{count}</b> following",
     "findPeople": "Find people to follow",
@@ -684,7 +779,14 @@
     "shelf": "The shelf",
     "shelfHint": "Everything finished, newest first.",
     "shelfMore": "+ {count} more finished",
-    "shelfItem": "{name} ({kind, select, movie {movie} series {series} book {book} manga {manga} game {game} other {title}})"
+    "shelfItem": "{name} ({kind, select, movie {movie} series {series} book {book} manga {manga} game {game} other {title}})",
+    "settings": "Settings",
+    "meTitle": "Me",
+    "tabsLabel": "Your album and stats",
+    "tabAlbum": "Album",
+    "tabStats": "Stats",
+    "atlasCard": "Atlas of {count, plural, one {# country} other {# countries}}",
+    "atlasRegionsCard": "Atlas of {country}"
   },
   "Social": {
     "follow": "Follow",
@@ -709,16 +811,23 @@
     "cardAlt": "Card: {name}",
     "loadMore": "Load more",
     "loading": "Loading…",
-    "feedTitle": "Following",
+    "feedTitle": "Feed",
     "feedKicker": "What your people finished",
     "findPeople": "Find people",
     "feedEmpty": "Follow people to see what they finish, and give them a Stamp.",
+    "feedDescription": "What the people you follow finish, and notes from the Mystonie team: lists, picks and stories about the shows, movies, books and games you finish.",
+    "feedVisitorKicker": "Notes from the album",
+    "feedVisitorIntro": "Lists, picks and stories about the things you finish, from the people making Mystonie. Sign in to follow people and see what they finish too.",
+    "feedSignIn": "Sign in",
+    "feedTabsLabel": "Feed sections",
+    "tabFollowing": "Following",
+    "tabArticles": "Articles",
+    "tabSaved": "Saved",
     "activityTitle": "Lately",
     "activityStamp": "<b>{name}</b> stamped your finish of <b>{title}</b>",
     "activityFollow": "<b>{name}</b> started following you",
     "peopleTitle": "Find people",
     "peopleHint": "Search by username or name. Only public collections show up.",
-    "backToFeed": "← Following",
     "searchLabel": "Search people",
     "searchPlaceholder": "@username or name",
     "searching": "Searching…",
@@ -737,12 +846,12 @@
     "toBoard": "The board",
     "toChallenges": "Challenges",
     "toClubs": "Clubs",
+    "toReel": "Reel of the Day",
     "communityLabel": "Community"
   },
   "Board": {
     "title": "The board",
     "kicker": "You and your people",
-    "toFeed": "← Following",
     "periodLabel": "Board period",
     "period": "{period, select, month {This month} other {This week}}",
     "boardTitle": "{period, select, month {This month's board} other {This week's board}}",
@@ -772,7 +881,8 @@
     "next": "{first, select, true {Be the first: finish it and you're finisher #1.} other {Finish it and you'd be finisher #{number}.}}",
     "friends": "People you follow",
     "friendWhen": "finished {when}",
-    "hint": "Everyone who finishes a title gets the next number, and keeps it for good."
+    "hint": "Everyone who finishes a title gets the next number, and keeps it for good.",
+    "reviews": "What people said"
   },
   "Badges": {
     "items": {
@@ -863,10 +973,62 @@
       "all-rounder": {
         "name": "All-Rounder",
         "how": "Finish 4 kinds of title: movies, series, books, manga or games."
+      },
+      "reel-rookie": {
+        "name": "Reel Rookie",
+        "how": "Solve your first Reel of the Day."
+      },
+      "one-take": {
+        "name": "One Take",
+        "how": "Solve a Reel of the Day with your first guess."
+      },
+      "sharp-eye": {
+        "name": "Sharp Eye",
+        "how": "Solve 10 Reels of the Day in 3 guesses or fewer."
+      },
+      "hot-streak": {
+        "name": "Hot Streak",
+        "how": "Solve the Reel of the Day 7 days in a row."
+      },
+      "reel-legend": {
+        "name": "Reel Legend",
+        "how": "Solve the Reel of the Day 30 days in a row."
+      },
+      "challenger": {
+        "name": "Challenger",
+        "how": "Complete a monthly challenge."
+      },
+      "clean-sweep": {
+        "name": "Clean Sweep",
+        "how": "Complete all 4 challenges of one month."
+      },
+      "season-pass": {
+        "name": "Season Pass",
+        "how": "Complete challenges in 6 different months."
+      },
+      "lookout": {
+        "name": "Lookout",
+        "how": "Answer 10 questions in the warnings quiz."
+      },
+      "guardian": {
+        "name": "Guardian",
+        "how": "Answer 100 questions in the warnings quiz."
+      },
+      "critic": {
+        "name": "Critic",
+        "how": "Write a review for 10 titles you finished."
+      },
+      "byline": {
+        "name": "Byline",
+        "how": "Write an article for the Journal."
+      },
+      "supporter": {
+        "name": "Supporter",
+        "how": "Support Mystonie with Pro or a coffee."
       }
     },
     "album": "Sticker album",
-    "albumHint": "Stickers you earn from what you finish. Tap one to see how.",
+    "albumHint": "Stickers you earn from what you finish, play and help with. Tap one to see how.",
     "albumCount": "{count} of {total} stuck in",
     "progress": "{progress} of {target}",
     "earnedOn": "Earned {date}",
@@ -895,8 +1057,40 @@
     "gone": "This isn't public any more.",
     "close": "Close"
   },
+  "Beta": {
+    "badge": "BETA",
+    "badgeLabel": "Mystonie is in beta: what that means, and report a problem",
+    "footer": "Mystonie is in beta.",
+    "report": "Report a problem",
+    "title": "Mystonie is in beta",
+    "intro": "Mystonie is new, and one person is still building and polishing it. Everything you see works, but you may find rough edges, and things will keep changing as it grows.",
+    "whatItMeans": "What beta means",
+    "pointSafe": "Your collection is yours and it's kept safe. You can export all of it any time from Settings.",
+    "pointChanges": "Pages and features may change, move or get better from week to week.",
+    "pointListen": "Your reports shape what gets fixed and built next. We read every one.",
+    "pointPro": "<pro>Mystonie Pro</pro> isn't on sale yet. You can see what it will add and what it's planned to cost.",
+    "reportTitle": "Report a problem",
+    "replySignedIn": "Found a bug, or have an idea? Tell us here. We'll reply to your account's email if we need to know more.",
+    "replySignedOut": "Found a bug, or have an idea? Tell us here. Want a reply? Sign in first, or email <mail>{email}</mail>.",
+    "kindLabel": "What is it about?",
+    "kind": "{kind, select, bug {Something's broken} idea {An idea} other {Something else}}",
+    "messageLabel": "{kind, select, bug {What happened? What did you expect?} idea {What's your idea?} other {What would you like to tell us?}}",
+    "messagePlaceholder": "{kind, select, bug {I tapped… and then…} idea {It would be great if…} other {}}",
+    "hint": "The page you came from and your browser's name are sent with it.",
+    "honeypot": "Leave this empty",
+    "submit": "Send",
+    "sending": "Sending…",
+    "done": "Thank you! We read every report.",
+    "another": "Send another",
+    "error": "Couldn't send that. Try again in a moment.",
+    "limited": "Too many reports from here. Try again later.",
+    "yours": "Your reports",
+    "status": "{status, select, planned {On the list} fixed {Fixed} closed {Closed} other {Received}}",
+    "errorTitle": "Something went wrong",
+    "errorBody": "Sorry, this page broke. Try again, and if it keeps happening, tell us: it helps us fix it.",
+    "retry": "Try again"
+  },
   "Reading": {
-    "backToCollection": "← Your collection",
     "loadError": "Couldn't load this title right now. Try again in a moment.",
     "meta": "{kind, select, book {Book} other {Manga}}{year, select, none {} other { · {year}}}",
     "byAuthor": "by {author}",
@@ -932,7 +1126,6 @@
     "waitingToSync": "waiting to sync"
   },
   "Game": {
-    "backToCollection": "← Your collection",
     "loadError": "Couldn't load this game right now. Try again in a moment.",
     "meta": "Game{year, select, none {} other { · {year}}}",
     "average": "Average playtime: about {time}",
@@ -976,7 +1169,6 @@
   },
   "Import": {
     "title": "Import your history",
-    "back": "Settings",
     "intro": "Bring over what you've watched and read in another app: finishes with their dates and ratings, what you're in the middle of, and what you want to see next.",
     "fromLabel": "Where from?",
     "howTitle": "Get your {source} export",
@@ -1101,7 +1293,11 @@
     "manage": "Manage subscription",
     "error": "Something went wrong. Try again in a moment.",
     "pricesUnavailable": "Plans can't be shown right now. Try again in a moment.",
-    "fineprint": "Prices in USD, billed by Stripe. Cancel any time: Pro stays on until the end of the period you've paid for."
+    "fineprint": "Prices in USD, billed by Stripe. Cancel any time: Pro stays on until the end of the period you've paid for.",
+    "notOnSaleTitle": "Pro isn't on sale yet",
+    "notOnSaleBody": "Mystonie is in beta. Here's what Pro will add and what it's planned to cost. You'll be able to go Pro once the beta ends.",
+    "notOnSale": "Not on sale yet",
+    "plannedFineprint": "Planned prices in USD. They may change before Pro goes on sale."
   },
   "Warnings": {
     "title": "Content warnings",
@@ -1138,8 +1334,137 @@
     "saveError": "Couldn't save. Try again.",
     "loadError": "Couldn't load the topic list right now. Try again in a moment.",
     "noMatch": "No topics match “{query}”.",
-    "backToSettings": "Back to settings",
-    "categoryCount": "{count, plural, one {# chosen} other {# chosen}}"
+    "categoryCount": "{count, plural, one {# chosen} other {# chosen}}",
+    "familyBody": "Not sure where to start? The family set covers animal deaths, jump scares, gore, violence, self-harm, sexual content and drugs. You can change it any time.",
+    "familyButton": "Use the family set"
+  },
+  "TitleCheck": {
+    "title": "{kind, select, book {Before you read} manga {Before you read} game {Before you play} other {Before you watch}}",
+    "setup": "{kind, select, book {Is it right for you, or for reading aloud to the kids?} manga {Is it right for you, or for the kids?} game {Is it right for you, or for the kids?} other {Safe to watch with your family?}} Pick what you'd rather avoid, and every title answers here first.",
+    "family": "Check for family viewing",
+    "familyError": "Couldn't save the topics. Try again.",
+    "checking": "Checking your topics…",
+    "ownTopics": "Choose my own topics",
+    "editTopics": "Edit topics",
+    "stamp": "Heads up",
+    "hits": "{count, plural, one {1 of your topics: {topics}} other {# of your topics: {topics}}}",
+    "dtddVotes": "DoesTheDogDie: {yes} yes · {no} no",
+    "oursSource": "Confirmed on Mystonie",
+    "details": "See the details",
+    "clear": "Nothing from your avoid list",
+    "sureAll": "{count, plural, one {People said no to your topic.} other {People said no to all # of your topics.}}",
+    "sureSome": "People said no to {sure} of your {total} topics; the rest don't have enough votes yet.",
+    "unknown": "No answer for your topics yet",
+    "unknownBody": "DoesTheDogDie doesn't have this title, and nobody on Mystonie has flagged your topics here.",
+    "unavailable": "Couldn't reach DoesTheDogDie right now, and nobody on Mystonie has flagged your topics here. Try again in a moment.",
+    "unknownOurs": "{kind, select, game {Nobody who played it} other {Nobody who read it}} has flagged your topics here yet. Warnings for {kind, select, book {books} manga {manga} other {games}} come from people on Mystonie."
+  },
+  "Atlas": {
+    "title": "Atlas",
+    "statCountries": "{count, plural, one {country} other {countries}} you've been to",
+    "statContinents": "{count, plural, one {continent} other {continents}} of 7",
+    "statStories": "{count, plural, one {country} other {countries}} in your stories",
+    "layersLabel": "Map layer",
+    "layerBeen": "Been",
+    "layerStories": "Stories",
+    "mapLabel": "World map",
+    "zoomLabel": "Zoom to",
+    "world": "World",
+    "continents": {
+      "africa": "Africa",
+      "antarctica": "Antarctica",
+      "asia": "Asia",
+      "europe": "Europe",
+      "north_america": "North America",
+      "south_america": "South America",
+      "oceania": "Oceania"
+    },
+    "mapBeenAlt": "World map with {count, plural, =0 {no countries} one {# country} other {# countries}} you've been to coloured in",
+    "mapStoriesAlt": "World map with the {count, plural, =0 {countries} one {# country} other {# countries}} your stories come from coloured in",
+    "loadingMap": "Unfolding the map…",
+    "statusBeen": "Been there",
+    "statusLived": "Lived there",
+    "statusWant": "Want to go",
+    "fewer": "Fewer",
+    "more": "More stories",
+    "addHint": "Tap a country on the map, or find it here.",
+    "storiesHint": "Where the movies, series and manga you've watched and read come from. Tap a country to see them.",
+    "searchLabel": "Find a country",
+    "searchPlaceholder": "Find a country",
+    "searchNone": "No country by that name.",
+    "saveError": "Couldn't save that. Check your connection and try again.",
+    "empty": "Where have you been? Tap a country to start your Atlas.",
+    "beenTitle": "Been there · {count}",
+    "wantTitle": "Want to go · {count}",
+    "livedTag": "lived",
+    "bothLine": "Been there, watched that: stories from {both} of your {been, plural, one {# country} other {# countries}}.",
+    "storiesEmpty": "Start or finish a movie, series or manga and the country it comes from lights up here.",
+    "storiesTitle": "{count, plural, one {# country} other {# countries}} in your stories",
+    "storyCount": "{count, plural, one {# story} other {# stories}}",
+    "storiesSource": "Countries come from TMDB (movies and series) and AniList (manga). Books and games don't say where they're from.",
+    "share": "Share my Atlas",
+    "shareEmpty": "Add a country you've been to first.",
+    "profilePrivate": "Your profile is private, so only you see your Atlas.",
+    "close": "Close",
+    "statusLabel": "You and {country}",
+    "firstVisit": "First visit",
+    "yearUnknown": "Not sure",
+    "fromHere": "Stories from here",
+    "fromHereCount": "{count, plural, one {# story} other {# stories}} from {country} in your collection.",
+    "fromHereNone": "Nothing from here in your collection yet.",
+    "remove": "Take it off my Atlas",
+    "albumCount": "{countries, plural, one {# country} other {# countries}} · {continents, plural, one {# continent} other {# continents}}",
+    "openAtlas": "Open my Atlas",
+    "kindOne": "{kind, select, state {state} province {province} prefecture {prefecture} county {county} department {department} governorate {governorate} canton {canton} district {district} municipality {municipality} parish {parish} emirate {emirate} nation {nation} other {region}}",
+    "kindMany": "{kind, select, state {states} province {provinces} prefecture {prefectures} county {counties} department {departments} governorate {governorates} canton {cantons} district {districts} municipality {municipalities} parish {parishes} emirate {emirates} nation {nations} other {regions}}",
+    "kindTitle": "{kind, select, state {States} province {Provinces} prefecture {Prefectures} county {Counties} department {Departments} governorate {Governorates} canton {Cantons} district {Districts} municipality {Municipalities} parish {Parishes} emirate {Emirates} nation {Nations} other {Regions}}",
+    "regionsDone": "{done}/{total}",
+    "regionsDoneOf": "{done} of {total}",
+    "regionsShort": "{done}/{total}",
+    "regionsDoneLabel": "{many} you've been to",
+    "regionsMark": "Mark the {many} you've been to",
+    "regionsJoinHint": "Mark one and {country} goes on your Atlas as Been there.",
+    "regionsWantHint": "{country} is on your Want to go list. Mark one and it moves to Been there.",
+    "regionsMapLabel": "Map of {country}",
+    "regionsMapAlt": "Map of {country}: {done} of {total} {many} you've been to",
+    "regionsMapError": "The map couldn't load. Check your connection and try again.",
+    "regionsMapHint": "Tap the {many} you've been to, or find them below.",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "regionMarked": "Marked {region}",
+    "regionUnmarked": "Took {region} off",
+    "undo": "Undo",
+    "regionsAll": "{title} · {total}",
+    "regionsFind": "Find a {one}",
+    "regionsNoMatch": "No {many} match “{query}”.",
+    "regionsShare": "Share my {country}",
+    "regionsShareEmpty": "Mark the {many} you've been to, then share them as a card.",
+    "regionsClearWant": "{count, plural, one {Want to go clears the # {one} you've marked.} other {Want to go clears the # {many} you've marked.}}",
+    "regionsClearRemove": "{count, plural, one {This also clears the # {one} you've marked.} other {This also clears the # {many} you've marked.}}",
+    "regionsClearWantYes": "Clear and switch",
+    "regionsClearRemoveYes": "Take it off",
+    "regionsClearNo": "Keep"
+  },
+  "TitleDetails": {
+    "toggle": "Details and content warnings",
+    "loading": "Loading details…",
+    "error": "Couldn't load the details. Try again in a moment.",
+    "retry": "Try again",
+    "more": "Read more",
+    "less": "Show less",
+    "score": "{score} on TMDB",
+    "votes": "{count, plural, one {# vote} other {# votes}}",
+    "seasons": "{seasons, plural, one {# season} other {# seasons}}{episodes, plural, =0 {} one { · # episode} other { · # episodes}}",
+    "runtime": "{kind, select, series {About {minutes} min an episode} other {{minutes} min}}",
+    "directors": "{kind, select, series {Created by {names}} other {Directed by {names}}}",
+    "cast": "Starring {names}",
+    "makers": "{kind, select, game {Made by {names}} other {By {names}}}",
+    "imdb": "See it on IMDb",
+    "page": "{kind, select, book {Open the book's page} manga {Open the manga's page} game {Open the game's page} series {Open the series' page} other {Open the movie's page}}",
+    "flagged": "People say yes to",
+    "yesVotes": "{count, plural, one {# yes} other {# yes}}",
+    "noFlags": "Nobody has said yes to a topic yet.",
+    "flaggedMore": "{count, plural, one {and 1 more on DoesTheDogDie (it may be a spoiler)} other {and # more on DoesTheDogDie (some may be spoilers)}}"
   },
   "WarningTopics": {
     "names": {
@@ -1453,7 +1778,6 @@
     "trendingPeople": "{count, plural, one {# member} other {# members}}",
     "feedTitle": "Latest from members",
     "feedEmpty": "No finishes here yet. Join and finish something that fits to be the first.",
-    "back": "← All clubs",
     "titleClubs": "Clubs for this",
     "profileTitle": "Clubs",
     "profileEmpty": "Find your fandom",
@@ -1482,5 +1806,113 @@
     "pageBody": "Pages you've opened before still work offline, and anything you log syncs when you're back.",
     "savedPages": "Open offline",
     "metaTitle": "Offline"
+  },
+  "GettingStarted": {
+    "title": "Getting started",
+    "open": "Getting started: {done} of {total} done",
+    "close": "Close",
+    "progress": "{done} of {total} done",
+    "progressLabel": "Getting started progress",
+    "steps": {
+      "add": "Add your first title",
+      "card": "Finish one and make a card",
+      "topics": "Pick topics to avoid",
+      "social": "Follow someone or join a club",
+      "install": "Install the app"
+    },
+    "hints": {
+      "add": "A movie, series, book, manga or game: tap ➕.",
+      "card": "Mark something finished and share its card.",
+      "topics": "We'll check every title against them before you watch.",
+      "social": "See what friends finish, or find your fandom's club.",
+      "install": "Your browser's menu → Add to Home Screen (Share → Add to Home Screen on iPhone)."
+    },
+    "done": "Done",
+    "toDo": "To do",
+    "skip": "Skip for now",
+    "doneTitle": "You're all set!",
+    "doneBody": "Your album is ready. Keep finishing things, and the cards and stats keep coming.",
+    "doneButton": "Nice",
+    "show": "Show the getting-started checklist",
+    "shown": "The checklist's round button is at the bottom of every page until you finish or skip it."
+  },
+  "Reel": {
+    "metaTitle": "Reel of the Day",
+    "metaDescription": "Guess today's movie in six tries. Every miss gives you a clue.",
+    "kicker": "A new movie every day",
+    "title": "Reel of the Day",
+    "intro": "Guess today's movie in six tries. Each miss sharpens the poster and opens a clue.",
+    "loading": "Loading today's reel…",
+    "loadError": "Today's reel didn't load. Try again in a moment.",
+    "retry": "Try again",
+    "guessError": "That guess didn't go through. Try again.",
+    "newDay": "A new reel is out.",
+    "posterAlt": "Today's poster, blurred",
+    "answerPosterAlt": "Poster of {name}",
+    "noPoster": "No poster",
+    "clues": "Clues",
+    "clue": "{key, select, year {Year} genre {Genre} actor {Top-billed actor} director {Director} tagline {Tagline} other {Clue}}",
+    "clueLocked": "After miss {count}",
+    "clueUnknown": "Not known",
+    "guesses": "Your guesses",
+    "right": "That's it",
+    "wrong": "Not it",
+    "guessLabel": "Guess the movie",
+    "guessPlaceholder": "Search for a movie…",
+    "guessesLeft": "{count, plural, one {# guess left} other {# guesses left}}",
+    "alreadyGuessed": "Already guessed",
+    "solvedTitle": "{count, plural, one {Got it in one!} other {Got it in # guesses!}}",
+    "lostTitle": "Out of guesses",
+    "answerWas": "Today's reel",
+    "openTitle": "Open the movie",
+    "shareResult": "Share result",
+    "copied": "Result copied: paste it anywhere.",
+    "makeCard": "Make a card",
+    "guestNote": "Sign in to keep your streak and make a card of your result.",
+    "signIn": "Sign in",
+    "nextReel": "Next reel in {time}",
+    "yesterday": "Yesterday's reel · #{number}",
+    "number": "#{number}",
+    "stats": "Your reels",
+    "played": "Played",
+    "winRate": "Win %",
+    "streak": "Streak",
+    "maxStreak": "Best streak",
+    "distribution": "Solved in",
+    "howTitle": "How it works",
+    "how": "Everyone gets the same movie, and a new one at midnight UTC. Guesses come from search, so spelling never costs you a try. Share your squares, not the answer.",
+    "homeTitle": "Reel of the Day #{number}",
+    "homePlay": "Guess today's movie in six tries.",
+    "homeSolved": "{count, plural, one {Solved in one} other {Solved in #}}. Come back tomorrow.",
+    "homeLost": "Missed today's. Come back tomorrow.",
+    "homePlaying": "{count, plural, one {# guess left} other {# guesses left}}.",
+    "homeCta": "Play"
+  },
+  "Journal": {
+    "empty": "The first article is on its way.",
+    "readTime": "{minutes} min read",
+    "by": "By {author}",
+    "defaultAuthor": "The Mystonie team",
+    "fallbackNote": "This article isn’t in your language yet, so here it is in {language}.",
+    "draft": "Draft",
+    "add": "Add",
+    "addLabel": "Add {name} to your collection",
+    "kind": "{kind, select, movie {Movie} series {Series} book {Book} manga {Manga} game {Game} other {Title}}",
+    "about": "In the Journal",
+    "latest": "From the Journal",
+    "readMore": "Read",
+    "inLanguage": "In {language}",
+    "forYouHint": "As your collection grows, articles about your titles come first.",
+    "reason": "{status, select, want {{kind, select, book {You want to read {name}} manga {You want to read {name}} game {You want to play {name}} other {You want to watch {name}}}} watching {{kind, select, book {You’re reading {name}} manga {You’re reading {name}} game {You’re playing {name}} other {You’re watching {name}}}} other {You finished {name}}}",
+    "featured": "Featured",
+    "save": "Save",
+    "saved": "Saved",
+    "unsave": "Remove from saved",
+    "share": "Share",
+    "copied": "Link copied",
+    "enjoyed": "Enjoyed this one?",
+    "actionsLabel": "Stamp, save or share",
+    "savedTitle": "Saved to read",
+    "seeAllSaved": "See all ({count})"
   }
 }

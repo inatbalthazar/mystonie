@@ -63,7 +63,7 @@ The Gem economy stays gated ([ADR 0036](0036-expansion-features-before-launch.md
 - **Speed rule:** an answer under 1.5 s after serving isn't counted. The third within 10 minutes pauses the quiz for an hour (`quiz_pauses`). "Don't remember" is recorded and not counted. Unique indexes make "never the same question twice" structural.
   - The page waits 1.5 s before its buttons work, so honest answers always count.
 - **No rewards.** The old design's Gems, the 5-a-day earning cap and the ledger are left out; the Gem economy needs the owner's go.
-  - Rejected for now: a "helper" sticker. The badge catalogue is about what people finish. A badge for answers can come later without schema changes (the answers are recorded).
+  - Rejected for now: a "helper" sticker (added later: Lookout and Guardian, [ADR 0063](0063-more-stickers.md)). The badge catalogue is about what people finish. A badge for answers can come later without schema changes (the answers are recorded).
 
 **Badges from both sources.** `avoidBadges` merges DTDD's cached Yes votes (`avoid_warnings`) with `community_avoid_hits` (confirmed warnings, settled yes answers).
 - Badge topics now carry the DTDD id (`BadgeTopic`), so the UI names our topics in the viewer's language.

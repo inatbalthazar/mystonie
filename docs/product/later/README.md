@@ -1,6 +1,6 @@
 # Later: gated features
 
-**Most of these are now approved to build before launch** ([ADR 0036](../../decisions/0036-expansion-features-before-launch.md)): they are tasks in [roadmap stage 3](../../roadmap.md#stage-3-the-community-album-before-launch), built in that order, and each task moves its spec into `product/features/`. The rest (ads, affiliate links, merch, Gems and the wheel, the AI assistant, the native app, travel) still need the owner's go ([still gated](../../roadmap.md#still-gated-owners-go-needed)). The gates below were the old plan. They are kept as designs so nothing from the original idea is lost. Some details (e.g. Thai-market specifics, Supabase Edge Functions as the only server runtime) predate the global, solo-sized plan. Re-check them against [AGENTS.md](../../../AGENTS.md) before implementing.
+**Most of these are now approved to build before launch** ([ADR 0036](../../decisions/0036-expansion-features-before-launch.md)): they are tasks in [roadmap stage 3](../../roadmap.md#stage-3-the-community-album-before-launch), built in that order, and each task moves its spec into `product/features/`. The rest (ads, affiliate links, merch, Gems and the wheel, the AI assistant, the native app) still need the owner's go ([still gated](../../roadmap.md#still-gated-owners-go-needed)). The gates below were the old plan. They are kept as designs so nothing from the original idea is lost. Some details (e.g. Thai-market specifics, Supabase Edge Functions as the only server runtime) predate the global, solo-sized plan. Re-check them against [AGENTS.md](../../../AGENTS.md) before implementing.
 
 | Spec | Gate (summary) |
 |---|---|
@@ -16,4 +16,5 @@
 | [gem-wallet.md](gem-wallet.md), [lucky-wheel.md](lucky-wheel.md), [merch-store.md](merch-store.md) | MAU ≥ 20,000 + stable revenue |
 | [native-ads.md](native-ads.md), [affiliate-links.md](affiliate-links.md) | MAU ≥ 20,000 |
 | [ai-assistant.md](ai-assistant.md): help chat / natural-language search | MAU ≥ 20,000 |
-| Travel module (countries visited) | Owner decision, not core |
+| Travel module (countries visited) | Built as the Atlas (2026-10-01, [ADR 0059](../../decisions/0059-atlas.md), [spec](../features/S4-atlas.md)) |
+| [long-reviews.md](long-reviews.md): long reviews, spoilers, a review feed by users (the team's Journal and short reviews on title pages are built, [S4](../features/S4-journal-reviews.md)) | ~300 short reviews a week + demand, owner's go |

@@ -1,5 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { albumBadges, BADGE_FRESH_MS, BADGES, badgesToAward, badgesToCelebrate, evaluateBadges, isBadgeId, type BadgeProgress, type BadgeTitle } from "./badges";
+import {
+  albumBadges,
+  BADGE_FRESH_MS,
+  BADGES,
+  badgesToAward,
+  badgesToCelebrate,
+  evaluateBadges,
+  isBadgeId,
+  NO_ACTIVITY,
+  type BadgeActivity,
+  type BadgeProgress,
+  type BadgeTitle,
+} from "./badges";
 import type { TitleKind } from "./catalog/types";
 import type { StatsEntry } from "./stats/summary";
 
@@ -134,5 +146,61 @@ describe("awarding", () => {
     expect(isBadgeId("rookie-bookworm")).toBe(true);
     expect(isBadgeId("admin")).toBe(false);
     expect(isBadgeId(5)).toBe(false);
+  });
+});
+
+describe("activity badges (ADR 0063)", () => {
+  const at = (d: number) => Date.parse(day(d));
+  const activity = (a: Partial<BadgeActivity>) => evaluateBadges([], [], "UTC", { ...NO_ACTIVITY, ...a });
+  /** A finished reel play on 2026-09-<d>. */
+  const play = (d: number, solved = true, guesses = 3) => ({ day: day(d).slice(0, 10), solved, guesses, at: at(d) });
+
+  it("has none without activity", () => {
+    expect(evaluateBadges([], [], "UTC").filter((b) => b.earnedAt !== null)).toEqual([]);
+  });
+
+  it("counts solved reels, and those solved in few guesses", () => {
+    const all = activity({ reel: [play(3, false, 6), play(1, true, 1), play(2, true, 4)] });
+    expect(get(all, "reel-rookie")).toMatchObject({ progress: 1, earnedAt: at(1), titleId: null });
+    expect(get(all, "one-take")).toMatchObject({ earnedAt: at(1) });
+    expect(get(all, "sharp-eye")).toMatchObject({ progress: 1, earnedAt: null });
+    const sharp = activity({ reel: Array.from({ length: 12 }, (_, i) => play(i + 1, true, i % 2 ? 3 : 5)) });
+    expect(get(sharp, "sharp-eye")).toMatchObject({ progress: 6, earnedAt: null });
+  });
+
+  it("needs days in a row for a streak: a loss or a skipped day starts again", () => {
+    const days = (from: number, n: number) => Array.from({ length: n }, (_, i) => play(from + i));
+    expect(get(activity({ reel: days(1, 6) }), "hot-streak")).toMatchObject({ progress: 6, earnedAt: null });
+    expect(get(activity({ reel: [...days(1, 3), ...days(5, 4)] }), "hot-streak")).toMatchObject({ progress: 4, earnedAt: null });
+    expect(get(activity({ reel: [...days(1, 3), play(4, false), ...days(5, 6)] }), "hot-streak")).toMatchObject({ progress: 6, earnedAt: null });
+    expect(get(activity({ reel: days(2, 7) }), "hot-streak")).toMatchObject({ progress: 7, earnedAt: at(8) });
+    const month = Array.from({ length: 30 }, (_, i) => ({ ...play(1), day: new Date(Date.UTC(2026, 9, 1 + i)).toISOString().slice(0, 10), at: Date.UTC(2026, 9, 1 + i, 12) }));
+    expect(get(activity({ reel: month.slice(0, 29) }), "reel-legend")).toMatchObject({ progress: 29, earnedAt: null });
+    expect(get(activity({ reel: month }), "reel-legend")).toMatchObject({ progress: 30, earnedAt: Date.UTC(2026, 9, 30, 12) });
+  });
+
+  it("counts challenges, months and a month's clean sweep", () => {
+    const done = (month: string, d: number) => ({ month, at: at(d) });
+    const all = activity({
+      challenges: [done("2026-09", 2), done("2026-09", 1), done("2026-08", 3), done("2026-09", 4), done("2026-09", 5)],
+    });
+    expect(get(all, "challenger")).toMatchObject({ earnedAt: at(1) });
+    expect(get(all, "clean-sweep")).toMatchObject({ progress: 4, earnedAt: at(5) });
+    expect(get(all, "season-pass")).toMatchObject({ progress: 2, earnedAt: null });
+  });
+
+  it("counts quiz answers, reviews, articles and support", () => {
+    const tens = Array.from({ length: 10 }, (_, i) => at(10 - i));
+    const all = activity({ quiz: tens, reviews: tens.slice(1), articles: [at(7)], support: [at(9), at(4)] });
+    expect(get(all, "lookout")).toMatchObject({ progress: 10, earnedAt: at(10) });
+    expect(get(all, "guardian")).toMatchObject({ progress: 10, earnedAt: null });
+    expect(get(all, "critic")).toMatchObject({ progress: 9, earnedAt: null });
+    expect(get(all, "byline")).toMatchObject({ earnedAt: at(7) });
+    expect(get(all, "supporter")).toMatchObject({ earnedAt: at(4), titleId: null });
+  });
+
+  it("keeps the hardest Reel sticker last among the Reel ones", () => {
+    const ids = BADGES.map((b) => b.id as string);
+    expect(ids.indexOf("reel-legend")).toBe(ids.indexOf("hot-streak") + 1);
   });
 });

@@ -4,7 +4,7 @@ import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ReviewBookends, ReviewCover, ReviewEmpty, ReviewMilestones, ReviewMonths, ReviewNumbers, ReviewTop } from "@/components/review/review-view";
 import { ShareYear } from "@/components/review/share-year";
-import { Records, Taste } from "@/components/stats/stats-view";
+import { Favourites, Records, Taste } from "@/components/stats/stats-view";
 import { localizedPath } from "@/core/auth";
 import { weekStartFor } from "@/core/stats/period";
 import { isReviewYear, yearInReview } from "@/core/stats/year-review";
@@ -66,6 +66,7 @@ export default async function ReviewPage({ params }: PageProps<"/[locale]/review
           <ReviewTop review={review} />
           <ReviewMonths review={review} />
           <Taste report={review.report} />
+          <Favourites report={review.report} />
           <Records report={review.report} />
           <ReviewBookends review={review} />
           <ReviewMilestones review={review} />

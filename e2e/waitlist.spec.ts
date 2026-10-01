@@ -43,6 +43,12 @@ test("privacy and terms are linked from the footer and name the operator contact
   await page.getByRole("contentinfo").getByRole("link", { name: "Terms" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Terms of Use");
   await expect(page).toHaveURL(/\/terms$/);
+
+  // The tip link (ADR 0049): in the footer, opening Buy Me a Coffee in a new tab; the Terms say what a tip is.
+  const tip = page.getByRole("contentinfo").getByRole("link", { name: /Buy Stonie a coffee/ });
+  await expect(tip).toHaveAttribute("href", "https://buymeacoffee.com/inatbalthab");
+  await expect(tip).toHaveAttribute("target", "_blank");
+  await expect(page.getByRole("heading", { name: "Tips" })).toBeVisible();
 });
 
 test("the unsubscribe link asks first, then posts the signed id", async ({ page }) => {

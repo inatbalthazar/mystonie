@@ -1,13 +1,16 @@
 // Building blocks shared by card templates. Cards are laid out at export size (1080px wide)
 // in real pixels; previews scale the whole card with CSS (see card-preview.tsx).
 import { StarIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import type { CSSProperties, ReactNode } from "react";
+import { continentCount } from "@/core/atlas";
 import { cardImageUrl } from "@/core/catalog/images";
 import type { TitleKind } from "@/core/catalog/types";
 import { challengeUnit, findChallenge, isChallengeSlug } from "@/core/challenges";
 import { CARD_DIMENSIONS, type CardData, type CardRecap, type CardSize, type Palette } from "@/core/cards/types";
 import { finishedKey, gameHours, titleSizeStep, watchMinutes } from "@/core/cards/text";
+import { countryName, isCountryCode } from "@/core/countries";
+import { REEL_GUESSES } from "@/core/reel";
 import { recapFigures, wholeMonth } from "@/core/stats/recap";
 import { cn } from "@/lib/utils";
 
@@ -54,9 +57,7 @@ export function CardRoot({ size, palette, className, children }: { size: CardSiz
 /** Poster image (RAWG's key art at card size, `cardImageUrl`), or a palette gradient when there is none. */
 export function Poster({ url, className }: { url?: string | null; className?: string }) {
   return (
-    <div
-      className={cn("overflow-hidden bg-[linear-gradient(135deg,var(--card-surface),var(--card-accent))]", className)}
-    >
+    <div className={cn("overflow-hidden bg-[linear-gradient(135deg,var(--card-surface),var(--card-accent))]", className)}>
       {url && (
         // eslint-disable-next-line @next/next/no-img-element -- exported to PNG; must be a plain CORS image
         <img
@@ -96,10 +97,19 @@ export function useChallengeName(data: CardData): string {
   return data.challenge && isChallengeSlug(data.challenge.slug) ? t(`items.${data.challenge.slug}.name`) : "";
 }
 
-/** What the card's big title says: the title's name, the week on a recap, the challenge on a Challenge card. */
+/**
+ * What the card's big title says: the title's name, the week on a recap, the challenge on a Challenge card, the
+ * reel's number on a Reel of the Day card (never the movie).
+ */
 export function useCardName(data: CardData): string {
+  const t = useTranslations("Card");
   const range = useRecapRange(data.recap);
   const challenge = useChallengeName(data);
+  const locale = useLocale();
+  if (data.reel) return t("reelName", { number: data.reel.number });
+  // A country's Atlas card is called by the country, in the viewer's language (ADR 0060).
+  if (data.atlas?.regions) return countryName(data.atlas.regions.country, locale);
+  if (data.atlas) return t("atlasName");
   return data.recap ? range : data.challenge ? challenge : data.name;
 }
 
@@ -163,7 +173,9 @@ export function useFinishedDate(data: CardData): string {
 /** Stat blocks a template can show: watch time, episodes, seasons (only the known ones the user didn't hide). */
 export function useStats(data: CardData): { value: string; label: string }[] {
   const t = useTranslations("Card");
+  const atlasT = useTranslations("Atlas");
   const format = useFormatter();
+  const locale = useLocale();
   const stats: { value: string; label: string }[] = [];
   const hidden = new Set(data.hide ?? []);
   if (data.milestone) {
@@ -174,7 +186,36 @@ export function useStats(data: CardData): { value: string; label: string }[] {
     // "4/4 titles finished", "20/20 hours": the target, met.
     const rule = findChallenge(data.challenge.month, data.challenge.slug)?.rule;
     const target = data.challenge.target;
-    return [{ value: `${format.number(target)}/${format.number(target)}`, label: t("challengeUnit", { unit: rule ? challengeUnit(rule) : "titles", count: target }) }];
+    return [
+      {
+        value: `${format.number(target)}/${format.number(target)}`,
+        label: t("challengeUnit", { unit: rule ? challengeUnit(rule) : "titles", count: target }),
+      },
+    ];
+  }
+  if (data.reel) {
+    // "3/6 guesses" (or "X/6"), then the streak.
+    const { results, solved, streak } = data.reel;
+    const score = { value: solved ? `${results.length}/${REEL_GUESSES}` : `X/${REEL_GUESSES}`, label: t("reelScore", { solved: String(solved) }) };
+    return streak > 0 ? [score, { value: format.number(streak), label: t("reelStreak", { count: streak }) }] : [score];
+  }
+  if (data.atlas?.regions) {
+    // "12 of 47 prefectures", "26% of Japan".
+    const { country, kind, total, ids } = data.atlas.regions;
+    return [
+      { value: format.number(ids.length), label: t("atlasRegionsOf", { total, many: atlasT("kindMany", { kind }) }) },
+      { value: format.number(ids.length / total, { style: "percent" }), label: t("atlasRegionsShare", { country: countryName(country, locale) }) },
+    ];
+  }
+  if (data.atlas) {
+    // "23 countries", "4 continents", "31 countries in my stories".
+    const { countries, stories } = data.atlas;
+    const continents = continentCount(countries.filter(isCountryCode));
+    const figures = [
+      { value: format.number(countries.length), label: t("atlasCountries", { count: countries.length }) },
+      { value: format.number(continents), label: t("atlasContinents", { count: continents }) },
+    ];
+    return stories > 0 ? [...figures, { value: format.number(stories), label: t("atlasStories", { count: stories }) }] : figures;
   }
   if (data.recap) {
     return recapFigures(data.recap, { time: hidden.has("time"), episodes: hidden.has("episodes") }).map(({ key, value }) => ({
@@ -185,11 +226,18 @@ export function useStats(data: CardData): { value: string; label: string }[] {
   if (data.reading) {
     // A reading Progress card: how far along (or just where, while the length is unknown), then the time so far.
     const { unit, position, total, readMin } = data.reading;
-    const label = unit === "page" ? t("pages", { count: total ?? position }) : unit === "chapter" ? t("chapters", { count: total ?? position }) : t("volumes", { count: total ?? position });
+    const label =
+      unit === "page"
+        ? t("pages", { count: total ?? position })
+        : unit === "chapter"
+          ? t("chapters", { count: total ?? position })
+          : t("volumes", { count: total ?? position });
     if (!hidden.has("episodes")) stats.push({ value: total ? `${format.number(position)}/${format.number(total)}` : format.number(position), label });
     if (!hidden.has("time") && readMin) {
       stats.push(
-        readMin >= 120 ? { value: format.number(Math.round(readMin / 60)), label: t("hours") } : { value: format.number(readMin), label: t("minutes") },
+        readMin >= 120
+          ? { value: format.number(Math.round(readMin / 60)), label: t("hours") }
+          : { value: format.number(readMin), label: t("minutes") },
       );
     }
     return stats;
@@ -203,8 +251,10 @@ export function useStats(data: CardData): { value: string; label: string }[] {
   if (data.kind === "book" || data.kind === "manga") {
     // A Finish card for a book or manga: its length.
     if (data.pageCount && !hidden.has("episodes")) stats.push({ value: format.number(data.pageCount), label: t("pages", { count: data.pageCount }) });
-    if (data.volumeCount && !hidden.has("seasons")) stats.push({ value: format.number(data.volumeCount), label: t("volumes", { count: data.volumeCount }) });
-    if (data.chapterCount && !hidden.has("episodes")) stats.push({ value: format.number(data.chapterCount), label: t("chapters", { count: data.chapterCount }) });
+    if (data.volumeCount && !hidden.has("seasons"))
+      stats.push({ value: format.number(data.volumeCount), label: t("volumes", { count: data.volumeCount }) });
+    if (data.chapterCount && !hidden.has("episodes"))
+      stats.push({ value: format.number(data.chapterCount), label: t("chapters", { count: data.chapterCount }) });
     return stats;
   }
   if (data.progress) {
@@ -247,8 +297,12 @@ export function useHeadline(data: CardData): string {
   // "100th title", "1,000 hours", "500 episodes".
   if (data.milestone) return t("milestoneHeadline", { ...data.milestone, count: format.number(data.milestone.value) });
   if (data.challenge) return t("challengeHeadline");
+  if (data.reel) return t("reelHeadline");
+  if (data.atlas) return t("atlasHeadline");
   // "Imported 312 films", "Imported 48 books" (S2 Letterboxd import, S3 import & export).
   if (data.recap?.imported) return t("importHeadline", { count: data.recap.titleCount, unit: data.recap.importedUnit ?? "film" });
+  // "All I've watched" (Share my collection, stage 4): one area's all-time card.
+  if (data.recap?.area) return t("areaHeadline", { area: data.recap.area });
   if (data.recap) return t("recapHeadline", { period: data.recap.period ?? "week" });
   if (data.reading) {
     const { milestone, unit, position } = data.reading;
@@ -279,7 +333,7 @@ export const footerUser = (data: CardData) => (data.hide?.includes("username") ?
 /** The finisher number a Finish card prints (S3 finishers & the board), or null: none yet, hidden, or another card. */
 export function cardFinisherNo(data: CardData): number | null {
   if (!data.finisherNo || data.hide?.includes("finisher")) return null;
-  return data.progress || data.reading || data.recap || data.milestone || data.challenge ? null : data.finisherNo;
+  return data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas ? null : data.finisherNo;
 }
 
 /**
@@ -314,12 +368,7 @@ export function FinisherStamp({ data, className }: { data: CardData; className?:
 export function FinishedStamp({ date, kind = "movie", className }: { date?: string; kind?: TitleKind; className?: string }) {
   const t = useTranslations("Card");
   return (
-    <div
-      className={cn(
-        "rounded-[18px] border-[6px] border-current p-[6px] text-[var(--card-stamp)]",
-        className,
-      )}
-    >
+    <div className={cn("rounded-[18px] border-[6px] border-current p-[6px] text-[var(--card-stamp)]", className)}>
       <div className="flex flex-col items-center rounded-[10px] border-[2px] border-current px-[26px] py-[10px]">
         <span className={cn(DISPLAY, "text-[46px] leading-none font-extrabold tracking-[0.1em] uppercase")}>{t(finishedKey(kind))}</span>
         {date && <span className="mt-[6px] text-[24px] font-bold tracking-[0.12em] whitespace-nowrap uppercase">{date}</span>}

@@ -7,7 +7,9 @@ import { Celebration } from "@/components/celebration";
 import type { CardRecap } from "@/core/cards/types";
 import { recapCardData } from "@/core/stats/recap";
 
-/** "Share stats" (S1 stats): the period's numbers as a Bold Stats card (Collage one swipe away), in the celebration. */
+/**
+ * "Share stats" (S1 stats): the period's numbers as a Bold Stats card (Collage one swipe away), in the celebration.
+ */
 export function ShareStats({ card, username, host }: { card: CardRecap; username: string | null; host: string }) {
   const t = useTranslations("Stats");
   const [open, setOpen] = useState(false);

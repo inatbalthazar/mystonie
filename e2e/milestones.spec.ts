@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { uuidv7 } from "../src/core/ids";
 import { periodRange } from "../src/core/stats/period";
-import { canSeed, lastEmail, mailpitUp, mockSearch, seedTitles, signUp, type SeedTitle } from "./helpers";
+import { canSeed, lastEmail, mailpitUp, mockSearch, openQuickAdd, seedTitles, signUp, type SeedTitle } from "./helpers";
 
 // S2 milestones & recaps (ADR 0031). Needs the local Supabase stack; titles are seeded and /api/search is mocked.
 const ZONE = "Asia/Bangkok";
@@ -24,13 +24,6 @@ async function finish(page: Page, movie: SeedTitle, finishedAt?: string) {
   expect(res.status(), await res.text()).toBe(201);
 }
 
-async function openAdd(page: Page) {
-  await expect(async () => {
-    await page.getByRole("button", { name: /^Add (a|your first) title$/ }).first().click({ timeout: 2000 });
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 1000 });
-  }).toPass();
-}
-
 test("the 10th title finished → its Milestone card after the Finish card → on the stats page, once", async ({ page, request }) => {
   test.skip(!(await mailpitUp(request)) || !canSeed(), "local Supabase (Mailpit, service role key) is not available");
   await seedTitles(request, MOVIES);
@@ -40,7 +33,7 @@ test("the 10th title finished → its Milestone card after the Finish card → o
   // Nine finishes already in the collection (no celebration for those), then the tenth through quick add.
   for (const movie of MOVIES.slice(0, 9)) await finish(page, movie);
   await page.reload();
-  await openAdd(page);
+  await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Milestone Movie J");
   await page.getByRole("dialog").getByRole("button", { name: /^Milestone Movie J Movie/ }).click();
   const checked = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/milestones");

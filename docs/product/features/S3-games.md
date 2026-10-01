@@ -16,7 +16,7 @@ Games join movies, series, books and manga as a fifth kind of title. People find
 - **Without a RAWG key** game search is off: "All" leaves games out, the Games switch says "Search isn't working right now", and games already saved still show.
 
 ### The Play tab
-- Collection tabs: **Watch · Read · Play**. Each has its own header, filters and rows. A collection of only games opens on Play.
+- Collection tabs: **Watch · Read · Play** (then the Atlas, stage 4, [ADR 0059](../../decisions/0059-atlas.md)). Each has its own header, filters and rows. A collection of only games opens on Play.
 - The header shows **Play time** and **Games finished** for the year chosen, with a hint: "Play time is the hours you gave for each game, or its average playtime on RAWG when you didn't."
 - Rows show "187h played" (the player's hours) or "About 43h on average" (RAWG's), with the status stamp: Finished / Playing / Want to play.
 - The edit sheet's link is "About this game".

@@ -17,6 +17,7 @@ import { formatRuntime } from "@/core/format/runtime";
 import type { PlayTotals } from "@/core/stats/play";
 import type { ReadTotals } from "@/core/stats/reading";
 import type { WatchTotals } from "@/core/stats/summary";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 /**
@@ -68,12 +69,42 @@ export function PlaySummary({ totals, year }: { totals: PlayTotals; year: number
   return <SummaryTicket stats={stats} year={year} hint={t("playTimeHint")} />;
 }
 
-function SummaryTicket({ stats, year, hint }: { stats: { label: string; value: string }[]; year: number | null; hint?: string }) {
+/**
+ * The profile's pinned all-time numbers (stage 4): watched, read and played apart, each its time and titles finished,
+ * so a finished book or game never counts under watch time. Only the areas with anything in them; with only
+ * watching, the Watch tab's own header.
+ */
+export function AreaSummary({ totals }: { totals: { watch: WatchTotals; read: ReadTotals; play: PlayTotals } }) {
+  const t = useTranslations("Collection");
+  const locale = useLocale();
+  const { watch, read, play } = totals;
+  const has = {
+    watch: watch.minutes > 0 || watch.finished > 0 || watch.episodes > 0,
+    read: read.minutes > 0 || read.finished > 0,
+    play: play.finished > 0,
+  };
+  if (!has.read && !has.play) return <CollectionSummary totals={watch} year={null} />;
+  const time = (minutes: number) => (minutes > 0 ? formatRuntime(minutes, locale) : "0");
+  const stats = [
+    has.watch && { label: t("areaWatched"), value: time(watch.minutes), note: t("areaFinished", { count: watch.finished }) },
+    has.read && { label: t("areaRead"), value: time(read.minutes), note: t("areaFinished", { count: read.finished }) },
+    has.play && { label: t("areaPlayed"), value: time(play.minutes), note: t("areaFinished", { count: play.finished }) },
+  ].filter((x) => !!x);
+  return <SummaryTicket stats={stats} year={null} />;
+}
+
+function SummaryTicket({ stats, year, hint }: { stats: { label: string; value: string; note?: string }[]; year: number | null; hint?: string }) {
   const t = useTranslations("Collection");
   return (
-    <section aria-labelledby="collection-summary" className="relative mt-2 rounded-2xl bg-card px-4 pt-5 pb-4 shadow-[0_1px_2px_rgb(0_0_0/0.06),0_10px_24px_-14px_rgb(0_0_0/0.35)] ring-1 ring-border">
+    <section
+      aria-labelledby="collection-summary"
+      className="relative mt-2 rounded-2xl bg-card px-4 pt-5 pb-4 shadow-[0_1px_2px_rgb(0_0_0/0.06),0_10px_24px_-14px_rgb(0_0_0/0.35)] ring-1 ring-border"
+    >
       {/* Tape holding the ticket onto the page. */}
-      <span aria-hidden="true" className="absolute -top-2.5 left-1/2 h-5 w-20 -translate-x-1/2 rotate-[-3deg] rounded-[2px] bg-brand-soft/90 ring-1 ring-brand/15 dark:bg-brand/30" />
+      <span
+        aria-hidden="true"
+        className="absolute -top-2.5 left-1/2 h-5 w-20 -translate-x-1/2 rotate-[-3deg] rounded-[2px] bg-brand-soft/90 ring-1 ring-brand/15 dark:bg-brand/30"
+      />
       <h2 id="collection-summary" className="font-hand text-2xl leading-none text-muted-foreground">
         {t("summaryTitle", { year: year ?? "all" })}
       </h2>
@@ -87,6 +118,7 @@ function SummaryTicket({ stats, year, hint }: { stats: { label: string; value: s
           <div key={s.label} className="flex min-w-0 flex-col gap-1 px-2 first:pl-0 last:pr-0">
             <dt className="text-[11px] leading-tight font-semibold tracking-wide text-muted-foreground uppercase">{s.label}</dt>
             <dd className="font-display text-xl leading-tight font-extrabold tabular-nums break-words sm:text-2xl">{s.value}</dd>
+            {s.note && <dd className="text-xs text-muted-foreground">{s.note}</dd>}
           </div>
         ))}
       </dl>
@@ -96,29 +128,38 @@ function SummaryTicket({ stats, year, hint }: { stats: { label: string; value: s
 }
 
 /**
- * Watch · Read · Play (S2 books & manga, S3 games): the album's divider tabs. Movies and series on one, books and manga
- * on the next, games on the last; each tab has its own header, filters and rows.
+ * Watch · Read · Play · Atlas (S2 books & manga, S3 games, ADR 0059): the album's divider tabs. Movies and series on
+ * one, books and manga on the next, games on the third, each with its own header, filters and rows; then the Atlas,
+ * the places you've collected (`/collection/atlas`, its own server render). On the collection the shelves are buttons
+ * (`onShelf`); on the Atlas they link back to `/collection?shelf=…`.
  */
-export function ShelfTabs({ shelf, onShelf }: { shelf: CollectionShelf; onShelf: (shelf: CollectionShelf) => void }) {
+export function ShelfTabs({ shelf, onShelf }: { shelf: CollectionShelf | "atlas"; onShelf?: (shelf: CollectionShelf) => void }) {
   const t = useTranslations("Collection");
+  const tab = (on: boolean) =>
+    cn(
+      "-mb-0.5 flex min-h-11 items-center rounded-t-xl border-2 border-b-0 px-3 font-display text-base font-extrabold whitespace-nowrap transition-colors min-[400px]:px-5 min-[400px]:text-lg",
+      on
+        ? "border-border bg-card text-foreground shadow-[0_-4px_10px_-8px_rgb(0_0_0/0.3)]"
+        : "border-transparent text-muted-foreground hover:text-foreground",
+    );
   return (
-    <div role="group" aria-label={t("shelves")} className="flex gap-2 border-b-2 border-border">
-      {COLLECTION_SHELVES.map((value) => (
-        <button
-          key={value}
-          type="button"
-          aria-pressed={shelf === value}
-          onClick={() => onShelf(value)}
-          className={cn(
-            "-mb-0.5 min-h-11 rounded-t-xl border-2 border-b-0 px-5 font-display text-lg font-extrabold transition-colors",
-            shelf === value
-              ? "border-border bg-card text-foreground shadow-[0_-4px_10px_-8px_rgb(0_0_0/0.3)]"
-              : "border-transparent text-muted-foreground hover:text-foreground",
-          )}
-        >
-          {t("shelf", { shelf: value })}
-        </button>
-      ))}
+    <div role="group" aria-label={t("shelves")} className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none]">
+      <div className="flex min-w-max gap-1.5 border-b-2 border-border min-[400px]:gap-2">
+        {COLLECTION_SHELVES.map((value) =>
+          onShelf ? (
+            <button key={value} type="button" aria-pressed={shelf === value} onClick={() => onShelf(value)} className={tab(shelf === value)}>
+              {t("shelf", { shelf: value })}
+            </button>
+          ) : (
+            <Link key={value} href={{ pathname: "/collection", query: { shelf: value } }} className={tab(false)}>
+              {t("shelf", { shelf: value })}
+            </Link>
+          ),
+        )}
+        <Link href="/collection/atlas" aria-current={shelf === "atlas" ? "page" : undefined} className={tab(shelf === "atlas")}>
+          {t("shelfAtlas")}
+        </Link>
+      </div>
     </div>
   );
 }
@@ -192,12 +233,7 @@ export function CollectionControls({
           <label htmlFor={`${id}-sort`} className={labelClass}>
             {t("sort")}
           </label>
-          <select
-            id={`${id}-sort`}
-            value={sort}
-            onChange={(e) => isCollectionSort(e.target.value) && onSort(e.target.value)}
-            className={selectClass}
-          >
+          <select id={`${id}-sort`} value={sort} onChange={(e) => isCollectionSort(e.target.value) && onSort(e.target.value)} className={selectClass}>
             {COLLECTION_SORTS.map((s) => (
               <option key={s} value={s}>
                 {t("sortLabel", { sort: s })}

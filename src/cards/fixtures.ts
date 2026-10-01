@@ -97,6 +97,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
           { name: "Crash Landing on You", kind: "series", posterUrl: null },
           { name: "Parasite", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" },
         ],
+        favourites: [{ role: "actor", name: "Hyun Bin" }, { role: "director", name: "Bong Joon Ho" }],
       },
     },
   },
@@ -209,6 +210,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
           { name: "A title with no poster at all", kind: "movie", posterUrl: null },
         ],
         highlights: { genre: "Science Fiction & Fantasy", month: "2026-07", streak: 41 },
+        favourites: [{ role: "actor", name: "Maximiliano Hernández-Villanueva" }, { role: "director", name: "ポン・ジュノ" }],
       },
     },
   },
@@ -220,6 +222,52 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
       recap: {
         period: "year", from: "2026-01-01", to: "2026-02-03", minutes: 95, episodes: 0, finished: 1, titleCount: 1,
         titles: [{ name: "เพราะเราคู่กัน", kind: "movie", posterUrl: null }], highlights: {},
+      },
+    },
+  },
+  // Stage 4 daily game: Reel of the Day, spoiler-free (no poster, no name).
+  {
+    id: "reel-solved",
+    data: {
+      kind: "movie", name: "Reel of the Day #6", posterUrl: null, finishedOn: "2026-10-05", username: "a_very_long_username_here",
+      reel: { number: 6, day: "2026-10-05", results: [false, false, true], solved: true, streak: 128 },
+    },
+  },
+  {
+    id: "reel-lost",
+    data: {
+      kind: "movie", name: "Reel of the Day #1235", posterUrl: null, finishedOn: "2030-02-15",
+      reel: { number: 1235, day: "2030-02-15", results: [false, false, false, false, false, false], solved: false, streak: 0 },
+    },
+  },
+  // Stage 4 Atlas: a few neighbours (the map zooms in) and many far apart (the world, tiny ones as dots).
+  {
+    id: "atlas-few",
+    data: { kind: "movie", name: "Atlas", posterUrl: null, finishedOn: "2026-10-01", username: "maya", atlas: { countries: ["ES", "FR", "IT", "PT"], stories: 0 } },
+  },
+  {
+    id: "atlas-many",
+    data: {
+      kind: "movie", name: "Atlas", posterUrl: null, finishedOn: "2026-10-01", username: "a_very_long_username_here",
+      atlas: { countries: ["AU", "BR", "CA", "DE", "ES", "FR", "GB", "IT", "JP", "KR", "MT", "MV", "MX", "NZ", "PE", "SG", "TH", "US", "VN", "ZA"], stories: 34 },
+    },
+  },
+  // A country's card (ADR 0060): a wide one with insets (Alaska, Hawaii) and a tall one (Japan, with Okinawa).
+  {
+    id: "atlas-us",
+    data: {
+      kind: "movie", name: "United States", posterUrl: null, finishedOn: "2026-10-01", username: "maya",
+      atlas: { countries: ["US"], stories: 0, regions: { country: "US", kind: "state", total: 51, ids: ["US-AK", "US-CA", "US-HI", "US-NV", "US-NY", "US-OR", "US-WA"] } },
+    },
+  },
+  {
+    id: "atlas-japan",
+    data: {
+      kind: "movie", name: "Japan", posterUrl: null, finishedOn: "2026-10-01", username: "a_very_long_username_here",
+      atlas: {
+        countries: ["JP"],
+        stories: 0,
+        regions: { country: "JP", kind: "prefecture", total: 47, ids: ["JP-01", "JP-13", "JP-14", "JP-22", "JP-23", "JP-26", "JP-27", "JP-28", "JP-34", "JP-40", "JP-47"] },
       },
     },
   },

@@ -5,7 +5,7 @@
 **Phase:** M6 · **Priority:** Revenue
 
 ## Summary
-- **Affiliate links:** on book and game pages, show links to buy the title (books: MEB, Lazada, Shopee; games: Steam, Epic Games Store). We earn a commission on purchases.
+- **Affiliate links:** on book and game pages, show links to buy the title (books: Amazon Associates, Bookshop.org; manga: BookWalker; games: Humble, Fanatical, GOG. Steam has no affiliate programme; see [ADR 0049](../../decisions/0049-revenue-plan.md)). We earn a commission on purchases.
 - **Where to watch:** on movie/TV pages, show which streaming services carry it **in Thailand** (Netflix, Disney+, Prime Video, etc.) with deep links.
 
 ## Rules
@@ -16,7 +16,7 @@
 
 ## Acceptance criteria
 - [ ] A movie available on Netflix TH shows Netflix with a working link and attribution.
-- [ ] A game page shows Steam with a tracking parameter.
+- [ ] A game page shows a store link (Humble, Fanatical or GOG) with a tracking parameter.
 - [ ] Disabling a partner in config hides its links without a deploy.
 
 ## Data

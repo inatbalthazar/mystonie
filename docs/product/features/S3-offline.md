@@ -31,7 +31,7 @@ People log on planes, on the train, and in places with no signal.
 - **Rows waiting to sync** say "Waiting to sync" (collection rows, reading history). Episodes waiting have a dashed check. Rows being sent say "Saving…", as before.
 - **Search needs the network.** Offline, quick add says "You're offline, so search will work when you reconnect. Add something you've seen lately instead." and shows **Seen lately on this device**. These are titles picked in search, title pages opened and Home's trending: the newest 24.
   - With none: "Titles you open or search for show up here, so you can add them offline."
-  - The ➕ in the header still opens quick add on a kept collection page.
+  - The nav island's ➕ still opens quick add on a kept collection page.
 - **The celebration opens for a finish**, as online. Its Share button waits: "Share once you're online".
 
 ### The pending-sync note

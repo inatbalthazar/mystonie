@@ -3,13 +3,22 @@
 // headline equals `summarizeCollection`, i.e. the collection header, for the same period. Reading (S2 books &
 // manga) follows `titleRead`: its totals equal `summarizeReading`, i.e. the Read tab's header. Games (S3 games)
 // follow `titlePlay`: their totals equal `summarizePlay`, i.e. the Play tab's header.
-import { RECAP_COLLAGE_MAX, type CardRecap, type StatsPeriod } from "../cards/types";
-import { isReadingKind } from "../catalog/types";
+import {
+  COLLECTION_AREAS,
+  RECAP_COLLAGE_MAX,
+  RECAP_FAVOURITES_MAX,
+  type CardRecap,
+  type CollectionArea,
+  type RecapFavourite,
+  type StatsPeriod,
+} from "../cards/types";
+import { CREDIT_ROLES, type CreditRole } from "../catalog/credits";
+import { isReadingKind, type TitleKind } from "../catalog/types";
 import { localDateKey, periodRange, safeTimeZone } from "./period";
 import { summarizePlay, titlePlay, type PlayTotals } from "./play";
-import { readingEvents, sumReadEvents, summarizeReading, type ReadingSummary, type StatsReadingLog } from "./reading";
+import { readingEvents, sumReadEvents, summarizeReading, type ReadingSummary, type ReadTotals, type StatsReadingLog } from "./reading";
 import { addDays } from "./recap";
-import { summarizeCollection, type CollectionSummary, type StatsEntry, type StatsEpisodeLog, type StatsTitle } from "./summary";
+import { summarizeCollection, type CollectionSummary, type StatsEntry, type StatsEpisodeLog, type StatsTitle, type WatchTotals } from "./summary";
 
 export type ReportTitle = StatsTitle & {
   name: string;
@@ -17,7 +26,15 @@ export type ReportTitle = StatsTitle & {
   genres: readonly string[];
   /** ISO 639-1 from TMDB (`en`, `ko`, `ja`, …). */
   originalLanguage: string | null;
+  /** Who made it (`titles.credits`, stage 4), with photo URLs; absent or null while unknown. */
+  people?: readonly ReportPerson[] | null;
 };
+
+/** One credit of a title, ready to show: `id` is unique across catalogs (`tmdb:287`). */
+export type ReportPerson = { role: CreditRole; id: string; name: string; imageUrl: string | null };
+
+/** A favourite: how many finished titles of the period they're in, and those titles' time in the period. */
+export type RankedPerson = { id: string; name: string; imageUrl: string | null; titles: number; minutes: number };
 
 export type MonthBar = { month: string; minutes: number; finished: number };
 export type Ranked = { key: string; count: number };
@@ -53,6 +70,11 @@ export type StatsReport = {
   };
   /** Days in the period with something watched or read. */
   activeDays: number;
+  /**
+   * Favourite actors, directors, studios, authors and developers: top 5 of each over the titles finished in the
+   * period, by titles, then time, then name.
+   */
+  people: Record<CreditRole, RankedPerson[]>;
   /** The period's most watched, read or played titles (reading time for books and manga, play time for games), at most 5. */
   topTitles: { name: string; kind: ReportTitle["kind"]; posterUrl: string | null; minutes: number }[];
   /** The "Share stats" card's numbers; null when nothing was watched in the period. */
@@ -72,6 +94,48 @@ type WatchEvent = { at: number; minutes: number; episodes: number; finished: num
 
 const TOP = 5;
 const HEATMAP_WEEKS = 53;
+
+/** A favourite goes on a card from this many finished titles: with one, it's just whoever was in the one film. */
+export const FAVOURITE_MIN_TITLES = 2;
+/** Which favourites a card names first. */
+const CARD_ROLES: readonly CreditRole[] = ["actor", "director", "author", "developer", "studio"];
+
+/** Favourites over finished titles (each with its minutes in the period), top 5 per role. */
+export function favouritePeople(finished: readonly { title: ReportTitle; minutes: number }[]): Record<CreditRole, RankedPerson[]> {
+  const byRole = new Map<CreditRole, Map<string, RankedPerson>>(CREDIT_ROLES.map((role) => [role, new Map()]));
+  for (const { title, minutes } of finished) {
+    const seen = new Set<string>();
+    for (const person of title.people ?? []) {
+      const key = `${person.role}:${person.id}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      const people = byRole.get(person.role)!;
+      const ranked = people.get(person.id);
+      if (ranked) {
+        ranked.titles += 1;
+        ranked.minutes += minutes;
+        ranked.imageUrl ??= person.imageUrl;
+      } else {
+        people.set(person.id, { id: person.id, name: person.name, imageUrl: person.imageUrl, titles: 1, minutes });
+      }
+    }
+  }
+  const result = {} as Record<CreditRole, RankedPerson[]>;
+  for (const [role, people] of byRole) {
+    result[role] = [...people.values()]
+      .sort((a, b) => b.titles - a.titles || b.minutes - a.minutes || a.name.localeCompare(b.name))
+      .slice(0, TOP);
+  }
+  return result;
+}
+
+/** A card's favourites: the first roles (actor, director, …) whose favourite is in `FAVOURITE_MIN_TITLES` titles. */
+export function cardFavourites(people: Record<CreditRole, RankedPerson[]>): RecapFavourite[] {
+  return CARD_ROLES.flatMap((role) => {
+    const top = people[role][0];
+    return top && top.titles >= FAVOURITE_MIN_TITLES ? [{ role, name: top.name }] : [];
+  }).slice(0, RECAP_FAVOURITES_MAX);
+}
 
 /** One title's watching as dated events, by `titleWatch`'s rules: summing them over a range gives `titleWatch`. */
 export function titleEvents(title: StatsTitle, entry: StatsEntry | undefined, logs: readonly StatsEpisodeLog[]): WatchEvent[] {
@@ -263,6 +327,8 @@ export function statsReport(
 
   watched.sort((a, b) => b.minutes - a.minutes || Number(b.finished) - Number(a.finished) || a.title.name.localeCompare(b.title.name));
   const from = range ? dayOf(range.from) : days[0];
+  const people = favouritePeople(watched.filter((w) => w.finished));
+  const favourites = cardFavourites(people);
   const card: CardRecap | null =
     watched.length === 0 || !from
       ? null
@@ -277,6 +343,7 @@ export function statsReport(
           titles: watched.slice(0, RECAP_COLLAGE_MAX).map(({ title }) => ({ name: title.name, kind: title.kind, posterUrl: title.posterUrl })),
           ...(reading.minutes > 0 ? { readMinutes: reading.minutes } : {}),
           ...(play.minutes > 0 ? { playMinutes: play.minutes } : {}),
+          ...(favourites.length > 0 ? { favourites } : {}),
         };
 
   return {
@@ -290,7 +357,70 @@ export function statsReport(
     languages: top(languages),
     records: { longestMovie, longestSeries, busiestMonth, longestStreak },
     activeDays: days.length,
+    people,
     topTitles: watched.slice(0, TOP).map(({ title, minutes }) => ({ name: title.name, kind: title.kind, posterUrl: title.posterUrl, minutes })),
     card,
   };
+}
+
+/** "Share my collection" (stage 4): the kinds each area's card covers. */
+export const COLLECTION_AREA_KINDS: Record<CollectionArea, readonly TitleKind[]> = {
+  watch: ["movie", "series"],
+  read: ["book", "manga"],
+  play: ["game"],
+};
+
+/**
+ * "Share my collection" (stage 4): one all-time card per area, watched, read and played apart (the stats page
+ * already has the card with everything together). An area with nothing in it has no card. Each card counts only its
+ * own kinds: its time (watch, reading or play time), its titles finished and its poster collage.
+ */
+export function collectionCards(
+  titles: readonly ReportTitle[],
+  entries: readonly StatsEntry[],
+  episodeLogs: readonly StatsEpisodeLog[],
+  options: Omit<ReportOptions, "period">,
+  readingLogs: readonly StatsReadingLog[] = [],
+): Partial<Record<CollectionArea, CardRecap>> {
+  const cards: Partial<Record<CollectionArea, CardRecap>> = {};
+  for (const area of COLLECTION_AREAS) {
+    const kinds = COLLECTION_AREA_KINDS[area];
+    const own = titles.filter((t) => kinds.includes(t.kind));
+    if (own.length === 0) continue;
+    const ids = new Set(own.map((t) => t.id));
+    const mine = <T extends { titleId: string }>(rows: readonly T[]) => rows.filter((r) => ids.has(r.titleId));
+    const report = statsReport(own, mine(entries), area === "watch" ? mine(episodeLogs) : [], { ...options, period: "all" }, area === "read" ? mine(readingLogs) : []);
+    if (!report.card) continue;
+    // Drop the other areas' times; reading and play have no watch time or episodes of their own.
+    const { readMinutes, playMinutes, ...card } = report.card;
+    cards[area] =
+      area === "watch"
+        ? { ...card, area }
+        : area === "read"
+          ? { ...card, minutes: 0, episodes: 0, finished: report.split.reading.finished, ...(readMinutes ? { readMinutes } : {}), area }
+          : { ...card, minutes: 0, episodes: 0, finished: report.split.play.finished, ...(playMinutes ? { playMinutes } : {}), area };
+  }
+  return cards;
+}
+
+/** Each area's all-time totals (stage 4): the profile's pinned numbers, watched, read and played apart. */
+export type AreaTotals = { watch: WatchTotals; read: ReadTotals; play: PlayTotals };
+
+/**
+ * All-time totals per area, each counting only its own kinds: `summarizeCollection` alone counts a finished book or
+ * game as a finished title too (right for "titles finished", wrong under "Watch time").
+ */
+export function collectionAreaTotals(
+  titles: readonly StatsTitle[],
+  entries: readonly StatsEntry[],
+  episodeLogs: readonly StatsEpisodeLog[],
+  readingLogs: readonly StatsReadingLog[] = [],
+): AreaTotals {
+  const watchIds = new Set(titles.filter((t) => COLLECTION_AREA_KINDS.watch.includes(t.kind)).map((t) => t.id));
+  const { minutes, episodes, finished } = summarizeCollection(
+    titles.filter((t) => watchIds.has(t.id)),
+    entries.filter((e) => watchIds.has(e.titleId)),
+    episodeLogs.filter((l) => watchIds.has(l.titleId)),
+  );
+  return { watch: { minutes, episodes, finished }, read: summarizeReading(titles, entries, readingLogs), play: summarizePlay(titles, entries) };
 }

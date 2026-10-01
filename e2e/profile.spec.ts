@@ -34,6 +34,12 @@ test("profile settings, export, the public page, reports and privacy", async ({ 
   await expect(main.getByText("That username isn't allowed. Try another one.")).toBeVisible();
   await main.getByLabel("Display name").fill("Pat Profile");
   await main.getByLabel("Username").fill(username);
+  // The bio (ADR 0057): tidied on save, kept to 160 characters and 4 lines.
+  await main.getByLabel("Bio").fill("a\nb\nc\nd\ne");
+  await main.getByRole("button", { name: "Save" }).click();
+  await expect(main.getByText("Keep your bio to 160 characters and 4 lines.")).toBeVisible();
+  await main.getByLabel("Bio").fill("  Bong   Joon-ho fan 🎬\n\n\nhttps://example.com  ");
+  await expect(main.getByText("46/160")).toBeVisible();
   await main.getByRole("button", { name: "Save" }).click();
   await expect(main.getByText("Saved.")).toBeVisible();
 
@@ -51,12 +57,12 @@ test("profile settings, export, the public page, reports and privacy", async ({ 
   expect(exported.headers()["content-disposition"]).toMatch(new RegExp(`^attachment; filename="mystonie-${username}-\\d{4}-\\d{2}-\\d{2}\\.json"$`));
   const data = (await exported.json()) as {
     account: { id: string };
-    profile: { username: string; display_name: string };
+    profile: { username: string; display_name: string; bio: string };
     entries: { status: string; title: { name: string } }[];
     episodeLogs: unknown[];
     cards: unknown[];
   };
-  expect(data.profile).toMatchObject({ username, display_name: "Pat Profile" });
+  expect(data.profile).toMatchObject({ username, display_name: "Pat Profile", bio: "Bong Joon-ho fan 🎬\nhttps://example.com" });
   expect(data.entries.map((e) => `${e.title.name}:${e.status}`).sort()).toEqual(["Dune: Part Two:watching", "Parasite:finished"]);
   expect(data.episodeLogs).toEqual([]);
   expect(data.cards).toEqual([]);
@@ -85,6 +91,9 @@ test("profile settings, export, the public page, reports and privacy", async ({ 
   const guest = await visitor.newPage();
   await guest.goto(`/u/${username}`);
   await expect(guest.getByRole("heading", { level: 1 })).toHaveText("Pat Profile");
+  // The bio, as plain text: the address in it is not a link.
+  await expect(guest.getByRole("main").getByText("Bong Joon-ho fan 🎬")).toBeVisible();
+  await expect(guest.getByRole("link", { name: /example.com/ })).toHaveCount(0);
   await expect(guest.getByRole("region", { name: "Right now" })).toContainText("Dune: Part Two");
   await expect(guest.getByRole("region", { name: "Card gallery" }).getByRole("link", { name: "Card: Parasite" })).toHaveAttribute(
     "href",
@@ -114,6 +123,7 @@ test("profile settings, export, the public page, reports and privacy", async ({ 
   await guest.goto(`/u/${username}`);
   await expect(guest.getByRole("heading", { level: 1 })).toHaveText("This collection is private");
   await expect(guest.getByText("Dune: Part Two")).toHaveCount(0);
+  await expect(guest.getByText("Bong Joon-ho fan")).toHaveCount(0);
   await guest.goto(`/c/${cardId}`);
   await expect(guest.getByText(`From @${username}'s collection`)).toBeVisible();
   await expect(guest.getByRole("link", { name: `@${username}` })).toHaveCount(0);

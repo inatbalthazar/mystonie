@@ -1,6 +1,6 @@
 "use client";
 
-import { TriangleAlertIcon } from "lucide-react";
+import { CheckIcon, TriangleAlertIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
 import type { SearchResult } from "@/core/catalog/types";
@@ -14,14 +14,23 @@ import { cn } from "@/lib/utils";
  */
 export function useWarningLabel(): (topics: readonly BadgeTopic[] | undefined) => string | null {
   const t = useTranslations("Warnings");
-  const names = useTranslations("WarningTopics");
   const format = useFormatter();
+  const nameOf = useTopicName();
   return (topics) => {
     const named = (topics ?? []).flatMap((topic) => {
-      const ours = sceneTopicForDtdd(topic.id);
-      return ours ? [names(`names.${ours}`)] : topic.name ? [topic.name] : [];
+      const name = nameOf(topic);
+      return name ? [name] : [];
     });
     return named.length > 0 ? t("badge", { topics: format.list(named, { type: "conjunction" }) }) : null;
+  };
+}
+
+/** A topic's name: ours (S3) in the viewer's language, other DoesTheDogDie topics by DTDD's (English) name. */
+export function useTopicName(): (topic: BadgeTopic) => string | null {
+  const names = useTranslations("WarningTopics");
+  return (topic) => {
+    const ours = sceneTopicForDtdd(topic.id);
+    return ours ? names(`names.${ours}`) : (topic.name ?? null);
   };
 }
 
@@ -40,6 +49,22 @@ export function WarningBadge({ label, className }: { label: string; className?: 
       )}
     >
       <TriangleAlertIcon className="size-4" />
+    </span>
+  );
+}
+
+/**
+ * Stage 4, "Check a title before you watch": a quiet check sticker on a Want-to-watch poster that DoesTheDogDie knows
+ * and that has nothing from the user's avoid-topics. Decorative, like `WarningBadge`.
+ */
+export function ClearBadge({ label, className }: { label: string; className?: string }) {
+  return (
+    <span
+      aria-hidden="true"
+      title={label}
+      className={cn("flex size-7 rotate-[6deg] items-center justify-center rounded-full bg-card text-brand shadow-md ring-2 ring-brand/30", className)}
+    >
+      <CheckIcon className="size-4" strokeWidth={3} />
     </span>
   );
 }

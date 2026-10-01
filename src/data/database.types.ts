@@ -245,6 +245,35 @@ export type Database = {
           },
         ]
       }
+      daily_reels: {
+        Row: {
+          created_at: string
+          day: string
+          number: number
+          title_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          number: number
+          title_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          number?: number
+          title_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "daily_reels_title_id_fkey"
+            columns: ["title_id"]
+            isOneToOne: false
+            referencedRelation: "titles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       entries: {
         Row: {
           created_at: string
@@ -362,6 +391,56 @@ export type Database = {
           },
         ]
       }
+      feedback: {
+        Row: {
+          created_at: string
+          device: string | null
+          error_ref: string | null
+          id: string
+          kind: string
+          locale: string
+          message: string
+          page: string | null
+          status: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          device?: string | null
+          error_ref?: string | null
+          id: string
+          kind: string
+          locale?: string
+          message: string
+          page?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          device?: string | null
+          error_ref?: string | null
+          id?: string
+          kind?: string
+          locale?: string
+          message?: string
+          page?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "feedback_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       follows: {
         Row: {
           created_at: string
@@ -404,9 +483,128 @@ export type Database = {
           },
         ]
       }
+      journal_marks: {
+        Row: {
+          created_at: string
+          deleted_at: string | null
+          id: string
+          kind: string
+          slug: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          deleted_at?: string | null
+          id: string
+          kind: string
+          slug: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          kind?: string
+          slug?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_marks_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      place_regions: {
+        Row: {
+          country: string
+          created_at: string
+          deleted_at: string | null
+          id: string
+          region: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country?: string
+          created_at?: string
+          deleted_at?: string | null
+          id: string
+          region: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          deleted_at?: string | null
+          id?: string
+          region?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "place_regions_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      places: {
+        Row: {
+          country: string
+          created_at: string
+          deleted_at: string | null
+          first_year: number | null
+          id: string
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          country: string
+          created_at?: string
+          deleted_at?: string | null
+          first_year?: number | null
+          id: string
+          status: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          country?: string
+          created_at?: string
+          deleted_at?: string | null
+          first_year?: number | null
+          id?: string
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "places_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
+          atlas_public: boolean
           avatar_url: string | null
+          bio: string | null
           country: string | null
           created_at: string
           display_name: string | null
@@ -414,6 +612,8 @@ export type Database = {
           id: string
           locale: string
           milestones_seen: Json
+          reel_reminded_on: string | null
+          reel_reminders: boolean
           theme: string
           time_zone: string
           updated_at: string
@@ -421,7 +621,9 @@ export type Database = {
           visibility: string
         }
         Insert: {
+          atlas_public?: boolean
           avatar_url?: string | null
+          bio?: string | null
           country?: string | null
           created_at?: string
           display_name?: string | null
@@ -429,6 +631,8 @@ export type Database = {
           id: string
           locale?: string
           milestones_seen?: Json
+          reel_reminded_on?: string | null
+          reel_reminders?: boolean
           theme?: string
           time_zone?: string
           updated_at?: string
@@ -436,7 +640,9 @@ export type Database = {
           visibility?: string
         }
         Update: {
+          atlas_public?: boolean
           avatar_url?: string | null
+          bio?: string | null
           country?: string | null
           created_at?: string
           display_name?: string | null
@@ -444,6 +650,8 @@ export type Database = {
           id?: string
           locale?: string
           milestones_seen?: Json
+          reel_reminded_on?: string | null
+          reel_reminders?: boolean
           theme?: string
           time_zone?: string
           updated_at?: string
@@ -690,6 +898,57 @@ export type Database = {
           },
           {
             foreignKeyName: "reading_logs_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reel_plays: {
+        Row: {
+          created_at: string
+          day: string
+          finished_at: string | null
+          guesses: Json
+          id: string
+          solved: boolean
+          streak: number | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          day: string
+          finished_at?: string | null
+          guesses?: Json
+          id: string
+          solved?: boolean
+          streak?: number | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          finished_at?: string | null
+          guesses?: Json
+          id?: string
+          solved?: boolean
+          streak?: number | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reel_plays_day_fkey"
+            columns: ["day"]
+            isOneToOne: false
+            referencedRelation: "daily_reels"
+            referencedColumns: ["day"]
+          },
+          {
+            foreignKeyName: "reel_plays_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -1144,6 +1403,7 @@ export type Database = {
         Row: {
           chapter_count: number | null
           created_at: string
+          credits: Json | null
           dtdd_checked_at: string | null
           dtdd_id: number | null
           episode_count: number | null
@@ -1171,6 +1431,7 @@ export type Database = {
         Insert: {
           chapter_count?: number | null
           created_at?: string
+          credits?: Json | null
           dtdd_checked_at?: string | null
           dtdd_id?: number | null
           episode_count?: number | null
@@ -1198,6 +1459,7 @@ export type Database = {
         Update: {
           chapter_count?: number | null
           created_at?: string
+          credits?: Json | null
           dtdd_checked_at?: string | null
           dtdd_id?: number | null
           episode_count?: number | null
@@ -1430,6 +1692,10 @@ export type Database = {
           yes_count: number
         }[]
       }
+      award_supporter: {
+        Args: { p_at: string; p_email: string }
+        Returns: boolean
+      }
       challenge_counts: {
         Args: { p_month: string }
         Returns: {
@@ -1539,6 +1805,13 @@ export type Database = {
       }
       is_reserved_username: { Args: { name: string }; Returns: boolean }
       is_time_zone: { Args: { tz: string }; Returns: boolean }
+      journal_stamp_counts: {
+        Args: never
+        Returns: {
+          slug: string
+          stamps: number
+        }[]
+      }
       monthly_recap_candidates: {
         Args: { p_limit: number; p_now: string }
         Returns: {
@@ -1583,6 +1856,7 @@ export type Database = {
         Args: { p_username: string }
         Returns: {
           avatar_url: string
+          bio: string
           blocked_by_me: boolean
           created_at: string
           display_name: string
@@ -1601,6 +1875,19 @@ export type Database = {
         Returns: boolean
       }
       rate_limits_prune: { Args: never; Returns: undefined }
+      reel_reminders_due: {
+        Args: { p_day: string; p_limit: number }
+        Returns: {
+          auth: string
+          endpoint: string
+          locale: string
+          p256dh: string
+          streak: number
+          subscription_id: string
+          time_zone: string
+          user_id: string
+        }[]
+      }
       scene_warning_tally: {
         Args: { p_warning_id: string }
         Returns: {
@@ -1635,6 +1922,31 @@ export type Database = {
         }[]
       }
       suggest_username: { Args: { seed: string }; Returns: string }
+      title_reviews: {
+        Args: { p_limit?: number; p_title_id: string }
+        Returns: {
+          avatar_url: string
+          card_id: string
+          card_image_path: string
+          display_name: string
+          entry_id: string
+          finished_at: string
+          finisher_no: number
+          poster_path: string
+          rating: number
+          review: string
+          stamp_count: number
+          stamped: boolean
+          title_external_id: string
+          title_id: string
+          title_kind: string
+          title_name: string
+          title_source: string
+          title_year: number
+          user_id: string
+          username: string
+        }[]
+      }
       title_scene_warnings: {
         Args: { p_title_id: string }
         Returns: {

@@ -1,5 +1,5 @@
 import { expect, test, type APIRequestContext, type Browser, type BrowserContext, type Page } from "@playwright/test";
-import { canSeed, mailpitUp, mockSearch, seedTitles, signUp, type SeedTitle } from "./helpers";
+import { canSeed, mailpitUp, mockSearch, navIsland, openQuickAdd, seedTitles, signUp, type SeedTitle } from "./helpers";
 
 // S3 offline (ADR 0042). The only tests with the service worker on (playwright.config.ts blocks it elsewhere).
 // `setOffline` cuts a device and its service worker off the network, like flight mode. Needs the local Supabase stack
@@ -22,14 +22,6 @@ test.beforeEach(async ({ request }) => {
   await seedTitles(request, TITLES);
 });
 
-/** The page's ➕. Retries until the sheet opens (a first dev compile can take a moment to hydrate). */
-async function openAdd(page: Page) {
-  await expect(async () => {
-    await page.getByRole("button", { name: "Add a title" }).click({ timeout: 2000 });
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 1000 });
-  }).toPass();
-}
-
 /** Searches in quick add and taps the result (which also remembers it on this device for adding offline). */
 async function pickResult(page: Page, query: string, name: string) {
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill(query);
@@ -41,13 +33,13 @@ async function start(page: Page, request: APIRequestContext, tag: string) {
   await mockSearch(page, TITLES);
   await signUp(page, request, tag);
   await page.waitForFunction(() => !!navigator.serviceWorker.controller);
-  await openAdd(page);
+  await openQuickAdd(page);
   await pickResult(page, "Paper", MOONS);
   await page.getByRole("button", { name: "Want to watch" }).click();
   await expect(row(page, MOONS)).toContainText("Want to watch");
   await expect(row(page, MOONS)).not.toContainText("Saving…");
   // Looked at, not added: quick add offers it offline.
-  await openAdd(page);
+  await openQuickAdd(page);
   await pickResult(page, "Lighthouse", LIGHTHOUSE);
   await page.getByRole("dialog").getByRole("button", { name: "Close" }).click();
 }
@@ -100,7 +92,7 @@ async function setStatus(page: Page, name: string, status: "Want to watch" | "Wa
 
 /** Adds a title from quick add's "seen lately" list (offline, search can't reach the catalogs). */
 async function addRecent(page: Page, name: string, status: "Want to watch" | "Watching") {
-  await openAdd(page);
+  await openQuickAdd(page);
   const sheet = page.getByRole("dialog");
   await expect(sheet.getByText("You're offline, so search will work when you reconnect.")).toBeVisible();
   await sheet.getByRole("region", { name: "Seen lately on this device" }).getByRole("button", { name: new RegExp(`^${name} Movie`) }).click();
@@ -134,7 +126,7 @@ test("offline: the app opens with the collection, logs a title, and it reaches a
   await context.setOffline(true);
   await page.goto("/home?source=pwa");
   await expect(page.getByText("You're offline. What you log is saved on this device and syncs when you're back.")).toBeVisible();
-  await page.getByRole("banner").getByRole("link", { name: "Collection" }).click();
+  await navIsland(page).getByRole("link", { name: "Collection" }).click();
   await expect(page).toHaveURL(/\/collection$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Your collection");
   await expect(row(page, MOONS)).toContainText("Want to watch");

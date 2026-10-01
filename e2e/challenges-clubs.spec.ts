@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { uuidv7 } from "../src/core/ids";
-import { canSeed, mailpitUp, mockSearch, seedTitles, signUp, uniqueEmail, type SeedTitle } from "./helpers";
+import { canSeed, mailpitUp, mockSearch, openQuickAdd, seedTitles, signUp, uniqueEmail, type SeedTitle } from "./helpers";
 
 // S3 challenges & clubs (ADR 0040). Needs the local Supabase stack (Mailpit for sign-in, the service role to seed
 // titles, other collectors and their finishes). Titles are seeded and /api/search is mocked.
@@ -41,10 +41,7 @@ async function insert(request: APIRequestContext, table: string, rows: object[])
 /** Opens quick add on the collection page and marks the title Finished. */
 async function finishThroughQuickAdd(page: Page, name: string) {
   await page.goto("/collection");
-  await expect(async () => {
-    await page.getByRole("button", { name: /^Add (a|your first) title$/ }).first().click({ timeout: 2000 });
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 1000 });
-  }).toPass();
+  await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill(name);
   await page.getByRole("dialog").getByRole("button", { name: new RegExp(`^${name} Movie`) }).click();
   await page.getByRole("button", { name: "Finished", exact: true }).click();
@@ -121,8 +118,10 @@ test("monthly challenges: joining counts the whole month, a finish completes it,
   await expect(main.getByRole("heading", { name: "Your patches" })).toBeVisible();
   await expect(main.getByRole("listitem").filter({ hasText: "Finish Four" })).toBeVisible();
 
-  // A Challenge card saves only for a challenge the user completed.
-  const month = new Date().toISOString().slice(0, 7);
+  // A Challenge card saves only for a challenge the user completed. Challenges run by the local month (the browser's
+  // zone is this machine's), which isn't the UTC one in the hours around midnight on the 1st.
+  const now = new Date();
+  const month = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}`;
   const card = (slug: string, target: number) => ({
     id: uuidv7(),
     kind: "challenge",

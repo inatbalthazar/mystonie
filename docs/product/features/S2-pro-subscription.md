@@ -19,11 +19,11 @@ The free tier keeps the full core loop: logging, the 3 base templates, recaps an
 
 ## As built
 Decisions and alternatives: [ADR 0034](../../decisions/0034-pro-subscription.md). Built and tested in Stripe test mode, **off in production** until the owner go-live (roadmap).
-- **Switch:** Pro exists only when `PRO_ENABLED=true`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and at least one of `STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_YEARLY` are set. Otherwise nothing about Pro shows, `/pro` is a 404 and the billing routes answer 503.
+- **Switch:** Pro exists only when `PRO_ENABLED=true`, `STRIPE_SECRET_KEY`, `STRIPE_WEBHOOK_SECRET` and at least one of `STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_YEARLY` are set. Otherwise Pro can't be bought: the billing routes answer 503 and Pro card styles aren't offered. `/pro` still shows the offer and the planned prices ($2.99 / $19.99, `PLANNED_PRICES`) with grey "Not on sale yet" buttons, and Settings links to it (the beta, [ADR 0055](../../decisions/0055-beta-and-feedback.md)).
 - **What Pro adds today:** Pro card templates, starting with **Film Strip** (the poster as a frame of 35 mm film taped into the album, with a paper label; movies and series, Finish and Progress, story and feed). Custom colours and fonts, advanced stats and early Year in Review are not built yet.
 - **Free stays free:** logging, the base templates, recaps, stats and sharing. A Pro template is shown to non-Pro users as a locked preview (Unlock → `/pro`, Download and Share off); it is never offered in the anonymous card maker.
 - **`/pro`:** the offer, both plans with prices read from Stripe (yearly shows "Save N%"), Checkout, and for Pro users the renewal or "Cancelled: Pro stays on until …" date and **Manage subscription** (Customer Portal). Back from Checkout (`?checkout=success`) it checks every 2 s for up to a minute until the webhook has switched Pro on.
-- **Settings:** a Pro section linking to `/pro` ("See Pro" / "Manage Pro").
+- **Settings:** a Pro section linking to `/pro` ("See Pro" / "Manage Pro"), shown whether or not Pro is on sale.
 - **Routes:**
   - `POST /api/billing/checkout {plan}` → `{url}` (409 when already Pro, 10/min);
   - `POST /api/billing/portal` → `{url}` (404 without a Stripe customer);

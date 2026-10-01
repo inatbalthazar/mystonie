@@ -15,6 +15,9 @@ export const isVisibility = (v: unknown): v is Visibility => (VISIBILITIES as re
 /** Same rule as the `profiles.username` check. */
 export const USERNAME_RE = /^[a-z0-9_]{3,20}$/;
 export const DISPLAY_NAME_MAX = 50;
+/** Same rules as the `profiles.bio` check (ADR 0057). */
+export const BIO_MAX = 160;
+export const BIO_MAX_LINES = 4;
 const TIME_ZONE_RE = /^[A-Za-z][A-Za-z0-9_+/-]{0,63}$/;
 
 /** "  Jane.Doe " → "jane.doe": usernames are lower-case; the format check comes after. */
@@ -22,10 +25,31 @@ export function normalizeUsername(input: string): string {
   return input.trim().replace(/^@/, "").toLowerCase();
 }
 
+/**
+ * A bio as typed → as saved: line breaks kept, other runs of spaces or tabs as one space, control characters gone,
+ * each line trimmed and blank lines dropped. "" when nothing is left.
+ */
+export function normalizeBio(input: string): string {
+  return input
+    .replace(/\r\n?/g, "\n")
+    .replace(/[^\S\n]+/g, " ")
+    .replace(/[^\P{Cc}\n]/gu, "")
+    .split("\n")
+    .map((line) => line.trim())
+    .filter(Boolean)
+    .join("\n");
+}
+
+/** Whether a normalized bio fits: at most `BIO_MAX` characters and `BIO_MAX_LINES` lines. */
+export function bioFits(bio: string): boolean {
+  return [...bio].length <= BIO_MAX && bio.split("\n").length <= BIO_MAX_LINES;
+}
+
 /** A settings change, in database column names. Only the fields that were sent. */
 export type AccountPatch = {
   username?: string;
   display_name?: string | null;
+  bio?: string | null;
   avatar_url?: null;
   locale?: string;
   time_zone?: string;
@@ -33,11 +57,14 @@ export type AccountPatch = {
   theme?: Theme;
   visibility?: Visibility;
   email_recaps?: boolean;
+  reel_reminders?: boolean;
+  atlas_public?: boolean;
 };
 
 /**
- * Validates a PATCH /api/account body: any of `username`, `displayName` (empty or null clears it),
- * `avatarUrl` (only null: remove the photo), `locale`, `timeZone`, `country` (ISO 3166-1, for where to watch), `theme`, `visibility`, `emailRecaps`.
+ * Validates a PATCH /api/account body: any of `username`, `displayName` (empty or null clears it), `bio` (the same),
+ * `avatarUrl` (only null: remove the photo), `locale`, `timeZone`, `country` (ISO 3166-1, for where to watch), `theme`, `visibility`, `emailRecaps`,
+ * `reelReminders` (ADR 0054), `atlasPublic` (the Atlas on the album, ADR 0059).
  * Null when anything sent is invalid or nothing is.
  */
 export function parseAccountPatch(body: unknown, locales: readonly string[]): AccountPatch | null {
@@ -58,6 +85,15 @@ export function parseAccountPatch(body: unknown, locales: readonly string[]): Ac
       const name = b.displayName.trim().replace(/\s+/g, " ");
       if ([...name].length > DISPLAY_NAME_MAX) return null;
       patch.display_name = name || null;
+    }
+  }
+  if ("bio" in b) {
+    if (b.bio === null) patch.bio = null;
+    else if (typeof b.bio !== "string") return null;
+    else {
+      const bio = normalizeBio(b.bio);
+      if (!bioFits(bio)) return null;
+      patch.bio = bio || null;
     }
   }
   if ("avatarUrl" in b) {
@@ -87,6 +123,14 @@ export function parseAccountPatch(body: unknown, locales: readonly string[]): Ac
   if ("emailRecaps" in b) {
     if (typeof b.emailRecaps !== "boolean") return null;
     patch.email_recaps = b.emailRecaps;
+  }
+  if ("reelReminders" in b) {
+    if (typeof b.reelReminders !== "boolean") return null;
+    patch.reel_reminders = b.reelReminders;
+  }
+  if ("atlasPublic" in b) {
+    if (typeof b.atlasPublic !== "boolean") return null;
+    patch.atlas_public = b.atlasPublic;
   }
   return Object.keys(patch).length > 0 ? patch : null;
 }

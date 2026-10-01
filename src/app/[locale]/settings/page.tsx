@@ -2,7 +2,9 @@ import { DownloadIcon, FileSpreadsheetIcon, TriangleAlertIcon, UploadIcon } from
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { FeedbackLink } from "@/components/beta/feedback-link";
 import { DeleteAccount } from "@/components/delete-account";
+import { ShowGettingStarted } from "@/components/getting-started";
 import { PaperCard } from "@/components/paper-card";
 import { PushSwitch } from "@/components/pwa/push";
 import { SignOutForm } from "@/components/pwa/sign-out-form";
@@ -14,10 +16,12 @@ import { localizedPath } from "@/core/auth";
 import { countryOptions, isCountryCode } from "@/core/countries";
 import { pushConfig } from "@/data/push";
 import { getProState } from "@/data/subscriptions";
+import { SupportLink } from "@/components/support-link";
 import { userClient } from "@/data/supabase-server";
 import { avoidTopicIds } from "@/data/warnings";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { BETA } from "@/lib/site";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Settings");
@@ -43,7 +47,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
   const [{ data: profile }, t, tw, avoid] = await Promise.all([
     supabase
       .from("profiles")
-      .select("username, display_name, avatar_url, time_zone, country, theme, visibility, email_recaps")
+      .select("username, display_name, bio, avatar_url, time_zone, country, theme, visibility, email_recaps, reel_reminders, atlas_public")
       .eq("id", user.id)
       .single(),
     getTranslations("Settings"),
@@ -64,11 +68,14 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
         <>
           <PaperCard>
             <h2 className="mb-4 font-display text-lg font-bold">{t("profile")}</h2>
-            <ProfileForm username={profile.username} displayName={profile.display_name} avatarUrl={profile.avatar_url} />
+            <ProfileForm username={profile.username} displayName={profile.display_name} bio={profile.bio} avatarUrl={profile.avatar_url} />
           </PaperCard>
           <PaperCard>
             <h2 className="mb-3 font-display text-lg font-bold">{t("privacy")}</h2>
-            <SettingSwitch setting="publicProfile" initial={profile.visibility === "public"} />
+            <div className="flex flex-col gap-4">
+              <SettingSwitch setting="publicProfile" initial={profile.visibility === "public"} />
+              <SettingSwitch setting="atlasPublic" initial={profile.atlas_public} />
+            </div>
           </PaperCard>
           <PaperCard>
             <h2 className="mb-4 font-display text-lg font-bold">{t("preferences")}</h2>
@@ -93,13 +100,20 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
             </Link>
           </PaperCard>
           <PaperCard>
+            <h2 className="mb-3 font-display text-lg font-bold">{t("gettingStarted")}</h2>
+            <ShowGettingStarted />
+          </PaperCard>
+          <PaperCard>
             <h2 className="mb-3 font-display text-lg font-bold">{t("emails")}</h2>
             <SettingSwitch setting="emailRecaps" initial={profile.email_recaps} />
           </PaperCard>
           {pushKey && (
             <PaperCard>
               <h2 className="mb-3 font-display text-lg font-bold">{t("notifications")}</h2>
-              <PushSwitch publicKey={pushKey} />
+              <PushSwitch publicKey={pushKey}>
+                {/* Reel of the Day reminders (ADR 0054). */}
+                <SettingSwitch setting="reelReminders" initial={profile.reel_reminders} />
+              </PushSwitch>
             </PaperCard>
           )}
         </>
@@ -116,15 +130,25 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
         </dl>
         <SignOutForm next={localizedPath("/", locale, routing.defaultLocale)} />
       </PaperCard>
-      {pro?.available && (
-        <PaperCard stamp={pro.pro ? t("proStamp") : undefined}>
-          <h2 className="font-display text-lg font-bold">{t("proTitle")}</h2>
-          <p className="mt-1 text-sm text-muted-foreground">{pro.pro ? t("proActive") : t("proBody")}</p>
-          <Link href="/pro" className="mt-4 inline-flex h-11 items-center rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted">
-            {pro.pro ? t("proManage") : t("proLink")}
-          </Link>
-        </PaperCard>
-      )}
+      {/* Beta (ADR 0055): what it means, and "Report a problem". */}
+      <PaperCard stamp={BETA ? t("betaStamp") : undefined}>
+        <h2 className="font-display text-lg font-bold">{BETA ? t("betaTitle") : t("feedbackTitle")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("betaBody")}</p>
+        <FeedbackLink place="button" className="mt-4" />
+      </PaperCard>
+      {/* While Pro isn't on sale (the beta), /pro still shows what it will add. */}
+      <PaperCard stamp={pro?.pro ? t("proStamp") : undefined}>
+        <h2 className="font-display text-lg font-bold">{t("proTitle")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{!pro?.available ? t("proSoon") : pro.pro ? t("proActive") : t("proBody")}</p>
+        <Link href="/pro" className="mt-4 inline-flex h-11 items-center rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted">
+          {pro?.pro ? t("proManage") : t("proLink")}
+        </Link>
+      </PaperCard>
+      <PaperCard>
+        <h2 className="font-display text-lg font-bold">{t("supportTitle")}</h2>
+        <p className="mt-1 text-sm text-muted-foreground">{t("supportBody")}</p>
+        <SupportLink place="settings" />
+      </PaperCard>
       <PaperCard>
         <h2 className="font-display text-lg font-bold">{t("importTitle")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{t("importBody")}</p>

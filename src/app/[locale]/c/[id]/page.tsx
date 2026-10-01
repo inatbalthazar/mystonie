@@ -4,6 +4,7 @@ import type { Locale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { ReportButton } from "@/components/report-button";
 import { RememberCardVisit, SharedCardImage } from "@/components/shared-card";
+import { countryName } from "@/core/countries";
 import type { SharedCard } from "@/data/cards";
 import { Link } from "@/i18n/navigation";
 import { siteUrl } from "@/lib/site";
@@ -13,13 +14,22 @@ import { loadCard } from "./load";
 async function cardLine(card: SharedCard, locale: Locale): Promise<string> {
   const t = await getTranslations({ locale, namespace: "SharedCard" });
   const tc = await getTranslations({ locale, namespace: "Card" });
+  if (card.data.reel) return t("reelLine", { number: card.data.reel.number });
+  if (card.data.atlas?.regions) {
+    const { country, kind, total, ids } = card.data.atlas.regions;
+    const atlas = await getTranslations({ locale, namespace: "Atlas" });
+    return t("atlasRegionsLine", { done: ids.length, total, many: atlas("kindMany", { kind }), country: countryName(country, locale) });
+  }
+  if (card.data.atlas) return t("atlasLine", { count: card.data.atlas.countries.length });
   const recap = card.data.recap;
   if (recap) {
     const format = await getFormatter({ locale });
     const day = (key: string) => new Date(`${key}T00:00:00Z`);
     const year = recap.period && recap.period !== "week" ? "numeric" : undefined;
     const range = format.dateTimeRange(day(recap.from), day(recap.to), { month: "short", day: "numeric", year, timeZone: "UTC" });
-    return recap.imported ? t("importLine", { count: recap.titleCount, unit: recap.importedUnit ?? "film", range }) : t("recapLine", { period: recap.period ?? "week", range });
+    return recap.imported
+      ? t("importLine", { count: recap.titleCount, unit: recap.importedUnit ?? "film", range })
+      : t("recapLine", { period: recap.period ?? "week", range });
   }
   const p = card.data.progress;
   if (!p) return t("finishedLine", { name: card.data.name });
@@ -57,11 +67,7 @@ export default async function SharedCardPage({ params }: PageProps<"/[locale]/c/
   const card = await loadCard(id);
   if (!card) notFound();
 
-  const [t, tc, format] = await Promise.all([
-    getTranslations("SharedCard"),
-    getTranslations("Card"),
-    getFormatter(),
-  ]);
+  const [t, tc, format] = await Promise.all([getTranslations("SharedCard"), getTranslations("Card"), getFormatter()]);
   const { data } = card;
   const [y, m, d] = data.finishedOn.split("-").map(Number);
   const date = format.dateTime(new Date(Date.UTC(y!, m! - 1, d!)), { dateStyle: "medium", timeZone: "UTC" });
@@ -74,7 +80,10 @@ export default async function SharedCardPage({ params }: PageProps<"/[locale]/c/
           ? t.rich("byUserLink", {
               username: data.username,
               link: (chunks) => (
-                <Link href={`/u/${card.profileUsername}`} className="text-foreground underline decoration-brand/60 underline-offset-4 hover:decoration-brand">
+                <Link
+                  href={`/u/${card.profileUsername}`}
+                  className="text-foreground underline decoration-brand/60 underline-offset-4 hover:decoration-brand"
+                >
                   {chunks}
                 </Link>
               ),
@@ -86,8 +95,14 @@ export default async function SharedCardPage({ params }: PageProps<"/[locale]/c/
 
       {/* Pasted into the album: a slight tilt and two strips of tape. */}
       <div className="relative mx-auto w-full max-w-[20rem] rotate-[-1.5deg]">
-        <span aria-hidden="true" className="absolute -top-3 left-6 z-10 h-6 w-20 rotate-[-8deg] rounded-[2px] bg-brand-soft/90 ring-1 ring-brand/15 dark:bg-brand/30" />
-        <span aria-hidden="true" className="absolute -top-3 right-6 z-10 h-6 w-16 rotate-[6deg] rounded-[2px] bg-brand-soft/90 ring-1 ring-brand/15 dark:bg-brand/30" />
+        <span
+          aria-hidden="true"
+          className="absolute -top-3 left-6 z-10 h-6 w-20 rotate-[-8deg] rounded-[2px] bg-brand-soft/90 ring-1 ring-brand/15 dark:bg-brand/30"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute -top-3 right-6 z-10 h-6 w-16 rotate-[6deg] rounded-[2px] bg-brand-soft/90 ring-1 ring-brand/15 dark:bg-brand/30"
+        />
         <div
           className={
             card.kind === "sticker"

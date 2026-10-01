@@ -2,24 +2,26 @@
 
 import { useTranslations } from "next-intl";
 import { useId, useState, type FormEvent } from "react";
-import { DISPLAY_NAME_MAX, normalizeUsername, USERNAME_RE } from "@/core/account";
+import { BIO_MAX, bioFits, DISPLAY_NAME_MAX, normalizeBio, normalizeUsername, USERNAME_RE } from "@/core/account";
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { saveAccount, type SaveResult } from "./save-account";
 
-type Status = { kind: "idle" | "saving" | "saved" } | { kind: "error"; result: Extract<SaveResult, { ok: false }> | "format" };
+type Status = { kind: "idle" | "saving" | "saved" } | { kind: "error"; result: Extract<SaveResult, { ok: false }> | "format" | "bio" };
 
 const inputClass =
   "h-11 w-full min-w-0 rounded-lg border border-input bg-background px-3 text-base text-foreground focus-visible:outline-2 focus-visible:outline-ring aria-invalid:border-destructive";
 
-/** Settings → Profile: photo, display name and username, saved together. */
+/** Settings → Profile: photo, display name, username and bio (ADR 0057), saved together. */
 export function ProfileForm({
   username: savedUsername,
   displayName: savedName,
+  bio: savedBio,
   avatarUrl,
 }: {
   username: string;
   displayName: string | null;
+  bio: string | null;
   avatarUrl: string | null;
 }) {
   const t = useTranslations("Settings");
@@ -28,6 +30,7 @@ export function ProfileForm({
   const router = useRouter();
   const [username, setUsername] = useState(savedUsername);
   const [displayName, setDisplayName] = useState(savedName ?? "");
+  const [bio, setBio] = useState(savedBio ?? "");
   const [photo, setPhoto] = useState(avatarUrl);
   const [status, setStatus] = useState<Status>({ kind: "idle" });
 
@@ -35,10 +38,13 @@ export function ProfileForm({
     e.preventDefault();
     const name = normalizeUsername(username);
     if (!USERNAME_RE.test(name)) return setStatus({ kind: "error", result: "format" });
+    const cleanBio = normalizeBio(bio);
+    if (!bioFits(cleanBio)) return setStatus({ kind: "error", result: "bio" });
     setStatus({ kind: "saving" });
-    const result = await saveAccount({ username: name, displayName });
+    const result = await saveAccount({ username: name, displayName, bio: cleanBio || null });
     if (!result.ok) return setStatus({ kind: "error", result });
     setUsername(name);
+    setBio(cleanBio);
     setStatus({ kind: "saved" });
     router.refresh();
   }
@@ -52,14 +58,18 @@ export function ProfileForm({
   }
 
   const error = status.kind === "error" ? status.result : null;
-  const usernameError = error === "format" || (error && error.field !== "display_name" && error.error !== "unavailable");
-  const nameError = error !== null && error !== "format" && error.field === "display_name";
+  const bioError = error === "bio";
+  const usernameError = error === "format" || (error && error !== "bio" && error.field !== "display_name" && error.error !== "unavailable");
+  const nameError = error !== null && error !== "format" && error !== "bio" && error.field === "display_name";
+  const bioLength = [...bio].length;
   const message =
     error === null
       ? status.kind === "saved"
         ? t("saved")
         : ""
-      : error === "format" || error.error === "invalid"
+      : error === "bio"
+        ? t("bioTooLong", { max: BIO_MAX })
+        : error === "format" || error.error === "invalid"
         ? t("invalidUsername")
         : error.error === "username_taken"
           ? t("usernameTaken")
@@ -139,6 +149,30 @@ export function ProfileForm({
         </div>
         <p id={`${id}-username-hint`} className="text-sm text-muted-foreground">
           {t("usernameHint")}
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <div className="flex items-baseline justify-between gap-3">
+          <label htmlFor={`${id}-bio`} className="text-sm font-semibold">
+            {t("bio")}
+          </label>
+          <span aria-hidden="true" className={cn("text-xs tabular-nums", bioLength > BIO_MAX ? "text-destructive" : "text-muted-foreground")}>
+            {t("bioCount", { count: bioLength, max: BIO_MAX })}
+          </span>
+        </div>
+        <textarea
+          id={`${id}-bio`}
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          rows={3}
+          placeholder={t("bioPlaceholder")}
+          aria-invalid={bioError || undefined}
+          aria-describedby={`${id}-bio-hint ${id}-message`}
+          className={cn(inputClass, "h-auto min-h-24 resize-y py-2 leading-snug")}
+        />
+        <p id={`${id}-bio-hint`} className="text-sm text-muted-foreground">
+          {t("bioHint", { max: BIO_MAX })}
         </p>
       </div>
 

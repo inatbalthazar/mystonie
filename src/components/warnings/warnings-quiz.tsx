@@ -3,6 +3,8 @@
 import Image from "next/image";
 import { useFormatter, useTranslations } from "next-intl";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { BadgeToast } from "@/components/badges/badge-toast";
+import type { BadgeNews } from "@/core/badges";
 import { QUIZ_ANSWERS_TO_RESOLVE, QUIZ_MIN_ANSWER_MS, type QuizChoice, type QuizQuestion, type QuizResult, type QuizServe } from "@/core/quiz";
 import { SCENE_CONFIRMATIONS } from "@/core/scene-warnings";
 import { Link } from "@/i18n/navigation";
@@ -16,8 +18,8 @@ type Note = { tone: "good" | "warn"; text: string } | null;
 /**
  * The warnings quiz (S3 warnings & quiz): one question at a time about titles the user finished, from GET /api/quiz,
  * answered with POST /api/quiz. The server times every answer; the buttons wake up only after a question has been on
- * screen long enough to read (the same 1.5 s the server requires), so honest answers always count. No rewards: the
- * point is helping others skip what they'd rather not see.
+ * screen long enough to read (the same 1.5 s the server requires), so honest answers always count. No Gems: the
+ * point is helping others skip what they'd rather not see. Helping earns stickers, though (Lookout, Guardian; ADR 0063).
  */
 export function WarningsQuiz({ titleId }: { titleId: string | null }) {
   const t = useTranslations("Quiz");
@@ -26,6 +28,7 @@ export function WarningsQuiz({ titleId }: { titleId: string | null }) {
   const [note, setNote] = useState<Note>(null);
   const [answered, setAnswered] = useState(0);
   const [sending, setSending] = useState(false);
+  const [stickers, setStickers] = useState<BadgeNews[]>([]);
 
   const request = useCallback(async (): Promise<State> => {
     try {
@@ -52,7 +55,8 @@ export function WarningsQuiz({ titleId }: { titleId: string | null }) {
     try {
       const res = await fetch("/api/quiz", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ id: question.id, choice }) });
       if (!res.ok) throw new Error(String(res.status));
-      const result = (await res.json()) as QuizResult;
+      const result = (await res.json()) as QuizResult & { badges?: BadgeNews[] };
+      if (result.badges?.length) setStickers(result.badges);
       if (result.status === "paused") {
         setNote(null);
         setState({ kind: "served", serve: { status: "paused", until: result.until } });
@@ -120,6 +124,7 @@ export function WarningsQuiz({ titleId }: { titleId: string | null }) {
         <EmptyCard title={t("doneTitle")} body={t("doneBody")} cta={{ href: "/home", label: t("back") }} />
       )}
       {answered > 0 && <p className="text-center text-xs text-muted-foreground tabular-nums">{t("answered", { count: answered })}</p>}
+      {stickers.length > 0 && <BadgeToast key={stickers.map((b) => b.id).join()} badges={stickers} onClose={() => setStickers([])} />}
     </div>
   );
 }

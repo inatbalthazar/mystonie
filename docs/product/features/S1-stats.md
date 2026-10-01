@@ -18,9 +18,11 @@ A Strava-like stats page with big, bold numbers first, then charts.
 - Periods use the user's time zone: `periodRange(period, { timeZone, weekStart, offset })` in `src/core/stats/period.ts` gives UTC bounds [from, to) for this week / month / year (`offset: -1` = the previous one), handling DST. The week starts on the locale's first day (`weekStartFor(locale)`: Sunday for `en`, Monday where CLDR says so). Headline numbers come from `summarizeCollection` with that range, so they match the collection summary.
 - Charts use theme-token colours and are readable in dark mode. They are server-rendered elements, not Recharts ([ADR 0026](../../decisions/0026-stats-page.md)).
 - A "Share stats" button creates a Bold Stats card for the selected period (card kind `stats`, ADR 0026).
+- **Favourites** (stage 4, 2026-09-30, [S4 deeper stats](S4-deeper-stats.md)): favourite actors, directors & creators, studios, authors and developers over the period's finished titles, with photos; stats cards name the top two.
+- **Share my collection** (stage 4, 2026-09-30): the same card for all time, in one tap from the collection page (next to its title) and the owner's profile (under the pinned all-time numbers). Shown once something is logged.
 
 ## As built ([ADR 0026](../../decisions/0026-stats-page.md))
-- **Page:** `/stats?period=week|month|year|all` (this month by default), signed in. The header has a Stats link.
+- **Page:** `/stats?period=week|month|year|all` (this month by default), signed in. Stats is Me's second tab, under the same cover as the album (photo, name, followers), with Me lit in the nav island ([ADR 0053](../../decisions/0053-feed-tab-stats-in-me.md); it was the island's own tab, [ADR 0050](../../decisions/0050-mobile-first-nav-island.md)). The period tabs each take their label's width, so all four fit on one line at 360px.
 - **Numbers:** `statsReport` in `src/core/stats/report.ts`, from the rows in `src/data/stats.ts`.
 - **Sections:**
   - The period's headline, with Share stats.

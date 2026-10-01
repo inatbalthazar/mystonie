@@ -324,9 +324,6 @@ export function ImportFlow({ username, host, from }: { username: string | null; 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 pt-12 pb-10">
       <header className="flex flex-col gap-2">
-        <Link href="/settings" className="self-start text-sm text-muted-foreground underline-offset-4 hover:underline">
-          {t("back")}
-        </Link>
         <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("title")}</h1>
         {(step.name === "pick" || step.name === "reading") && <p className="max-w-prose text-muted-foreground">{t("intro")}</p>}
       </header>
@@ -593,8 +590,9 @@ function Preview(props: {
         </details>
       )}
 
-      {/* Sticks to the bottom while the list scrolls, and settles under it at the end (never over the footer). */}
-      <div className="sticky bottom-0 z-10 -mx-4 border-t border-border bg-background/95 px-4 py-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] backdrop-blur">
+      {/* Sticks to the bottom while the list scrolls, above the nav island (`--island-space`, ADR 0050), and settles
+          under the list at the end (never over the footer). */}
+      <div className="sticky bottom-[calc(var(--island-space)-0.75rem)] z-10 -mx-4 border-t border-border bg-background/95 px-4 py-3 backdrop-blur">
         <div className="flex items-center justify-end">
           <button
             type="button"

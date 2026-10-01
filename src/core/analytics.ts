@@ -31,13 +31,40 @@ export type AnalyticsEvents = {
   challenge_joined: { challenge: string };
   /** A fandom club was joined, from its page or the clubs list. */
   club_joined: { club: string; via: "club" | "list" };
+  /** The getting-started checklist (stage 4, ADR 0056): its floating button opened, skipped, or its 100 % celebration closed. */
+  getting_started: { action: "opened" | "skipped" | "completed" };
+  /** A picked title's details and warnings opened in the ➕ sheet before adding (stage 4, ADR 0058): its kind. */
+  title_details_opened: { kind: string };
+  /** A country put on the Atlas, changed or taken off (stage 4, ADR 0059): its new status, never the country. */
+  place_saved: { status: "been" | "lived" | "want" | "removed" };
+  /** A region of a country marked or unmarked on its page (stage 4, ADR 0060): never which one. */
+  region_saved: { visited: boolean; via: "map" | "list" };
+  /** A Reel of the Day play ended (stage 4 daily game): solved or not, and the guesses it took. */
+  reel_finished: { solved: boolean; guesses: number };
+  /** The spoiler-free result shared as text (the share sheet, or copied). The card shows as `card_shared` (`card`: reel). */
+  reel_shared: { channel: "share_sheet" | "copy" };
+  /** The "Buy me a coffee" tip link was opened (ADR 0049): from the footer or Settings. */
+  support_clicked: { place: "footer" | "settings" };
+  /** A beta report was sent from /feedback (ADR 0055): its kind only, never the message. */
+  feedback_sent: { kind: "bug" | "idea" | "other" };
+  /** "Check for family viewing" tapped on a title page: the family set of avoid-topics was saved (stage 4). */
+  family_check_chosen: Record<string, never>;
   /** A scene warning was added on a title page (S3 warnings & quiz): its topic and whether it says where. */
   scene_warning_added: { topic: string; placed: boolean };
   /** A vote on someone's scene warning from the title page: saw it, not there, or taken back. */
   scene_warning_voted: { vote: "confirm" | "dispute" | "undo" };
   /** A warnings quiz answer: the kind of question, the choice, and whether the server counted it. */
   quiz_answered: { kind: "topic" | "warning"; choice: "yes" | "no" | "unsure"; counted: boolean };
+  /** A Stamp on a Journal article (ADR 0052): from the Journal's rows, the article's page or the Following feed. */
+  article_stamped: { place: ArticlePlace };
+  /** A Journal article saved to read later. */
+  article_saved: { place: ArticlePlace };
+  /** A Journal article shared: the share sheet, or its link copied. */
+  article_shared: { place: ArticlePlace; channel: "share_sheet" | "copy" };
 };
+
+/** Where a Journal article's Stamp, Save or Share was tapped. */
+export type ArticlePlace = "article" | "feed";
 
 export type AnalyticsEvent = keyof AnalyticsEvents;
 

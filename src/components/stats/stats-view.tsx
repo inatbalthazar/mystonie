@@ -1,10 +1,12 @@
+import Image from "next/image";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
 import { PaperCard } from "@/components/paper-card";
 import type { StatsPeriod } from "@/core/cards/types";
+import { CREDIT_ROLES } from "@/core/catalog/credits";
 import { formatRuntime } from "@/core/format/runtime";
 import { addDays } from "@/core/stats/recap";
-import type { MonthBar, Ranked, StatsReport } from "@/core/stats/report";
+import type { MonthBar, Ranked, RankedPerson, StatsReport } from "@/core/stats/report";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
@@ -23,18 +25,21 @@ function SectionTitle({ children }: { children: ReactNode }) {
   return <h2 className="font-display text-xl font-extrabold tracking-[-0.02em]">{children}</h2>;
 }
 
-/** This week / month / year / all time, as links (`?period=`), so each period is a plain server render. */
+/**
+ * This week / month / year / all time, as links (`?period=`), so each period is a plain server render. Each takes its
+ * label's width plus a share of the rest, so "This month" stays on one line at 360px (and wraps only if it must).
+ */
 export function PeriodTabs({ period }: { period: StatsPeriod }) {
   const t = useTranslations("Stats");
   return (
-    <nav aria-label={t("periodsLabel")} className="grid grid-cols-4 gap-1 rounded-xl bg-muted p-1">
+    <nav aria-label={t("periodsLabel")} className="flex gap-1 rounded-xl bg-muted p-1">
       {(["week", "month", "year", "all"] as const).map((p) => (
         <Link
           key={p}
           href={{ pathname: "/stats", query: { period: p } }}
           aria-current={p === period ? "page" : undefined}
           className={cn(
-            "flex h-11 items-center justify-center rounded-lg px-1 text-center text-sm leading-tight font-semibold text-muted-foreground transition-colors hover:text-foreground",
+            "flex h-11 flex-auto items-center justify-center rounded-lg px-1 text-center text-sm leading-tight font-semibold text-muted-foreground transition-colors hover:text-foreground",
             p === period && "bg-card text-foreground shadow-sm ring-1 ring-border",
           )}
         >
@@ -257,6 +262,67 @@ export function Taste({ report }: { report: StatsReport }) {
           </div>
         </>
       )}
+    </PaperCard>
+  );
+}
+
+/** A round photo (a square white chip for a studio's logo), or the name's initials while there is none. */
+function PersonImage({ person, logo }: { person: RankedPerson; logo: boolean }) {
+  const initials = person.name
+    .split(/\s+/)
+    .slice(0, 2)
+    .map((word) => Array.from(word)[0] ?? "")
+    .join("");
+  return (
+    <span
+      aria-hidden="true"
+      className={cn(
+        "relative flex size-11 shrink-0 items-center justify-center overflow-hidden font-display text-sm font-extrabold ring-1 ring-border",
+        logo ? "rounded-lg bg-white text-neutral-700" : "rounded-full bg-muted text-muted-foreground",
+      )}
+    >
+      {person.imageUrl ? (
+        <Image src={person.imageUrl} alt="" fill unoptimized sizes="44px" className={logo ? "object-contain p-1" : "object-cover"} />
+      ) : (
+        initials
+      )}
+    </span>
+  );
+}
+
+/**
+ * Favourite actors, directors & creators, studios, authors and developers (stage 4): who made the titles finished in
+ * the period, top 5 of each. Hidden while no finished title has credits.
+ */
+export function Favourites({ report }: { report: StatsReport }) {
+  const t = useTranslations("Stats");
+  const runtime = useRuntime();
+  const roles = CREDIT_ROLES.filter((role) => report.people[role].length > 0);
+  if (roles.length === 0) return null;
+  return (
+    <PaperCard className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
+        <SectionTitle>{t("favourites")}</SectionTitle>
+        <p className="text-sm text-muted-foreground">{t("favouritesHint")}</p>
+      </div>
+      <div className="grid gap-5 sm:grid-cols-2">
+        {roles.map((role) => (
+          <div key={role} className="flex min-w-0 flex-col gap-2">
+            <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">{t("favouriteRole", { role })}</h3>
+            <ol className="flex flex-col gap-2">
+              {report.people[role].map((person) => (
+                <li key={person.id} className="flex min-w-0 items-center gap-3">
+                  <PersonImage person={person} logo={role === "studio"} />
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate text-sm font-semibold">{person.name}</span>
+                    <span className="text-xs text-muted-foreground tabular-nums">{t("personDetail", { count: person.titles, time: runtime(person.minutes) })}</span>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        ))}
+      </div>
     </PaperCard>
   );
 }

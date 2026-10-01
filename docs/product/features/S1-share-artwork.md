@@ -73,7 +73,7 @@ The heart of Mystonie, modelled on Strava's post-activity share. Every finish or
   - Templates: **Collage** (default: an album page, posters taped in) and **Bold Stats**.
   - Sticker, Share, `/c/[id]` and the OG image all work as for Finish cards.
   - The collection page shows "Your week is in" for 7 days.
-- **Web push** (built, [ADR 0028](../../decisions/0028-home-pwa-web-push.md)): in the installed app, Settings → Notifications (and a one-time note on Home) turns on recap notifications for that device. The hourly job pushes each new recap once, before the emails; tapping the notification opens `/recap/[id]`.
+- **Web push** (built, [ADR 0028](../../decisions/0028-home-pwa-web-push.md)): in the installed app, Settings → Notifications (and a one-time note on Home) turns on recap notifications for that device. The hourly job pushes each new recap once, before the emails; tapping the notification opens `/recap/[id]`. Stage 4 adds opt-in Reel of the Day reminders under the same switch ([ADR 0054](../../decisions/0054-feed-dot-reel-reminders.md)).
 - Tests:
   - `src/core/stats/recap.test.ts`;
   - `saved.test.ts` (recap parsing);

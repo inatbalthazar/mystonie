@@ -180,3 +180,10 @@ export async function setBlock(db: UserClient, viewerId: string, userId: string,
   );
   return "ok";
 }
+
+/** "What people said" on a title page (ADR 0051): finishes of this title with a written review, newest first. */
+export async function titleReviews(db: UserClient, viewerId: string, titleId: string, limit = 20): Promise<FeedItem[]> {
+  const { data, error } = await db.rpc("title_reviews", { p_title_id: titleId, p_limit: limit });
+  if (error) throw new Error(`title_reviews failed: ${error.message}`);
+  return feedItems(db, viewerId, data);
+}

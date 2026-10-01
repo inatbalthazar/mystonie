@@ -5,7 +5,7 @@ import { WarningsQuiz } from "@/components/warnings/warnings-quiz";
 import { localizedPath } from "@/core/auth";
 import { parseQuizTitle } from "@/core/quiz";
 import { userClient } from "@/data/supabase-server";
-import { Link, redirect } from "@/i18n/navigation";
+import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -30,9 +30,6 @@ export default async function QuizPage({ params, searchParams }: PageProps<"/[lo
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-8 pb-16">
-      <Link href="/home" className="inline-flex min-h-11 items-center self-start text-sm font-semibold text-brand">
-        {t("back")}
-      </Link>
       <div className="flex flex-col gap-2">
         <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("title")}</h1>
         <p className="text-sm text-muted-foreground">{t("intro")}</p>

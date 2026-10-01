@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { uuidv7 } from "../src/core/ids";
-import { canSeed, fakePushService, mailpitUp, seedSeries, seedTitles, signUp, type SeedTitle } from "./helpers";
+import { canSeed, fakePushService, mailpitUp, navIsland, seedSeries, seedTitles, signUp, type SeedTitle } from "./helpers";
 
 // Needs the local Supabase stack. Titles and the series are seeded, so TMDB isn't needed (with a token, the
 // trending section shows up too and is checked).
@@ -20,11 +20,12 @@ test("Home: up next, recent cards, trending into quick add, install prompt", asy
   await signUp(page, request, "home", "/home");
   const main = page.getByRole("main");
 
-  // A new account: a greeting, an empty card strip, and Home in the header.
+  // A new account: a greeting, an empty card strip, and Home lit in the nav island.
   await expect(main.getByRole("heading", { level: 1 })).toHaveText(/^Hi, \S+/);
   await expect(main.getByText("Finish something and your cards land here.")).toBeVisible();
   await expect(main.getByRole("region", { name: "Up next" })).toHaveCount(0);
-  await expect(page.getByRole("banner").getByRole("link", { name: "Home", exact: true })).toHaveAttribute("href", "/home");
+  await expect(navIsland(page).getByRole("link", { name: "Home", exact: true })).toHaveAttribute("href", "/home");
+  await expect(navIsland(page).getByRole("link", { name: "Home", exact: true })).toHaveAttribute("aria-current", "page");
 
   // Watching a series: its next episode is one tap away on Home.
   const logged = await page.request.post("/api/episodes", {
@@ -168,4 +169,48 @@ test("push subscriptions: saved per device, only for real push services, dropped
   await expect(page).toHaveURL(/\/$/);
   expect(await push.stored()).toEqual([]);
   await push.close();
+});
+
+test("the getting-started checklist: a round button on every page, ticked from real data, skipped, and back from Settings", async ({ page, request }) => {
+  test.skip(!(await mailpitUp(request)) || !canSeed(), "local Supabase (Mailpit, service role key) is not available");
+  await seedTitles(request, [MOVIE]);
+  await signUp(page, request, "getting-started", "/home");
+  // Not on Home's page any more: a round progress button floats above the nav island (ADR 0056).
+  const button = page.getByRole("button", { name: /^Getting started: / });
+  await expect(button).toHaveAccessibleName("Getting started: 0 of 5 done");
+  const sheet = page.getByRole("dialog", { name: "Getting started" });
+  await expect(sheet).toHaveCount(0);
+
+  // Adding a title and choosing topics tick their steps, on any page.
+  const added = await page.request.post("/api/entries", { data: { id: uuidv7(), title: { source: "tmdb", kind: "movie", externalId: MOVIE.externalId }, status: "want" } });
+  expect(added.status(), await added.text()).toBe(201);
+  const topics = await page.request.put("/api/warnings/topics", { data: { topicIds: [153] } });
+  expect(topics.status(), await topics.text()).toBe(200);
+  await page.goto("/stats");
+  await expect(button).toHaveAccessibleName("Getting started: 2 of 5 done");
+  await button.click();
+  await expect(sheet.getByRole("progressbar")).toHaveAttribute("aria-valuenow", "2");
+  await expect(sheet).toContainText("2 of 5 done");
+  await expect(sheet.getByRole("listitem").filter({ hasText: "Add your first title" })).toContainText("Done");
+  await expect(sheet.getByRole("link", { name: /Pick topics to avoid/ })).toHaveCount(0);
+  await expect(sheet.getByRole("link", { name: /Follow someone or join a club/ })).toHaveAttribute("href", "/people");
+  // A step's link closes the sheet on the way.
+  await sheet.getByRole("link", { name: /Follow someone or join a club/ }).click();
+  await expect(page).toHaveURL(/\/people$/);
+  await expect(sheet).toHaveCount(0);
+  await expect(button).toBeVisible();
+
+  // Skip for now: gone, and it stays gone.
+  await button.click();
+  await sheet.getByRole("button", { name: "Skip for now" }).click();
+  await expect(button).toHaveCount(0);
+  await page.reload();
+  await expect(page.getByRole("main")).toBeVisible();
+  await expect(button).toHaveCount(0);
+
+  // Settings brings it back.
+  await page.goto("/settings");
+  await page.getByRole("button", { name: "Show the getting-started checklist" }).click();
+  await expect(page.getByText("The checklist's round button is at the bottom of every page until you finish or skip it.")).toBeVisible();
+  await expect(button).toHaveAccessibleName("Getting started: 2 of 5 done");
 });

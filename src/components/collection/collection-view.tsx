@@ -1,9 +1,9 @@
 "use client";
 
-import { ImageIcon, PlusIcon } from "lucide-react";
+import { ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { useId, useMemo, useState, useSyncExternalStore } from "react";
+import { useEffect, useId, useMemo, useState, useSyncExternalStore } from "react";
 import { isReadingKind, type SearchResult } from "@/core/catalog/types";
 import {
   finishedAtForDate,
@@ -42,10 +42,13 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { CardData } from "@/core/cards/types";
 import { Celebration } from "../celebration";
+import { QUICK_ADD_EVENT, takePendingQuickAdd } from "../nav-island";
 import { useMilestones } from "../milestone-celebration";
 import { send, useOverlayOps } from "../offline/outbox";
 import { Sheet } from "../sheet";
-import { useWarningLabel, WarningBadge } from "../warnings/warning-badge";
+import { ClearBadge, useWarningLabel, WarningBadge } from "../warnings/warning-badge";
+import { ShareCollection } from "@/components/stats/share-collection";
+import type { CardRecap, CollectionArea } from "@/core/cards/types";
 import { CollectionControls, CollectionSummary, PlaySummary, ReadSummary, ShelfTabs } from "./collection-header";
 import { QuickAdd } from "./quick-add";
 
@@ -88,7 +91,7 @@ function subscribeLayout(listener: () => void) {
 const noSubscribe = () => () => {};
 const readAddParam = () => new URLSearchParams(window.location.search).get("add") === "1";
 
-/** Drops `?add=1` (the header ➕) and `pick` once the sheet closes, so the next ➕ tap opens it again. */
+/** Drops `?add=1` (the ➕ from another page) and `pick` once the sheet closes, so a reload doesn't open it again. */
 function clearAddParam() {
   const url = new URL(window.location.href);
   if (!url.searchParams.has("add")) return;
@@ -124,7 +127,10 @@ export function CollectionView({
   host,
   startAdding = false,
   startWith = null,
+  startShelf = null,
   warnings = {},
+  cleared = [],
+  shareCards = {},
 }: {
   /** Who is signed in: the owner of the changes made here. */
   userId: string;
@@ -140,8 +146,14 @@ export function CollectionView({
   startAdding?: boolean;
   /** Opens quick add on this title's status step (a trending title tapped on Home). */
   startWith?: SearchResult | null;
+  /** The tab to open on (`?shelf=read`, the Atlas tab's links back). */
+  startShelf?: CollectionShelf | null;
   /** Content warnings: by title id, the user's avoid-topics each title has a Yes for (badges; DTDD's and our own). */
   warnings?: Record<string, BadgeTopic[]>;
+  /** Stage 4 pre-watch check: title ids DTDD knows with nothing from the user's avoid-topics (a check on Want tiles). */
+  cleared?: string[];
+  /** "Share my collection" (stage 4): the all-time card of each area, shared from the open tab. */
+  shareCards?: Partial<Record<CollectionArea, CardRecap>>;
 }) {
   const t = useTranslations("Collection");
   const locale = useLocale();
@@ -157,9 +169,11 @@ export function CollectionView({
   const watchLogs = useMemo(() => overlayWatchLogs(logs, items, ops), [logs, items, ops]);
   const readingLogs = useMemo(() => overlayReadLogs(readLogs, items, ops), [readLogs, items, ops]);
   const [filter, setFilter] = useState<CollectionFilter>({ year: null, status: null });
-  // Watch · Read · Play. Starts where the picked title belongs, or on the one tab with anything on it.
+  const isCleared = (item: Row) => item.status === "want" && !!item.title.id && cleared.includes(item.title.id);
+  // Watch · Read · Play. Starts where the picked title belongs, on the asked-for tab, or on the one tab with anything on it.
   const [shelf, setShelf] = useState<CollectionShelf>(() => {
     if (startWith) return shelfOf({ title: startWith });
+    if (startShelf) return startShelf;
     const shelves = new Set(initialItems.map(shelfOf));
     return shelves.size === 1 ? [...shelves][0]! : "watch";
   });
@@ -176,6 +190,18 @@ export function CollectionView({
 
   // Offline, the page comes from this device's saved copy, made without `?add=1`: the ➕ link still opens quick add.
   const addInUrl = useSyncExternalStore(noSubscribe, readAddParam, () => false);
+
+  // The nav island's ➕ on this page opens quick add in place, without a trip to the server (ADR 0050), and so does
+  // a ➕ tapped while the page was still getting ready.
+  useEffect(() => {
+    function open(event: Event) {
+      event.preventDefault();
+      setAdding(true);
+    }
+    window.addEventListener(QUICK_ADD_EVENT, open);
+    if (takePendingQuickAdd()) open(new Event(QUICK_ADD_EVENT, { cancelable: true }));
+    return () => window.removeEventListener(QUICK_ADD_EVENT, open);
+  }, []);
 
   /** The server's answer replaces its entry in `base` (by title: the server may keep another id). */
   function keep(key: string, next: CollectionItem | null) {
@@ -255,9 +281,10 @@ export function CollectionView({
 
   return (
     <>
+      {/* Always there, so the Atlas tab is too before anything is collected. */}
+      <ShelfTabs shelf={shelf} onShelf={setShelf} />
       {items.length > 0 && (
-        <div className="flex flex-col gap-4">
-          <ShelfTabs shelf={shelf} onShelf={setShelf} />
+        <div className="mt-2 flex flex-col gap-4">
           {shelf === "read" ? (
             <ReadSummary totals={summarizeReadRows(rows)} year={activeFilter.year} />
           ) : shelf === "play" ? (
@@ -265,6 +292,7 @@ export function CollectionView({
           ) : (
             <CollectionSummary totals={summarizeRows(rows)} year={activeFilter.year} />
           )}
+          <ShareCollection cards={shareCards} area={shelf} username={username || null} host={host} />
           <CollectionControls
             years={years}
             filter={activeFilter}
@@ -321,7 +349,13 @@ export function CollectionView({
         <ul className="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4">
           {rows.map((row, i) => (
             <li key={row.item.id}>
-              <EntryTile row={row} tilt={i} warning={warnings[row.item.title.id ?? ""]} onEdit={() => setEditing(row.item)} />
+              <EntryTile
+                row={row}
+                tilt={i}
+                warning={warnings[row.item.title.id ?? ""]}
+                clear={isCleared(row.item)}
+                onEdit={() => setEditing(row.item)}
+              />
             </li>
           ))}
         </ul>
@@ -329,20 +363,17 @@ export function CollectionView({
         <ul className="flex flex-col gap-3">
           {rows.map((row) => (
             <li key={row.item.id}>
-              <EntryRow row={row} timeZone={timeZone} warning={warnings[row.item.title.id ?? ""]} onEdit={() => setEditing(row.item)} />
+              <EntryRow
+                row={row}
+                timeZone={timeZone}
+                warning={warnings[row.item.title.id ?? ""]}
+                clear={isCleared(row.item)}
+                onEdit={() => setEditing(row.item)}
+              />
             </li>
           ))}
         </ul>
       )}
-
-      <button
-        type="button"
-        onClick={() => setAdding(true)}
-        aria-label={t("add")}
-        className="fixed right-4 bottom-[max(1rem,env(safe-area-inset-bottom))] z-10 flex size-16 items-center justify-center rounded-full bg-brand text-brand-foreground shadow-lg ring-4 ring-background hover:bg-brand/90 sm:right-[max(1rem,calc(50%-18rem))]"
-      >
-        <PlusIcon className="size-8" aria-hidden="true" />
-      </button>
 
       <QuickAdd open={adding || addInUrl} onClose={closeAdd} onAdd={add} timeZone={timeZone} initialPick={startWith} />
       <Sheet open={!!editing} onClose={() => setEditing(null)} title={editing?.title.name ?? ""} closeLabel={t("close")}>
@@ -425,10 +456,22 @@ function useLength() {
   };
 }
 
-function EntryRow({ row, timeZone, warning, onEdit }: { row: CollectionRow<Row>; timeZone: string; warning?: BadgeTopic[]; onEdit: () => void }) {
+function EntryRow({
+  row,
+  timeZone,
+  warning,
+  clear,
+  onEdit,
+}: {
+  row: CollectionRow<Row>;
+  timeZone: string;
+  warning?: BadgeTopic[];
+  clear: boolean;
+  onEdit: () => void;
+}) {
   const { item } = row;
   const t = useTranslations("Collection");
-  const warningLabel = useWarningLabel()(warning);
+  const warningLabel = useWarningLabel()(warning) ?? (clear ? t("checkedClear") : null);
   const home = useTranslations("Home");
   const format = useFormatter();
   const length = useLength()(row);
@@ -446,7 +489,12 @@ function EntryRow({ row, timeZone, warning, onEdit }: { row: CollectionRow<Row>;
     >
       <span className="relative aspect-[2/3] w-14 shrink-0 overflow-hidden rounded-lg bg-muted">
         {item.title.posterUrl && <Image src={item.title.posterUrl} alt="" fill unoptimized sizes="56px" className="object-cover" />}
-        {warningLabel && <WarningBadge label={warningLabel} className="absolute top-0.5 right-0.5 size-6" />}
+        {warningLabel &&
+          (warning?.length ? (
+            <WarningBadge label={warningLabel} className="absolute top-0.5 right-0.5 size-6" />
+          ) : (
+            <ClearBadge label={warningLabel} className="absolute top-0.5 right-0.5 size-6" />
+          ))}
       </span>
       <span className="flex min-w-0 flex-1 flex-col gap-0.5">
         <span className="line-clamp-2 font-semibold leading-snug">{item.title.name}</span>
@@ -476,10 +524,22 @@ const TILTS = ["rotate-[-1.5deg]", "rotate-[1deg]", "rotate-[-0.5deg]", "rotate-
  * A poster pasted into the album (tiles view): a paper frame, a slight tilt that alternates down the
  * page, the status stamp on the corner and the length under it.
  */
-function EntryTile({ row, tilt, warning, onEdit }: { row: CollectionRow<Row>; tilt: number; warning?: BadgeTopic[]; onEdit: () => void }) {
+function EntryTile({
+  row,
+  tilt,
+  warning,
+  clear,
+  onEdit,
+}: {
+  row: CollectionRow<Row>;
+  tilt: number;
+  warning?: BadgeTopic[];
+  clear: boolean;
+  onEdit: () => void;
+}) {
   const { item } = row;
   const t = useTranslations("Collection");
-  const warningLabel = useWarningLabel()(warning);
+  const warningLabel = useWarningLabel()(warning) ?? (clear ? t("checkedClear") : null);
   const length = useLength()(row, true);
   return (
     <button
@@ -498,7 +558,12 @@ function EntryTile({ row, tilt, warning, onEdit }: { row: CollectionRow<Row>; ti
             </span>
           )}
         </span>
-        {warningLabel && <WarningBadge label={warningLabel} className="absolute -top-2 -right-2" />}
+        {warningLabel &&
+          (warning?.length ? (
+            <WarningBadge label={warningLabel} className="absolute -top-2 -right-2" />
+          ) : (
+            <ClearBadge label={warningLabel} className="absolute -top-2 -right-2" />
+          ))}
         <span className="absolute inset-x-0 -bottom-2.5 flex justify-center">
           <span className="rounded-md bg-card/95">
             <StatusStamp status={item.status} shelf={shelfOf(item)} small />
@@ -574,8 +639,7 @@ function EntryEditor({
   const [confirmRemove, setConfirmRemove] = useState(false);
 
   // Keep the exact time when the day didn't change (ordering within a day stays as it was).
-  const finishedAt =
-    status !== "finished" ? null : item.finishedAt && date === originalDate ? item.finishedAt : finishedAtForDate(date, timeZone);
+  const finishedAt = status !== "finished" ? null : item.finishedAt && date === originalDate ? item.finishedAt : finishedAtForDate(date, timeZone);
   const valid = status !== "finished" || !!finishedAt;
 
   return (

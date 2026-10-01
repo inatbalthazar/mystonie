@@ -5,19 +5,21 @@ import { useState } from "react";
 import { Celebration } from "@/components/celebration";
 import { PaperCard } from "@/components/paper-card";
 import type { CardData } from "@/core/cards/types";
+import { previewClass, ShowAll } from "@/components/show-all";
 import { cn } from "@/lib/utils";
 
 const TILTS = ["-rotate-2", "rotate-1", "rotate-2", "-rotate-1"];
 
 /**
  * Milestones reached so far (ADR 0031), newest first, as little carved stones on the stats page. Tapping one opens
- * its Milestone card, so a milestone reached before the feature existed can still be shared.
+ * its Milestone card, so a milestone reached before the feature existed can still be shared. Two rows, then "Show all".
  */
 export function MilestoneShelf({ milestones, username, host }: { milestones: CardData[]; username: string | null; host: string }) {
   const t = useTranslations("Stats");
   const tc = useTranslations("Card");
   const format = useFormatter();
   const [open, setOpen] = useState<CardData | null>(null);
+  const [all, setAll] = useState(false);
 
   return (
     <PaperCard className="flex flex-col gap-3">
@@ -32,7 +34,7 @@ export function MilestoneShelf({ milestones, username, host }: { milestones: Car
               const { metric, value } = m.milestone!;
               const date = format.dateTime(new Date(`${m.finishedOn}T00:00:00Z`), { dateStyle: "medium", timeZone: "UTC" });
               return (
-                <li key={`${metric}-${value}`}>
+                <li key={`${metric}-${value}`} className={previewClass(i, all, 4, 6)}>
                   <button
                     type="button"
                     onClick={() => setOpen(m)}
@@ -50,6 +52,7 @@ export function MilestoneShelf({ milestones, username, host }: { milestones: Car
               );
             })}
           </ul>
+          {milestones.length > 4 && <ShowAll open={all} onToggle={() => setAll(!all)} count={milestones.length} hiddenFromSm={milestones.length <= 6} />}
         </>
       )}
       {open && <Celebration data={open} source={{ kind: "milestone", ready: true }} username={username} host={host} onClose={() => setOpen(null)} />}

@@ -97,11 +97,19 @@ describe("a game's Finish card (S3 games)", () => {
   it("keeps RAWG art and the hours, and saves on the cartridge", () => {
     expect(parseCardData(game)).toMatchObject({ kind: "game", playtimeHours: 43, hoursPlayed: 187, posterUrl: game.posterUrl });
     expect(parseCardData({ ...game, hoursPlayed: null })).toMatchObject({ hoursPlayed: null });
-    expect(parseCardSave({ id: ID, kind: "finish", templateId: "cartridge", size: "story", entryId: ENTRY, data: game })).toMatchObject({ templateId: "cartridge" });
+    expect(parseCardSave({ id: ID, kind: "finish", templateId: "cartridge", size: "story", entryId: ENTRY, data: game })).toMatchObject({
+      templateId: "cartridge",
+    });
   });
 
   it("rejects hours out of range or on anything but a game, and a game on the cartridge's neighbours' templates it can't take", () => {
-    for (const bad of [{ ...game, hoursPlayed: 0 }, { ...game, hoursPlayed: 10_000 }, { ...game, playtimeHours: 1.5 }, { ...data, hoursPlayed: 3 }, { ...data, playtimeHours: 3 }]) {
+    for (const bad of [
+      { ...game, hoursPlayed: 0 },
+      { ...game, hoursPlayed: 10_000 },
+      { ...game, playtimeHours: 1.5 },
+      { ...data, hoursPlayed: 3 },
+      { ...data, playtimeHours: 3 },
+    ]) {
       expect(parseCardData(bad), JSON.stringify(bad)).toBeNull();
     }
     // No Progress cards for games (there's no progress to log), and no Film Strip.
@@ -116,8 +124,11 @@ describe("parseCardSave", () => {
   it("accepts a finish card, a progress card and a sticker", () => {
     expect(parseCardSave(finish)).toMatchObject({ kind: "finish", entryId: ENTRY, episodeLogId: null, share: true });
     const series = { ...data, kind: "series", progress };
-    expect(parseCardSave({ ...finish, kind: "progress", templateId: "boldStats", entryId: null, episodeLogId: LOG, data: series }))
-      .toMatchObject({ kind: "progress", episodeLogId: LOG, share: true });
+    expect(parseCardSave({ ...finish, kind: "progress", templateId: "boldStats", entryId: null, episodeLogId: LOG, data: series })).toMatchObject({
+      kind: "progress",
+      episodeLogId: LOG,
+      share: true,
+    });
     expect(parseCardSave({ ...finish, kind: "sticker", templateId: "sticker", size: "feed", share: undefined })).toMatchObject({
       kind: "sticker",
       share: false,
@@ -185,6 +196,12 @@ describe("parseRecap", () => {
     // An "Imported N books" card (S3 import & export).
     const imported = { ...recap, period: "all", imported: true, importedUnit: "book" };
     expect(parseRecap(imported)).toMatchObject({ imported: true, importedUnit: "book" });
+    // Play time and a stats card's favourites (stage 4) survive saving.
+    const favourites = [
+      { role: "actor", name: "Song Kang-ho" },
+      { role: "director", name: "Bong Joon Ho" },
+    ];
+    expect(parseRecap({ ...recap, period: "all", playMinutes: 1200, favourites })).toMatchObject({ playMinutes: 1200, favourites });
   });
 
   it("rejects malformed recaps", () => {
@@ -198,6 +215,28 @@ describe("parseRecap", () => {
       { ...recap, titles: [{ ...recap.titles[0], kind: "podcast" }] },
       { ...recap, period: "decade" },
       { ...recap, period: "all", imported: true, importedUnit: "podcast" },
+      { ...recap, playMinutes: -5 },
+      // Favourites: only on a stats period, known roles, once each, at most two.
+      { ...recap, favourites: [{ role: "actor", name: "A" }] },
+      { ...recap, period: "all", favourites: [{ role: "grip", name: "A" }] },
+      {
+        ...recap,
+        period: "all",
+        favourites: [
+          { role: "actor", name: "A" },
+          { role: "actor", name: "B" },
+        ],
+      },
+      {
+        ...recap,
+        period: "all",
+        favourites: [
+          { role: "actor", name: "A" },
+          { role: "director", name: "B" },
+          { role: "studio", name: "C" },
+        ],
+      },
+      { ...recap, period: "all", favourites: [{ role: "actor", name: " " }] },
       { ...recap, importedUnit: "book" },
     ];
     for (const b of bad) expect(parseRecap(b), JSON.stringify(b)).toBeNull();
@@ -293,11 +332,15 @@ describe("reading Progress cards (S2 books & manga)", () => {
 
   it("accepts a book's Finish card and rejects reading progress that doesn't add up", () => {
     const book = { kind: "book", name: "Project Hail Mary", posterUrl: "/api/covers/3fzJEAAAQBAJ", pageCount: 496, finishedOn: "2026-09-27" };
-    expect(parseCardSave({ id: ID, kind: "finish", templateId: "ticket", size: "feed", entryId: ENTRY, data: book })).toMatchObject({ data: { pageCount: 496 } });
+    expect(parseCardSave({ id: ID, kind: "finish", templateId: "ticket", size: "feed", entryId: ENTRY, data: book })).toMatchObject({
+      data: { pageCount: 496 },
+    });
     expect(parseCardSave({ id: ID, kind: "finish", templateId: "spine", size: "feed", entryId: ENTRY, data: book })).not.toBeNull();
     // The manga panel is for manga, and neither reading template draws a movie.
     expect(parseCardSave({ id: ID, kind: "finish", templateId: "mangaPanel", size: "feed", entryId: ENTRY, data: book })).toBeNull();
-    expect(parseCardSave({ id: ID, kind: "finish", templateId: "spine", size: "feed", entryId: ENTRY, data: { ...book, kind: "movie", pageCount: null } })).toBeNull();
+    expect(
+      parseCardSave({ id: ID, kind: "finish", templateId: "spine", size: "feed", entryId: ENTRY, data: { ...book, kind: "movie", pageCount: null } }),
+    ).toBeNull();
     const reading = { unit: "chapter", position: 1100, total: null, readMin: 5500, milestone: null };
     const progress = { id: ID, kind: "progress", templateId: "boldStats", size: "story", readingLogId: LOG, data: { ...manga, reading } };
     for (const bad of [
@@ -376,5 +419,91 @@ describe("Challenge cards (S3 challenges & clubs)", () => {
     expect(parseCardSave({ ...save, entryId: ENTRY })).toBeNull();
     expect(parseCardSave({ ...save, templateId: "stone" })).toBeNull();
     expect(parseCardSave({ ...save, kind: "finish", entryId: ENTRY, templateId: "ticket" })).toBeNull();
+  });
+});
+
+describe("Reel of the Day cards (stage 4 daily game)", () => {
+  const reel = { number: 6, day: "2026-10-05", results: [false, false, true], solved: true, streak: 4 };
+  const reelData = { kind: "movie", name: "Reel of the Day #6", finishedOn: "2026-10-05", posterUrl: null, reel };
+  const save = { id: ID, kind: "reel", templateId: "reel", size: "story", data: reelData, share: true };
+
+  it("accepts a consistent result, as a reel card or its sticker", () => {
+    expect(parseCardSave(save)).toMatchObject({ kind: "reel", templateId: "reel", data: { reel } });
+    expect(parseCardSave({ ...save, kind: "sticker", templateId: "sticker" })).toMatchObject({ kind: "sticker" });
+    const lost = { ...reel, results: [false, false, false, false, false, false], solved: false, streak: 0 };
+    expect(parseCardData({ ...reelData, reel: lost })?.reel).toEqual(lost);
+  });
+
+  it("rejects results that can't happen, a poster (a spoiler), and mixing", () => {
+    const bad = [
+      { ...reel, number: 7 }, // not that day's number
+      { ...reel, results: [true, false] }, // a hit ends the play
+      { ...reel, results: [false, false], solved: false, streak: 0 }, // lost with guesses left
+      { ...reel, solved: false }, // the last result says solved
+      { ...reel, streak: 0 }, // a win starts a streak
+      { ...reel, results: [] },
+    ];
+    for (const b of bad) expect(parseCardData({ ...reelData, reel: b }), JSON.stringify(b)).toBeNull();
+    expect(parseCardData({ ...reelData, posterUrl: "https://image.tmdb.org/t/p/w342/matrix.jpg" })).toBeNull();
+    expect(parseCardData({ ...reelData, kind: "series" })).toBeNull();
+    expect(parseCardSave({ ...save, kind: "finish", entryId: ENTRY })).toBeNull();
+    expect(parseCardSave({ ...save, kind: "stats", templateId: "boldStats" })).toBeNull();
+    expect(parseCardSave({ ...save, data: { ...reelData, reel: null } })).toBeNull();
+  });
+});
+
+describe("Atlas cards (stage 4, ADR 0059)", () => {
+  const atlas = { countries: ["TH", "FR", "JP", "FR"], stories: 12 };
+  const atlasData = { kind: "movie", name: "Atlas", finishedOn: "2026-10-01", posterUrl: null, atlas };
+  const save = { id: ID, kind: "atlas", templateId: "atlas", size: "feed", data: atlasData, share: true };
+
+  it("accepts known countries (unique and sorted), as an Atlas card or its sticker", () => {
+    expect(parseCardSave(save)).toMatchObject({
+      kind: "atlas",
+      templateId: "atlas",
+      data: { atlas: { countries: ["FR", "JP", "TH"], stories: 12 } },
+    });
+    expect(parseCardSave({ ...save, kind: "sticker", templateId: "sticker" })).toMatchObject({ kind: "sticker" });
+  });
+
+  it("rejects no or unknown countries, odd story counts, a poster, and mixing", () => {
+    for (const bad of [
+      { ...atlas, countries: [] },
+      { ...atlas, countries: ["ZZ"] },
+      { ...atlas, countries: "TH" },
+      { ...atlas, stories: -1 },
+      { ...atlas, stories: 1.5 },
+    ]) {
+      expect(parseCardData({ ...atlasData, atlas: bad }), JSON.stringify(bad)).toBeNull();
+    }
+    expect(parseCardData({ ...atlasData, posterUrl: "https://image.tmdb.org/t/p/w342/matrix.jpg" })).toBeNull();
+    expect(parseCardData({ ...atlasData, finisherNo: 3 })).toBeNull();
+    expect(parseCardSave({ ...save, kind: "finish", entryId: ENTRY })).toBeNull();
+    expect(parseCardSave({ ...save, kind: "stats", templateId: "boldStats" })).toBeNull();
+    expect(parseCardSave({ ...save, data: { ...atlasData, atlas: null } })).toBeNull();
+    expect(parseCardSave({ ...save, templateId: "reel" })).toBeNull();
+  });
+
+  // A country's card (ADR 0060): that country and its marked regions.
+  const regions = { country: "JP", kind: "prefecture", total: 47, ids: ["JP-01", "JP-13", "JP-26"] };
+  const japan = { countries: ["JP"], stories: 0, regions };
+
+  it("takes a country's card with its regions", () => {
+    expect(parseCardData({ ...atlasData, name: "Japan", atlas: japan })).toMatchObject({ atlas: { countries: ["JP"], regions } });
+  });
+
+  it("rejects regions of another country, more than there are, repeats, and a card of several countries", () => {
+    for (const bad of [
+      { ...japan, countries: ["JP", "TH"] },
+      { ...japan, regions: { ...regions, country: "TH" } },
+      { ...japan, regions: { ...regions, ids: ["TH-10"] } },
+      { ...japan, regions: { ...regions, ids: [] } },
+      { ...japan, regions: { ...regions, ids: ["JP-01", "JP-01"] } },
+      { ...japan, regions: { ...regions, total: 2 } },
+      { ...japan, regions: { ...regions, kind: "Prefecture!" } },
+      { ...japan, regions: "JP-01" },
+    ]) {
+      expect(parseCardData({ ...atlasData, atlas: bad }), JSON.stringify(bad)).toBeNull();
+    }
   });
 });

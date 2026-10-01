@@ -32,8 +32,13 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  // Journal articles (ADR 0051) are read from content/journal/ at request time too (Home's note, title pages, the
+  // daily refresh of article pages), so every server function carries them.
+  outputFileTracingIncludes: { "/**": ["./content/journal/**/*.md"] },
   // PostHog's API uses trailing slashes; don't redirect them away.
   skipTrailingSlashRedirect: true,
+  // Development only: the Next.js badge goes top right, clear of the nav island at the bottom (ADR 0050).
+  devIndicators: { position: "top-right" },
   experimental: {
     // Development only: React's debug info comes inside the page, as in production builds, instead of over a
     // WebSocket that a page opened offline never gets, which stops it from hydrating (S3 offline, ADR 0042).

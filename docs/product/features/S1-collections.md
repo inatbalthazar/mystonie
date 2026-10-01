@@ -12,7 +12,7 @@ The journal. Users search a movie or series (incl. anime and K-drama, all via TM
 - ➕ → search-as-you-type (same as [S0](S0-card-maker.md)) → tap result → quick-add sheet with **Finished** (primary), **Watching** and **Want to watch**.
 - `finished_at` defaults to **now** and is **editable**. It's stored in UTC and shown in the user's time zone.
 - **Built (quick add, [ADR 0022](../../decisions/0022-collection-writes-through-route-handlers.md)):**
-  - The ➕ sits in the header for signed-in users (`/collection?add=1`) and as a floating button on `/collection`.
+  - The ➕ sits in the middle of the nav island on every signed-in page ([ADR 0050](../../decisions/0050-mobile-first-nav-island.md)). Elsewhere it opens `/collection?add=1`; on `/collection` it opens the sheet in place.
   - The sheet has search → result → **Finished** (primary, with a "Finished on" date field defaulting to today) / **Watching** / **Want to watch**.
   - Tapping a row opens an edit sheet: status, finish date, and "Remove from collection" (two taps, soft delete).
   - A picked day becomes now (today) or noon that day in the profile's time zone (`finishedAtForDate`).

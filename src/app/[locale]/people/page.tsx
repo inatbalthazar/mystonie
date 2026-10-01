@@ -8,7 +8,7 @@ import { PersonRow } from "@/components/social/person-row";
 import { localizedPath } from "@/core/auth";
 import { myBlocks, myFollowing } from "@/data/social";
 import { userClient } from "@/data/supabase-server";
-import { Link, redirect } from "@/i18n/navigation";
+import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -32,9 +32,6 @@ export default async function PeoplePage({ params }: PageProps<"/[locale]/people
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
       <header className="flex flex-col gap-1">
-        <Link href="/feed" className="flex min-h-11 items-center self-start text-sm font-semibold text-brand">
-          {t("backToFeed")}
-        </Link>
         <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("peopleTitle")}</h1>
         <p className="text-sm text-muted-foreground">{t("peopleHint")}</p>
       </header>

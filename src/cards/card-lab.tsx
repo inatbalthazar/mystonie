@@ -14,6 +14,8 @@ import type { CardData, CardKind } from "@/core/cards/types";
 function labKind(data: CardData): CardKind {
   if (data.milestone) return "milestone";
   if (data.challenge) return "challenge";
+  if (data.reel) return "reel";
+  if (data.atlas) return "atlas";
   if (data.recap?.highlights) return "year_review";
   if (data.recap?.period === "month") return "monthly_recap";
   if (data.recap) return "weekly_recap";

@@ -11,6 +11,7 @@ export type PublicProfile =
       id: string;
       username: string;
       displayName: string | null;
+      bio: string | null;
       avatarUrl: string | null;
       joinedAt: string;
     };
@@ -29,6 +30,7 @@ export async function publicProfile(db: UserClient, username: string): Promise<P
         is_private: boolean;
         created_at: string | null;
         blocked_by_me: boolean;
+        bio: string | null;
       }
     | undefined;
   if (!row) return null;
@@ -39,6 +41,7 @@ export async function publicProfile(db: UserClient, username: string): Promise<P
     id: row.id,
     username: row.username,
     displayName: row.display_name,
+    bio: row.bio,
     avatarUrl: row.avatar_url,
     joinedAt: row.created_at,
   };
@@ -96,10 +99,11 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
     sceneWarnings,
     sceneWarningVotes,
     quizAnswers,
+    feedback,
   ] = await Promise.all([
     db
       .from("profiles")
-      .select("username, display_name, avatar_url, locale, time_zone, country, visibility, theme, email_recaps, created_at, updated_at")
+      .select("username, display_name, bio, avatar_url, locale, time_zone, country, visibility, theme, email_recaps, reel_reminders, created_at, updated_at")
       .eq("id", user.id)
       .single()
       .then(({ data, error }) => {
@@ -240,6 +244,15 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
         .order("id")
         .range(from, to),
     ),
+    // Beta reports (ADR 0055): what the user reported and what became of it.
+    table((from, to) =>
+      db
+        .from("feedback")
+        .select("id, kind, message, page, error_ref, device, locale, status, created_at, updated_at")
+        .eq("user_id", user.id)
+        .order("id")
+        .range(from, to),
+    ),
   ]);
 
   return {
@@ -264,5 +277,6 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
     sceneWarnings,
     sceneWarningVotes,
     quizAnswers,
+    feedback,
   };
 }

@@ -3,9 +3,11 @@ import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { StickerAlbum } from "@/components/badges/sticker-album";
 import { PaperCard } from "@/components/paper-card";
+import { AlbumCover } from "@/components/profile/album-cover";
+import { MeTabs } from "@/components/profile/me-tabs";
 import { MilestoneShelf } from "@/components/stats/milestone-shelf";
 import { ShareStats } from "@/components/stats/share-stats";
-import { Headline, Heatmap, MonthBars, PeriodTabs, Records, StatsEmpty, Taste } from "@/components/stats/stats-view";
+import { Favourites, Headline, Heatmap, MonthBars, PeriodTabs, Records, StatsEmpty, Taste } from "@/components/stats/stats-view";
 import { localizedPath } from "@/core/auth";
 import { STATS_PERIODS, type StatsPeriod } from "@/core/cards/types";
 import { milestoneCardData, reachedMilestones } from "@/core/stats/milestones";
@@ -13,6 +15,7 @@ import { weekStartFor } from "@/core/stats/period";
 import { statsReport } from "@/core/stats/report";
 import { currentYear } from "@/core/stats/year-review";
 import { badgeAlbum } from "@/data/badges";
+import { followCounts } from "@/data/social";
 import { statsRows } from "@/data/stats";
 import { userClient } from "@/data/supabase-server";
 import { Link, redirect } from "@/i18n/navigation";
@@ -27,8 +30,9 @@ export async function generateMetadata(): Promise<Metadata> {
 const isPeriod = (value: unknown): value is StatsPeriod => (STATS_PERIODS as readonly unknown[]).includes(value);
 
 /**
- * The signed-in user's stats (S1 stats): big numbers first, then the heatmap, months, taste and records for
- * `?period=` (this month by default), in the user's time zone. Everything is computed by `statsReport`.
+ * The signed-in user's stats (S1 stats), Me's Stats tab under the album's cover (ADR 0053): big numbers first, then the
+ * heatmap, months, taste and records for `?period=` (this month by default), in the user's time zone. Everything is
+ * computed by `statsReport`.
  */
 export default async function StatsPage({ params, searchParams }: PageProps<"/[locale]/stats">) {
   const locale = (await params).locale as Locale;
@@ -42,14 +46,19 @@ export default async function StatsPage({ params, searchParams }: PageProps<"/[l
   const userId = data?.claims.sub;
   if (!supabase || !userId) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
-  const [{ data: profile }, rows, t, tb] = await Promise.all([
-    supabase.from("profiles").select("time_zone, username").eq("id", userId).single(),
+  const [{ data: profile, error }, rows, counts, t, tb] = await Promise.all([
+    supabase.from("profiles").select("id, username, display_name, bio, avatar_url, created_at, time_zone").eq("id", userId).single(),
     statsRows(supabase, userId),
+    followCounts(supabase, userId).catch((error: unknown) => {
+      console.error(error);
+      return null;
+    }),
     getTranslations("Stats"),
     getTranslations("Badges"),
   ]);
+  if (error) throw new Error(`profile read failed: ${error.message}`);
   const empty = rows.entries.length === 0 && rows.logs.length === 0 && rows.reads.length === 0;
-  const timeZone = profile?.time_zone ?? "UTC";
+  const timeZone = profile.time_zone;
   // eslint-disable-next-line react-hooks/purity -- a server render, once per request
   const now = Date.now();
   const report = statsReport(
@@ -71,27 +80,49 @@ export default async function StatsPage({ params, searchParams }: PageProps<"/[l
     .map((m) => milestoneCardData(m, titleById.get(m.titleId)!, timeZone));
   const year = currentYear(now, timeZone);
   const host = siteUrl().host;
-  const badges = empty
-    ? []
-    : await badgeAlbum(supabase, userId, rows, timeZone, now).catch((error: unknown) => {
-        console.error(error);
-        return [];
-      });
+  // Stickers come from more than finishes (the Reel of the Day, challenges, the quiz, support; ADR 0063), so an empty
+  // collection can have some: then the album shows under the empty state.
+  const badges = await badgeAlbum(supabase, userId, rows, timeZone, now).catch((error: unknown) => {
+    console.error(error);
+    return [];
+  });
   const earned = badges.filter((b) => b.earnedAt !== null).length;
+  const album = (empty ? earned > 0 : badges.length > 0) && (
+    <PaperCard id="stickers" className="flex scroll-mt-6 flex-col gap-3">
+      <div className="flex flex-wrap items-baseline justify-between gap-x-3">
+        <h2 className="font-display text-xl font-extrabold tracking-[-0.02em]">{tb("album")}</h2>
+        <p className="font-hand text-xl leading-none text-muted-foreground">{tb("albumCount", { count: earned, total: badges.length })}</p>
+      </div>
+      <p className="text-sm text-muted-foreground">{tb("albumHint")}</p>
+      <StickerAlbum badges={badges} />
+    </PaperCard>
+  );
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 pt-10 pb-28">
-      <header className="flex flex-col gap-1">
-        <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("title")}</h1>
-        <p className="font-hand text-2xl leading-none text-muted-foreground">{t("subtitle")}</p>
-      </header>
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
+      <AlbumCover
+        profile={{
+          id: profile.id,
+          username: profile.username,
+          displayName: profile.display_name,
+          bio: profile.bio,
+          avatarUrl: profile.avatar_url,
+          joinedAt: profile.created_at,
+        }}
+        owner
+        counts={counts}
+      />
+      <MeTabs current="stats" />
       {empty ? (
-        <StatsEmpty />
+        <>
+          <StatsEmpty />
+          {album}
+        </>
       ) : (
         <>
           <PeriodTabs period={period} />
           <Headline report={report} period={period}>
-            {report.card && <ShareStats card={report.card} username={profile?.username ?? null} host={host} />}
+            {report.card && <ShareStats card={report.card} username={profile.username} host={host} />}
           </Headline>
           {period === "year" && (
             <Link
@@ -104,18 +135,10 @@ export default async function StatsPage({ params, searchParams }: PageProps<"/[l
           <Heatmap report={report} />
           <MonthBars months={report.months} />
           <Taste report={report} />
+          <Favourites report={report} />
           <Records report={report} />
-          <MilestoneShelf milestones={milestones} username={profile?.username ?? null} host={host} />
-          {badges.length > 0 && (
-            <PaperCard id="stickers" className="flex scroll-mt-6 flex-col gap-3">
-              <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-                <h2 className="font-display text-xl font-extrabold tracking-[-0.02em]">{tb("album")}</h2>
-                <p className="font-hand text-xl leading-none text-muted-foreground">{tb("albumCount", { count: earned, total: badges.length })}</p>
-              </div>
-              <p className="text-sm text-muted-foreground">{tb("albumHint")}</p>
-              <StickerAlbum badges={badges} />
-            </PaperCard>
-          )}
+          <MilestoneShelf milestones={milestones} username={profile.username} host={host} />
+          {album}
         </>
       )}
     </main>

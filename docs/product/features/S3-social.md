@@ -8,7 +8,7 @@ A collection is more fun when friends can see it. Follow people, see what they f
 ## Rules
 - **Follow** is one-way, with no approval: only **public** profiles can be followed. Following yourself isn't possible. At most 2,000 live follows per person.
 - A profile going **private** drops out of every feed and search at once. Its follows stay in the database and come back if it goes public again.
-- **The Following feed** (`/feed`, signed in):
+- **The Following feed** (`/feed`, signed in, titled "Feed"): the nav island's Feed tab since [ADR 0053](../../decisions/0053-feed-tab-stats-in-me.md).
   - It shows **finishes** (entries with `finished_at`), newest first: your own and those of the public people you follow. Your own finishes are in it so the page is never empty.
   - It pages by cursor (finished time, entry id), 20 at a time with "Load more". There is no ranking.
   - Each item shows who, when, the poster, or their latest shared finish card of that title (tap → `/c/[id]`), the rating, the review in handwriting, and the Stamp. The title links to the viewer's own title page.
@@ -16,7 +16,7 @@ A collection is more fun when friends can see it. Follow people, see what they f
   - One per person per finish, and only on someone else's live finish that the stamper can see (a public profile, not blocked).
   - Tapping again takes it back (soft delete). Your own finishes show how many Stamps they got.
   - The Stamp is drawn as a rubber stamp that lands with the celebration's stamp animation (reduced motion: no animation).
-- **Activity** ("Lately" on `/feed`): the latest Stamps on your finishes and new followers, with "Follow back".
+- **Activity** ("Lately" on `/feed`): the latest Stamps on your finishes and new followers, with "Follow back". A new one since you last opened the feed puts a coral dot on the island's Feed tab until you open it again ([ADR 0054](../../decisions/0054-feed-dot-reel-reminders.md); per device).
 - **Find people** (`/people`, signed in):
   - Search by username prefix or display-name substring (2–50 characters; a leading `@` is ignored). Only public, unblocked profiles show up, and never yourself (up to 20, with how many titles each finished).
   - The page also lists the people you follow (unfollow there) and the people you blocked (unblock there).

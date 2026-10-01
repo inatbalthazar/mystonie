@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext } from "@playwright/test";
 import { uuidv7 } from "../src/core/ids";
-import { canSeed, mailpitUp, mockSearch, seedTitles, signUp, uniqueEmail, type SeedTitle } from "./helpers";
+import { canSeed, mailpitUp, mockSearch, openQuickAdd, seedTitles, signUp, uniqueEmail, type SeedTitle } from "./helpers";
 
 // S3 finishers & the board (ADR 0039). Needs the local Supabase stack: the service role creates the other collectors
 // and their finishes; the signed-in flow also needs Mailpit. Titles are seeded and /api/search is mocked.
@@ -77,10 +77,7 @@ test("Finisher #N on the celebration, the saved card, the title page and the fee
 
   // Quick add → Finished: the celebration says #3, and the card carries the seal.
   await page.goto("/collection");
-  await expect(async () => {
-    await page.getByRole("button", { name: /^Add (a|your first) title$/ }).first().click({ timeout: 2000 });
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 1000 });
-  }).toPass();
+  await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill(movie.name);
   await page.getByRole("dialog").getByRole("button", { name: new RegExp(`^${movie.name} Movie`) }).click();
   await page.getByRole("button", { name: "Finished", exact: true }).click();

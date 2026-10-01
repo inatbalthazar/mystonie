@@ -1,4 +1,5 @@
 import { useTranslations } from "next-intl";
+import { FeedbackLink } from "@/components/beta/feedback-link";
 import { Link } from "@/i18n/navigation";
 
 export default function NotFound() {
@@ -10,6 +11,9 @@ export default function NotFound() {
       <Link href="/" className="underline underline-offset-4">
         {t("backHome")}
       </Link>
+      {/* A broken link is worth a report during the beta (ADR 0055). */}
+      <p className="text-sm text-muted-foreground">{t("brokenLink")}</p>
+      <FeedbackLink place="button" kind="bug" />
     </main>
   );
 }

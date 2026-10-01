@@ -5,6 +5,19 @@
 ## Summary
 Users pick the topics they want to avoid (e.g. *a dog dies*, *jump scares*, *sexual content*, *flashing lights*, *spiders*). Title pages and cards then show warnings for those topics, using the existing community data from **DoesTheDogDie (DTDD)**.
 
+**The goal is a check before you watch** ("is this safe to watch with my family?"), not a note after it. Since stage 4 ([ADR 0045](../../decisions/0045-pre-watch-check.md)) every title page answers that first.
+
+## Pre-watch check (stage 4, built 2026-09-30)
+- **Top of every title page** (all kinds), right under the header: "Before you watch" ("Before you read", "Before you play").
+  - **Hits:** "2 of your topics: a dog dies and jump scares", each with its source ("DoesTheDogDie: 142 yes · 3 no", "Confirmed on Mystonie") and a link to the details below.
+  - **Clear:** DTDD knows the title and nothing hits: "Nothing from your avoid list", then how sure ("People said no to 3 of your 5 topics; the rest don't have enough votes yet").
+  - **Unknown:** no DTDD data and none of our own warnings: "No answer for your topics yet" (books, manga and games say their warnings come from people on Mystonie).
+  - Sources: DTDD's votes (the Yes rule below) and our own confirmed scene warnings and quiz "yes" answers ([S3 warnings & quiz](S3-warnings-quiz.md)).
+- **No topics chosen:** "Safe to watch with your family?" with **Check for family viewing**: one tap saves the family set (12 of our own topics: animal deaths, jump scares, gore, violence, sexual assault, suicide, self-harm, child abuse, sex scenes, drug use), editable in Settings, which also offers "Use the family set" while nothing is chosen. Or "Choose my own topics".
+- **Opened from search:** the title page looks the title up on DTDD (one request, then cached), so every title someone opens gets checked. Search results themselves stay cache-only (quota).
+- **Look before you add** (stage 4, [ADR 0058](../../decisions/0058-look-before-you-add.md)): in the ➕ sheet, a tapped result's status step shows the search badge's warning note at once, and "Details and content warnings" (one tap, loaded on request): TMDB's score, synopsis, people and genres, an IMDb link, the viewer's check, and DTDD's most-voted Yes topics (spoilers left out, only counted). It looks the title up like opening its page; adding stays 3 taps.
+- **Want to watch:** a check sticker ("Checked: nothing from your avoid list") on Want posters DTDD knows with no badge; the warning badge as before otherwise.
+
 ## Behaviour
 - **Settings → Content warnings** (`/settings/warnings`): choose avoid-topics from the DTDD topic list (grouped by category, searchable, chosen ones as removable stickers, saved as you go). Default: none (the feature is opt-in). Only the user can see them.
 - **Title page** (movies and series; books and manga not yet, see ADR 0035): a "Content warnings" section. Without avoid-topics it invites the user to choose some ("Show this title's warnings" looks it up anyway):
@@ -29,6 +42,12 @@ Users pick the topics they want to avoid (e.g. *a dog dies*, *jump scares*, *sex
 - [x] A second view within 7 days makes no DTDD request (cache hit).
 - [x] An unmatched title shows "No warning data yet" and no badge.
 - [x] No DTDD key or request appears in client bundles or network calls from the browser.
+
+Pre-watch check (stage 4):
+- [x] A title page answers on top: the avoided topics it has with their sources, or "Nothing from your avoid list" with how sure, or "No answer for your topics yet". (`titleCheck` in `src/core/warnings.test.ts`; `e2e/warnings.spec.ts`)
+- [x] Someone with no topics checks a title in one tap ("Check for family viewing"), on every kind.
+- [x] A Want-to-watch poster shows the check (a warning badge or a check sticker) when the title was checked; no DTDD request comes from search or the collection.
+- [x] In the ➕ sheet, a picked title shows its warning note, and on a tap its details (TMDB score, synopsis, people, IMDb link) and warnings (the check, DTDD's Yes topics without spoilers); adding is still one tap away. (`src/core/title-preview.test.ts`; `e2e/warnings.spec.ts`)
 
 Checked in `e2e/warnings.spec.ts` (seeded cache; the browser never requests DTDD) and by hand against the live API on 2026-09-29 (John Wick, Stranger Things, Parasite: matched by TMDB id, first lookup 1–3.5 s, then 40–160 ms from the cache).
 

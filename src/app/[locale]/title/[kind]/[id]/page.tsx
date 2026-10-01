@@ -8,8 +8,11 @@ import { Suspense } from "react";
 import { RememberTitles } from "@/components/offline/recent-titles";
 import { SeriesEpisodes } from "@/components/series/series-episodes";
 import { ContentWarnings, ContentWarningsSkeleton } from "@/components/title/content-warnings";
+import { TitleJournal } from "@/components/journal/title-journal";
 import { TitleFinishers } from "@/components/title/finishers";
 import { SceneWarnings, SceneWarningsSkeleton } from "@/components/title/scene-warnings";
+import { TitleCheck, TitleCheckSkeleton } from "@/components/title/title-check";
+import { TitleReviews } from "@/components/title/reviews";
 import { TitleClubs } from "@/components/title/title-clubs";
 import { WhereToWatch, WhereToWatchSkeleton } from "@/components/title/where-to-watch";
 import { localizedPath } from "@/core/auth";
@@ -20,7 +23,7 @@ import { countryFromRequest, isCountryCode } from "@/core/countries";
 import { ensureEpisodes, episodeLogs, type SeriesEpisodes as Series } from "@/data/episodes";
 import { userClient } from "@/data/supabase-server";
 import { ensureTitle } from "@/data/titles";
-import { avoidTopicIds } from "@/data/warnings";
+import { avoidTopicIds, titleWarnings } from "@/data/warnings";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
@@ -42,7 +45,8 @@ function seasonEpisodes(episodes: readonly Episode[]): { season: number; episode
  * Title detail: a series' seasons and episodes with logging (S1 collection → Series), a book's or manga's reading
  * progress (S2 books & manga), and for movies and series where to watch in the user's country (S2 where to watch)
  * and content warnings (S2 content warnings; `?warnings=1` shows them without avoid-topics chosen), a game's page (S3
- * games), and for every kind our own scene warnings (S3 warnings & quiz). Signed-in only (the proxy sends others to
+ * games), and for every kind our own scene warnings (S3 warnings & quiz), with the pre-watch check against the
+ * viewer's avoid-topics on top (stage 4, "Check a title before you watch"). Signed-in only (the proxy sends others to
  * /auth).
  */
 export default async function TitlePage({ params, searchParams }: PageProps<"/[locale]/title/[kind]/[id]">) {
@@ -118,11 +122,24 @@ export default async function TitlePage({ params, searchParams }: PageProps<"/[l
     </Suspense>
   );
 
+  // One DTDD lookup for the verdict on top and the warnings block (`titleWarnings` is cached per request by `title`).
+  const warningTitle = { ...title.title, kind: isMovie ? ("movie" as const) : ("series" as const) };
+  const check = (
+    <Suspense fallback={<TitleCheckSkeleton kind={title.title.kind} />}>
+      <TitleCheck
+        supabase={supabase}
+        titleId={title.id}
+        kind={title.title.kind}
+        avoid={avoid}
+        dtdd={avoid.length > 0 ? titleWarnings(title.id, warningTitle) : null}
+      />
+    </Suspense>
+  );
   const warnings = (
     <Suspense fallback={<ContentWarningsSkeleton />}>
       <ContentWarnings
         titleId={title.id}
-        title={{ ...title.title, kind: isMovie ? "movie" : "series" }}
+        title={warningTitle}
         avoid={avoid}
         path={`/title/${kind}/${id}`}
         check={query.warnings === "1"}
@@ -151,9 +168,6 @@ export default async function TitlePage({ params, searchParams }: PageProps<"/[l
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 pt-8 pb-16">
-      <Link href="/collection" className="inline-flex min-h-11 items-center self-start text-sm font-semibold text-brand">
-        {t("backToCollection")}
-      </Link>
       <header className="flex items-center gap-4">
         <span className="relative aspect-[2/3] w-24 shrink-0 -rotate-2 overflow-hidden rounded-lg bg-muted shadow-md ring-4 ring-card">
           {poster && <Image src={poster} alt="" fill unoptimized sizes="96px" className="object-cover" />}
@@ -167,6 +181,7 @@ export default async function TitlePage({ params, searchParams }: PageProps<"/[l
           </p>
         </div>
       </header>
+      {check}
       {warnings}
       {sceneWarnings}
       {whereToWatch}
@@ -201,7 +216,11 @@ export default async function TitlePage({ params, searchParams }: PageProps<"/[l
       <Suspense fallback={null}>
         <TitleFinishers supabase={supabase} userId={userId} titleId={title.id} />
       </Suspense>
+      <Suspense fallback={null}>
+        <TitleReviews supabase={supabase} userId={userId} titleId={title.id} />
+      </Suspense>
       <TitleClubs title={title.title} />
+      <TitleJournal kind={kind} externalId={id} />
     </main>
   );
 }

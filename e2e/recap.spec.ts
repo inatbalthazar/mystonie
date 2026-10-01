@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import { periodRange } from "../src/core/stats/period";
-import { canSeed, fakePushService, lastEmail, mailpitUp, mockSearch, seedTitles, signUp, type SeedTitle } from "./helpers";
+import { canSeed, fakePushService, lastEmail, mailpitUp, mockSearch, openQuickAdd, seedTitles, signUp, type SeedTitle } from "./helpers";
 
 // Needs the local Supabase stack and a dev server started with CRON_SECRET and UNSUBSCRIBE_SECRET (the recap
 // route and its unsubscribe links). The recap email lands in Mailpit, like sign-in emails.
@@ -19,10 +19,7 @@ test("a finished week → Monday recap email → recap card → share, then unsu
   const email = await signUp(page, request, "recap");
 
   // Finish a movie this week.
-  await expect(async () => {
-    await page.getByRole("button", { name: "Add a title" }).click({ timeout: 2000 });
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 1000 });
-  }).toPass();
+  await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Parasite");
   await page.getByRole("dialog").getByRole("button", { name: /^Parasite Movie/ }).first().click();
   const added = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/entries" && r.request().method() === "POST");
@@ -50,7 +47,7 @@ test("a finished week → Monday recap email → recap card → share, then unsu
   expect(run.status()).toBe(200);
   expect(await run.json()).toMatchObject({ created: expect.any(Number), pushed: push ? 1 : 0, sent: expect.any(Number) });
   // Running again creates, pushes and sends nothing new.
-  expect(await (await cron(new Date(nextMonday + 11 * 3_600_000).toISOString())).json()).toEqual({ created: 0, pushed: 0, sent: 0 });
+  expect(await (await cron(new Date(nextMonday + 11 * 3_600_000).toISOString())).json()).toEqual({ created: 0, pushed: 0, reminded: 0, sent: 0 });
   expect((await request.post("/api/cron/weekly-recaps", { data: {} })).status()).toBe(401);
 
   const mail = await lastEmail(request, email);

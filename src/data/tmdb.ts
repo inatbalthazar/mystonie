@@ -8,6 +8,7 @@ import {
   type TmdbKind,
 } from "@/core/catalog/tmdb";
 import type { Episode, SearchResult, Title } from "@/core/catalog/types";
+import type { ReelCandidate } from "@/core/reel";
 import { normalizeTmdbWatchProviders, type WatchProviders } from "@/core/catalog/watch-providers";
 import { CatalogError } from "./catalog-error";
 
@@ -67,9 +68,13 @@ export async function trendingTitles(): Promise<SearchResult[]> {
   return normalizeTmdbList(await tmdb("/trending/all/week", {}, 3600));
 }
 
-/** Details plus the raw body (kept in `titles.raw`, e.g. for `imdb_id`). */
+/**
+ * Details plus the raw body (kept in `titles.raw`, e.g. for `imdb_id`), with the credits and external ids in the same
+ * request (`append_to_response`, no extra call; `saveTitle` keeps the credits in `titles.credits`, ADR 0047; a series'
+ * IMDb id is only under `external_ids`, ADR 0058).
+ */
 export async function titleDetails(kind: TmdbKind, externalId: string): Promise<{ title: Title; raw: unknown } | null> {
-  const raw = await tmdb(`/${tmdbMediaType(kind)}/${externalId}`, {}, DAY);
+  const raw = await tmdb(`/${tmdbMediaType(kind)}/${externalId}`, { append_to_response: "credits,external_ids" }, DAY);
   const title = normalizeTmdbDetails(kind, raw);
   return title ? { title, raw } : null;
 }
@@ -85,4 +90,19 @@ export async function seasonEpisodes(externalId: string, season: number): Promis
  */
 export async function watchProviders(kind: TmdbKind, externalId: string): Promise<WatchProviders> {
   return normalizeTmdbWatchProviders(await tmdb(`/${tmdbMediaType(kind)}/${externalId}/watch/providers`, {}, 3600));
+}
+
+/**
+ * One page (20) of Reel of the Day's pool (stage 4, ADR 0048): the best-known movies by TMDB votes, no documentaries
+ * or TV movies. Cached a week: the order barely moves.
+ */
+export async function reelPoolPage(page: number): Promise<ReelCandidate[]> {
+  const params = {
+    sort_by: "vote_count.desc",
+    include_adult: "false",
+    "vote_count.gte": "3000",
+    without_genres: "99,10770",
+    page: String(page),
+  };
+  return normalizeTmdbList(await tmdb("/discover/movie", params, 7 * DAY), "movie").map((r) => ({ externalId: r.externalId, hasPoster: !!r.imageUrl }));
 }

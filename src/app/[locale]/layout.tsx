@@ -4,17 +4,23 @@ import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AccountLink } from "@/components/account-link";
+import { BackButton } from "@/components/back-button";
+import { BetaBadge } from "@/components/beta/beta-badge";
+import { FeedbackLink } from "@/components/beta/feedback-link";
+import { GettingStartedButton } from "@/components/getting-started";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Logo } from "@/components/logo";
+import { NavIsland } from "@/components/nav-island";
 import { SyncProvider } from "@/components/offline/sync-provider";
 import { SyncStatus } from "@/components/offline/sync-status";
 import { PwaListener } from "@/components/pwa/browser";
-import { ThemeScript } from "@/components/theme-script";
+import { PrepaintScript } from "@/components/prepaint-script";
 import { RawgAttribution } from "@/components/rawg-attribution";
+import { SupportLink } from "@/components/support-link";
 import { TmdbAttribution } from "@/components/tmdb-attribution";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
-import { siteUrl } from "@/lib/site";
+import { BETA, siteUrl } from "@/lib/site";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -50,32 +56,41 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
   };
 }
 
-// Browser chrome matches the page background of each theme (--background in globals.css).
+// Browser chrome matches the page background of each theme (--background in globals.css). The page runs edge to edge
+// (`viewport-fit=cover`), so the nav island can sit just above the home indicator (env(safe-area-inset-bottom), ADR 0050).
 export const viewport: Viewport = {
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "#fbf9f5" },
     { media: "(prefers-color-scheme: dark)", color: "#161310" },
   ],
+  viewportFit: "cover",
 };
 
 export default async function LocaleLayout({ children, params }: LayoutProps<"/[locale]">) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
-  const t = await getTranslations({ locale, namespace: "Legal" });
+  const [t, tb] = await Promise.all([getTranslations({ locale, namespace: "Legal" }), getTranslations({ locale, namespace: "Beta" })]);
 
   return (
     <html
       lang={locale}
       className={`${geistSans.variable} ${bricolage.variable} ${caveat.variable} ${notoThai.variable} h-full antialiased`}
-      suppressHydrationWarning // THEME_SCRIPT may set data-theme before React hydrates
+      suppressHydrationWarning // the pre-paint script sets data-theme and data-auth before React hydrates
     >
       <body className="min-h-full flex flex-col">
-        <ThemeScript />
+        <PrepaintScript />
         <PwaListener />
         <NextIntlClientProvider>
           <header className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 px-4 pt-4">
-            <Logo />
+            <div className="flex min-w-0 items-center gap-2">
+              {/* Under a tab: "‹ Atlas", back to the page before, in place of the logo (ADR 0061). */}
+              <BackButton>
+                <Logo />
+              </BackButton>
+              {/* Still in beta (ADR 0055): opens /feedback. */}
+              <BetaBadge />
+            </div>
             <AccountLink />
           </header>
           {/* Offline-first (S3 offline): the service worker, the outbox, and a note while changes wait on this device. */}
@@ -84,6 +99,11 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
           {children}
           <footer className="mt-auto flex flex-col items-center gap-4 border-t border-border px-4 pt-8 pb-10">
             <LocaleSwitcher />
+            {/* The beta, and "Report a problem" from the page it's on (ADR 0055). */}
+            <p className="flex flex-wrap justify-center gap-x-1.5 text-center text-sm text-muted-foreground">
+              {BETA && <span>{tb("footer")}</span>}
+              <FeedbackLink place="footer" />
+            </p>
             <nav className="flex gap-4 text-sm text-muted-foreground">
               <Link href="/privacy" className="underline-offset-4 hover:underline">
                 {t("privacy")}
@@ -92,9 +112,14 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
                 {t("terms")}
               </Link>
             </nav>
+            <SupportLink place="footer" />
             <TmdbAttribution />
             <RawgAttribution />
           </footer>
+          {/* Signed in: Home · Collection · ➕ · Feed · Me, floating at the bottom (ADR 0050, ADR 0053). */}
+          <NavIsland />
+          {/* New accounts: the getting-started checklist behind a round progress button, just above the island (ADR 0056). */}
+          <GettingStartedButton />
         </NextIntlClientProvider>
       </body>
     </html>

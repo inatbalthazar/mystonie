@@ -1,6 +1,6 @@
 import { expect, test, type APIRequestContext, type Page } from "@playwright/test";
 import { uuidv7 } from "../src/core/ids";
-import { canSeed, mailpitUp, mockSearch, seedTitles, signUp, type SeedTitle } from "./helpers";
+import { canSeed, mailpitUp, mockSearch, navIsland, openQuickAdd, seedTitles, signUp, type SeedTitle } from "./helpers";
 
 // S2 content warnings (ADR 0035). Needs the local Supabase stack. DTDD's votes are seeded into the cache as fresh,
 // so the title pages, badges and the Survived offer never call DTDD (the made-up counts below prove it: DTDD
@@ -123,7 +123,7 @@ test("an avoided topic is flagged on the title page, in the collection and in se
   await expect(page.getByRole("button", { name: "Edit Warn Test Nowhere", exact: true }).first()).toBeVisible();
 
   // Search results: the same badge.
-  await page.getByRole("button", { name: "Add a title" }).click();
+  await navIsland(page).getByRole("link", { name: "Add a title" }).click();
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Warn Test");
   await expect(page.getByRole("dialog").getByRole("button", { name: /^Warn Test Doghouse Movie.*Content warning: a dog dies$/ })).toBeVisible();
   await expect(page.getByRole("dialog").getByRole("button", { name: /^Warn Test Nowhere Movie · 2022$/ })).toBeVisible();
@@ -131,14 +131,114 @@ test("an avoided topic is flagged on the title page, in the collection and in se
   noDtdd();
 });
 
+test("the check on top answers before you watch: the family set, a clear title, the Want tile", async ({ page, request }) => {
+  const noDtdd = noBrowserDtdd(page);
+  await signUp(page, request, "warn-check", "/title/movie/973001");
+  const check = page.getByRole("main").locator("section").filter({ has: page.getByRole("heading", { name: "Before you watch" }) });
+
+  // No topics yet: one tap picks the family set, and the page answers it.
+  await expect(check).toContainText("Safe to watch with your family?");
+  await check.getByRole("button", { name: "Check for family viewing" }).click();
+  await expect(check.getByRole("note")).toHaveText("2 of your topics: a dog dies and jump scares");
+  await expect(check.getByRole("listitem").filter({ hasText: "a dog dies" })).toContainText("DoesTheDogDie: 142 yes · 3 no");
+  await expect(check.getByRole("link", { name: "See the details" })).toHaveAttribute("href", "#content-warnings");
+
+  // Only spiders, which people said no to: clear, and how sure.
+  const saved = await page.request.put("/api/warnings/topics", { data: { topicIds: [SPIDERS] } });
+  expect(saved.status(), await saved.text()).toBe(200);
+  await page.reload();
+  await expect(check).toContainText("Nothing from your avoid list");
+  await expect(check).toContainText("People said no to your topic.");
+
+  // A title DTDD doesn't have: no answer yet.
+  await page.goto("/title/movie/973002");
+  await expect(check).toContainText("No answer for your topics yet");
+
+  // Want to watch: the clear title gets a check on its poster; one DTDD doesn't know gets nothing.
+  for (const externalId of ["973001", "973002"]) {
+    const res = await page.request.post("/api/entries", { data: { id: uuidv7(), title: { source: "tmdb", kind: "movie", externalId }, status: "want" } });
+    expect(res.status(), await res.text()).toBe(201);
+  }
+  await page.goto("/collection");
+  await expect(page.getByRole("button", { name: "Edit Warn Test Doghouse. Checked: nothing from your avoid list" }).first()).toBeVisible();
+  await expect(page.getByRole("button", { name: "Edit Warn Test Nowhere", exact: true }).first()).toBeVisible();
+
+  noDtdd();
+});
+
+test("look before you add: the ➕ sheet shows a title's details and warnings on request (ADR 0058)", async ({ page, request }) => {
+  const noDtdd = noBrowserDtdd(page);
+  // TMDB's details body and credits, as a real fetch would have cached them.
+  const { url, headers } = rest();
+  const patch = await request.patch(`${url}/titles?source=eq.tmdb&kind=eq.movie&external_id=eq.973001`, {
+    headers,
+    data: {
+      raw: { overview: "A family dog and a very long night.", tagline: "Nobody sleeps tonight.", vote_average: 7.36, vote_count: 2412, imdb_id: "tt9973001" },
+      credits: [
+        { role: "director", id: "1", name: "Dee Rector", image: null },
+        { role: "actor", id: "2", name: "Ann Actor", image: null },
+        { role: "actor", id: "3", name: "Bo Actor", image: null },
+      ],
+    },
+  });
+  expect(patch.ok(), await patch.text()).toBe(true);
+  await mockSearch(page, TITLES);
+  await signUp(page, request, "warn-preview");
+  const saved = await page.request.put("/api/warnings/topics", { data: { topicIds: [DOG] } });
+  expect(saved.status(), await saved.text()).toBe(200);
+  const before = await checkedAt(request, "973001");
+
+  await openQuickAdd(page);
+  const sheet = page.getByRole("dialog", { name: "Add a title" });
+  await sheet.getByLabel("Search movies, series, books, manga and games").fill("Warn Test");
+  await sheet.getByRole("button", { name: /^Warn Test Doghouse Movie/ }).click();
+  // The search badge's warning comes along to the status step at once…
+  await expect(sheet.getByRole("note")).toHaveText("Content warning: a dog dies");
+  // …and the details wait for a tap.
+  const toggle = sheet.getByRole("button", { name: "Details and content warnings" });
+  await expect(toggle).toHaveAttribute("aria-expanded", "false");
+  await toggle.click();
+  await expect(toggle).toHaveAttribute("aria-expanded", "true");
+  await expect(sheet.getByText("7.4 on TMDB")).toBeVisible();
+  await expect(sheet.getByText("2,412 votes")).toBeVisible();
+  await expect(sheet.getByText("Nobody sleeps tonight.")).toBeVisible();
+  await expect(sheet.getByText("A family dog and a very long night.")).toBeVisible();
+  await expect(sheet.getByText("Directed by Dee Rector")).toBeVisible();
+  await expect(sheet.getByText("Starring Ann Actor and Bo Actor")).toBeVisible();
+  await expect(sheet.getByRole("link", { name: "See it on IMDb" })).toHaveAttribute("href", "https://www.imdb.com/title/tt9973001/");
+  await expect(sheet.getByRole("link", { name: "Open the movie's page" })).toHaveAttribute("href", "/title/movie/973001");
+  // DTDD's Yes topics by votes (spiders got a No; the sad ending is a spoiler, only counted).
+  const warnings = sheet.getByRole("region", { name: "Content warnings" });
+  // The viewer's own topic first, then the chips (161 is one of our own topics: our name for it).
+  await expect(warnings.getByRole("listitem")).toContainText(["a dog diesDoesTheDogDie: 142 yes · 3 no", "a dog dies142 yes", "jump scares12 yes"]);
+  await expect(warnings.getByRole("listitem")).toHaveCount(3);
+  await expect(warnings).toContainText("and 1 more on DoesTheDogDie");
+  await expect(warnings).not.toContainText("the ending is sad");
+  await expect(warnings.getByRole("link", { name: "See every vote on DoesTheDogDie" })).toHaveAttribute("href", "https://www.doesthedogdie.com/media/9973001");
+  expect(await checkedAt(request, "973001")).toBe(before); // from the cache
+
+  // Adding is still one tap from here.
+  const added = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/entries" && r.request().method() === "POST");
+  await sheet.getByRole("button", { name: "Want to watch" }).click();
+  expect((await added).status()).toBe(201);
+
+  // A title DTDD doesn't have, with no details cached: no note, and says so.
+  await openQuickAdd(page);
+  await sheet.getByLabel("Search movies, series, books, manga and games").fill("Nowhere");
+  await sheet.getByRole("button", { name: /^Warn Test Nowhere Movie/ }).click();
+  await expect(sheet.getByRole("note")).toHaveCount(0);
+  await sheet.getByRole("button", { name: "Details and content warnings" }).click();
+  await expect(sheet.getByRole("region", { name: "Content warnings" })).toContainText("No warning data yet.");
+  await expect(sheet.getByRole("region", { name: "Content warnings" })).toContainText("No answer for your topics yet");
+  await expect(sheet.getByRole("link", { name: "See it on IMDb" })).toHaveCount(0);
+  noDtdd();
+});
+
 test("finishing something with jump scares offers the Survived card", async ({ page, request }) => {
   const noDtdd = noBrowserDtdd(page);
   await mockSearch(page, TITLES);
   await signUp(page, request, "warn-survived");
-  await expect(async () => {
-    await page.getByRole("button", { name: "Add a title" }).click({ timeout: 2000 });
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 1000 });
-  }).toPass();
+  await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Doghouse");
   await page.getByRole("dialog").getByRole("button", { name: /^Warn Test Doghouse Movie/ }).click();
   await page.getByRole("button", { name: "Finished", exact: true }).click();

@@ -1,3 +1,4 @@
+import type { CreditRole } from "../catalog/credits";
 import type { SurvivedKey } from "../catalog/dtdd";
 import type { TitleKind } from "../catalog/types";
 import type { ReadingUnit } from "../collection/reading";
@@ -50,6 +51,16 @@ export type CardData = {
    * month with something logged. `kind`, `name` and `posterUrl` are the title whose save completed it.
    */
   challenge?: CardChallenge | null;
+  /**
+   * Set on a Reel of the Day card (stage 4 daily game): the day's result, spoiler-free. `name` is the reel's label and
+   * `posterUrl` is always empty: the card must not give the movie away.
+   */
+  reel?: CardReel | null;
+  /**
+   * Set on an Atlas card (stage 4, ADR 0059): the visited countries coloured in on the world map. `name` is the card's
+   * label and `posterUrl` is always empty.
+   */
+  atlas?: CardAtlas | null;
   /**
    * Set on a Survived card (S2 content warnings): the scare DTDD says the movie or series has ("Survived the jump
    * scares"). Only with the `survived` template, on a finish.
@@ -127,6 +138,13 @@ export type CardRecap = {
   playMinutes?: number;
   /** Year in Review only: the year's standouts. */
   highlights?: RecapHighlights;
+  /** Stats cards and Year in Review (stage 4): favourite people, at most `RECAP_FAVOURITES_MAX`; absent when none. */
+  favourites?: RecapFavourite[];
+  /**
+   * "Share my collection" (stage 4): an all-time card for one area only (watched, read or played), `period: "all"`.
+   * Absent: every kind together (the stats page's card).
+   */
+  area?: CollectionArea;
   /** An "Imported N films" card (S2 Letterboxd import): the titles an import brought in, `period: "all"`. */
   imported?: boolean;
   /** What an imported card counts ("312 films", "48 books"; S3 import & export). Absent: films. */
@@ -147,6 +165,14 @@ export type RecapHighlights = {
   streak?: number;
 };
 
+/** A favourite on a stats card: "Favourite actor · Pedro Pascal". */
+export type RecapFavourite = { role: CreditRole; name: string };
+export const RECAP_FAVOURITES_MAX = 2;
+
+/** "Share my collection" (stage 4): one all-time card per area. Which kinds each covers: `COLLECTION_AREA_KINDS`. */
+export const COLLECTION_AREAS = ["watch", "read", "play"] as const;
+export type CollectionArea = (typeof COLLECTION_AREAS)[number];
+
 /** Milestones (S2 milestones & recaps): all-time totals crossing a round number. */
 export const MILESTONE_METRICS = ["titles", "hours", "episodes"] as const;
 export type MilestoneMetric = (typeof MILESTONE_METRICS)[number];
@@ -164,12 +190,43 @@ export type CardChallenge = {
   days: number[];
 };
 
+/** A Reel of the Day result: which guesses were right (only the last, when solved) and the streak after it. */
+export type CardReel = {
+  number: number;
+  /** The reel's UTC day, `YYYY-MM-DD`. */
+  day: string;
+  results: boolean[];
+  solved: boolean;
+  streak: number;
+};
+
+/**
+ * An Atlas card: the countries visited (been or lived; ISO codes, sorted) and how many countries the stories come from.
+ * A country's card (ADR 0060) has that one country and its regions: the ones marked (in the map's order), how many
+ * there are and what they are called.
+ */
+export type CardAtlas = { countries: string[]; stories: number; regions?: CardAtlasRegions };
+
+export type CardAtlasRegions = { country: string; kind: string; total: number; ids: string[] };
+
 export type RecapCollageTitle = { name: string; kind: TitleKind; posterUrl: string | null };
 
 export const RECAP_COLLAGE_MAX = 4;
 
 /** What a saved card is: `cards.kind`. */
-export const CARD_KINDS = ["finish", "progress", "sticker", "weekly_recap", "stats", "milestone", "monthly_recap", "year_review", "challenge"] as const;
+export const CARD_KINDS = [
+  "finish",
+  "progress",
+  "sticker",
+  "weekly_recap",
+  "stats",
+  "milestone",
+  "monthly_recap",
+  "year_review",
+  "challenge",
+  "reel",
+  "atlas",
+] as const;
 export type CardKind = (typeof CARD_KINDS)[number];
 
 /** Card colours, all as `#rrggbb`. `text` and `muted` meet contrast on `background`. */

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { periodRange } from "./period";
-import { addMonths, statsReport, type ReportTitle } from "./report";
+import { parseRecap } from "../cards/saved";
+import { addMonths, collectionAreaTotals, collectionCards, statsReport, type ReportPerson, type ReportTitle } from "./report";
 import { summarizeCollection, type StatsEntry, type StatsEpisodeLog } from "./summary";
 
 const title = (t: Partial<ReportTitle> & Pick<ReportTitle, "id" | "kind" | "name">): ReportTitle => ({
@@ -158,6 +159,108 @@ describe("statsReport", () => {
     }
     expect(best).toBeLessThan(500);
     expect(report.totals.finished).toBe(1000);
+  });
+});
+
+describe("favourites", () => {
+  const person = (role: ReportPerson["role"], id: string, name: string, imageUrl: string | null = null): ReportPerson => ({ role, id, name, imageUrl });
+  const song = person("actor", "tmdb:20738", "Song Kang-ho", "https://image.tmdb.org/t/p/w185/song.jpg");
+  const bong = person("director", "tmdb:21684", "Bong Joon Ho");
+  const cast = [
+    title({ id: "parasite", kind: "movie", name: "Parasite", runtimeMin: 133, people: [song, bong, bong, person("studio", "tmdb:4399", "Barunson E&A")] }),
+    title({ id: "memories", kind: "movie", name: "Memories of Murder", runtimeMin: 131, people: [song, bong] }),
+    title({ id: "host", kind: "movie", name: "The Host", runtimeMin: 120, people: [song, person("actor", "tmdb:1", "Bae Doona")] }),
+    title({ id: "dune", kind: "movie", name: "Dune", runtimeMin: 166, people: [person("actor", "tmdb:2", "Timothée Chalamet")] }),
+    // Unfinished: never counted.
+    title({ id: "okja", kind: "movie", name: "Okja", runtimeMin: 120, people: [person("actor", "tmdb:3", "Ahn Seo-hyun")] }),
+    title({ id: "none", kind: "movie", name: "No credits", runtimeMin: 90, people: null }),
+  ];
+  // Two finishes in the week of Sep 7, the rest the week after.
+  const days: Record<string, string> = { parasite: "08", memories: "09", host: "15", dune: "16", none: "17" };
+  const finishes: StatsEntry[] = Object.entries(days).map(([id, day], i) => ({
+    id: `f${i}`,
+    titleId: id,
+    status: "finished",
+    finishedAt: `2026-09-${day}T12:00:00Z`,
+  }));
+  finishes.push({ id: "f9", titleId: "okja", status: "watching", finishedAt: null });
+
+  it("ranks people over finished titles by titles, then time, and names them on the card from two titles", () => {
+    const report = statsReport(cast, finishes, [], { ...base, period: "month" });
+    expect(report.people.actor.map((p) => [p.name, p.titles, p.minutes])).toEqual([
+      ["Song Kang-ho", 3, 133 + 131 + 120],
+      ["Timothée Chalamet", 1, 166],
+      ["Bae Doona", 1, 120],
+    ]);
+    expect(report.people.actor[0]!.imageUrl).toBe("https://image.tmdb.org/t/p/w185/song.jpg");
+    // Listed twice on one title, counted once.
+    expect(report.people.director).toEqual([{ id: "tmdb:21684", name: "Bong Joon Ho", imageUrl: null, titles: 2, minutes: 264 }]);
+    expect(report.people.studio.map((p) => p.titles)).toEqual([1]);
+    expect(report.people.author).toEqual([]);
+    // The studio is in one title only: not a favourite on the card.
+    expect(report.card?.favourites).toEqual([
+      { role: "actor", name: "Song Kang-ho" },
+      { role: "director", name: "Bong Joon Ho" },
+    ]);
+  });
+
+  it("counts only the period's finishes, and leaves the card without favourites when none has two titles", () => {
+    const week = statsReport(cast, finishes, [], { ...base, now: Date.parse("2026-09-10T10:00:00Z"), period: "week" });
+    expect(week.people.actor.map((p) => p.name)).toEqual(["Song Kang-ho"]);
+    expect(week.people.actor[0]!.titles).toBe(2);
+    const one = statsReport(cast, finishes.slice(3), [], { ...base, period: "month" });
+    expect(one.people.actor.map((p) => p.titles)).toEqual([1]);
+    expect(one.card).not.toHaveProperty("favourites");
+  });
+});
+
+describe("collectionCards (Share my collection)", () => {
+  const shelf = [
+    ...titles,
+    title({ id: "hm", kind: "book", name: "Project Hail Mary", pageCount: 480 }),
+    title({ id: "op", kind: "manga", name: "One Piece", volumeCount: 100 }),
+    title({ id: "hades", kind: "game", name: "Hades", playtimeHours: 22 }),
+  ];
+  const more: StatsEntry[] = [
+    ...entries,
+    { id: "e6", titleId: "hm", status: "finished", finishedAt: "2026-09-12T12:00:00Z" },
+    { id: "e7", titleId: "hades", status: "finished", finishedAt: "2026-09-14T12:00:00Z" },
+  ];
+
+  it("makes one all-time card per area, each with only its own kinds", () => {
+    const cards = collectionCards(shelf, more, logs, base);
+    const all = statsReport(shelf, more, logs, { ...base, period: "all" }).card!;
+
+    expect(cards.watch).toMatchObject({ area: "watch", period: "all", minutes: all.minutes, episodes: all.episodes, finished: 4, titleCount: 5 });
+    expect(cards.watch!.readMinutes).toBeUndefined();
+    expect(cards.watch!.playMinutes).toBeUndefined();
+    expect(cards.watch!.titles.every((t) => t.kind === "movie" || t.kind === "series")).toBe(true);
+
+    expect(cards.read).toMatchObject({ area: "read", minutes: 0, episodes: 0, finished: 1, titleCount: 1, readMinutes: all.readMinutes });
+    expect(cards.read!.titles.map((t) => t.name)).toEqual(["Project Hail Mary"]);
+
+    expect(cards.play).toMatchObject({ area: "play", minutes: 0, episodes: 0, finished: 1, titleCount: 1, playMinutes: 22 * 60 });
+    expect(cards.play!.titles.map((t) => t.name)).toEqual(["Hades"]);
+  });
+
+  it("totals each area apart for the profile's pinned numbers", () => {
+    const totals = collectionAreaTotals(shelf, more, logs);
+    expect(summarizeCollection(shelf, more, logs).finished).toBe(6); // books and games count as titles finished
+    expect(totals.watch).toEqual({ minutes: summarizeCollection(titles, entries, logs).minutes, episodes: summarizeCollection(titles, entries, logs).episodes, finished: 4 });
+    expect(totals.read).toMatchObject({ finished: 1, pages: 480 });
+    expect(totals.play).toEqual({ minutes: 22 * 60, finished: 1 });
+  });
+
+  it("leaves out an area with nothing in it", () => {
+    expect(Object.keys(collectionCards(titles, entries, logs, base))).toEqual(["watch"]);
+    expect(collectionCards([], [], [], base)).toEqual({});
+  });
+
+  it("saves as a stats card; an area only on an all-time card", () => {
+    const { read } = collectionCards(shelf, more, logs, base);
+    expect(parseRecap(read)).toEqual(read);
+    expect(parseRecap({ ...read, period: "year" })).toBeNull();
+    expect(parseRecap({ ...read, area: "listen" })).toBeNull();
   });
 });
 

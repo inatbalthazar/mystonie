@@ -37,6 +37,12 @@ export function grantsPro(sub: Pick<Subscription, "status" | "currentPeriodEnd">
 /** A plan's price as Stripe charges it (`amount` in the currency's main unit, e.g. 2.99). */
 export type PlanPrice = { plan: ProPlan; amount: number; currency: string };
 
+/** The prices in the spec (S2 Pro), shown on /pro while Pro isn't on sale (the beta, ADR 0055). Stripe's win once it is. */
+export const PLANNED_PRICES: readonly PlanPrice[] = [
+  { plan: "monthly", amount: 2.99, currency: "USD" },
+  { plan: "yearly", amount: 19.99, currency: "USD" },
+];
+
 /** What the Pro page and the card editor need to know. */
 export type ProState = {
   /** Pro can be bought here at all (PRO_ENABLED and Stripe keys set). */

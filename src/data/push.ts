@@ -119,3 +119,64 @@ export async function pushDueRecaps(
   }
   return { recaps: ids.length, sent, gone: gone.length };
 }
+
+export type ReelReminder = { userId: string; locale: string; streak: number };
+
+/** Players looked at per run: every time zone's, so those whose hour it is aren't crowded out by the others. */
+const REMINDER_CANDIDATES = 5000;
+
+/**
+ * Reel of the Day reminders (ADR 0054): pushes one to the players whose streak today's reel would end and whose
+ * reminder hour it is (`due`, by time zone), longest streaks first and at most `limit` players per call. Each player is claimed for the day
+ * before the push goes out, so overlapping runs never send twice; a failed push isn't retried that day.
+ */
+export async function pushReelReminders(
+  vapid: VapidKeys,
+  day: string,
+  due: (timeZone: string) => boolean,
+  render: (reminder: ReelReminder) => Promise<PushMessage>,
+  limit: number,
+): Promise<{ players: number; sent: number; gone: number }> {
+  const db = admin();
+  const { data, error } = await db.rpc("reel_reminders_due", { p_day: day, p_limit: REMINDER_CANDIDATES });
+  if (error) throw new PushUnavailableError(`reel reminders failed: ${error.message}`);
+  const dueNow = data.filter((row) => due(row.time_zone));
+  const chosen = new Set([...new Set(dueNow.map((row) => row.user_id))].slice(0, limit));
+  const rows = dueNow.filter((row) => chosen.has(row.user_id));
+  if (rows.length === 0) return { players: 0, sent: 0, gone: 0 };
+
+  const { data: claimed, error: claimError } = await db
+    .from("profiles")
+    .update({ reel_reminded_on: day })
+    .in("id", [...chosen])
+    .or(`reel_reminded_on.is.null,reel_reminded_on.lt.${day}`)
+    .select("id");
+  if (claimError) throw new PushUnavailableError(`profiles update failed: ${claimError.message}`);
+  const players = new Set(claimed.map((row) => row.id));
+
+  const messages = new Map<string, PushMessage>();
+  for (const row of rows) {
+    if (players.has(row.user_id) && !messages.has(row.user_id)) {
+      messages.set(row.user_id, await render({ userId: row.user_id, locale: row.locale, streak: row.streak }));
+    }
+  }
+
+  let sent = 0;
+  const gone: string[] = [];
+  const mine = rows.filter((row) => messages.has(row.user_id));
+  for (let i = 0; i < mine.length; i += 10) {
+    await Promise.all(
+      mine.slice(i, i + 10).map(async (row) => {
+        const subscription = { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } };
+        const outcome = await deliver(vapid, subscription, messages.get(row.user_id)!, "reel-reminder");
+        if (outcome === "sent") sent++;
+        if (outcome === "gone") gone.push(row.subscription_id);
+      }),
+    );
+  }
+  if (gone.length > 0) {
+    const { error: deleteError } = await db.from("push_subscriptions").delete().in("id", gone);
+    if (deleteError) console.error("push_subscriptions cleanup failed", deleteError.message);
+  }
+  return { players: messages.size, sent, gone: gone.length };
+}

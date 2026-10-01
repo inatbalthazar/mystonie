@@ -1,7 +1,8 @@
 // Rows for the stats page (S1 stats), read as the user (RLS: their own rows). The numbers themselves come
 // from `statsReport` in src/core/stats/report.ts.
+import { creditImageUrl, parseCredits } from "@/core/catalog/credits";
 import { posterUrl } from "@/core/catalog/images";
-import type { ReportTitle } from "@/core/stats/report";
+import type { ReportPerson, ReportTitle } from "@/core/stats/report";
 import type { StatsEntry, StatsEpisodeLog } from "@/core/stats/summary";
 import type { Database } from "./database.types";
 import { watchLogs } from "./episodes";
@@ -10,7 +11,7 @@ import type { StatsReadingLog } from "@/core/stats/reading";
 import type { UserClient } from "./supabase-server";
 
 const TITLE_COLUMNS =
-  "id, source, kind, name, poster_path, genres, original_language, runtime_min, episode_count, page_count, chapter_count, volume_count, playtime_hours";
+  "id, source, kind, name, poster_path, genres, original_language, runtime_min, episode_count, page_count, chapter_count, volume_count, playtime_hours, credits";
 
 type TitleRow = Pick<
   Database["public"]["Tables"]["titles"]["Row"],
@@ -27,7 +28,15 @@ type TitleRow = Pick<
   | "chapter_count"
   | "volume_count"
   | "playtime_hours"
+  | "credits"
 >;
+
+/** A title's credits for the stats: photo URLs, and ids unique across catalogs (`tmdb:287`). */
+export function reportPeople(source: string, credits: unknown): ReportPerson[] | null {
+  return (
+    parseCredits(credits)?.map((c) => ({ role: c.role, id: `${source}:${c.id}`, name: c.name, imageUrl: creditImageUrl(source, c.image) })) ?? null
+  );
+}
 
 function titleFromRow(row: TitleRow): ReportTitle {
   return {
@@ -43,6 +52,7 @@ function titleFromRow(row: TitleRow): ReportTitle {
     chapterCount: row.chapter_count,
     volumeCount: row.volume_count,
     playtimeHours: row.playtime_hours,
+    people: reportPeople(row.source, row.credits),
   };
 }
 

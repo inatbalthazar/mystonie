@@ -28,13 +28,13 @@ import { useOnline } from "./offline/outbox";
 
 /**
  * What the card is about: a finished entry, a logged episode, a week or month (recap), a stats period (Share
- * stats), a milestone, a completed monthly challenge or a year (Year in Review). `ready` = saved on the server.
+ * stats), a milestone, a completed monthly challenge, a year (Year in Review), a day's Reel of the Day or the Atlas. `ready` = saved on the server.
  */
 export type CelebrationSource =
   | { kind: "finish"; entryId: string; ready: boolean }
   | { kind: "progress"; episodeLogId: string | null; readingLogId?: string | null; ready: boolean }
   | { kind: "weekly_recap" | "monthly_recap"; recapId: string; ready: boolean }
-  | { kind: "stats" | "milestone" | "challenge" | "year_review"; ready: boolean };
+  | { kind: "stats" | "milestone" | "challenge" | "year_review" | "reel" | "atlas"; ready: boolean };
 
 type Props = {
   data: CardData;
@@ -80,6 +80,7 @@ const SWIPE_PX = 40;
  */
 export function Celebration({ data, source, animate = false, username, host, onClose, survivedFor }: Props) {
   const t = useTranslations("Celebration");
+  const atlasT = useTranslations("Atlas");
   const tc = useTranslations("Card");
   const format = useFormatter();
   const dialog = useRef<HTMLDialogElement>(null);
@@ -189,7 +190,11 @@ export function Celebration({ data, source, animate = false, username, host, onC
 
   const filename = () => {
     if (data.recap) return `mystonie-${data.recap.period ?? "week"}-${data.recap.from}-${templateId}.png`;
-    const slug = data.name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "") || "card";
+    const slug =
+      data.name
+        .toLowerCase()
+        .replace(/[^\p{L}\p{N}]+/gu, "-")
+        .replace(/^-|-$/g, "") || "card";
     return `mystonie-${slug}-${templateId}.png`;
   };
 
@@ -213,7 +218,11 @@ export function Celebration({ data, source, animate = false, username, host, onC
     });
     if (!canShare) {
       published.then(
-        () => navigator.clipboard?.writeText(link).then(() => setNotice(t("linkCopied")), () => setNotice(link)),
+        () =>
+          navigator.clipboard?.writeText(link).then(
+            () => setNotice(t("linkCopied")),
+            () => setNotice(link),
+          ),
         () => {},
       );
       setDelivered(true);
@@ -238,9 +247,9 @@ export function Celebration({ data, source, animate = false, username, host, onC
     setHide((cur) => (cur.includes(item) ? cur.filter((h) => h !== item) : [...cur, item]));
   }
   const read = isReadingKind(data.kind);
-  // Milestone and Challenge cards have only the username to hide; a book's Finish card has no time on it, and a game's
+  // Milestone, Challenge, Reel of the Day and Atlas cards have only the username to hide; a book's Finish card has no time on it, and a game's
   // has one only with its hours (the player's or the average).
-  const onlyUser = !!(data.milestone || data.challenge);
+  const onlyUser = !!(data.milestone || data.challenge || data.reel || data.atlas);
   const noTime = data.recap ? false : (read && !data.reading) || (data.kind === "game" && !gameHours(card));
   const hideable: CardHideable[] = [
     ...(username ? (["username"] as const) : []),
@@ -253,11 +262,22 @@ export function Celebration({ data, source, animate = false, username, host, onC
   function title(): string {
     if (data.milestone) return t("milestoneCardTitle", { ...data.milestone, count: format.number(data.milestone.value) });
     if (data.challenge) return t("challengeCardTitle", { name: challengeName });
+    if (data.reel) return t("reelCardTitle", { number: data.reel.number });
+    if (data.atlas?.regions) {
+      const { kind, total, ids } = data.atlas.regions;
+      return t("atlasRegionCardTitle", { done: format.number(ids.length), total, many: atlasT("kindMany", { kind }), country: data.name });
+    }
+    if (data.atlas) return t("atlasCardTitle", { count: data.atlas.countries.length });
     if (source.kind === "year_review" && data.recap) return t("yearTitle", { year: data.recap.from.slice(0, 4) });
     if (source.kind === "finish") {
-      return read ? t("finishedReadTitle", { name: data.name }) : data.kind === "game" ? t("finishedPlayTitle", { name: data.name }) : t("finishedTitle", { name: data.name });
+      return read
+        ? t("finishedReadTitle", { name: data.name })
+        : data.kind === "game"
+          ? t("finishedPlayTitle", { name: data.name })
+          : t("finishedTitle", { name: data.name });
     }
     if (data.recap?.imported) return t("importTitle", { count: data.recap.titleCount, unit: data.recap.importedUnit ?? "film", range });
+    if (data.recap?.area) return t("areaTitle", { area: data.recap.area, range });
     if (data.recap) return t("recapTitle", { period: data.recap.period ?? "week", range });
     if (data.reading) {
       const { milestone, unit, position } = data.reading;
@@ -265,7 +285,9 @@ export function Celebration({ data, source, animate = false, username, host, onC
         ? t("milestoneTitle", { name: data.name, milestone })
         : t("readingTitle", { name: data.name, unit, position: format.number(position) });
     }
-    return data.progress?.milestone ? t("milestoneTitle", { name: data.name, milestone: data.progress.milestone }) : t("progressTitle", { name: data.name });
+    return data.progress?.milestone
+      ? t("milestoneTitle", { name: data.name, milestone: data.progress.milestone })
+      : t("progressTitle", { name: data.name });
   }
 
   return (
@@ -315,7 +337,12 @@ export function Celebration({ data, source, animate = false, username, host, onC
           onPointerCancel={() => (swipeStart.current = null)}
           onDragStart={(e) => e.preventDefault()}
         >
-          <div className={cn("rounded-xl", sticker && "bg-[repeating-conic-gradient(var(--muted)_0_25%,transparent_0_50%)] bg-[length:20px_20px] ring-1 ring-border")}>
+          <div
+            className={cn(
+              "rounded-xl",
+              sticker && "bg-[repeating-conic-gradient(var(--muted)_0_25%,transparent_0_50%)] bg-[length:20px_20px] ring-1 ring-border",
+            )}
+          >
             <CardPreview template={templateId} data={card} size={size} palette={palette} host={host} cardRef={cardRef} />
           </div>
           <p className="mt-2 text-center text-xs text-muted-foreground" aria-live="polite">
@@ -343,7 +370,10 @@ export function Celebration({ data, source, animate = false, username, host, onC
           <div className="flex items-center gap-3 rounded-2xl bg-brand-soft/60 p-3 ring-1 ring-brand/30">
             <LockIcon className="size-5 shrink-0 text-brand" aria-hidden="true" />
             <p className="flex-1 text-sm">{t("proLocked", { style: tc(`templates.${template}`) })}</p>
-            <Link href="/pro" className="inline-flex h-11 shrink-0 items-center rounded-xl bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90">
+            <Link
+              href="/pro"
+              className="inline-flex h-11 shrink-0 items-center rounded-xl bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90"
+            >
               {t("proUnlock")}
             </Link>
           </div>

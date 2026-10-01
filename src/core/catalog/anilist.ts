@@ -27,8 +27,10 @@ export const ANILIST_BY_MAL_QUERY = `query ($ids: [Int], $type: MediaType) {
   Page(perPage: 50) { media(idMal_in: $ids, type: $type) { idMal ${MEDIA_FIELDS} } }
 }`;
 
-/** One manga by AniList id (`$id`). */
-export const ANILIST_DETAILS_QUERY = `query ($id: Int) { Media(id: $id, type: MANGA) { ${MEDIA_FIELDS} } }`;
+/** One manga by AniList id (`$id`), with the staff who wrote and drew it (`anilistCredits`). */
+export const ANILIST_DETAILS_QUERY = `query ($id: Int) {
+  Media(id: $id, type: MANGA) { ${MEDIA_FIELDS} staff(sort: [RELEVANCE, ID], perPage: 8) { edges { role node { id name { full } image { medium } } } } }
+}`;
 
 const FORMATS = new Set(["MANGA", "ONE_SHOT"]);
 

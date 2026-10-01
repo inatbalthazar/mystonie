@@ -113,7 +113,7 @@ If DTDD's topic list can't be loaded, our 26 topics stand in, so people can stil
 - The account export includes the warnings added, the votes and the quiz answers.
 
 ## Not in this task
-- Gems or any reward for answering (gated), and a badge for helping (a possible follow-up).
+- Gems or any reward for answering (gated). Helping does earn stickers since [ADR 0063](../../decisions/0063-more-stickers.md): Lookout (10 answers) and Guardian (100).
 - Free-text notes on warnings, and reporting a warning (nothing to moderate yet).
 - Asking the quiz right after a finish in the celebration (the title page link covers it for now).
 - Timestamps on DTDD's data (DTDD has none per scene).

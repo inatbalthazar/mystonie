@@ -4,7 +4,7 @@ import { SearchIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import type { WarningTopic } from "@/core/catalog/dtdd";
-import { AVOID_MAX } from "@/core/warnings";
+import { AVOID_MAX, FAMILY_TOPIC_IDS } from "@/core/warnings";
 import { cn } from "@/lib/utils";
 
 type Status = "idle" | "saving" | "saved" | "error";
@@ -67,6 +67,12 @@ export function AvoidTopics({ topics, initial }: { topics: WarningTopic[]; initi
     setChosen((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : cur.length >= AVOID_MAX ? cur : [...cur, id]));
   }
 
+  /** "Check for family viewing" (stage 4): a ready-made set to start from, only offered while nothing is chosen. */
+  function chooseFamilySet() {
+    dirty.current = true;
+    setChosen(FAMILY_TOPIC_IDS.filter((id) => topics.some((topic) => topic.id === id)));
+  }
+
   function clearAll() {
     dirty.current = true;
     setChosen([]);
@@ -112,6 +118,14 @@ export function AvoidTopics({ topics, initial }: { topics: WarningTopic[]; initi
             {status === "saving" ? t("saving") : status === "saved" ? t("saved") : status === "error" ? t("saveError") : ""}
           </p>
         </div>
+        {picked.length === 0 && (
+          <div className="flex flex-col items-start gap-2 rounded-xl border-2 border-dashed border-border p-4">
+            <p className="text-sm text-muted-foreground">{t("familyBody")}</p>
+            <button type="button" onClick={chooseFamilySet} className="inline-flex h-11 items-center rounded-xl bg-brand px-5 font-semibold text-brand-foreground hover:bg-brand/90">
+              {t("familyButton")}
+            </button>
+          </div>
+        )}
         {picked.length > 0 && (
           <ul className="flex flex-wrap gap-2">
             {picked.map((topic, i) => (

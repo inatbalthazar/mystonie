@@ -38,7 +38,9 @@ test("every template × size × hard case stays inside the card", async ({ page 
   // The Survived fixture (S2 content warnings): the 3 finish templates, the sticker, the Film Strip and Survived.
   // Challenges (S3 challenges & clubs): Bold Stats, the Calendar + the sticker.
   // Games (S3 games): the 3 finish templates, the Cartridge + the sticker.
-  expect(count).toBe(5 * 4 * 2 + 2 * 3 * 2 + 3 * 3 * 2 + (5 + 6) * 2 + (5 + 4) * 2 + 2 * 3 * 2 + 3 * 2 + 2 * 4 * 2 + 7 * 2 + 6 * 2 + 2 * 3 * 2 + 2 * 5 * 2);
+  // Reel of the Day (stage 4): Film Frames + the sticker. The Atlas (stage 4): Scratch map + the sticker, for two
+  // world cards and two country cards (ADR 0060).
+  expect(count).toBe(5 * 4 * 2 + 2 * 3 * 2 + 3 * 3 * 2 + (5 + 6) * 2 + (5 + 4) * 2 + 2 * 3 * 2 + 3 * 2 + 2 * 4 * 2 + 7 * 2 + 6 * 2 + 2 * 3 * 2 + 2 * 5 * 2 + 2 * 2 * 2 + 4 * 2 * 2);
 
   for (let i = 0; i < count; i++) {
     const card = cards.nth(i);

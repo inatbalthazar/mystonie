@@ -54,7 +54,7 @@ export async function SceneWarnings({ supabase, titleId, kind, avoid, status, se
   const canWarn = status === "watching" || status === "finished";
 
   return (
-    <PaperCard stamp={headsUp ? warningsText("headsUp") : undefined} className="flex flex-col gap-4 pt-6">
+    <PaperCard id="scene-warnings" stamp={headsUp ? warningsText("headsUp") : undefined} className="flex flex-col gap-4 pt-6">
       <div className="flex flex-col gap-1">
         {heading}
         <p className="text-sm text-muted-foreground">{t("intro", { kind, count: SCENE_CONFIRMATIONS })}</p>

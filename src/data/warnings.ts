@@ -2,6 +2,7 @@
 // (`user_avoid_topics`) and the badges they cause. Only the title page and `/api/warnings/*` call DTDD; badges read
 // the cache alone.
 import { after } from "next/server";
+import { cache } from "react";
 import { dtddMediaUrl, warningVerdict, type TitleWarnings, type WarningTitle } from "@/core/catalog/dtdd";
 import type { TmdbKind } from "@/core/catalog/tmdb";
 import type { Title } from "@/core/catalog/types";
@@ -55,8 +56,12 @@ async function refresh(db: Admin | null, titleId: string, title: WarningTitle): 
 /**
  * What DTDD says about a movie or series, or null when DTDD failed and nothing is cached. A cache younger than
  * 7 days is used as is; an older one is shown while it refreshes after the response (stale-while-revalidate).
+ * Cached per request, so the title page's verdict and its warnings block (given the same `title` object) share one
+ * lookup.
  */
-export async function titleWarnings(titleId: string, title: Title & { kind: TmdbKind }): Promise<TitleWarnings | null> {
+export const titleWarnings = cache(lookupWarnings);
+
+async function lookupWarnings(titleId: string, title: Title & { kind: TmdbKind }): Promise<TitleWarnings | null> {
   const db = adminClient();
   const target: WarningTitle = {
     kind: title.kind,
@@ -68,11 +73,13 @@ export async function titleWarnings(titleId: string, title: Title & { kind: Tmdb
   };
   if (db) {
     const [{ data: row, error }, { data: rows, error: rowsError }] = await Promise.all([
-      db.from("titles").select("dtdd_id, dtdd_checked_at, imdb:raw->>imdb_id").eq("id", titleId).maybeSingle(),
+      db.from("titles").select("dtdd_id, dtdd_checked_at, imdb:raw->>imdb_id, imdbSeries:raw->external_ids->>imdb_id").eq("id", titleId).maybeSingle(),
       db.from("title_warnings").select("topic_id, topic_name, category, spoiler, yes_count, no_count, comment").eq("title_id", titleId),
     ]);
     if (error || rowsError) console.error("warnings read failed", (error ?? rowsError)?.message);
-    if (typeof row?.imdb === "string" && /^tt\d{5,10}$/.test(row.imdb)) target.imdbId = row.imdb;
+    // A movie's IMDb id is `imdb_id`; a series' is under `external_ids` (ADR 0058): either helps DTDD find the title.
+    const imdb = [row?.imdb, row?.imdbSeries].find((v): v is string => typeof v === "string" && /^tt\d{5,10}$/.test(v));
+    if (imdb) target.imdbId = imdb;
     if (row?.dtdd_checked_at && rows) {
       const cached: TitleWarnings = row.dtdd_id
         ? {
@@ -158,4 +165,15 @@ export async function avoidBadges(db: UserClient, titleIds: readonly string[]): 
   }
   for (const id of new Set([...dtdd.keys(), ...ours.keys()])) badges.set(id, mergeBadgeTopics(dtdd.get(id) ?? [], ours.get(id) ?? []));
   return badges;
+}
+
+/**
+ * Of `titleIds`, the ones DTDD knows (a match is cached): with no badge, their check is clear (stage 4, "Check a
+ * title before you watch": the Want-to-watch tiles). Titles nobody opened yet aren't checked.
+ */
+export async function dtddKnown(db: UserClient, titleIds: readonly string[]): Promise<Set<string>> {
+  if (titleIds.length === 0) return new Set();
+  const { data, error } = await db.from("titles").select("id").in("id", [...titleIds]).not("dtdd_id", "is", null);
+  if (error) console.error("titles dtdd read failed", error.message);
+  return new Set((data ?? []).map((r) => r.id));
 }

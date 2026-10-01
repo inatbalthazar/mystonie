@@ -20,6 +20,7 @@
   },
   "HomeApp": {
     "title": "หน้าแรก",
+    "reelCard": "Reel of the Day #{number}",
     "greeting": "สวัสดี {name}",
     "recentCards": "การ์ดล่าสุดของคุณ",
     "recentCardsEmpty": "ดูอะไรจบแล้ว การ์ดจะมาอยู่ตรงนี้",
@@ -47,14 +48,17 @@
     "yearCard": "สรุปทั้งปี",
     "reviewTitle": "สรุปปี {year} ของคุณมาแล้ว",
     "reviewBody": "ทั้งปีที่คุณดูและอ่าน ทีละหน้า",
-    "reviewCta": "เปิดดูปีของฉัน"
+    "reviewCta": "เปิดดูปีของฉัน",
+    "atlasCard": "Atlas {count} ประเทศ",
+    "atlasRegionsCard": "Atlas ของ{country}"
   },
   "LocaleSwitcher": {
     "label": "ภาษา"
   },
   "NotFound": {
     "title": "ไม่พบหน้านี้",
-    "backHome": "กลับหน้าแรก"
+    "backHome": "กลับหน้าแรก",
+    "brokenLink": "มาจากลิงก์ไหน? บอกเราว่าลิงก์เสีย"
   },
   "Attribution": {
     "tmdb": "ผลิตภัณฑ์นี้ใช้ TMDB API แต่ไม่ได้รับการรับรองจาก TMDB",
@@ -85,7 +89,9 @@
       "filmStrip": "Film Strip",
       "survived": "รอดมาได้",
       "calendar": "Calendar",
-      "cartridge": "ตลับเกม"
+      "cartridge": "ตลับเกม",
+      "reel": "Film Frames",
+      "atlas": "แผนที่ขูด"
     },
     "sizes": {
       "story": "สตอรี่ 9:16",
@@ -136,18 +142,31 @@
     "milestoneLabel": "{metric, select, titles {เรื่องที่ดูจบ} hours {ชั่วโมงที่ดู} other {ตอนที่ดู}}",
     "milestoneBy": "ด้วยเรื่อง {name}",
     "challengeHeadline": "ชาเลนจ์สำเร็จ",
+    "reelHeadline": "Reel of the Day",
+    "reelName": "#{number}",
+    "reelScore": "{solved, select, true {ครั้งที่ทาย} other {ทายไม่ถูก}}",
+    "reelStreak": "วันติดต่อกัน",
     "challengeUnit": "{unit, select, titles {เรื่องที่จบ} languages {ภาษา} kinds {ประเภท} hours {ชั่วโมง} other {วัน}}",
     "challengeBy": "สำเร็จด้วย {name}",
     "yearInReview": "สรุปทั้งปี",
     "topGenre": "แนวที่ดูเยอะสุด",
     "busiestMonth": "เดือนที่ดูเยอะสุด",
     "bestStreak": "ต่อเนื่องนานสุด",
+    "favourite": "{role, select, actor {นักแสดงคนโปรด} director {ผู้กำกับคนโปรด} studio {สตูดิโอโปรด} author {นักเขียนคนโปรด} developer {ผู้พัฒนาเกมโปรด} other {คนโปรด}}",
     "streakDays": "{count, plural, other {# วัน}}",
     "importHeadline": "นำเข้า{unit, select, book {หนังสือ {count, plural, other {# เล่ม}}} series {ซีรีส์ {count, plural, other {# เรื่อง}}} manga {มังงะ {count, plural, other {# เรื่อง}}} game {เกม {count, plural, other {# เกม}}} title {{count, plural, other {# เรื่อง}}} other {หนัง {count, plural, other {# เรื่อง}}}}",
     "filmEdge": "Mystonie 400 · Safety film",
     "filmFrame": "▸ 12A",
     "survivedBadge": "รอดมาได้",
-    "survivedHeadline": "รอดจาก{scare, select, jumpScares {ฉากตุ้งแช่} zombies {ซอมบี้} possession {ผีเข้า} ghosts {ผี} clowns {ตัวตลก} dolls {ตุ๊กตาหลอน} gore {เลือดสาด} spiders {แมงมุม} snakes {งู} sharks {ฉลาม} other {เข็มฉีดยา}}มาได้"
+    "survivedHeadline": "รอดจาก{scare, select, jumpScares {ฉากตุ้งแช่} zombies {ซอมบี้} possession {ผีเข้า} ghosts {ผี} clowns {ตัวตลก} dolls {ตุ๊กตาหลอน} gore {เลือดสาด} spiders {แมงมุม} snakes {งู} sharks {ฉลาม} other {เข็มฉีดยา}}มาได้",
+    "areaHeadline": "{area, select, watch {ที่ดูมาทั้งหมด} read {ที่อ่านมาทั้งหมด} play {ที่เล่นมาทั้งหมด} other {ตลอดกาล}}",
+    "atlasName": "My Atlas",
+    "atlasHeadline": "ที่ที่ฉันเคยไป",
+    "atlasCountries": "ประเทศ",
+    "atlasContinents": "ทวีป",
+    "atlasStories": "ประเทศในเรื่องที่ดู",
+    "atlasRegionsOf": "จาก {total} {many}",
+    "atlasRegionsShare": "ของ{country}"
   },
   "Waitlist": {
     "heading": "อยากเก็บการ์ดทั้งหมดไว้ในที่เดียว? ลงชื่อรอไว้เลย",
@@ -166,8 +185,36 @@
     "lastUpdated": "อัปเดตล่าสุด {date}",
     "backHome": "กลับไปที่ Mystonie"
   },
+  "Support": {
+    "footer": "เลี้ยงกาแฟ Stonie",
+    "link": "เลี้ยงกาแฟ",
+    "newTab": "(เปิดในแท็บใหม่)"
+  },
   "Nav": {
-    "home": "หน้าแรก Mystonie"
+    "home": "หน้าแรก Mystonie",
+    "showAll": "ดูทั้งหมด ({count})",
+    "showLess": "ย่อลง"
+  },
+  "Back": {
+    "back": "กลับ",
+    "backTo": "กลับไป {page}",
+    "profile": "@{username}",
+    "pages": {
+      "landing": "Mystonie",
+      "home": "หน้าแรก",
+      "collection": "คอลเลกชัน",
+      "atlas": "Atlas",
+      "feed": "ฟีด",
+      "me": "ฉัน",
+      "stats": "สถิติ",
+      "settings": "ตั้งค่า",
+      "people": "หาคน",
+      "board": "กระดาน",
+      "challenges": "ชาเลนจ์",
+      "clubs": "คลับ",
+      "reel": "Reel of the Day",
+      "pro": "Pro"
+    }
   },
   "Unsubscribe": {
     "title": "ยกเลิกการรับอีเมล",
@@ -215,15 +262,22 @@
     "recap": {
       "title": "{period, select, month {สรุปเดือนของคุณมาแล้ว: {range}} other {สรุปสัปดาห์ของคุณมาแล้ว: {range}}}",
       "body": "{summary} แตะเพื่อดูการ์ดสรุป"
+    },
+    "reel": {
+      "title": "🔥 รักษาสตรีค {count} วันไว้",
+      "body": "Reel of the Day วันนี้จะหมดในอีก {hours} ชั่วโมง ทายได้ไหม"
     }
   },
   "Account": {
     "signIn": "เข้าสู่ระบบ",
-    "yourAccount": "บัญชีของคุณ",
     "collection": "คอลเลกชัน",
     "add": "เพิ่มเรื่อง",
     "stats": "สถิติ",
-    "home": "หน้าแรก"
+    "feed": "ฟีด",
+    "feedNews": "ฟีด มีความเคลื่อนไหวใหม่",
+    "home": "หน้าแรก",
+    "me": "ฉัน",
+    "nav": "เมนูหลัก"
   },
   "Auth": {
     "title": "เปิดสมุดสะสมของคุณ",
@@ -289,6 +343,11 @@
     "displayName": "ชื่อที่แสดง",
     "displayNameHint": "แสดงบนหน้าของคุณ เว้นว่างไว้เพื่อแสดงชื่อผู้ใช้แทน",
     "usernameHint": "ตัวอักษรภาษาอังกฤษตัวเล็ก ตัวเลข หรือ _ จำนวน 3–20 ตัว",
+    "bio": "Bio",
+    "bioPlaceholder": "ชอบดู อ่าน หรือเล่นอะไร?",
+    "bioHint": "แสดงบนหน้าของคุณใต้ชื่อ ได้ไม่เกิน {max} ตัวอักษรและ 4 บรรทัด ลิงก์จะกดไม่ได้",
+    "bioCount": "{count}/{max}",
+    "bioTooLong": "bio ยาวได้ไม่เกิน {max} ตัวอักษรและ 4 บรรทัด",
     "save": "บันทึก",
     "saving": "กำลังบันทึก…",
     "saved": "บันทึกแล้ว",
@@ -312,6 +371,8 @@
     "notifications": "การแจ้งเตือน",
     "pushRecaps": "แจ้งเตือนสรุปประจำสัปดาห์",
     "pushRecapsHint": "บนอุปกรณ์นี้ ทุกเช้าวันจันทร์เมื่อการ์ดสรุปของคุณพร้อม",
+    "reelReminders": "เตือน Reel of the Day",
+    "reelRemindersHint": "เตือนเมื่อ reel วันนี้จะทำให้สตรีคที่ชนะติดกัน 2 วันขึ้นไปขาด ไม่เกินวันละครั้ง",
     "pushBlocked": "การแจ้งเตือนของ Mystonie ถูกปิดอยู่ เปิดได้ในการตั้งค่าของอุปกรณ์ก่อน",
     "pushInstall": "ติดตั้ง Mystonie บนอุปกรณ์นี้ (จากเมนูของเบราว์เซอร์) แล้วเปิดจากหน้าจอหลัก เพื่อรับสรุปประจำสัปดาห์เป็นการแจ้งเตือน",
     "pushInstallIos": "เพิ่ม Mystonie ลงในหน้าจอโฮม (แชร์ แล้วเลือก “เพิ่มไปยังหน้าจอโฮม”) แล้วเปิดจากตรงนั้นเพื่อเปิดการแจ้งเตือน",
@@ -324,7 +385,17 @@
     "proBody": "สไตล์การ์ด Pro ได้ของใหม่ก่อนใคร และช่วยให้ Mystonie ไปต่อได้",
     "proActive": "คุณเป็น Pro แล้ว ขอบคุณที่ช่วยให้ Mystonie ไปต่อได้",
     "proLink": "ดู Pro",
-    "proManage": "จัดการ Pro"
+    "betaStamp": "BETA",
+    "betaTitle": "Mystonie ยังเป็นเบต้า",
+    "feedbackTitle": "ความคิดเห็น",
+    "betaBody": "เจอบั๊กหรือมีไอเดีย บอกเราได้ เราอ่านทุกเรื่อง",
+    "proSoon": "ยังไม่เปิดขายช่วงเบต้า ดูได้ว่าจะมีอะไรเพิ่ม",
+    "proManage": "จัดการ Pro",
+    "gettingStarted": "เริ่มต้นใช้งาน",
+    "supportTitle": "สนับสนุน Mystonie",
+    "supportBody": "Mystonie ใช้ฟรีและทำโดยคนคนเดียว ถ้าชอบ เลี้ยงกาแฟสักแก้วช่วยให้เว็บไปต่อได้ ทิปไม่ได้ปลดล็อกอะไร ทุกอย่างยังฟรีเหมือนเดิม เลี้ยงกาแฟด้วยอีเมลเดียวกับบัญชี Mystonie แล้วจะได้สติกเกอร์ Supporter",
+    "atlasPublic": "แสดง Atlas บนโปรไฟล์",
+    "atlasPublicHint": "คนอื่นจะเห็นประเทศที่คุณเคยไปและเคยอยู่ แต่ไม่เห็นประเทศที่อยากไป ปิดไว้จนกว่าคุณจะเปิดเอง"
   },
   "Collection": {
     "title": "คอลเลกชันของคุณ",
@@ -374,6 +445,7 @@
     "searchType": "{type, select, all {ทั้งหมด} screen {หนังและซีรีส์} book {หนังสือ} game {เกม} other {มังงะ}}",
     "shelves": "แท็บคอลเลกชัน",
     "shelf": "{shelf, select, read {อ่าน} play {เล่น} other {ดู}}",
+    "shelfAtlas": "Atlas",
     "readTime": "เวลาที่อ่าน",
     "titlesRead": "อ่านจบ",
     "readTimeHint": "เวลาอ่านเป็นค่าประมาณ: หน้าละ 1.5 นาที มังงะตอนละ 5 นาที เล่มละ 45 นาที",
@@ -400,7 +472,12 @@
     "readLength": "{progress} · อ่านไป {time}",
     "importLink": "ย้ายมาจากแอปอื่น? นำเข้าประวัติของคุณ",
     "waitingToSync": "รอซิงก์",
-    "changedElsewhere": "“{name}” ถูกแก้ไขในอุปกรณ์อื่นหลังจากนี้ จึงใช้การแก้ไขนั้นแทน"
+    "changedElsewhere": "“{name}” ถูกแก้ไขในอุปกรณ์อื่นหลังจากนี้ จึงใช้การแก้ไขนั้นแทน",
+    "checkedClear": "เช็คแล้ว: ไม่มีหัวข้อที่คุณเลี่ยง",
+    "areaWatched": "ดู",
+    "areaRead": "อ่าน",
+    "areaPlayed": "เล่น",
+    "areaFinished": "จบ {count} เรื่อง"
   },
   "Series": {
     "backToCollection": "← คอลเลกชันของคุณ",
@@ -480,6 +557,7 @@
     "readingTitle": "{unit, select, page {{name} หน้า {position}} chapter {{name} ตอนที่ {position}} other {{name} เล่ม {position}}}",
     "milestoneCardTitle": "{metric, select, titles {นี่คือเรื่องที่ {value, number} ของคุณ!} hours {ดูไปแล้ว {count} ชั่วโมง!} other {ดูไปแล้ว {count} ตอน!}}",
     "challengeCardTitle": "คุณทำ {name} สำเร็จแล้ว!",
+    "reelCardTitle": "Reel of the Day #{number}",
     "yearTitle": "สรุปปี {year} ของคุณ",
     "importTitle": "นำเข้า{unit, select, book {หนังสือ {count, plural, other {# เล่ม}}} series {ซีรีส์ {count, plural, other {# เรื่อง}}} manga {มังงะ {count, plural, other {# เรื่อง}}} game {เกม {count, plural, other {# เกม}}} title {{count, plural, other {# เรื่อง}}} other {หนัง {count, plural, other {# เรื่อง}}}} {range}",
     "styleLabelPro": "{style} (Pro) · ปัดเพื่อเปลี่ยนสไตล์",
@@ -487,7 +565,10 @@
     "proUnlock": "ปลดล็อก",
     "survivedOffer": "คุณผ่าน{scare, select, jumpScares {ฉากตุ้งแช่} zombies {ซอมบี้} possession {ผีเข้า} ghosts {ผี} clowns {ตัวตลก} dolls {ตุ๊กตาหลอน} gore {เลือดสาด} spiders {แมงมุม} snakes {งู} sharks {ฉลาม} other {เข็มฉีดยา}}มาได้แล้ว",
     "survivedTry": "ทำเป็นการ์ด Survived",
-    "shareOffline": "แชร์ได้เมื่อกลับมาออนไลน์"
+    "shareOffline": "แชร์ได้เมื่อกลับมาออนไลน์",
+    "areaTitle": "{area, select, watch {ทุกเรื่องที่คุณดู} read {ทุกเล่มที่คุณอ่าน} play {ทุกเกมที่คุณเล่น} other {คอลเลกชันของคุณ}}, {range}",
+    "atlasCardTitle": "{count} ประเทศใน Atlas ของคุณ",
+    "atlasRegionCardTitle": "{country}: {done} จาก {total} {many}"
   },
   "SharedCard": {
     "notFoundTitle": "ไม่พบการ์ด · Mystonie",
@@ -503,8 +584,11 @@
     "makeYourOwn": "ทำการ์ดของคุณ",
     "startCollection": "เริ่มคอลเลกชันของคุณ",
     "recapLine": "{period, select, month {หนึ่งเดือนของการดู} year {หนึ่งปีของการดู} all {ที่ดูมาทั้งหมด} other {หนึ่งสัปดาห์ของการดู}} {range}",
+    "reelLine": "Reel of the Day #{number}",
     "byUserLink": "จากคอลเลกชันของ <link>@{username}</link>",
-    "importLine": "นำเข้า{unit, select, book {หนังสือ {count, plural, other {# เล่ม}}} series {ซีรีส์ {count, plural, other {# เรื่อง}}} manga {มังงะ {count, plural, other {# เรื่อง}}} game {เกม {count, plural, other {# เกม}}} title {{count, plural, other {# เรื่อง}}} other {หนัง {count, plural, other {# เรื่อง}}}} {range}"
+    "importLine": "นำเข้า{unit, select, book {หนังสือ {count, plural, other {# เล่ม}}} series {ซีรีส์ {count, plural, other {# เรื่อง}}} manga {มังงะ {count, plural, other {# เรื่อง}}} game {เกม {count, plural, other {# เกม}}} title {{count, plural, other {# เรื่อง}}} other {หนัง {count, plural, other {# เรื่อง}}}} {range}",
+    "atlasLine": "Atlas {count} ประเทศ",
+    "atlasRegionsLine": "{country}: เคยไป {done} จาก {total} {many}"
   },
   "Recap": {
     "pageTitle": "การ์ดสรุป",
@@ -513,7 +597,6 @@
   },
   "Stats": {
     "title": "สถิติ",
-    "subtitle": "อัลบั้มของคุณในแบบตัวเลข",
     "periodsLabel": "ช่วงเวลา",
     "period": "{period, select, week {สัปดาห์นี้} month {เดือนนี้} year {ปีนี้} other {ทั้งหมด}}",
     "headline": "{period, select, week {สัปดาห์ของคุณ} month {เดือนของคุณ} year {ปีของคุณ} other {ทั้งหมดที่ผ่านมา}}",
@@ -536,6 +619,10 @@
     "topGenres": "แนวที่ดูบ่อย",
     "topLanguages": "ภาษาที่ดูบ่อย",
     "titleCount": "{count} เรื่อง",
+    "favourites": "คนโปรด",
+    "favouritesHint": "คนที่อยู่เบื้องหลังเรื่องที่คุณจบในช่วงนี้",
+    "favouriteRole": "{role, select, actor {นักแสดง} director {ผู้กำกับและผู้สร้าง} studio {สตูดิโอ} author {นักเขียน} developer {ผู้พัฒนาเกม} other {บุคคล}}",
+    "personDetail": "{count} เรื่อง · {time}",
     "tasteEmpty": "แนวและภาษาจะแสดงเมื่อมีเรื่องที่ดูในช่วงนี้",
     "records": "สถิติสูงสุด",
     "longestMovie": "หนังที่ยาวที่สุด",
@@ -563,7 +650,10 @@
     "milestonesHint": "ตัวเลขกลมๆ ที่คุณทำได้แล้ว แตะเพื่อทำการ์ด",
     "milestoneOn": "{date} · {name}",
     "milestonesEmpty": "หมุดหมายแรกคือดูจบครบ 10 เรื่อง",
-    "yearReviewLink": "ดูสรุปปี {year} ของคุณ"
+    "yearReviewLink": "ดูสรุปปี {year} ของคุณ",
+    "shareCollection": "แชร์คอลเลกชันของฉัน",
+    "shareArea": "{area, select, watch {ที่ดู} read {ที่อ่าน} play {ที่เล่น} other {ทั้งหมด}}",
+    "shareAreaAll": "{area, select, watch {แชร์ทุกเรื่องที่ดู} read {แชร์ทุกเล่มที่อ่าน} play {แชร์ทุกเกมที่เล่น} other {แชร์คอลเลกชันของฉัน}}"
   },
   "Profile": {
     "metaTitle": "{name} (@{username})",
@@ -585,6 +675,7 @@
     "ctaButton": "ทำการ์ดใบแรก",
     "milestoneCard": "หมุดหมาย",
     "yearCard": "สรุปทั้งปี",
+    "reelCard": "Reel of the Day #{number}",
     "followers": "ผู้ติดตาม <b>{count}</b>",
     "followingCount": "กำลังติดตาม <b>{count}</b>",
     "findPeople": "หาคนที่จะติดตาม",
@@ -593,7 +684,14 @@
     "shelf": "ชั้นสะสม",
     "shelfHint": "ทุกเรื่องที่จบแล้ว ล่าสุดก่อน",
     "shelfMore": "+ จบอีก {count} เรื่อง",
-    "shelfItem": "{name} ({kind, select, movie {หนัง} series {ซีรีส์} book {หนังสือ} manga {มังงะ} game {เกม} other {เรื่อง}})"
+    "shelfItem": "{name} ({kind, select, movie {หนัง} series {ซีรีส์} book {หนังสือ} manga {มังงะ} game {เกม} other {เรื่อง}})",
+    "settings": "การตั้งค่า",
+    "meTitle": "ฉัน",
+    "tabsLabel": "อัลบั้มและสถิติของคุณ",
+    "tabAlbum": "อัลบั้ม",
+    "tabStats": "สถิติ",
+    "atlasCard": "Atlas {count} ประเทศ",
+    "atlasRegionsCard": "Atlas ของ{country}"
   },
   "Social": {
     "follow": "ติดตาม",
@@ -618,16 +716,23 @@
     "cardAlt": "การ์ด: {name}",
     "loadMore": "โหลดเพิ่ม",
     "loading": "กำลังโหลด…",
-    "feedTitle": "กำลังติดตาม",
+    "feedTitle": "ฟีด",
     "feedKicker": "คนของคุณดูอะไรจบบ้าง",
     "findPeople": "หาคน",
     "feedEmpty": "ติดตามคนอื่นเพื่อดูว่าเขาดูอะไรจบ แล้วปั๊มตราให้เขา",
+    "feedDescription": "ดูว่าคนที่คุณติดตามดูอะไรจบ และบันทึกจากทีม Mystonie: ลิสต์ เรื่องแนะนำ และเรื่องเล่าเกี่ยวกับซีรีส์ หนัง หนังสือ และเกมที่คุณดูจบ",
+    "feedVisitorKicker": "บันทึกจากอัลบั้ม",
+    "feedVisitorIntro": "ลิสต์ เรื่องแนะนำ และเรื่องเล่าเกี่ยวกับสิ่งที่คุณดูจบ จากคนที่ทำ Mystonie เข้าสู่ระบบเพื่อติดตามคนอื่นและดูว่าเขาดูอะไรจบ",
+    "feedSignIn": "เข้าสู่ระบบ",
+    "feedTabsLabel": "ส่วนของฟีด",
+    "tabFollowing": "ที่ติดตาม",
+    "tabArticles": "บทความ",
+    "tabSaved": "ที่บันทึกไว้",
     "activityTitle": "ช่วงนี้",
     "activityStamp": "<b>{name}</b> ปั๊มตราให้ <b>{title}</b> ที่คุณดูจบ",
     "activityFollow": "<b>{name}</b> เริ่มติดตามคุณ",
     "peopleTitle": "หาคน",
     "peopleHint": "ค้นหาด้วยชื่อผู้ใช้หรือชื่อ เฉพาะคอลเลกชันสาธารณะเท่านั้นที่จะแสดง",
-    "backToFeed": "← กำลังติดตาม",
     "searchLabel": "ค้นหาคน",
     "searchPlaceholder": "@ชื่อผู้ใช้ หรือชื่อ",
     "searching": "กำลังค้นหา…",
@@ -646,12 +751,12 @@
     "toBoard": "กระดาน",
     "toChallenges": "ชาเลนจ์",
     "toClubs": "คลับ",
+    "toReel": "Reel of the Day",
     "communityLabel": "ชุมชน"
   },
   "Board": {
     "title": "กระดาน",
     "kicker": "คุณกับเพื่อน ๆ",
-    "toFeed": "← กำลังติดตาม",
     "periodLabel": "ช่วงเวลาของกระดาน",
     "period": "{period, select, month {เดือนนี้} other {สัปดาห์นี้}}",
     "boardTitle": "{period, select, month {กระดานเดือนนี้} other {กระดานสัปดาห์นี้}}",
@@ -681,7 +786,8 @@
     "next": "{first, select, true {เป็นคนแรกสิ จบเรื่องนี้แล้วคุณจะเป็น Finisher #1} other {จบเรื่องนี้แล้วคุณจะเป็น Finisher #{number}}}",
     "friends": "คนที่คุณติดตาม",
     "friendWhen": "จบเมื่อ{when}",
-    "hint": "ทุกคนที่จบเรื่องหนึ่งจะได้หมายเลขถัดไป และเก็บหมายเลขนั้นไว้ตลอด"
+    "hint": "ทุกคนที่จบเรื่องหนึ่งจะได้หมายเลขถัดไป และเก็บหมายเลขนั้นไว้ตลอด",
+    "reviews": "คนอื่นว่าอย่างไร"
   },
   "Badges": {
     "items": {
@@ -772,10 +878,62 @@
       "all-rounder": {
         "name": "All-Rounder",
         "how": "จบให้ครบ 4 ประเภท จากหนัง ซีรีส์ หนังสือ มังงะ หรือเกม"
+      },
+      "reel-rookie": {
+        "name": "Reel Rookie",
+        "how": "ทาย Reel of the Day ถูกครั้งแรก"
+      },
+      "one-take": {
+        "name": "One Take",
+        "how": "ทาย Reel of the Day ถูกตั้งแต่ครั้งแรก"
+      },
+      "sharp-eye": {
+        "name": "Sharp Eye",
+        "how": "ทาย Reel of the Day ถูก 10 วัน ภายใน 3 ครั้ง"
+      },
+      "hot-streak": {
+        "name": "Hot Streak",
+        "how": "ทาย Reel of the Day ถูกติดกัน 7 วัน"
+      },
+      "reel-legend": {
+        "name": "Reel Legend",
+        "how": "ทาย Reel of the Day ถูกติดกัน 30 วัน"
+      },
+      "challenger": {
+        "name": "Challenger",
+        "how": "ทำชาเลนจ์ประจำเดือนสำเร็จ"
+      },
+      "clean-sweep": {
+        "name": "Clean Sweep",
+        "how": "ทำชาเลนจ์ครบทั้ง 4 อันในเดือนเดียว"
+      },
+      "season-pass": {
+        "name": "Season Pass",
+        "how": "ทำชาเลนจ์สำเร็จใน 6 เดือนที่ต่างกัน"
+      },
+      "lookout": {
+        "name": "Lookout",
+        "how": "ตอบคำถามใน warnings quiz 10 ข้อ"
+      },
+      "guardian": {
+        "name": "Guardian",
+        "how": "ตอบคำถามใน warnings quiz 100 ข้อ"
+      },
+      "critic": {
+        "name": "Critic",
+        "how": "เขียนรีวิวเรื่องที่ดูจบ 10 เรื่อง"
+      },
+      "byline": {
+        "name": "Byline",
+        "how": "เขียนบทความลง Journal"
+      },
+      "supporter": {
+        "name": "Supporter",
+        "how": "สนับสนุน Mystonie ด้วย Pro หรือเลี้ยงกาแฟ"
       }
     },
     "album": "สมุดสติกเกอร์",
-    "albumHint": "สติกเกอร์ที่ได้จากเรื่องที่คุณจบ แตะเพื่อดูวิธีได้",
+    "albumHint": "สติกเกอร์ที่ได้จากเรื่องที่คุณจบ เกมที่เล่น และสิ่งที่ช่วยคนอื่น แตะเพื่อดูวิธีได้",
     "albumCount": "ติดแล้ว {count} จาก {total}",
     "progress": "{progress} จาก {target}",
     "earnedOn": "ได้เมื่อ {date}",
@@ -804,8 +962,40 @@
     "gone": "หน้านี้ไม่เป็นสาธารณะแล้ว",
     "close": "ปิด"
   },
+  "Beta": {
+    "badge": "BETA",
+    "badgeLabel": "Mystonie ยังเป็นเบต้า: ดูว่าหมายถึงอะไร และแจ้งปัญหา",
+    "footer": "Mystonie ยังเป็นเบต้า",
+    "report": "แจ้งปัญหา",
+    "title": "Mystonie ยังเป็นเบต้า",
+    "intro": "Mystonie ยังใหม่ และมีคนคนเดียวที่กำลังสร้างและขัดเกลาอยู่ ทุกอย่างที่เห็นใช้งานได้ แต่อาจเจอจุดที่ยังไม่เรียบร้อย และหลายอย่างจะเปลี่ยนไปเรื่อยๆ",
+    "whatItMeans": "เบต้าหมายถึงอะไร",
+    "pointSafe": "คอลเลกชันเป็นของคุณ และเก็บไว้อย่างปลอดภัย ส่งออกทั้งหมดได้ทุกเมื่อจากการตั้งค่า",
+    "pointChanges": "หน้าและฟีเจอร์อาจเปลี่ยน ย้ายที่ หรือดีขึ้นทุกสัปดาห์",
+    "pointListen": "สิ่งที่คุณแจ้งมากำหนดว่าจะแก้และสร้างอะไรต่อ เราอ่านทุกเรื่อง",
+    "pointPro": "<pro>Mystonie Pro</pro> ยังไม่เปิดขาย แต่ดูได้ว่าจะมีอะไรเพิ่มและราคาที่วางแผนไว้",
+    "reportTitle": "แจ้งปัญหา",
+    "replySignedIn": "เจอบั๊กหรือมีไอเดีย บอกเราได้ที่นี่ ถ้าต้องการข้อมูลเพิ่ม เราจะตอบทางอีเมลของบัญชีคุณ",
+    "replySignedOut": "เจอบั๊กหรือมีไอเดีย บอกเราได้ที่นี่ อยากได้คำตอบ? เข้าสู่ระบบก่อน หรืออีเมลมาที่ <mail>{email}</mail>",
+    "kindLabel": "เป็นเรื่องอะไร",
+    "kind": "{kind, select, bug {มีอะไรพัง} idea {มีไอเดีย} other {เรื่องอื่น}}",
+    "messageLabel": "{kind, select, bug {เกิดอะไรขึ้น แล้วคุณคาดว่าควรเป็นแบบไหน} idea {ไอเดียของคุณคืออะไร} other {อยากบอกอะไรเรา}}",
+    "messagePlaceholder": "{kind, select, bug {ฉันกด… แล้ว…} idea {จะดีมากถ้า…} other {}}",
+    "hint": "หน้าที่คุณมาจากและชื่อเบราว์เซอร์จะถูกส่งไปด้วย",
+    "honeypot": "เว้นว่างช่องนี้ไว้",
+    "submit": "ส่ง",
+    "sending": "กำลังส่ง…",
+    "done": "ขอบคุณมาก! เราอ่านทุกเรื่อง",
+    "another": "แจ้งเรื่องอื่น",
+    "error": "ส่งไม่สำเร็จ ลองใหม่อีกครั้งในอีกสักครู่",
+    "limited": "มีการแจ้งจากที่นี่มากเกินไป ลองใหม่ภายหลัง",
+    "yours": "เรื่องที่คุณแจ้ง",
+    "status": "{status, select, planned {อยู่ในแผน} fixed {แก้แล้ว} closed {ปิดแล้ว} other {ได้รับแล้ว}}",
+    "errorTitle": "มีบางอย่างผิดพลาด",
+    "errorBody": "ขอโทษด้วย หน้านี้มีปัญหา ลองอีกครั้ง ถ้ายังเป็นอยู่ บอกเราได้ จะช่วยให้แก้ได้เร็วขึ้น",
+    "retry": "ลองอีกครั้ง"
+  },
   "Reading": {
-    "backToCollection": "← คอลเลกชันของคุณ",
     "loadError": "โหลดเรื่องนี้ไม่ได้ตอนนี้ ลองใหม่อีกครั้ง",
     "meta": "{kind, select, book {หนังสือ} other {มังงะ}}{year, select, none {} other { · {year}}}",
     "byAuthor": "โดย {author}",
@@ -841,7 +1031,6 @@
     "waitingToSync": "รอซิงก์"
   },
   "Game": {
-    "backToCollection": "← คอลเลกชันของคุณ",
     "loadError": "โหลดเกมนี้ไม่ได้ตอนนี้ ลองใหม่อีกครั้ง",
     "meta": "เกม{year, select, none {} other { · {year}}}",
     "average": "เวลาเล่นเฉลี่ยราว {time}",
@@ -885,7 +1074,6 @@
   },
   "Import": {
     "title": "นำเข้าประวัติของคุณ",
-    "back": "การตั้งค่า",
     "intro": "นำสิ่งที่คุณดูและอ่านจากแอปอื่นมาด้วย: เรื่องที่จบแล้วพร้อมวันที่และคะแนน เรื่องที่กำลังดูอยู่ และเรื่องที่อยากดู",
     "fromLabel": "มาจากไหน?",
     "howTitle": "ขอไฟล์ส่งออกจาก {source}",
@@ -1010,7 +1198,11 @@
     "manage": "จัดการการสมัคร",
     "error": "มีบางอย่างผิดพลาด ลองอีกครั้งในอีกสักครู่",
     "pricesUnavailable": "ตอนนี้แสดงแพ็กเกจไม่ได้ ลองอีกครั้งในอีกสักครู่",
-    "fineprint": "ราคาเป็น USD เรียกเก็บโดย Stripe ยกเลิกได้ทุกเมื่อ: Pro ยังใช้ได้จนจบรอบที่จ่ายไว้"
+    "fineprint": "ราคาเป็น USD เรียกเก็บโดย Stripe ยกเลิกได้ทุกเมื่อ: Pro ยังใช้ได้จนจบรอบที่จ่ายไว้",
+    "notOnSaleTitle": "Pro ยังไม่เปิดขาย",
+    "notOnSaleBody": "Mystonie ยังเป็นเบต้า ตรงนี้คือสิ่งที่ Pro จะเพิ่มและราคาที่วางแผนไว้ สมัคร Pro ได้เมื่อจบช่วงเบต้า",
+    "notOnSale": "ยังไม่เปิดขาย",
+    "plannedFineprint": "ราคาที่วางแผนไว้เป็น USD อาจเปลี่ยนก่อนเปิดขาย Pro"
   },
   "Warnings": {
     "title": "คำเตือนเนื้อหา",
@@ -1047,8 +1239,137 @@
     "saveError": "บันทึกไม่ได้ ลองใหม่อีกครั้ง",
     "loadError": "โหลดรายการหัวข้อไม่ได้ในตอนนี้ ลองใหม่อีกครั้ง",
     "noMatch": "ไม่มีหัวข้อที่ตรงกับ “{query}”",
-    "backToSettings": "กลับไปที่ตั้งค่า",
-    "categoryCount": "{count, plural, other {เลือก #}}"
+    "categoryCount": "{count, plural, other {เลือก #}}",
+    "familyBody": "ไม่รู้จะเริ่มตรงไหน? ชุดสำหรับครอบครัวครอบคลุมสัตว์ตาย ฉากตุ้งแช่ ฉากเลือด ความรุนแรง การทำร้ายตัวเอง เนื้อหาทางเพศ และยาเสพติด เปลี่ยนได้ทุกเมื่อ",
+    "familyButton": "ใช้ชุดสำหรับครอบครัว"
+  },
+  "TitleCheck": {
+    "title": "{kind, select, book {ก่อนอ่าน} manga {ก่อนอ่าน} game {ก่อนเล่น} other {ก่อนดู}}",
+    "setup": "{kind, select, book {เหมาะกับคุณ หรืออ่านให้เด็กฟังได้ไหม?} manga {เหมาะกับคุณหรือเด็กๆ ไหม?} game {เหมาะกับคุณหรือเด็กๆ ไหม?} other {ดูกับครอบครัวได้ไหม?}} เลือกสิ่งที่คุณอยากเลี่ยง แล้วทุกเรื่องจะตอบตรงนี้ก่อนเลย",
+    "family": "เช็คสำหรับดูกับครอบครัว",
+    "familyError": "บันทึกหัวข้อไม่ได้ ลองอีกครั้ง",
+    "checking": "กำลังเช็คหัวข้อของคุณ…",
+    "ownTopics": "เลือกหัวข้อเอง",
+    "editTopics": "แก้หัวข้อ",
+    "stamp": "ระวัง",
+    "hits": "{count, plural, other {มี # หัวข้อที่คุณเลี่ยง: {topics}}}",
+    "dtddVotes": "DoesTheDogDie: ใช่ {yes} · ไม่ {no}",
+    "oursSource": "ยืนยันแล้วบน Mystonie",
+    "details": "ดูรายละเอียด",
+    "clear": "ไม่มีหัวข้อที่คุณเลี่ยง",
+    "sureAll": "{count, plural, other {คนส่วนใหญ่บอกว่าไม่มีครบทั้ง # หัวข้อ}}",
+    "sureSome": "คนส่วนใหญ่บอกว่าไม่มี {sure} จาก {total} หัวข้อ ที่เหลือยังมีโหวตไม่พอ",
+    "unknown": "ยังไม่มีคำตอบสำหรับหัวข้อของคุณ",
+    "unknownBody": "DoesTheDogDie ยังไม่มีเรื่องนี้ และยังไม่มีใครบน Mystonie แจ้งหัวข้อของคุณไว้",
+    "unavailable": "ติดต่อ DoesTheDogDie ไม่ได้ตอนนี้ และยังไม่มีใครบน Mystonie แจ้งหัวข้อของคุณไว้ ลองใหม่อีกสักครู่",
+    "unknownOurs": "ยังไม่มีคน{kind, select, game {เล่น} other {อ่าน}}แล้วแจ้งหัวข้อของคุณไว้ คำเตือนของ{kind, select, book {หนังสือ} manga {มังงะ} other {เกม}}มาจากคนบน Mystonie"
+  },
+  "Atlas": {
+    "title": "Atlas",
+    "statCountries": "ประเทศที่เคยไป",
+    "statContinents": "ทวีป จาก 7",
+    "statStories": "ประเทศในเรื่องที่ดู",
+    "layersLabel": "ชั้นของแผนที่",
+    "layerBeen": "ที่เคยไป",
+    "layerStories": "เรื่องที่ดู",
+    "mapLabel": "แผนที่โลก",
+    "zoomLabel": "ซูมไปที่",
+    "world": "ทั้งโลก",
+    "continents": {
+      "africa": "แอฟริกา",
+      "antarctica": "แอนตาร์กติกา",
+      "asia": "เอเชีย",
+      "europe": "ยุโรป",
+      "north_america": "อเมริกาเหนือ",
+      "south_america": "อเมริกาใต้",
+      "oceania": "โอเชียเนีย"
+    },
+    "mapBeenAlt": "แผนที่โลกที่ระบายสี{count, plural, =0 {ยังไม่มีประเทศ} other {ประเทศที่เคยไป # ประเทศ}}",
+    "mapStoriesAlt": "แผนที่โลกที่ระบายสีประเทศที่เรื่องที่ดูมาจาก{count, plural, =0 {} other { # ประเทศ}}",
+    "loadingMap": "กำลังกางแผนที่…",
+    "statusBeen": "เคยไป",
+    "statusLived": "เคยอยู่",
+    "statusWant": "อยากไป",
+    "fewer": "น้อย",
+    "more": "หลายเรื่อง",
+    "addHint": "แตะประเทศบนแผนที่ หรือค้นหาตรงนี้",
+    "storiesHint": "หนัง ซีรีส์ และมังงะที่ดูและอ่านมาจากประเทศไหนบ้าง แตะประเทศเพื่อดูเรื่องจากที่นั่น",
+    "searchLabel": "ค้นหาประเทศ",
+    "searchPlaceholder": "ค้นหาประเทศ",
+    "searchNone": "ไม่พบประเทศชื่อนี้",
+    "saveError": "บันทึกไม่ได้ ตรวจการเชื่อมต่อแล้วลองใหม่อีกครั้ง",
+    "empty": "เคยไปที่ไหนมาบ้าง แตะประเทศเพื่อเริ่ม Atlas ของคุณ",
+    "beenTitle": "เคยไป · {count}",
+    "wantTitle": "อยากไป · {count}",
+    "livedTag": "เคยอยู่",
+    "bothLine": "เคยไปแล้วก็ดูแล้ว: มีเรื่องจาก {both} ใน {been} ประเทศที่คุณเคยไป",
+    "storiesEmpty": "เริ่มหรือดูหนัง ซีรีส์ หรือมังงะจบสักเรื่อง แล้วประเทศของเรื่องนั้นจะขึ้นสีตรงนี้",
+    "storiesTitle": "{count} ประเทศในเรื่องที่ดู",
+    "storyCount": "{count} เรื่อง",
+    "storiesSource": "ข้อมูลประเทศมาจาก TMDB (หนังและซีรีส์) และ AniList (มังงะ) หนังสือและเกมไม่มีข้อมูลประเทศ",
+    "share": "แชร์ Atlas ของฉัน",
+    "shareEmpty": "เพิ่มประเทศที่เคยไปก่อน",
+    "profilePrivate": "โปรไฟล์ของคุณเป็นส่วนตัว จึงมีแค่คุณที่เห็น Atlas",
+    "close": "ปิด",
+    "statusLabel": "คุณกับ{country}",
+    "firstVisit": "ไปครั้งแรก",
+    "yearUnknown": "ไม่แน่ใจ",
+    "fromHere": "เรื่องจากที่นี่",
+    "fromHereCount": "มี {count} เรื่องจาก{country}ในคลังของคุณ",
+    "fromHereNone": "ยังไม่มีเรื่องจากที่นี่ในคลังของคุณ",
+    "remove": "เอาออกจาก Atlas",
+    "albumCount": "{countries} ประเทศ · {continents} ทวีป",
+    "openAtlas": "เปิด Atlas ของฉัน",
+    "kindOne": "{kind, select, state {รัฐ} province {จังหวัด} prefecture {จังหวัด} county {เคาน์ตี} department {จังหวัด} governorate {เขตผู้ว่าการ} canton {แคนทอน} district {เขต} municipality {เทศบาล} parish {แพริช} emirate {เอมิเรต} nation {ประเทศ} other {แคว้น}}",
+    "kindMany": "{kind, select, state {รัฐ} province {จังหวัด} prefecture {จังหวัด} county {เคาน์ตี} department {จังหวัด} governorate {เขตผู้ว่าการ} canton {แคนทอน} district {เขต} municipality {เทศบาล} parish {แพริช} emirate {เอมิเรต} nation {ประเทศ} other {แคว้น}}",
+    "kindTitle": "{kind, select, state {รัฐ} province {จังหวัด} prefecture {จังหวัด} county {เคาน์ตี} department {จังหวัด} governorate {เขตผู้ว่าการ} canton {แคนทอน} district {เขต} municipality {เทศบาล} parish {แพริช} emirate {เอมิเรต} nation {ประเทศ} other {แคว้น}}",
+    "regionsDone": "{done}/{total}",
+    "regionsDoneOf": "{done} จาก {total}",
+    "regionsShort": "{done}/{total}",
+    "regionsDoneLabel": "{many}ที่เคยไป",
+    "regionsMark": "ทำเครื่องหมาย{many}ที่เคยไป",
+    "regionsJoinHint": "แตะสักแห่ง แล้ว{country}จะขึ้นบน Atlas ว่าเคยไปแล้ว",
+    "regionsWantHint": "{country}อยู่ในรายการอยากไป แตะสักแห่งแล้วจะย้ายไปเป็นเคยไปแล้ว",
+    "regionsMapLabel": "แผนที่{country}",
+    "regionsMapAlt": "แผนที่{country}: เคยไป {done} จาก {total} {many}",
+    "regionsMapError": "โหลดแผนที่ไม่ได้ ตรวจการเชื่อมต่อแล้วลองใหม่อีกครั้ง",
+    "regionsMapHint": "แตะ{many}ที่เคยไป หรือหาจากรายการด้านล่าง",
+    "zoomIn": "ขยาย",
+    "zoomOut": "ย่อ",
+    "regionMarked": "ทำเครื่องหมาย{region}แล้ว",
+    "regionUnmarked": "เอา{region}ออกแล้ว",
+    "undo": "เลิกทำ",
+    "regionsAll": "{title}ทั้งหมด · {total}",
+    "regionsFind": "ค้นหา{one}",
+    "regionsNoMatch": "ไม่มี{many}ที่ตรงกับ “{query}”",
+    "regionsShare": "แชร์{country}ของฉัน",
+    "regionsShareEmpty": "ทำเครื่องหมาย{many}ที่เคยไป แล้วแชร์เป็นการ์ดได้",
+    "regionsClearWant": "{count, plural, other {เปลี่ยนเป็นอยากไปจะล้าง{many}ที่ทำเครื่องหมายไว้ # แห่ง}}",
+    "regionsClearRemove": "{count, plural, other {จะล้าง{many}ที่ทำเครื่องหมายไว้ # แห่งด้วย}}",
+    "regionsClearWantYes": "ล้างแล้วเปลี่ยน",
+    "regionsClearRemoveYes": "เอาออก",
+    "regionsClearNo": "เก็บไว้"
+  },
+  "TitleDetails": {
+    "toggle": "รายละเอียดและคำเตือนเนื้อหา",
+    "loading": "กำลังโหลดรายละเอียด…",
+    "error": "โหลดรายละเอียดไม่ได้ ลองใหม่อีกครั้งในอีกสักครู่",
+    "retry": "ลองอีกครั้ง",
+    "more": "อ่านต่อ",
+    "less": "ย่อ",
+    "score": "{score} บน TMDB",
+    "votes": "{count, plural, other {# โหวต}}",
+    "seasons": "{seasons, plural, other {# ซีซัน}}{episodes, plural, =0 {} other { · # ตอน}}",
+    "runtime": "{kind, select, series {ตอนละประมาณ {minutes} นาที} other {{minutes} นาที}}",
+    "directors": "{kind, select, series {สร้างโดย {names}} other {กำกับโดย {names}}}",
+    "cast": "นำแสดงโดย {names}",
+    "makers": "{kind, select, game {พัฒนาโดย {names}} other {โดย {names}}}",
+    "imdb": "ดูบน IMDb",
+    "page": "{kind, select, book {เปิดหน้าหนังสือ} manga {เปิดหน้ามังงะ} game {เปิดหน้าเกม} series {เปิดหน้าซีรีส์} other {เปิดหน้าหนัง}}",
+    "flagged": "คนส่วนใหญ่บอกว่ามี",
+    "yesVotes": "{count, plural, other {มี #}}",
+    "noFlags": "ยังไม่มีหัวข้อไหนที่คนบอกว่ามี",
+    "flaggedMore": "{count, plural, other {และอีก # หัวข้อบน DoesTheDogDie (บางหัวข้ออาจสปอยล์)}}"
   },
   "WarningTopics": {
     "names": {
@@ -1362,7 +1683,6 @@
     "trendingPeople": "{count, plural, other {สมาชิก # คน}}",
     "feedTitle": "ล่าสุดจากสมาชิก",
     "feedEmpty": "ยังไม่มีใครดูจบในคลับนี้ เข้าร่วมแล้วดูเรื่องที่เข้าคลับให้จบเป็นคนแรกได้เลย",
-    "back": "← คลับทั้งหมด",
     "titleClubs": "คลับของเรื่องนี้",
     "profileTitle": "คลับ",
     "profileEmpty": "หาแฟนด้อมของคุณ",
@@ -1391,5 +1711,113 @@
     "pageBody": "หน้าที่เคยเปิดแล้วยังใช้ได้ตอนออฟไลน์ และทุกอย่างที่บันทึกจะซิงก์เมื่อกลับมาออนไลน์",
     "savedPages": "เปิดแบบออฟไลน์",
     "metaTitle": "ออฟไลน์"
+  },
+  "GettingStarted": {
+    "title": "เริ่มต้นใช้งาน",
+    "open": "เริ่มต้นใช้งาน: เสร็จ {done} จาก {total}",
+    "close": "ปิด",
+    "progress": "เสร็จ {done} จาก {total}",
+    "progressLabel": "ความคืบหน้าการเริ่มต้นใช้งาน",
+    "steps": {
+      "add": "เพิ่มเรื่องแรก",
+      "card": "ดูจบสักเรื่องแล้วทำการ์ด",
+      "topics": "เลือกหัวข้อที่อยากเลี่ยง",
+      "social": "ติดตามใครสักคนหรือเข้าคลับ",
+      "install": "ติดตั้งแอป"
+    },
+    "hints": {
+      "add": "หนัง ซีรีส์ หนังสือ มังงะ หรือเกม: แตะ ➕",
+      "card": "กดว่าจบแล้วแชร์การ์ดของเรื่องนั้น",
+      "topics": "เราจะเช็คทุกเรื่องให้ก่อนคุณดู",
+      "social": "ดูว่าเพื่อนดูอะไรจบ หรือหาคลับของแฟนด้อมคุณ",
+      "install": "เมนูของเบราว์เซอร์ → เพิ่มไปยังหน้าจอหลัก (บน iPhone: แชร์ → เพิ่มไปยังหน้าจอโฮม)"
+    },
+    "done": "เสร็จแล้ว",
+    "toDo": "ยังไม่ได้ทำ",
+    "skip": "ข้ามไปก่อน",
+    "doneTitle": "พร้อมแล้ว!",
+    "doneBody": "อัลบั้มของคุณพร้อมแล้ว ดูจบเรื่องต่อไปเรื่อยๆ แล้วการ์ดกับสถิติจะตามมาเอง",
+    "doneButton": "เยี่ยม",
+    "show": "แสดงรายการเริ่มต้นใช้งาน",
+    "shown": "ปุ่มกลมของรายการจะอยู่มุมล่างของทุกหน้า จนกว่าคุณจะทำครบหรือกดข้าม"
+  },
+  "Reel": {
+    "metaTitle": "Reel of the Day",
+    "metaDescription": "ทายหนังของวันนี้ใน 6 ครั้ง ทายผิดแต่ละครั้งได้คำใบ้เพิ่ม",
+    "kicker": "หนังใหม่ทุกวัน",
+    "title": "Reel of the Day",
+    "intro": "ทายหนังของวันนี้ใน 6 ครั้ง ทายผิดแต่ละครั้ง โปสเตอร์จะชัดขึ้นและได้คำใบ้เพิ่ม",
+    "loading": "กำลังโหลดหนังของวันนี้…",
+    "loadError": "โหลดหนังของวันนี้ไม่สำเร็จ ลองใหม่อีกครั้ง",
+    "retry": "ลองใหม่",
+    "guessError": "ส่งคำตอบไม่สำเร็จ ลองใหม่อีกครั้ง",
+    "newDay": "หนังของวันใหม่มาแล้ว",
+    "posterAlt": "โปสเตอร์ของวันนี้แบบเบลอ",
+    "answerPosterAlt": "โปสเตอร์ {name}",
+    "noPoster": "ไม่มีโปสเตอร์",
+    "clues": "คำใบ้",
+    "clue": "{key, select, year {ปี} genre {แนว} actor {นักแสดงนำ} director {ผู้กำกับ} tagline {คำโปรย} other {คำใบ้}}",
+    "clueLocked": "หลังทายผิดครั้งที่ {count}",
+    "clueUnknown": "ไม่มีข้อมูล",
+    "guesses": "ที่คุณทาย",
+    "right": "ถูกต้อง",
+    "wrong": "ไม่ใช่",
+    "guessLabel": "ทายชื่อหนัง",
+    "guessPlaceholder": "ค้นหาหนัง…",
+    "guessesLeft": "ทายได้อีก {count} ครั้ง",
+    "alreadyGuessed": "ทายไปแล้ว",
+    "solvedTitle": "{count, plural, one {ทายถูกในครั้งเดียว!} other {ทายถูกใน # ครั้ง!}}",
+    "lostTitle": "หมดสิทธิ์ทายแล้ว",
+    "answerWas": "หนังของวันนี้",
+    "openTitle": "เปิดหน้าหนัง",
+    "shareResult": "แชร์ผล",
+    "copied": "คัดลอกผลแล้ว วางที่ไหนก็ได้",
+    "makeCard": "ทำการ์ด",
+    "guestNote": "เข้าสู่ระบบเพื่อเก็บสถิติทายถูกต่อเนื่องและทำการ์ดผลลัพธ์",
+    "signIn": "เข้าสู่ระบบ",
+    "nextReel": "หนังเรื่องถัดไปใน {time}",
+    "yesterday": "หนังของเมื่อวาน · #{number}",
+    "number": "#{number}",
+    "stats": "สถิติของคุณ",
+    "played": "เล่นแล้ว",
+    "winRate": "ทายถูก %",
+    "streak": "ติดต่อกัน",
+    "maxStreak": "ติดต่อกันนานสุด",
+    "distribution": "ทายถูกในครั้งที่",
+    "howTitle": "วิธีเล่น",
+    "how": "ทุกคนได้หนังเรื่องเดียวกัน และเปลี่ยนเรื่องใหม่ตอนเที่ยงคืนเวลา UTC เลือกคำตอบจากการค้นหา จึงไม่เสียสิทธิ์เพราะสะกดผิด แชร์เป็นช่องสี ไม่เฉลยคำตอบ",
+    "homeTitle": "Reel of the Day #{number}",
+    "homePlay": "ทายหนังของวันนี้ใน 6 ครั้ง",
+    "homeSolved": "ทายถูกใน {count} ครั้ง พรุ่งนี้มาเล่นใหม่นะ",
+    "homeLost": "วันนี้ทายไม่ถูก พรุ่งนี้มาเล่นใหม่นะ",
+    "homePlaying": "ทายได้อีก {count} ครั้ง",
+    "homeCta": "เล่น"
+  },
+  "Journal": {
+    "empty": "บทความแรกกำลังมา",
+    "readTime": "อ่าน {minutes} นาที",
+    "by": "โดย {author}",
+    "defaultAuthor": "ทีม Mystonie",
+    "fallbackNote": "บทความนี้ยังไม่มีภาษาของคุณ จึงแสดงเป็นภาษา{language}",
+    "draft": "ฉบับร่าง",
+    "add": "เพิ่ม",
+    "addLabel": "เพิ่ม {name} ในคอลเลกชัน",
+    "kind": "{kind, select, movie {หนัง} series {ซีรีส์} book {หนังสือ} manga {มังงะ} game {เกม} other {เรื่อง}}",
+    "about": "ใน Journal",
+    "latest": "จาก Journal",
+    "readMore": "อ่าน",
+    "inLanguage": "ภาษา{language}",
+    "forYouHint": "ยิ่งคอลเลกชันของคุณโต บทความเกี่ยวกับเรื่องของคุณก็จะขึ้นมาก่อน",
+    "reason": "{status, select, want {{kind, select, book {คุณอยากอ่าน {name}} manga {คุณอยากอ่าน {name}} game {คุณอยากเล่น {name}} other {คุณอยากดู {name}}}} watching {{kind, select, book {คุณกำลังอ่าน {name}} manga {คุณกำลังอ่าน {name}} game {คุณกำลังเล่น {name}} other {คุณกำลังดู {name}}}} other {{kind, select, book {คุณอ่าน {name} จบแล้ว} manga {คุณอ่าน {name} จบแล้ว} game {คุณเล่น {name} จบแล้ว} other {คุณดู {name} จบแล้ว}}}}",
+    "featured": "แนะนำ",
+    "save": "บันทึก",
+    "saved": "บันทึกแล้ว",
+    "unsave": "เอาออกจากที่บันทึกไว้",
+    "share": "แชร์",
+    "copied": "คัดลอกลิงก์แล้ว",
+    "enjoyed": "ชอบบทความนี้ไหม",
+    "actionsLabel": "ปั๊ม บันทึก หรือแชร์",
+    "savedTitle": "บทความที่บันทึกไว้อ่าน",
+    "seeAllSaved": "ดูทั้งหมด ({count})"
   }
 }

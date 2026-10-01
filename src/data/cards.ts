@@ -1,7 +1,11 @@
 // Saved cards (S1 share artwork, ADR 0024). Server only.
+import { atlasCardCountries } from "@/core/atlas";
+import { regionsByCountry, regionsOf } from "@/core/atlas-regions";
 import { cardImagePath, parseCardData, type CardSave } from "@/core/cards/saved";
 import { isTemplateId, type TemplateId } from "@/core/cards/templates";
 import type { CardData, CardKind, CardSize } from "@/core/cards/types";
+import { isCountryCode } from "@/core/countries";
+import { userPlaces, userRegions } from "./atlas";
 import { linkRecapCard } from "./recaps";
 import { adminClient } from "./supabase-admin";
 import { publicSupabaseEnv, type UserClient } from "./supabase-server";
@@ -30,18 +34,16 @@ export function publicImageUrl(path: string): string | null {
  * Share after Download) updates it. The footer's `@username` comes from the profile, never from the request.
  * A share also returns a signed URL the browser uploads the PNG to (the bucket has no client write access).
  */
-export async function saveCard(
-  db: UserClient,
-  userId: string,
-  save: CardSave,
-): Promise<{ uploadUrl: string | null } | null> {
-  const [{ data: profile, error: profileError }, finisherNo, completed] = await Promise.all([
+export async function saveCard(db: UserClient, userId: string, save: CardSave): Promise<{ uploadUrl: string | null } | null> {
+  const [{ data: profile, error: profileError }, finisherNo, completed, played, mapped] = await Promise.all([
     db.from("profiles").select("username").eq("id", userId).single(),
     cardFinisherNo(db, userId, save),
     completedChallenge(db, userId, save),
+    playedReel(db, userId, save),
+    ownAtlas(db, userId, save),
   ]);
   if (profileError) throw new Error(`profiles read failed: ${profileError.message}`);
-  if (!completed) return null;
+  if (!completed || !played || !mapped) return null;
   const hideName = save.data.hide?.includes("username");
   const params = { ...save.data, username: hideName ? null : profile.username, finisherNo };
   const path = cardImagePath(userId, save.id);
@@ -82,6 +84,45 @@ export async function saveCard(
     return { uploadUrl: null };
   }
   return { uploadUrl: signed.signedUrl };
+}
+
+/**
+ * Whether a Reel of the Day card (or its sticker) is the user's own finished play (stage 4 daily game): the same
+ * right and wrong guesses and the streak the server recorded. Cards about anything else pass.
+ */
+async function playedReel(db: UserClient, userId: string, save: CardSave): Promise<boolean> {
+  const reel = save.data.reel;
+  if (!reel) return true;
+  const { data, error } = await db
+    .from("reel_plays")
+    .select("guesses, solved, streak, finished_at")
+    .eq("user_id", userId)
+    .eq("day", reel.day)
+    .maybeSingle();
+  if (error) throw new Error(`reel_plays read failed: ${error.message}`);
+  if (!data?.finished_at) return false;
+  const guesses = Array.isArray(data.guesses) ? data.guesses.length : 0;
+  return data.solved === reel.solved && data.streak === reel.streak && guesses === reel.results.length;
+}
+
+/**
+ * Whether an Atlas card colours in exactly the countries the user has been to (stage 4, ADR 0059), or, on a country's
+ * card, exactly the regions of it they marked, with that country's real count and kind (ADR 0060). Cards about anything
+ * else pass.
+ */
+async function ownAtlas(db: UserClient, userId: string, save: CardSave): Promise<boolean> {
+  const atlas = save.data.atlas;
+  if (!atlas) return true;
+  if (atlas.regions) {
+    const { country, kind, total, ids } = atlas.regions;
+    if (!isCountryCode(country)) return false;
+    const list = regionsOf(country);
+    if (!list || list.kind !== kind || list.ids.length !== total) return false;
+    const marked = regionsByCountry(await userRegions(db, userId, country)).get(country) ?? [];
+    return marked.length === ids.length && marked.every((id, i) => id === ids[i]);
+  }
+  const visited = atlasCardCountries(await userPlaces(db, userId));
+  return visited.length === atlas.countries.length && visited.every((code, i) => code === atlas.countries[i]);
 }
 
 /**

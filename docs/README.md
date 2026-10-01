@@ -22,6 +22,7 @@
 | 1 | [S1 · Auth](product/features/S1-auth.md) · [S1 · Collection](product/features/S1-collections.md) · [S1 · Share artwork](product/features/S1-share-artwork.md) · [S1 · Stats](product/features/S1-stats.md) · [S1 · Profile & privacy](product/features/S1-profile-privacy.md) |
 | 2 | [S2 · Content warnings (DTDD)](product/features/S2-content-warnings.md) · [S2 · Books & manga](product/features/S2-books-manga.md) · [S2 · Pro](product/features/S2-pro-subscription.md) · [S2 · Where to watch](product/features/S2-where-to-watch.md) · [S2 · Letterboxd import](product/features/S2-letterboxd-import.md) |
 | 3 | [S3 · Social](product/features/S3-social.md) · [S3 · Badges & shelf](product/features/S3-badges-shelf.md) · [S3 · Finishers & the board](product/features/S3-finishers-board.md) · [S3 · Challenges & clubs](product/features/S3-challenges-clubs.md) · [S3 · Import & export](product/features/S3-import-export.md) · [S3 · Offline](product/features/S3-offline.md) · [S3 · Warnings & quiz](product/features/S3-warnings-quiz.md) · [S3 · Games](product/features/S3-games.md) |
+| 4 | [S4 · Getting started](product/features/S4-getting-started.md) · [S4 · Deeper stats](product/features/S4-deeper-stats.md) · [S4 · Reel of the Day](product/features/S4-daily-reel.md) · [S4 · Journal & reviews](product/features/S4-journal-reviews.md) · [S4 · Atlas](product/features/S4-atlas.md) (the pre-watch check is in [S2 · Content warnings](product/features/S2-content-warnings.md)) |
 | Later | [Gated features](product/later/README.md) |
 
 ## Owner's brief

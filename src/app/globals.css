@@ -15,6 +15,11 @@
   }
 }
 
+/* Signed in (ADR 0050): `<html data-auth>`, set before first paint from the session cookie (SIGNED_IN_SCRIPT in
+   src/core/auth.ts). `signed-in:` shows the nav island, `signed-out:` the Sign in link. */
+@custom-variant signed-in (&:where([data-auth] *));
+@custom-variant signed-out (&:where(:root:not([data-auth]) *));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -145,15 +150,59 @@
   }
 }
 
+/* The Atlas's world map (stage 4, ADR 0059): the sea, land, borders and the inks of its two layers (been and lived in
+   the brand's coral; the stories in four steps of teal, more stories darker in light mode and brighter in dark). */
+:root {
+  --atlas-sea: oklch(0.955 0.016 225);
+  --atlas-land: oklch(0.885 0.022 75);
+  --atlas-edge: oklch(0.985 0.005 80);
+  --atlas-lived: oklch(0.44 0.15 32);
+  --atlas-story-1: oklch(0.84 0.05 195);
+  --atlas-story-2: oklch(0.73 0.08 195);
+  --atlas-story-3: oklch(0.61 0.095 198);
+  --atlas-story-4: oklch(0.48 0.09 200);
+  @variant dark {
+    --atlas-sea: oklch(0.2 0.016 240);
+    --atlas-land: oklch(0.34 0.014 70);
+    --atlas-edge: oklch(0.2 0.016 240);
+    --atlas-lived: oklch(0.82 0.12 50);
+    --atlas-story-1: oklch(0.43 0.055 195);
+    --atlas-story-2: oklch(0.54 0.08 195);
+    --atlas-story-3: oklch(0.66 0.095 195);
+    --atlas-story-4: oklch(0.79 0.095 195);
+  }
+}
+
+/* The nav island (ADR 0050) floats over the page's last 5rem, above the home indicator. `--island-space` is the room
+   pages keep at the bottom for it: the body's padding, sticky bars and toasts sit above it. 0 when signed out. */
+:root {
+  --island-space: 0px;
+}
+:root[data-auth] {
+  --island-space: calc(5.25rem + max(1.5rem, calc(env(safe-area-inset-bottom) + 0.5rem)));
+  /* Focus and in-page links never land behind the island. */
+  scroll-padding-bottom: var(--island-space);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
     @apply bg-background text-foreground;
+    padding-bottom: var(--island-space);
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Typing on a phone: the island steps aside for the keyboard (fixed bars ride up oddly over it on iOS). Unlayered, so
+   it wins over the island's own display utilities. */
+@media (pointer: coarse) {
+  :root:has(:is(input:not([type="checkbox"], [type="radio"], [type="range"], [type="button"], [type="submit"], [type="file"]), textarea):focus)
+    :is([data-nav-island], [data-getting-started]) {
+    display: none;
   }
 }
 /* Celebration (S1 share artwork): the FINISHED stamp lands, then the card rises into place.

@@ -3,11 +3,12 @@ import { getFormatter, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { LEGAL } from "@/lib/legal";
+import { SUPPORT_URL } from "@/lib/site";
 
 // Section order per page. Text lives in messages/en.json (English only: other locales fall back to it).
 export const LEGAL_SECTIONS = {
   Privacy: ["who", "cards", "account", "collect", "use", "processors", "transfers", "retention", "rights", "children", "changes"],
-  Terms: ["service", "content", "tmdb", "use", "brand", "liability", "changes", "contact"],
+  Terms: ["service", "content", "tmdb", "use", "brand", "tips", "liability", "changes", "contact"],
 } as const;
 
 type Doc = keyof typeof LEGAL_SECTIONS;
@@ -41,6 +42,7 @@ export async function LegalPage({ doc }: { doc: Doc }) {
     operator: external(LEGAL.operatorSite),
     tmdb: external("https://www.themoviedb.org/"),
     rawg: external("https://rawg.io/"),
+    bmc: external(SUPPORT_URL),
   };
 
   return (

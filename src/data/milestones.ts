@@ -29,9 +29,10 @@ export async function checkProgress(
   if (error) throw new Error(`profiles read failed: ${error.message}`);
   const reached = reachedMilestones(rows.titles, rows.entries, rows.logs);
   const { announce, seen, changed } = announceMilestones(reached, parseMilestonesSeen(profile.milestones_seen), now);
-  const [badges, challenges] = await Promise.all([
+  // Challenges first: a challenge this save completed counts toward the challenge stickers (ADR 0063).
+  const challenges = await syncChallenges(db, userId, rows, profile.time_zone, now);
+  const [badges] = await Promise.all([
     syncBadges(db, userId, rows, profile.time_zone, now),
-    syncChallenges(db, userId, rows, profile.time_zone, now),
     changed &&
       db
         .from("profiles")

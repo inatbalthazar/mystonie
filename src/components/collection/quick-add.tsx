@@ -14,12 +14,14 @@ import { rememberTitles, useRecentTitles } from "../offline/recent-titles";
 import { Sheet } from "../sheet";
 import { MIN_SEARCH_CHARS, PosterButton, SearchStatus, useTitleSearch } from "../title-search";
 import { useSearchBadges, useWarningLabel } from "../warnings/warning-badge";
+import { TitleDetails } from "./title-details";
 
 /**
  * The ➕ sheet (S1 collection): search → tap a result → tap a status. Three taps from the ➕ to a
  * finished title; the finish date is today unless changed first. A switcher narrows the search to movies & TV,
  * books or manga (S2 books & manga), or games (S3 games); All searches every catalog. Offline, titles seen lately on this device stand in
- * for the search (S3 offline).
+ * for the search (S3 offline). The status step shows a picked title's warning note and, on request, its details and
+ * content warnings (stage 4, ADR 0058).
  */
 export function QuickAdd({
   open,
@@ -69,7 +71,17 @@ function QuickAddSteps({
     setPicked(result);
   };
 
-  if (picked) return <PickStatus result={picked} onBack={() => setPicked(null)} onAdd={onAdd} timeZone={timeZone} />;
+  if (picked) {
+    return (
+      <PickStatus
+        result={picked}
+        warning={warningLabel(badges[`${picked.kind}:${picked.externalId}`])}
+        onBack={() => setPicked(null)}
+        onAdd={onAdd}
+        timeZone={timeZone}
+      />
+    );
+  }
   if (!online) return <OfflinePicks onPick={pick} />;
 
   return (
@@ -154,11 +166,14 @@ function OfflinePicks({ onPick }: { onPick: (r: SearchResult) => void }) {
 
 function PickStatus({
   result,
+  warning,
   onBack,
   onAdd,
   timeZone,
 }: {
   result: SearchResult;
+  /** The search badge's words, when the cache already flags one of the viewer's avoid-topics. */
+  warning: string | null;
   onBack: () => void;
   onAdd: (r: SearchResult, s: EntryStatus, f: string | null) => void;
   timeZone: string;
@@ -198,6 +213,8 @@ function PickStatus({
           </button>
         </div>
       </div>
+
+      <TitleDetails key={`${result.kind}-${result.externalId}`} result={result} warning={warning} />
 
       <div className="flex flex-col gap-2">
         <button

@@ -1,11 +1,10 @@
 import { CheckIcon } from "lucide-react";
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { PaperCard } from "@/components/paper-card";
 import { ProActions } from "@/components/pro/pro-actions";
-import type { PlanPrice } from "@/core/billing";
+import { PLANNED_PRICES, type PlanPrice } from "@/core/billing";
 import { planPrices, stripeConfig } from "@/data/stripe";
 import { getProState } from "@/data/subscriptions";
 import { userClient } from "@/data/supabase-server";
@@ -15,24 +14,28 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: `${t("title")} · Mystonie` };
 }
 
-/** Mystonie Pro (S2 Pro, ADR 0034): what it adds, the plans, and buying or managing it. 404 while Pro is off. */
+/**
+ * Mystonie Pro (S2 Pro, ADR 0034): what it adds, the plans, and buying or managing it. While Pro isn't on sale (the
+ * beta, ADR 0055) it still shows the offer and the planned prices, with the buttons greyed out.
+ */
 export default async function ProPage({ params, searchParams }: PageProps<"/[locale]/pro">) {
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
   const config = stripeConfig();
-  if (!config) notFound();
 
   const supabase = await userClient();
   const { data: auth } = supabase ? await supabase.auth.getClaims() : { data: null };
   const userId = auth?.claims.sub ?? null;
   const [state, t] = await Promise.all([getProState(supabase, userId), getTranslations("Pro")]);
   // The plans only matter to someone who isn't Pro yet.
-  const prices = state.pro
-    ? []
-    : await planPrices(config).catch((error): PlanPrice[] => {
-        console.error("stripe prices", error);
-        return [];
-      });
+  const prices = !config
+    ? [...PLANNED_PRICES]
+    : state.pro
+      ? []
+      : await planPrices(config).catch((error): PlanPrice[] => {
+          console.error("stripe prices", error);
+          return [];
+        });
   const checkout = (await searchParams).checkout === "success";
   const features = ["featureTemplates", "featureFirst", "featureSupport"] as const;
 

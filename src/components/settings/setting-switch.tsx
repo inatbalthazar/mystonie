@@ -8,6 +8,9 @@ import { saveAccount } from "./save-account";
 // Each switch is one boolean-ish profile setting. Keys, not callbacks, so server pages can render them.
 const SETTINGS = {
   emailRecaps: { label: "recapEmails", hint: "recapEmailsHint", patch: (on: boolean) => ({ emailRecaps: on }) },
+  reelReminders: { label: "reelReminders", hint: "reelRemindersHint", patch: (on: boolean) => ({ reelReminders: on }) },
+  // The Atlas on the album (stage 4, ADR 0059): off by default, since where you've lived says where you're from.
+  atlasPublic: { label: "atlasPublic", hint: "atlasPublicHint", patch: (on: boolean) => ({ atlasPublic: on }) },
   publicProfile: {
     label: "publicProfile",
     hint: "publicProfileHint",

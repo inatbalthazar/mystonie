@@ -42,6 +42,10 @@ export const TEMPLATE_META = [
   // S3 challenges & clubs: the month's calendar page, torn off, with the days you logged circled.
   { id: "calendar", kinds: ["challenge"], sizes: BOTH_SIZES, tier: "free" },
   { id: "yearbook", kinds: ["year_review"], sizes: BOTH_SIZES, tier: "free" },
+  // Stage 4 daily game: a strip of six film frames, lit red or green, spoiler-free.
+  { id: "reel", kinds: ["reel"], sizes: BOTH_SIZES, tier: "free" },
+  // Stage 4 Atlas: the world map with the countries you've been to coloured in, like a scratch map.
+  { id: "atlas", kinds: ["atlas"], sizes: BOTH_SIZES, tier: "free" },
   { id: "sticker", kinds: ["sticker"], sizes: BOTH_SIZES, tier: "free" },
 ] as const satisfies readonly TemplateMeta[];
 
@@ -83,7 +87,8 @@ export function templateFits(id: TemplateId, kind: CardKind, size: CardSize, tit
 /**
  * The template a new card opens on: the manga panel for manga and the spine for books (Finish and Progress), the
  * cartridge for a game's finish, else the Polaroid for a finish, Bold Stats for progress and stats, the collage for a week or a month, the
- * carved stone for a milestone, the calendar for a challenge and the yearbook for a Year in Review.
+ * carved stone for a milestone, the calendar for a challenge, the yearbook for a Year in Review and the film strip for
+ * Reel of the Day.
  */
 export function defaultTemplate(kind: CardKind, titleKind: TitleKind): TemplateId {
   if (kind === "sticker") return "sticker";
@@ -92,6 +97,8 @@ export function defaultTemplate(kind: CardKind, titleKind: TitleKind): TemplateI
   if (kind === "milestone") return "stone";
   if (kind === "challenge") return "calendar";
   if (kind === "year_review") return "yearbook";
+  if (kind === "reel") return "reel";
+  if (kind === "atlas") return "atlas";
   if (titleKind === "manga") return "mangaPanel";
   if (titleKind === "book") return "spine";
   if (titleKind === "game" && kind === "finish") return "cartridge";

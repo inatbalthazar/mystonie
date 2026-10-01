@@ -48,9 +48,6 @@ export default async function AvoidTopicsPage({ params }: PageProps<"/[locale]/s
 
   return (
     <main className="mx-auto flex w-full max-w-md flex-1 flex-col gap-6 px-4 pt-8 pb-16">
-      <Link href="/settings" className="inline-flex min-h-11 items-center self-start text-sm font-semibold text-brand">
-        {t("backToSettings")}
-      </Link>
       <div className="flex flex-col gap-2">
         <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("pageTitle")}</h1>
         <p className="text-sm text-muted-foreground">{t("pageIntro")}</p>

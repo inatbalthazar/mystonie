@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { canSeed, mailpitUp, mockSearch, seedTitles, signUp, type SeedTitle } from "./helpers";
+import { canSeed, mailpitUp, mockSearch, navIsland, openQuickAdd, seedTitles, signUp, type SeedTitle } from "./helpers";
 
 // Needs the local Supabase stack (sign-in via Mailpit). TMDB isn't needed: search is mocked in the browser
 // and the titles are seeded into the local cache, so adding them never calls TMDB.
@@ -8,14 +8,6 @@ const TITLES: SeedTitle[] = [
   { kind: "movie", externalId: "693134", name: "Dune: Part Two", year: 2024, posterPath: null, runtimeMin: 167 },
 ];
 const rows = (page: Page) => page.getByRole("main").getByRole("listitem");
-
-/** The page's ➕. Retries until the sheet opens (a first dev compile can take a moment to hydrate). */
-async function openAdd(page: Page) {
-  await expect(async () => {
-    await page.getByRole("button", { name: "Add a title" }).click({ timeout: 2000 });
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 1000 });
-  }).toPass();
-}
 
 /** Resolves when the next write to /api/entries has been answered (the UI updates before that). */
 const saved = (page: Page) =>
@@ -35,7 +27,7 @@ test("quick add: a finished movie in 3 taps, shown at once, then edited and remo
   await expect(page.getByText("Your first page is waiting")).toBeVisible();
 
   // Want to watch, from the ➕ on the page.
-  await openAdd(page);
+  await openQuickAdd(page);
   await pickResult(page, "Parasite", "Parasite");
   await page.getByRole("button", { name: "Want to watch" }).click();
   await expect(rows(page).first()).toContainText("Parasite");
@@ -49,7 +41,7 @@ test("quick add: a finished movie in 3 taps, shown at once, then edited and remo
     await route.continue();
   });
   await page.goto("/");
-  await page.getByRole("banner").getByRole("link", { name: "Add a title" }).click(); // tap 1
+  await navIsland(page).getByRole("link", { name: "Add a title" }).click(); // tap 1
   await pickResult(page, "Dune Part", "Dune: Part Two"); // tap 2
   await page.getByRole("button", { name: "Finished", exact: true }).click(); // tap 3
   await expect(rows(page).first()).toContainText("Dune: Part Two");
@@ -92,7 +84,7 @@ test("quick add: a finished movie in 3 taps, shown at once, then edited and remo
   await page.getByRole("button", { name: "List" }).click();
 
   // Adding a title that's already there updates it instead of duplicating it.
-  await openAdd(page);
+  await openQuickAdd(page);
   await pickResult(page, "Dune Part", "Dune: Part Two");
   const rewatched = saved(page);
   await page.getByRole("button", { name: "Watching" }).click();

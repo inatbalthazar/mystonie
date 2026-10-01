@@ -1,6 +1,7 @@
 // Saved cards (S1 share artwork): what `POST /api/cards` accepts, what `cards.params` holds, and the
 // Progress card's milestones. The params are a snapshot of the card's inputs, so `/c/[id]` and the profile
 // gallery can re-render it without the entry (which may change later).
+import { isCreditRole } from "../catalog/credits";
 import { isSurvivedKey, type SurvivedKey } from "../catalog/dtdd";
 import { findChallenge, isMonth } from "../challenges";
 import { isCardPosterUrl } from "../catalog/images";
@@ -17,18 +18,23 @@ import {
   type ReadingLog,
   type ReadingUnit,
 } from "../collection/reading";
+import { COUNTRY_CODES, isCountryCode } from "../countries";
 import { isUuidV7 } from "../ids";
+import { REEL_GUESSES, reelNumber } from "../reel";
 import { reviewLength } from "./edit";
 import { isSurvivedTemplate, isTemplateId, templateFits, type TemplateId } from "./templates";
 import {
   CARD_HIDEABLE,
   CARD_KINDS,
+  COLLECTION_AREAS,
   IMPORT_UNITS,
   MILESTONE_METRICS,
   MILESTONES,
   RECAP_COLLAGE_MAX,
+  RECAP_FAVOURITES_MAX,
   REVIEW_MAX_CHARS,
   STATS_PERIODS,
+  type CardAtlas,
   type CardChallenge,
   type CardData,
   type CardHideable,
@@ -36,11 +42,14 @@ import {
   type CardMilestone,
   type CardProgress,
   type CardReading,
+  type CardReel,
   type CardRecap,
   type CardSize,
+  type CollectionArea,
   type ImportUnit,
   type Milestone,
   type MilestoneMetric,
+  type RecapFavourite,
   type RecapHighlights,
   type StatsPeriod,
 } from "./types";
@@ -150,7 +159,23 @@ function parseReading(v: unknown): CardReading | null | undefined {
  */
 export function parseRecap(v: unknown): CardRecap | null {
   if (!isObject(v)) return null;
-  const { period, from, to, minutes, episodes, finished, titleCount, titles, readMinutes, highlights, imported, importedUnit } = v;
+  const {
+    period,
+    from,
+    to,
+    minutes,
+    episodes,
+    finished,
+    titleCount,
+    titles,
+    readMinutes,
+    playMinutes,
+    highlights,
+    favourites,
+    imported,
+    importedUnit,
+    area,
+  } = v;
   if (period !== undefined && !(STATS_PERIODS as readonly unknown[]).includes(period)) return null;
   if (typeof from !== "string" || !DATE_RE.test(from) || typeof to !== "string" || !DATE_RE.test(to) || to < from) return null;
   // All-time stats cards can hold years of watching.
@@ -162,10 +187,16 @@ export function parseRecap(v: unknown): CardRecap | null {
     collage.push({ name: (t.name as string).trim(), kind: t.kind as CardData["kind"], posterUrl: orNull(t.posterUrl as string | null | undefined) });
   }
   if (readMinutes !== undefined && !int(readMinutes, 0, 10_000_000)) return null;
+  if (playMinutes !== undefined && !int(playMinutes, 0, 10_000_000)) return null;
   if (imported !== undefined && (imported !== true || period !== "all")) return null;
+  // An area card (Share my collection) is all time, never an import.
+  if (area !== undefined && (!(COLLECTION_AREAS as readonly unknown[]).includes(area) || period !== "all" || imported !== undefined)) return null;
   if (importedUnit !== undefined && (!imported || !(IMPORT_UNITS as readonly unknown[]).includes(importedUnit))) return null;
   const standouts = parseHighlights(highlights);
   if (standouts === undefined) return null;
+  const people = parseFavourites(favourites);
+  // Favourites come from a stats period (the stats page, Year in Review), never a weekly recap.
+  if (people === undefined || (people && period === undefined)) return null;
   return {
     ...(period === undefined ? {} : { period: period as StatsPeriod }),
     from,
@@ -176,9 +207,12 @@ export function parseRecap(v: unknown): CardRecap | null {
     titleCount: titleCount as number,
     titles: collage,
     ...(readMinutes ? { readMinutes: readMinutes as number } : {}),
+    ...(playMinutes ? { playMinutes: playMinutes as number } : {}),
     ...(standouts ? { highlights: standouts } : {}),
+    ...(people ? { favourites: people } : {}),
     ...(imported ? { imported: true } : {}),
     ...(importedUnit ? { importedUnit: importedUnit as ImportUnit } : {}),
+    ...(area ? { area: area as CollectionArea } : {}),
   };
 }
 
@@ -197,6 +231,55 @@ function parseHighlights(v: unknown): RecapHighlights | null | undefined {
     ...(month === undefined ? {} : { month: month as string }),
     ...(streak === undefined ? {} : { streak: streak as number }),
   };
+}
+
+/** A stats card's favourites: known roles, once each, at most `RECAP_FAVOURITES_MAX`. `undefined` = invalid; null = none. */
+function parseFavourites(v: unknown): RecapFavourite[] | null | undefined {
+  if (v === undefined || v === null) return null;
+  if (!Array.isArray(v) || v.length > RECAP_FAVOURITES_MAX) return undefined;
+  const favourites: RecapFavourite[] = [];
+  for (const f of v) {
+    if (!isObject(f) || !isCreditRole(f.role) || !text(f.name, 200) || favourites.some((x) => x.role === f.role)) return undefined;
+    favourites.push({ role: f.role, name: (f.name as string).trim() });
+  }
+  return favourites.length > 0 ? favourites : null;
+}
+
+/**
+ * A Reel of the Day card's result. `undefined` = invalid; null = none. Consistent with itself: wrong guesses, then
+ * the right one when solved (six wrong when not), the number matching the day.
+ */
+function parseReel(v: unknown): CardReel | null | undefined {
+  if (v === undefined || v === null) return null;
+  if (!isObject(v)) return undefined;
+  const { number, day, results, solved, streak } = v;
+  if (typeof day !== "string" || !DATE_RE.test(day) || !int(number, 1, 100_000) || number !== reelNumber(day)) return undefined;
+  if (typeof solved !== "boolean" || !int(streak, 0, 100_000) || (!solved && streak !== 0) || (solved && streak === 0)) return undefined;
+  if (!Array.isArray(results) || results.length < 1 || results.length > REEL_GUESSES || !results.every((r) => typeof r === "boolean"))
+    return undefined;
+  const wrong = results.slice(0, -1).every((r) => r === false);
+  if (!wrong || results.at(-1) !== solved || (!solved && results.length !== REEL_GUESSES)) return undefined;
+  return { number: number as number, day, results: results as boolean[], solved, streak: streak as number };
+}
+
+/** An Atlas card's countries: at least one, known codes, unique and sorted. `undefined` = invalid; null = none. */
+function parseAtlas(v: unknown): CardAtlas | null | undefined {
+  if (v === undefined || v === null) return null;
+  if (!isObject(v)) return undefined;
+  const { countries, stories, regions } = v;
+  if (!Array.isArray(countries) || countries.length < 1 || countries.length > COUNTRY_CODES.length || !countries.every(isCountryCode))
+    return undefined;
+  if (!int(stories, 0, COUNTRY_CODES.length)) return undefined;
+  const atlas = { countries: [...new Set(countries as string[])].sort(), stories: stories as number };
+  if (regions === undefined || regions === null) return atlas;
+  // A country's card: that one country, and region ids of it (which ones are real and the owner's, the server checks).
+  if (!isObject(regions)) return undefined;
+  const { country, kind, total, ids } = regions;
+  if (!isCountryCode(country) || atlas.countries.length !== 1 || atlas.countries[0] !== country) return undefined;
+  if (typeof kind !== "string" || !/^[a-z]{2,20}$/.test(kind) || !int(total, 2, 500)) return undefined;
+  if (!Array.isArray(ids) || ids.length < 1 || ids.length > (total as number) || new Set(ids).size !== ids.length) return undefined;
+  if (!ids.every((id) => typeof id === "string" && id.startsWith(`${country}-`) && /^[A-Z]{2}-[A-Z0-9]{1,8}$/.test(id))) return undefined;
+  return { ...atlas, regions: { country, kind, total: total as number, ids: ids as string[] } };
 }
 
 /** A Milestone card's milestone. `undefined` = invalid; null = none. */
@@ -223,7 +306,23 @@ function parseChallenge(v: unknown): CardChallenge | null | undefined {
 /** Card inputs from a request, or null when anything is off. `username` is always dropped. */
 export function parseCardData(v: unknown): CardData | null {
   if (!isObject(v)) return null;
-  const { kind, name, year, posterUrl, genres, runtimeMin, episodeCount, seasonCount, pageCount, chapterCount, volumeCount, rating, review, finishedOn, hide } = v;
+  const {
+    kind,
+    name,
+    year,
+    posterUrl,
+    genres,
+    runtimeMin,
+    episodeCount,
+    seasonCount,
+    pageCount,
+    chapterCount,
+    volumeCount,
+    rating,
+    review,
+    finishedOn,
+    hide,
+  } = v;
   const { playtimeHours, hoursPlayed } = v;
   if (!isTitleKind(kind)) return null;
   if (!text(name, 300) || typeof finishedOn !== "string" || !DATE_RE.test(finishedOn)) return null;
@@ -252,15 +351,23 @@ export function parseCardData(v: unknown): CardData | null {
   if (recap === null && v.recap !== undefined && v.recap !== null) return null;
   const milestone = parseMilestone(v.milestone);
   const challenge = parseChallenge(v.challenge);
-  if (milestone === undefined || challenge === undefined) return null;
-  if (num(progress, reading, recap, milestone, challenge) > 1) return null;
+  const reel = parseReel(v.reel);
+  const atlas = parseAtlas(v.atlas);
+  if (milestone === undefined || challenge === undefined || reel === undefined || atlas === undefined) return null;
+  if (num(progress, reading, recap, milestone, challenge, reel, atlas) > 1) return null;
+  // A reel card never shows the movie; an Atlas card is about no title.
+  if ((reel || atlas) && (kind !== "movie" || posterUrl)) return null;
   const survived = v.survived ?? null;
-  if (survived !== null && (!isSurvivedKey(survived) || (kind !== "movie" && kind !== "series") || num(progress, reading, recap, milestone, challenge) > 0)) {
+  if (
+    survived !== null &&
+    (!isSurvivedKey(survived) || (kind !== "movie" && kind !== "series") || num(progress, reading, recap, milestone, challenge, reel, atlas) > 0)
+  ) {
     return null;
   }
   // Only a Finish card has a finisher number.
   const finisherNo = v.finisherNo ?? null;
-  if (finisherNo !== null && (!int(finisherNo, 1, 1_000_000_000) || num(progress, reading, recap, milestone, challenge) > 0)) return null;
+  if (finisherNo !== null && (!int(finisherNo, 1, 1_000_000_000) || num(progress, reading, recap, milestone, challenge, reel, atlas) > 0))
+    return null;
   return {
     kind: kind as CardData["kind"],
     name: (name as string).trim(),
@@ -273,7 +380,9 @@ export function parseCardData(v: unknown): CardData | null {
     pageCount: orNull(pageCount as number | null | undefined),
     chapterCount: orNull(chapterCount as number | null | undefined),
     volumeCount: orNull(volumeCount as number | null | undefined),
-    ...(kind === "game" ? { playtimeHours: orNull(playtimeHours as number | null | undefined), hoursPlayed: orNull(hoursPlayed as number | null | undefined) } : {}),
+    ...(kind === "game"
+      ? { playtimeHours: orNull(playtimeHours as number | null | undefined), hoursPlayed: orNull(hoursPlayed as number | null | undefined) }
+      : {}),
     rating: orNull(rating as number | null | undefined),
     review: review ? (review as string).trim() : null,
     finishedOn,
@@ -282,6 +391,8 @@ export function parseCardData(v: unknown): CardData | null {
     recap,
     milestone,
     challenge,
+    ...(reel ? { reel } : {}),
+    ...(atlas ? { atlas } : {}),
     survived: survived as SurvivedKey | null,
     finisherNo: finisherNo as number | null,
     hide: [...new Set((hide as CardHideable[] | undefined) ?? [])],
@@ -304,7 +415,8 @@ export function parseCardSave(body: unknown): CardSave | null {
   const data = parseCardData(body.data);
   if (!data || !templateFits(templateId, kind as CardKind, size, data.kind)) return null;
   const reading = data.kind === "book" || data.kind === "manga";
-  if (kind === "finish" && (!entryId || data.progress || data.reading || data.recap || data.milestone || data.challenge)) return null;
+  if (kind === "finish" && (!entryId || data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas))
+    return null;
   if (kind === "progress" && !(reading ? data.reading : data.progress && data.kind === "series")) return null;
   if (episodeLogId && !data.progress) return null;
   if (readingLogId && !data.reading) return null;
@@ -315,6 +427,10 @@ export function parseCardSave(body: unknown): CardSave | null {
   if (kind === "year_review" && (data.recap?.period !== "year" || sourced || recapId)) return null;
   if (kind === "milestone" && (!data.milestone || sourced || recapId)) return null;
   if (kind === "challenge" && (!data.challenge || sourced || recapId)) return null;
+  if (kind === "reel" && (!data.reel || sourced || recapId)) return null;
+  if (data.reel && kind !== "reel" && kind !== "sticker") return null;
+  if (kind === "atlas" && (!data.atlas || sourced || recapId)) return null;
+  if (data.atlas && kind !== "atlas" && kind !== "sticker") return null;
   // A Survived card is a finish on the Survived template, and that template draws nothing else.
   if (!!data.survived !== isSurvivedTemplate(templateId) || (data.survived && kind !== "finish")) return null;
   // Highlights belong to a Year in Review; a recap id to a weekly or monthly recap.

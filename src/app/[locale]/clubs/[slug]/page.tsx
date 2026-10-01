@@ -63,9 +63,6 @@ export default async function ClubPage({ params }: PageProps<"/[locale]/clubs/[s
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-6 px-4 pt-8 pb-16">
-      <Link href="/clubs" className="flex min-h-11 items-center self-start text-sm font-semibold text-brand">
-        {t("back")}
-      </Link>
 
       <header className="relative flex flex-col items-center gap-3 rounded-3xl bg-card px-5 pt-8 pb-6 text-center shadow-md ring-1 ring-border">
         <span aria-hidden="true" className="absolute -top-3 left-1/2 h-6 w-24 -translate-x-1/2 rotate-[2deg] rounded-[2px] bg-brand-soft/90 ring-1 ring-brand/10 dark:bg-brand/30" />

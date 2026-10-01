@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { lastEmail, mailpitUp, uniqueEmail } from "./helpers";
+import { lastEmail, mailpitUp, navIsland, uniqueEmail } from "./helpers";
 
 test("app pages send signed-out visitors to sign-in and back", async ({ page }) => {
   await page.goto("/th/settings");
@@ -39,7 +39,9 @@ test("email code: sign up, see settings, delete the account", async ({ page, req
   // The browser's time zone was saved at sign-up (Playwright uses the machine's zone).
   const tz = await page.evaluate(() => Intl.DateTimeFormat().resolvedOptions().timeZone);
   await expect(page.getByRole("main").getByLabel("Time zone")).toHaveValue(tz);
-  await expect(page.getByRole("banner").getByRole("link", { name: "Your account" })).toBeVisible();
+  // Signed in: the nav island instead of the header's Sign in; Settings belongs to Me.
+  await expect(navIsland(page).getByRole("link", { name: "Me", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("banner").getByRole("link", { name: "Sign in" })).toBeHidden();
 
   // Signed in: /auth moves straight on.
   await page.goto("/auth?next=/settings");

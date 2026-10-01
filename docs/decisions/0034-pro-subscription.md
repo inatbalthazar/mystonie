@@ -12,7 +12,7 @@ AGENTS.md says money is server-authoritative: Pro comes only from verified Strip
 
 **One switch.** `stripeConfig()` returns null, and everything about Pro stays hidden, unless `PRO_ENABLED=true`, `STRIPE_SECRET_KEY` and `STRIPE_WEBHOOK_SECRET` are set, and at least one of `STRIPE_PRICE_MONTHLY` / `STRIPE_PRICE_YEARLY` is set. While Pro is off:
 - Pro templates are not offered;
-- `/pro` is a 404 and Settings has no Pro section;
+- `/pro` is a 404 and Settings has no Pro section (since [ADR 0055](0055-beta-and-feedback.md), `/pro` and the Settings section show the offer with greyed-out buttons instead);
 - the billing routes answer 503, and `/api/billing/status` says `{ available: false }`.
 
 Production doesn't change until the owner turns it on.

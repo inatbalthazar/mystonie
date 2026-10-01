@@ -5,6 +5,7 @@ import { useState } from "react";
 import type { AlbumBadge } from "@/core/badges";
 import { cn } from "@/lib/utils";
 import { Sheet } from "../sheet";
+import { previewClass, ShowAll } from "../show-all";
 import { Sticker } from "./sticker";
 
 const TILTS = ["-rotate-6", "rotate-3", "-rotate-2", "rotate-6", "rotate-1", "-rotate-4"];
@@ -12,20 +13,25 @@ const TILTS = ["-rotate-6", "rotate-3", "-rotate-2", "rotate-6", "rotate-1", "-r
 /**
  * Badges as an album page of stickers (S3 badges & shelf). Earned ones are stuck in at a tilt; with `locked`, the
  * ones still to earn show as dashed spots with their progress. Tapping one tells how it is earned, and when it was.
+ * Earned ones come first, then the closest to earning; past two rows the rest wait behind "Show all".
  */
 export function StickerAlbum({ badges, compact = false, className }: { badges: AlbumBadge[]; compact?: boolean; className?: string }) {
   const t = useTranslations("Badges");
   const format = useFormatter();
   const [open, setOpen] = useState<AlbumBadge | null>(null);
+  const [all, setAll] = useState(false);
+  const ratio = (b: AlbumBadge) => (b.earnedAt !== null ? 2 : b.progress / Math.max(1, b.target));
+  const sorted = badges.map((b, i) => ({ b, i })).sort((x, y) => ratio(y.b) - ratio(x.b) || x.i - y.i).map(({ b }) => b);
+  const [phone, wide] = compact ? [8, 12] : [6, 10];
   const date = (iso: string) => format.dateTime(new Date(iso), { dateStyle: "medium" });
 
   return (
     <>
       <ul className={cn("grid gap-x-2", compact ? "grid-cols-4 gap-y-2 sm:grid-cols-6" : "grid-cols-3 gap-y-4 sm:grid-cols-5", className)}>
-        {badges.map((b, i) => {
+        {sorted.map((b, i) => {
           const earned = b.earnedAt !== null;
           return (
-            <li key={b.id}>
+            <li key={b.id} className={previewClass(i, all, phone, wide)}>
               <button
                 type="button"
                 onClick={() => setOpen(b)}
@@ -42,6 +48,7 @@ export function StickerAlbum({ badges, compact = false, className }: { badges: A
           );
         })}
       </ul>
+      {badges.length > phone && <ShowAll open={all} onToggle={() => setAll(!all)} count={badges.length} hiddenFromSm={badges.length <= wide} />}
       <Sheet open={open !== null} onClose={() => setOpen(null)} title={open ? t(`items.${open.id}.name`) : ""} closeLabel={t("close")}>
         {open && (
           <div className="flex flex-col items-center gap-3 pb-2 text-center">

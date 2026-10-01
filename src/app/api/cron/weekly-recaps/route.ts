@@ -7,8 +7,9 @@ import { recapFigures, wholeMonth } from "@/core/stats/recap";
 import type { CardRecap } from "@/core/cards/types";
 import { localizedPath } from "@/core/auth";
 import type { PushMessage } from "@/core/push";
+import { isReelReminderHour, reelDay, reelHoursLeft } from "@/core/reel";
 import { BATCH_MAX, emailConfig, sendEmailBatch, sendToLocalInbox, type OutgoingEmail } from "@/data/email";
-import { pushConfig, pushDueRecaps, type RecapToPush } from "@/data/push";
+import { pushConfig, pushDueRecaps, pushReelReminders, type RecapToPush, type ReelReminder } from "@/data/push";
 import { createDueRecaps, markRecapsNotified, recapsToNotify, type RecapToNotify } from "@/data/recaps";
 import { routing } from "@/i18n/routing";
 import { LEGAL } from "@/lib/legal";
@@ -20,6 +21,8 @@ export const maxDuration = 60;
 const noStore = { "Cache-Control": "no-store" };
 /** Users per run. More wait for the next hourly run (still Monday for them). */
 const CREATE_LIMIT = 200;
+/** Players reminded per run, among those whose reminder hour it is (ADR 0054). */
+const REMINDERS_MAX = 500;
 
 /** "Sep 21 – 27" in the recipient's language. The dates are calendar dates, so they're formatted in UTC. */
 const utcDate = (key: string) => new Date(`${key}T00:00:00Z`);
@@ -52,6 +55,18 @@ async function pushFor(r: RecapToPush): Promise<PushMessage> {
     body: t("body", { summary }),
     url: localizedPath(`/recap/${r.id}`, locale, routing.defaultLocale),
     tag: `recap-${r.recap.from}`,
+  };
+}
+
+/** The Reel of the Day reminder (ADR 0054): tapping it opens today's reel. */
+async function reminderFor(r: ReelReminder, now: Date): Promise<PushMessage> {
+  const locale = recapLocale(r.locale);
+  const t = await getTranslations({ locale, namespace: "Push.reel" });
+  return {
+    title: t("title", { count: r.streak }),
+    body: t("body", { hours: reelHoursLeft(now.getTime()) }),
+    url: localizedPath("/reel", locale, routing.defaultLocale),
+    tag: `reel-${reelDay(now.getTime())}`,
   };
 }
 
@@ -106,10 +121,11 @@ function runAt(body: unknown): Date {
 }
 
 /**
- * POST /api/cron/weekly-recaps, `Authorization: Bearer $CRON_SECRET` → { created, pushed, sent }.
+ * POST /api/cron/weekly-recaps, `Authorization: Bearer $CRON_SECRET` → { created, pushed, reminded, sent }.
  * Called hourly by pg_cron (ADR 0025). Creates the recaps that are due (local Monday from 09:00 for last week, the
  * local 1st from 09:00 for last month, ADR 0031), pushes new ones
- * to installed apps that turned notifications on (ADR 0028), then emails the unsent ones (≤ 100 per run) with a
+ * to installed apps that turned notifications on (ADR 0028) along with Reel of the Day reminders to the players
+ * whose streak today's reel would end, at their reminder hour (ADR 0054), then emails the unsent ones (≤ 100 per run) with a
  * link to the recap card. Safe to call again: recaps are unique per
  * user and week, and the batch's idempotency key stops a retried send. Without email set up (and outside
  * development, where Mailpit stands in), recaps are still created and wait up to 2 days for sending.
@@ -125,6 +141,7 @@ export async function POST(request: Request) {
 
     // Push first and on its own: a push service outage must not hold up the emails.
     let pushed = 0;
+    let reminded = 0;
     const vapid = pushConfig();
     if (vapid) {
       try {
@@ -132,23 +149,30 @@ export async function POST(request: Request) {
       } catch (error) {
         console.error("recap pushes failed", error);
       }
+      try {
+        const day = reelDay(now.getTime());
+        const due = (timeZone: string) => isReelReminderHour(now.getTime(), timeZone);
+        reminded = (await pushReelReminders(vapid, day, due, (r) => reminderFor(r, now), REMINDERS_MAX)).sent;
+      } catch (error) {
+        console.error("reel reminders failed", error);
+      }
     }
 
     const config = emailConfig();
     const secret = process.env.UNSUBSCRIBE_SECRET;
     const local = !config && process.env.NODE_ENV === "development";
     // Every email carries an unsubscribe link, so no secret means no sending.
-    if (!secret || (!config && !local)) return Response.json({ created, pushed, sent: 0, email: "off" }, { headers: noStore });
+    if (!secret || (!config && !local)) return Response.json({ created, pushed, reminded, sent: 0, email: "off" }, { headers: noStore });
 
     const pending = await recapsToNotify(BATCH_MAX);
-    if (pending.length === 0) return Response.json({ created, pushed, sent: 0 }, { headers: noStore });
+    if (pending.length === 0) return Response.json({ created, pushed, reminded, sent: 0 }, { headers: noStore });
     const site = siteUrl();
     const emails = await Promise.all(pending.map((r) => renderFor(r, secret, site)));
     const ids = pending.map((r) => r.id);
     if (config) await sendEmailBatch(config, emails, `recap:${ids[0]}:${ids.at(-1)}:${ids.length}`);
     else await Promise.all(emails.map(sendToLocalInbox));
     await markRecapsNotified(ids);
-    return Response.json({ created, pushed, sent: ids.length }, { headers: noStore });
+    return Response.json({ created, pushed, reminded, sent: ids.length }, { headers: noStore });
   } catch (error) {
     console.error("weekly recaps failed", error);
     return Response.json({ error: "failed" }, { status: 502, headers: noStore });

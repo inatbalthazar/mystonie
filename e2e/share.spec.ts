@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { canSeed, mailpitUp, mockSearch, seedTitles, signUp, type SeedTitle } from "./helpers";
+import { canSeed, mailpitUp, mockSearch, openQuickAdd, seedTitles, signUp, type SeedTitle } from "./helpers";
 
 // Needs the local Supabase stack (sign-in via Mailpit, Storage for the PNG). TMDB isn't needed for the flow:
 // the title is seeded and search is mocked (the poster itself loads from TMDB's image CDN when reachable).
@@ -18,10 +18,7 @@ test("finish → celebration → publish the card → /c/[id] with its preview",
   await signUp(page, request, "share");
 
   // Quick add → Finished: the celebration opens at once, with the card and Skip.
-  await expect(async () => {
-    await page.getByRole("button", { name: "Add a title" }).click({ timeout: 2000 });
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 1000 });
-  }).toPass();
+  await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Parasite");
   await page.getByRole("dialog").getByRole("button", { name: /^Parasite Movie/ }).first().click();
   await page.getByRole("button", { name: "Finished", exact: true }).click();

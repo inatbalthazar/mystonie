@@ -1,6 +1,8 @@
 import { expect, test, type Page } from "@playwright/test";
+import { BADGES } from "../src/core/badges";
 import { uuidv7 } from "../src/core/ids";
-import { canSeed, mailpitUp, mockSearch, seedTitles, signUp, type SeedReadingTitle, type SeedTitle } from "./helpers";
+import { signTip } from "../src/data/support";
+import { canSeed, mailpitUp, mockSearch, openQuickAdd, seedTitles, signUp, type SeedReadingTitle, type SeedTitle } from "./helpers";
 
 // S3 badges & shelf (ADR 0038). Needs the local Supabase stack (sign-in via Mailpit, the service role key that
 // awards badges); titles are seeded and /api/search is mocked.
@@ -45,10 +47,7 @@ test("the 5th book earns Rookie Bookworm once → the toast → the album → st
 
   // A movie through quick add: its sticker shows in a toast once the Finish card closes.
   await page.goto("/collection");
-  await expect(async () => {
-    await page.getByRole("button", { name: /^Add (a|your first) title$/ }).first().click({ timeout: 2000 });
-    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 1000 });
-  }).toPass();
+  await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Badge Movie");
   await page.getByRole("dialog").getByRole("button", { name: /^Badge Movie Movie/ }).click();
   const checked = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/milestones");
@@ -66,7 +65,9 @@ test("the 5th book earns Rookie Bookworm once → the toast → the album → st
   await expect(page).toHaveURL(/\/stats#stickers$/);
   const album = page.locator("#stickers");
   await expect(album.getByRole("heading", { name: "Sticker album" })).toBeVisible();
-  await expect(album.getByText("3 of 20 stuck in")).toBeVisible();
+  await expect(album.getByText(`3 of ${BADGES.length} stuck in`)).toBeVisible();
+  // Two rows at first (earned first, then the closest), the rest behind Show all.
+  await album.getByRole("button", { name: `Show all (${BADGES.length})` }).click();
   await expect(album.getByRole("button", { name: /^Bookworm\s*5 of 25$/ })).toBeVisible();
   await album.getByRole("button", { name: /^Rookie Bookworm$/ }).click();
   const sheet = page.getByRole("dialog", { name: "Rookie Bookworm" });
@@ -79,7 +80,7 @@ test("the 5th book earns Rookie Bookworm once → the toast → the album → st
   await guest.goto(`/u/${username}`);
   const main = guest.getByRole("main");
   await expect(main.getByRole("heading", { name: "Stickers" })).toBeVisible();
-  await expect(main.getByText("3 of 20")).toBeVisible();
+  await expect(main.getByText(`3 of ${BADGES.length}`)).toBeVisible();
   await expect(main.getByRole("button", { name: "Rookie Bookworm" })).toBeVisible();
   const shelf = main.getByRole("region", { name: "The shelf" });
   await expect(shelf.getByRole("listitem")).toHaveCount(6);
@@ -94,4 +95,33 @@ test("the 5th book earns Rookie Bookworm once → the toast → the album → st
   await expect(main.getByRole("heading", { name: "Stickers" })).toHaveCount(0);
   await expect(main.getByRole("region", { name: "The shelf" })).toHaveCount(0);
   await visitor.close();
+});
+
+test("a tip with the account's email sticks in the Supporter sticker (ADR 0063)", async ({ page, request }) => {
+  const secret = process.env.BMC_WEBHOOK_SECRET;
+  test.skip(
+    !secret || secret.length < 16 || !(await mailpitUp(request)) || !canSeed(),
+    "needs pnpm dev and this test started with the same BMC_WEBHOOK_SECRET, and the local Supabase stack",
+  );
+  const email = await signUp(page, request, "tipper", "/home");
+  const send = (body: object, signature?: string) => {
+    const raw = JSON.stringify(body);
+    return request.post("/api/support/webhook", { data: raw, headers: { "Content-Type": "application/json", "X-Signature-Sha256": signature ?? signTip(raw, secret!) } });
+  };
+  const tip = { event_id: 1, type: "donation.created", live_mode: false, created: Math.floor(Date.now() / 1000), attempt: 1, data: { supporter_email: email.toUpperCase(), amount: 5 } };
+
+  // Only Buy Me a Coffee's signature counts; a tip from an email with no account changes nothing.
+  expect((await send(tip, "0".repeat(64))).status()).toBe(400);
+  expect(await (await send(tip)).json()).toEqual({ received: true, matched: true });
+  expect(await (await send({ ...tip, data: { supporter_email: `nobody.${Date.now()}@example.com` } })).json()).toEqual({ received: true, matched: false });
+  expect(await (await send({ ...tip, type: "donation.refunded" })).json()).toEqual({ received: true, ignored: true });
+
+  // The album shows it, even with nothing finished yet.
+  await page.goto("/stats");
+  const album = page.locator("#stickers");
+  await expect(album.getByText(`1 of ${BADGES.length} stuck in`)).toBeVisible();
+  await album.getByRole("button", { name: /^Supporter$/ }).click();
+  const sheet = page.getByRole("dialog", { name: "Supporter" });
+  await expect(sheet.getByText("Support Mystonie with Pro or a coffee.")).toBeVisible();
+  await expect(sheet.getByText(/^Earned /)).toBeVisible();
 });

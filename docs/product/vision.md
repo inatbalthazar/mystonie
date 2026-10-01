@@ -1,6 +1,6 @@
 # Vision
 
-**Mystonie** ("my stone", from *Milestone*) is **Strava for the shows and movies you finish.** Every time you finish a movie, a series or even a single episode, Mystonie turns it into **beautiful, shareable artwork with your stats**, ready for Instagram Stories, X or TikTok. Over time those cards become your personal collection. Later, Mystonie also tells you which titles contain scenes you'd rather avoid.
+**Mystonie** ("my stone", from *Milestone*) is **Strava for the shows and movies you finish.** Every time you finish a movie, a series or even a single episode, Mystonie turns it into **beautiful, shareable artwork with your stats**, ready for Instagram Stories, X or TikTok. Over time those cards become your personal collection. Mystonie also answers the question before you press play: *is this safe to watch with my family?* Every title page checks it against the scenes you'd rather avoid.
 
 **Tagline:** *Finished it? Mystonie it.*
 
@@ -17,6 +17,7 @@ Competitors are **databases with a UI** (Letterboxd: film only; Serializd, TV Ti
 4. **Reuse before build.** Use TMDB for titles and DoesTheDogDie for warnings, and use Supabase for the backend.
 5. **Log in ≤ 3 taps. Celebrate first, ask later.**
 6. **Solo-founder sized.** Minimal services and near-zero cost until revenue. Polished before launch: stages 0–3 ship together, and each stage has success measures for after launch.
+7. **Phone first.** People finish a show and log it on their phone, so every screen is designed for a phone first and should feel like an app: a floating nav island with ➕ under the thumb, bottom sheets, installable ([ADR 0050](../decisions/0050-mobile-first-nav-island.md)).
 
 ## Glossary
 

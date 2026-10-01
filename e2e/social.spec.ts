@@ -1,6 +1,6 @@
 import { expect, test, type Page } from "@playwright/test";
 import { uuidv7 } from "../src/core/ids";
-import { canSeed, mailpitUp, seedTitles, signUp, type SeedTitle } from "./helpers";
+import { canSeed, mailpitUp, navIsland, seedTitles, signUp, type SeedTitle } from "./helpers";
 
 // Needs the local Supabase stack (sign-in via Mailpit, service role key for seeding). Titles are seeded, so TMDB
 // isn't needed.
@@ -33,11 +33,16 @@ test("follow, the Following feed, Stamps and blocks", async ({ page, request, br
   await signUp(kimPage, request, "social-kim", "/home");
   await setUp(kimPage, kim, "Kim Friend", PAST_LIVES);
 
-  // Signed-out visitors are sent to sign in.
+  // Signed-out visitors see the Journal's articles there and a way to sign in, nobody's finishes (ADR 0062); the
+  // people search still needs an account.
   const visitor = await browser.newContext();
   const guest = await visitor.newPage();
   await guest.goto("/feed");
-  await expect(guest).toHaveURL(/\/auth\?next=%2Ffeed$/);
+  await expect(guest).toHaveURL(/\/feed$/);
+  await expect(guest.getByRole("main").getByRole("link", { name: "Sign in" })).toBeVisible();
+  await expect(guest.getByRole("main")).not.toContainText("Past Lives");
+  await guest.goto("/people");
+  await expect(guest).toHaveURL(/\/auth\?next=%2Fpeople$/);
   await visitor.close();
 
   // Sam's feed has only Sam's own finish, and an invitation to find people.
@@ -63,12 +68,27 @@ test("follow, the Following feed, Stamps and blocks", async ({ page, request, br
   // Kim's finish is in Sam's feed; Sam stamps it.
   await page.goto("/feed");
   await expect(main.getByRole("link", { name: "Past Lives" }).first()).toBeVisible();
+  // Kim's finish (the feed also has the Journal's newest articles, with their own Stamps).
+  const finish = main.getByRole("article").filter({ hasText: "Past Lives" });
   const stamped = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/stamps");
-  await main.getByRole("button", { name: "Stamp", exact: true }).click();
+  await finish.getByRole("button", { name: "Stamp", exact: true }).click();
   expect((await stamped).ok()).toBe(true);
-  await expect(main.getByRole("button", { name: "Take back your Stamp" })).toHaveAttribute("aria-pressed", "true");
-  await expect(main.getByText("1 Stamp", { exact: true })).toBeVisible();
+  await expect(finish.getByRole("button", { name: "Take back your Stamp" })).toHaveAttribute("aria-pressed", "true");
+  await expect(finish.getByText("1 Stamp", { exact: true })).toBeVisible();
   await expect.poll(events).toContain("stamped");
+
+  // Kim's Home lights a dot on the island's Feed tab (ADR 0054); opening the feed clears it.
+  const kimIsland = navIsland(kimPage);
+  await kimPage.goto("/home");
+  await expect(kimIsland.getByRole("link", { name: "Feed, new activity" })).toBeVisible();
+  await kimIsland.getByRole("link", { name: "Feed, new activity" }).click();
+  await expect(kimPage).toHaveURL(/\/feed$/);
+  await expect(kimIsland.getByRole("link", { name: "Feed", exact: true })).toHaveAttribute("aria-current", "page");
+  await kimPage.goto("/home");
+  await expect(kimPage.getByRole("heading", { level: 1 })).toBeVisible();
+  await kimPage.waitForTimeout(1000); // the dot would show once the page is hydrated
+  await expect(kimIsland.getByRole("link", { name: "Feed", exact: true })).toBeVisible();
+  await expect(kimIsland.getByRole("link", { name: "Feed, new activity" })).toHaveCount(0);
 
   // Kim sees the Stamp and the new follower, and Sam's profile shows Kim's follow counts.
   const kimMain = kimPage.getByRole("main");

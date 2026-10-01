@@ -3,8 +3,11 @@ import { getTranslations } from "next-intl/server";
 import { Suspense } from "react";
 import { RememberTitles } from "@/components/offline/recent-titles";
 import { ReadingProgress } from "@/components/reading/reading-progress";
+import { TitleJournal } from "@/components/journal/title-journal";
 import { TitleFinishers } from "@/components/title/finishers";
 import { SceneWarnings, SceneWarningsSkeleton } from "@/components/title/scene-warnings";
+import { TitleCheck, TitleCheckSkeleton } from "@/components/title/title-check";
+import { TitleReviews } from "@/components/title/reviews";
 import { TitleClubs } from "@/components/title/title-clubs";
 import { posterUrl } from "@/core/catalog/images";
 import type { ReadingKind, Title } from "@/core/catalog/types";
@@ -12,7 +15,6 @@ import type { EntryStatus } from "@/core/collection/entries";
 import { titleReadingLogs } from "@/data/reading";
 import type { UserClient } from "@/data/supabase-server";
 import { avoidTopicIds } from "@/data/warnings";
-import { Link } from "@/i18n/navigation";
 import { siteUrl } from "@/lib/site";
 
 /** A book's or manga's page (S2 books & manga): cover, length, reading progress with logging and scene warnings (S3). */
@@ -42,9 +44,6 @@ export async function ReadingTitle({
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 pt-8 pb-16">
-      <Link href="/collection" className="inline-flex min-h-11 items-center self-start text-sm font-semibold text-brand">
-        {t("backToCollection")}
-      </Link>
       <header className="flex items-center gap-4">
         <span className="relative aspect-[2/3] w-24 shrink-0 -rotate-2 overflow-hidden rounded-lg bg-muted shadow-md ring-4 ring-card">
           {cover && <Image src={cover} alt="" fill unoptimized sizes="96px" className="object-cover" />}
@@ -57,6 +56,9 @@ export async function ReadingTitle({
           </p>
         </div>
       </header>
+      <Suspense fallback={<TitleCheckSkeleton kind={kind} />}>
+        <TitleCheck supabase={supabase} titleId={title.id} kind={kind} avoid={avoid} dtdd={null} />
+      </Suspense>
       {/* Offline, quick add offers titles opened lately (S3 offline). */}
       <RememberTitles
         titles={[{ source: title.title.source, kind, externalId, name, ...(year ? { year } : {}), ...(cover ? { imageUrl: cover } : {}) }]}
@@ -81,7 +83,11 @@ export async function ReadingTitle({
       <Suspense fallback={null}>
         <TitleFinishers supabase={supabase} userId={userId} titleId={title.id} />
       </Suspense>
+      <Suspense fallback={null}>
+        <TitleReviews supabase={supabase} userId={userId} titleId={title.id} />
+      </Suspense>
       <TitleClubs title={title.title} />
+      <TitleJournal kind={kind} externalId={externalId} />
     </main>
   );
 }

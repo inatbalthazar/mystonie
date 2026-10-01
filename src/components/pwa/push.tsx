@@ -2,7 +2,7 @@
 
 import { BellRingIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, type ReactNode } from "react";
 import { fromBase64Url } from "@/core/push";
 import { cn } from "@/lib/utils";
 import { dismissedRecently, isIos, isStandalone, pushSupported, rememberDismissed } from "./browser";
@@ -106,8 +106,11 @@ function usePush(publicKey: string, resync = false) {
   return { state, busy, failed, enable, disable };
 }
 
-/** Settings → Notifications: a switch in the installed app, else how to install. */
-export function PushSwitch({ publicKey }: { publicKey: string }) {
+/**
+ * Settings → Notifications: a switch in the installed app, else how to install. `children` (more kinds of
+ * notifications, like Reel of the Day reminders) show while notifications are on.
+ */
+export function PushSwitch({ publicKey, children }: { publicKey: string; children?: ReactNode }) {
   const t = useTranslations("Settings");
   const id = useId();
   const { state, busy, failed, enable, disable } = usePush(publicKey, true);
@@ -145,6 +148,7 @@ export function PushSwitch({ publicKey }: { publicKey: string }) {
       <p aria-live="polite" className={cn("text-sm text-destructive", !failed && "sr-only")}>
         {failed ? t("pushError") : ""}
       </p>
+      {on && children && <div className="border-t border-dashed border-border pt-3">{children}</div>}
     </div>
   );
 }

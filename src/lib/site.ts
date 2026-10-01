@@ -17,3 +17,12 @@ export function siteUrl(
   if (vercel) return new URL(`https://${vercel}`);
   return new URL("http://localhost:3000");
 }
+
+/**
+ * Mystonie is in beta (ADR 0055): the BETA stamp by the logo, the beta notes in the footer, Settings and /feedback.
+ * Set to false at launch.
+ */
+export const BETA = true;
+
+/** The owner's tip page (Buy Me a Coffee, ADR 0049): the footer and Settings link to it. Tips unlock nothing. */
+export const SUPPORT_URL = "https://buymeacoffee.com/inatbalthab";

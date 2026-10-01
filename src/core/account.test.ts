@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { collectPages, formatPrefs, normalizeUsername, parseAccountPatch, parsePrefs } from "./account";
+import { bioFits, collectPages, formatPrefs, normalizeBio, normalizeUsername, parseAccountPatch, parsePrefs } from "./account";
 
 const locales = ["en", "th"];
 
@@ -17,6 +17,8 @@ describe("parseAccountPatch", () => {
           theme: "dark",
           visibility: "private",
           emailRecaps: false,
+          reelReminders: true,
+          atlasPublic: true,
         },
         locales,
       ),
@@ -30,6 +32,8 @@ describe("parseAccountPatch", () => {
       theme: "dark",
       visibility: "private",
       email_recaps: false,
+      reel_reminders: true,
+      atlas_public: true,
     });
   });
 
@@ -45,6 +49,22 @@ describe("parseAccountPatch", () => {
   it("counts display name length in characters, not UTF-16 units", () => {
     expect(parseAccountPatch({ displayName: "🎬".repeat(50) }, locales)).toEqual({ display_name: "🎬".repeat(50) });
     expect(parseAccountPatch({ displayName: "a".repeat(51) }, locales)).toBeNull();
+  });
+
+  it("tidies a bio, keeps its line breaks, and clears it when empty (ADR 0057)", () => {
+    expect(parseAccountPatch({ bio: "  Ghibli   forever 🌿 \r\n\n\n  slowly\tfinishing One Piece  " }, locales)).toEqual({
+      bio: "Ghibli forever 🌿\nslowly finishing One Piece",
+    });
+    expect(parseAccountPatch({ bio: " \n " }, locales)).toEqual({ bio: null });
+    expect(parseAccountPatch({ bio: null }, locales)).toEqual({ bio: null });
+    expect(parseAccountPatch({ bio: 42 }, locales)).toBeNull();
+  });
+
+  it("takes a bio of up to 160 characters and 4 lines", () => {
+    expect(parseAccountPatch({ bio: "🎬".repeat(160) }, locales)).toEqual({ bio: "🎬".repeat(160) });
+    expect(parseAccountPatch({ bio: "a".repeat(161) }, locales)).toBeNull();
+    expect(parseAccountPatch({ bio: "a\nb\nc\nd" }, locales)).toEqual({ bio: "a\nb\nc\nd" });
+    expect(parseAccountPatch({ bio: "a\nb\nc\nd\ne" }, locales)).toBeNull();
   });
 
   it.each([
@@ -64,6 +84,8 @@ describe("parseAccountPatch", () => {
     [{ theme: "blue" }],
     [{ visibility: "friends" }],
     [{ emailRecaps: "yes" }],
+    [{ reelReminders: 1 }],
+    [{ atlasPublic: "on" }],
     [{ theme: "dark", locale: "xx" }],
   ])("rejects %j", (body) => {
     expect(parseAccountPatch(body, locales)).toBeNull();
@@ -112,3 +134,11 @@ describe("collectPages", () => {
     expect(calls).toBe(2);
   });
 });
+
+describe("normalizeBio", () => {
+  it("drops control characters but keeps emoji sequences", () => {
+    expect(normalizeBio("hi\u0000\u0007 there 👩‍🚀")).toBe("hi there 👩‍🚀");
+    expect(bioFits(normalizeBio("x".repeat(160)))).toBe(true);
+  });
+});
+

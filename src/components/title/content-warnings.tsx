@@ -31,7 +31,7 @@ const VERDICT_ORDER: WarningVerdict[] = ["yes", "unclear", "no"];
 
 function Frame({ children, stamp }: { children: ReactNode; stamp?: string }) {
   return (
-    <PaperCard stamp={stamp} className="flex flex-col gap-4 pt-6">
+    <PaperCard id="content-warnings" stamp={stamp} className="flex flex-col gap-4 pt-6">
       {children}
     </PaperCard>
   );

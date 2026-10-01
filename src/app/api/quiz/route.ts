@@ -1,5 +1,6 @@
 import { rateLimited } from "@/app/api/_lib/http";
 import { parseQuizAnswer, parseQuizTitle } from "@/core/quiz";
+import { activityBadgeNews } from "@/data/badges";
 import { quizAnswer, quizNext } from "@/data/scene-warnings";
 import { userClient } from "@/data/supabase-server";
 
@@ -13,7 +14,7 @@ async function signedIn(request: Request) {
   if (!auth?.claims.sub) return { response: Response.json({ error: "unauthorized" }, { status: 401, headers: noStore }) };
   const limited = await rateLimited(request, "quiz", LIMIT);
   if (limited) return { response: limited };
-  return { supabase };
+  return { supabase, userId: auth.claims.sub };
 }
 
 /**
@@ -36,7 +37,8 @@ export async function GET(request: Request) {
 /**
  * POST /api/quiz { id, choice: "yes" | "no" | "unsure" } → what happened: `counted` / `not_counted` (with the question's
  * or warning's state), `too_fast`, `paused` (until), `answered`, `gone`. 400 | 401 | 429 | 503. The server's clock
- * decides whether an answer came too fast to count.
+ * decides whether an answer came too fast to count. A yes or no that wasn't too fast also brings `badges`: the quiz
+ * stickers it earned (ADR 0063), usually none.
  */
 export async function POST(request: Request) {
   const input = parseQuizAnswer(await request.json().catch(() => null));
@@ -44,7 +46,10 @@ export async function POST(request: Request) {
   const user = await signedIn(request);
   if ("response" in user) return user.response;
   try {
-    return Response.json(await quizAnswer(user.supabase, input.id, input.choice), { headers: noStore });
+    const result = await quizAnswer(user.supabase, input.id, input.choice);
+    const helped = input.choice !== "unsure" && (result.status === "counted" || result.status === "not_counted");
+    const badges = helped ? await activityBadgeNews(user.supabase, user.userId, Date.now()) : [];
+    return Response.json({ ...result, badges }, { headers: noStore });
   } catch (error) {
     console.error(error);
     return Response.json({ error: "unavailable" }, { status: 503, headers: noStore });

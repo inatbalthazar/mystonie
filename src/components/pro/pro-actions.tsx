@@ -11,7 +11,8 @@ const POLL_FOR_MS = 60_000;
 
 /**
  * The plans and the buttons: Checkout for a plan, the Customer Portal once Pro. Back from Checkout, it waits for
- * the webhook (polling the status) instead of trusting the redirect.
+ * the webhook (polling the status) instead of trusting the redirect. While Pro isn't on sale (`state.available` is
+ * false: the beta, ADR 0055) the plans show the planned prices and the buttons are greyed out.
  */
 export function ProActions({ state, prices, signedIn, checkout }: { state: ProState; prices: PlanPrice[]; signedIn: boolean; checkout: boolean }) {
   const t = useTranslations("Pro");
@@ -93,8 +94,16 @@ export function ProActions({ state, prices, signedIn, checkout }: { state: ProSt
     );
   }
 
+  const onSale = state.available;
+
   return (
     <section className="flex flex-col gap-4">
+      {!onSale && (
+        <div className="flex flex-col gap-1 rounded-2xl border-2 border-dashed border-brand/50 bg-brand-soft/40 p-4">
+          <p className="font-display font-bold">{t("notOnSaleTitle")}</p>
+          <p className="text-sm text-muted-foreground">{t("notOnSaleBody")}</p>
+        </div>
+      )}
       {checkout && error && (
         <p role="alert" className="text-sm text-muted-foreground">
           {t("slowWebhook")}
@@ -116,7 +125,15 @@ export function ProActions({ state, prices, signedIn, checkout }: { state: ProSt
               <p className="font-display text-3xl font-extrabold">
                 {t("price", { price: format.number(p.amount, { style: "currency", currency: p.currency }), plan: p.plan })}
               </p>
-              {signedIn ? (
+              {!onSale ? (
+                <button
+                  type="button"
+                  disabled
+                  className="mt-auto h-12 cursor-not-allowed rounded-2xl bg-muted px-5 font-bold text-muted-foreground ring-1 ring-border"
+                >
+                  {t("notOnSale")}
+                </button>
+              ) : signedIn ? (
                 <button
                   type="button"
                   onClick={() => go(p.plan)}
@@ -140,7 +157,7 @@ export function ProActions({ state, prices, signedIn, checkout }: { state: ProSt
       <p role="alert" className="min-h-5 text-sm text-destructive">
         {error && !checkout && t("error")}
       </p>
-      <p className="text-xs text-muted-foreground">{t("fineprint")}</p>
+      <p className="text-xs text-muted-foreground">{onSale ? t("fineprint") : t("plannedFineprint")}</p>
     </section>
   );
 }

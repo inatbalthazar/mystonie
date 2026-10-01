@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { hasAuthCookie, isProtectedPath, localizedPath, safeNextPath, splitLocale } from "./auth";
+import { hasAuthCookie, isProtectedPath, localizedPath, safeNextPath, SIGNED_IN_SCRIPT, splitLocale } from "./auth";
 
 const LOCALES = ["en", "th"];
 
@@ -28,10 +28,12 @@ describe("protected paths", () => {
     expect(isProtectedPath("/settings/")).toBe(true);
     expect(isProtectedPath("/recap/01926000-0000-7000-8000-000000000001")).toBe(true);
     expect(isProtectedPath("/settings/account")).toBe(true);
-    expect(isProtectedPath("/feed")).toBe(true);
+    // The feed is public: visitors get the Journal's articles there (ADR 0062).
+    expect(isProtectedPath("/feed")).toBe(false);
     expect(isProtectedPath("/people")).toBe(true);
     expect(isProtectedPath("/board")).toBe(true);
     expect(isProtectedPath("/challenges")).toBe(true);
+    expect(isProtectedPath("/me")).toBe(true);
     // Club pages are public: signed-out visitors see the club and are asked to sign in to join.
     expect(isProtectedPath("/clubs/kdrama")).toBe(false);
     expect(isProtectedPath("/settingsx")).toBe(false);
@@ -63,5 +65,22 @@ describe("hasAuthCookie", () => {
     expect(hasAuthCookie(["theme", "sb-fuhwuwhiquysbfjmgtfi-auth-token.0"])).toBe(true);
     expect(hasAuthCookie(["sb-127-auth-token-code-verifier"])).toBe(false);
     expect(hasAuthCookie([])).toBe(false);
+  });
+});
+
+describe("SIGNED_IN_SCRIPT", () => {
+  /** Runs the pre-paint script against a stand-in document; true when it marked the page signed in. */
+  function run(cookie: string) {
+    const dataset: Record<string, string> = {};
+    new Function("document", SIGNED_IN_SCRIPT)({ cookie, documentElement: { dataset } });
+    return "auth" in dataset;
+  }
+
+  it("marks the page signed in exactly when hasAuthCookie would", () => {
+    expect(run("sb-127-auth-token=abc")).toBe(true);
+    expect(run("mystonie_prefs=en.dark; sb-fuhwuwhiquysbfjmgtfi-auth-token.0=abc; sb-fuhwuwhiquysbfjmgtfi-auth-token.1=def")).toBe(true);
+    expect(run("sb-127-auth-token-code-verifier=abc")).toBe(false);
+    expect(run("mystonie_prefs=en.dark; x=sb-127-auth-token")).toBe(false);
+    expect(run("")).toBe(false);
   });
 });

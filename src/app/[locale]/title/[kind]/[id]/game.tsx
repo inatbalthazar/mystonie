@@ -4,8 +4,11 @@ import { getFormatter, getLocale, getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { RememberTitles } from "@/components/offline/recent-titles";
+import { TitleJournal } from "@/components/journal/title-journal";
 import { TitleFinishers } from "@/components/title/finishers";
 import { SceneWarnings, SceneWarningsSkeleton } from "@/components/title/scene-warnings";
+import { TitleCheck, TitleCheckSkeleton } from "@/components/title/title-check";
+import { TitleReviews } from "@/components/title/reviews";
 import { TitleClubs } from "@/components/title/title-clubs";
 import { posterUrl } from "@/core/catalog/images";
 import type { Title } from "@/core/catalog/types";
@@ -48,9 +51,6 @@ export async function GameTitle({
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-6 px-4 pt-8 pb-16">
-      <Link href="/collection" className="inline-flex min-h-11 items-center self-start text-sm font-semibold text-brand">
-        {t("backToCollection")}
-      </Link>
       <header className="flex flex-col gap-4">
         {/* The key art, landscape as RAWG draws it, taped onto the page. */}
         <div className="relative mx-1 mt-2">
@@ -76,6 +76,9 @@ export async function GameTitle({
           {playtimeHours && <p className="text-sm text-muted-foreground">{t("average", { time: formatRuntime(playtimeHours * 60, locale) })}</p>}
         </div>
       </header>
+      <Suspense fallback={<TitleCheckSkeleton kind="game" />}>
+        <TitleCheck supabase={supabase} titleId={title.id} kind="game" avoid={avoid} dtdd={null} />
+      </Suspense>
 
       {/* Where it stands in the collection: the Play shelf's status, the finish date and the hours given. */}
       <p className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-card px-4 py-3 text-sm ring-1 ring-border">
@@ -116,7 +119,11 @@ export async function GameTitle({
       <Suspense fallback={null}>
         <TitleFinishers supabase={supabase} userId={userId} titleId={title.id} />
       </Suspense>
+      <Suspense fallback={null}>
+        <TitleReviews supabase={supabase} userId={userId} titleId={title.id} />
+      </Suspense>
       <TitleClubs title={title.title} />
+      <TitleJournal kind="game" externalId={externalId} />
       <p className="text-xs text-muted-foreground">{t.rich("credit", { rawg })}</p>
     </main>
   );

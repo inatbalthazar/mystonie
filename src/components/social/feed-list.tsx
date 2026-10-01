@@ -2,14 +2,29 @@
 
 import { useTranslations } from "next-intl";
 import { useState } from "react";
+import { ArticleRow } from "@/components/journal/article-row";
+import { interleaveArticles, type FeedArticle } from "@/core/journal-feed";
 import type { FeedCursor, FeedItem } from "@/core/social";
 import { FeedEntry } from "./feed-entry";
 
 /**
  * The Following feed: the first page comes from the server, "Load more" fetches the next ones (GET /api/feed). A club
- * page passes its items with no `next`, and `readOnly` for signed-out visitors.
+ * page passes its items with no `next`, and `readOnly` for signed-out visitors. `articles`, the Journal's newest, go
+ * in by their date as the pages load (ADR 0052).
  */
-export function FeedList({ items: first, next: firstNext, now, readOnly = false }: { items: FeedItem[]; next: FeedCursor | null; now: number; readOnly?: boolean }) {
+export function FeedList({
+  items: first,
+  next: firstNext,
+  now,
+  readOnly = false,
+  articles = [],
+}: {
+  items: FeedItem[];
+  next: FeedCursor | null;
+  now: number;
+  readOnly?: boolean;
+  articles?: FeedArticle[];
+}) {
   const t = useTranslations("Social");
   const [items, setItems] = useState(first);
   const [next, setNext] = useState(firstNext);
@@ -36,11 +51,17 @@ export function FeedList({ items: first, next: firstNext, now, readOnly = false 
   return (
     <div className="flex flex-col gap-6">
       <ul className="flex flex-col gap-6">
-        {items.map((item, i) => (
-          <li key={item.entryId}>
-            <FeedEntry item={item} now={now} index={i} readOnly={readOnly} />
-          </li>
-        ))}
+        {interleaveArticles(items, articles, next === null).map((slot, i) =>
+          slot.type === "entry" ? (
+            <li key={slot.item.entryId}>
+              <FeedEntry item={slot.item} now={now} index={i} readOnly={readOnly} />
+            </li>
+          ) : (
+            <li key={`journal-${slot.article.slug}`}>
+              <ArticleRow article={slot.article} place="feed" now={now} index={i} card />
+            </li>
+          ),
+        )}
       </ul>
       {next && (
         <button

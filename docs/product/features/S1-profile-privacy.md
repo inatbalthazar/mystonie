@@ -25,7 +25,7 @@
   - The saved language redirects the signed-in user to that locale, and the footer language menu saves it too.
   - A saved light/dark theme applies before first paint on every page.
   - Both work through the `mystonie_prefs` cookie, which exists only while signed in.
-- Profile: display name, username (with a link to the public page), photo (the Google photo can be removed; uploading a photo comes later).
+- Profile: display name, username (with a link to the public page), bio (plain text, ≤ 160 characters and 4 lines, shown under the name on the public page; links aren't linked, [ADR 0057](../../decisions/0057-profile-bio.md)), photo (the Google photo can be removed; uploading a photo comes later).
 - Privacy toggle ("Public collection").
 - Content warnings (stage 2): how many topics are chosen, and a link to `/settings/warnings` ([S2 content warnings](S2-content-warnings.md)).
 - Export my data (JSON download: account, profile, entries, episode logs, reading logs, cards, weekly recaps, subscriptions, avoid-topics, and from stage 3 follows, Stamps, blocks, badges, each entry's finisher number, challenge joins and club memberships; deleted rows included), Export as CSV (stage 3: the live collection, episodes and reading logs as spreadsheets that import back, [S3 import & export](S3-import-export.md)) and delete my account (GDPR/PDPA/CCPA).
@@ -34,4 +34,5 @@
 - [x] RLS test: user B can't read user A's entries when A is private. (`supabase/tests/database/stage1_collection.test.sql`)
 - [x] Changing the language switches the UI immediately and persists to the profile. (`e2e/profile.spec.ts`)
 - [x] Export returns all of the user's entries, episode logs and cards. (`e2e/profile.spec.ts`; paging in `src/core/account.test.ts`)
+- [x] The bio is tidied and limited, shown on the public page as plain text, and hidden while private. (`src/core/account.test.ts`, `stage4_profile_bio.test.sql`, `e2e/profile.spec.ts`)
 - [x] A signed-out visitor can report a public profile or card, and a reserved or blocked username is rejected. (`e2e/profile.spec.ts`, `supabase/tests/database/stage1_profile_privacy.test.sql`)

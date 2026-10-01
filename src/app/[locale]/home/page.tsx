@@ -10,21 +10,27 @@ import { RecapNote } from "@/components/recap-note";
 import { UpNext, type UpNextSeries } from "@/components/series/up-next";
 import { SharedCardImage, SignupFromCard } from "@/components/shared-card";
 import { ChallengeNote, type NoteChallenge } from "@/components/challenges/challenge-note";
+import { JOURNAL_NOTE_DAYS, JournalNote } from "@/components/journal/journal-note";
+import { ReelNote } from "@/components/reel/reel-note";
 import { BoardNote } from "@/components/social/board-note";
+import { FeedNewsFromHome } from "@/components/social/feed-news";
 import { FriendsFinished } from "@/components/social/friends-finished";
 import { QuizNote } from "@/components/warnings/quiz-note";
 import { localizedPath } from "@/core/auth";
 import { currentMonth, isChallengeSlug, monthChallenges } from "@/core/challenges";
+import { reelDay, reelNumber } from "@/core/reel";
 import { localDateKey, safeTimeZone } from "@/core/stats/period";
 import { reviewSeasonYear } from "@/core/stats/year-review";
 import { blendTrending, type TrendingTitle } from "@/core/trending";
 import { friendBoard } from "@/data/board";
 import { recentCards } from "@/data/cards";
 import { userJoins, type ChallengeJoin } from "@/data/challenges";
-import { followingFeed } from "@/data/social";
+import { followingFeed, myActivity } from "@/data/social";
 import { listCollection } from "@/data/entries";
 import { cachedEpisodes, episodeLogs } from "@/data/episodes";
 import { pushConfig } from "@/data/push";
+import { journalList } from "@/data/journal";
+import { reelPlay } from "@/data/reel";
 import { latestRecap } from "@/data/recaps";
 import { userClient, type UserClient } from "@/data/supabase-server";
 import { trendingTitles } from "@/data/tmdb";
@@ -67,7 +73,8 @@ async function loadTrending(db: UserClient): Promise<TrendingTitle[]> {
  * recap's note, the next episode of every series being watched,
  * the user's recent cards and what's trending (one tap into quick add). Stage 3 adds friends' finishes, the board,
  * this month's challenges and the warnings quiz. Also offers installing the app and, once
- * installed, recap notifications (ADR 0028).
+ * installed, recap notifications (ADR 0028). (The getting-started checklist floats over every page, ADR 0056.) It also
+ * tells the nav island whether something about you happened since you last opened the feed (ADR 0054).
  */
 export default async function HomePage({ params }: PageProps<"/[locale]/home">) {
   const locale = (await params).locale as Locale;
@@ -107,7 +114,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
   const now = Date.now();
   const viewer = { id: userId, username: profile?.username ?? "", displayName: profile?.display_name ?? null, avatarUrl: profile?.avatar_url ?? null };
   const month = currentMonth(now, timeZone);
-  const [episodes, logs, board, joins] = await Promise.all([
+  const today = reelDay(now);
+  const [episodes, logs, board, joins, reel, articles, activity] = await Promise.all([
     cachedEpisodes(supabase, ids),
     episodeLogs(supabase, userId, ids),
     friendBoard(supabase, viewer, "week", timeZone, now).catch((error: unknown) => {
@@ -117,6 +125,17 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
     userJoins(supabase, userId, month).catch((error: unknown): ChallengeJoin[] => {
       console.error(error);
       return [];
+    }),
+    // Reel of the Day (stage 4): today's play, if any.
+    reelPlay(supabase, userId, today).catch((error: unknown) => {
+      console.error(error);
+      return null;
+    }),
+    journalList(locale),
+    // The Feed tab's dot (ADR 0054): the newest Stamp on your finishes or new follower.
+    myActivity(supabase, 1).catch((error: unknown) => {
+      console.error(error);
+      return null;
     }),
   ]);
   // This month's challenges: progress as the last save recorded it (S3 challenges & clubs).
@@ -146,6 +165,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
       <SignupFromCard newAccount={newAccount} />
+      {activity && <FeedNewsFromHome user={userId} latest={activity[0]?.at ?? null} now={new Date(now).toISOString()} />}
       <header className="flex flex-col gap-1">
         <p className="font-hand text-2xl leading-none text-muted-foreground">
           {format.dateTime(now, { weekday: "long", month: "long", day: "numeric", timeZone })}
@@ -176,6 +196,11 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
       <FriendsFinished items={friends} now={now} />
       {board && board.following > 0 && <BoardNote rows={board.rows} />}
       <ChallengeNote month={month} challenges={challenges} />
+      <ReelNote number={reelNumber(today)} play={reel && { guesses: reel.guesses.length, solved: reel.solved, finished: reel.finished }} />
+      {/* The newest Journal article while it's new (ADR 0051). */}
+      {articles[0] && now - Date.parse(`${articles[0].meta.date}T00:00:00Z`) < JOURNAL_NOTE_DAYS * 86_400_000 && (
+        <JournalNote slug={articles[0].slug} title={articles[0].meta.title} written={articles[0].locale === locale ? null : articles[0].locale} />
+      )}
       {/* The warnings quiz asks about finished titles (S3 warnings & quiz). */}
       {items.some((i) => i.status === "finished") && <QuizNote />}
 
@@ -207,7 +232,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
               const image = (
                 <SharedCardImage
                   imageUrl={card.imageUrl}
-                  alt={t("cardAlt", { name: card.data.milestone ? t("milestoneCard") : card.data.recap?.highlights ? t("yearCard") : card.data.recap ? t("recapCard") : card.data.name })}
+                  alt={t("cardAlt", { name: card.data.reel ? t("reelCard", { number: card.data.reel.number }) : card.data.atlas?.regions ? t("atlasRegionsCard", { country: card.data.name }) : card.data.atlas ? t("atlasCard", { count: card.data.atlas.countries.length }) : card.data.milestone ? t("milestoneCard") : card.data.recap?.highlights ? t("yearCard") : card.data.recap ? t("recapCard") : card.data.name })}
                   templateId={card.templateId}
                   size={card.size}
                   data={card.data}

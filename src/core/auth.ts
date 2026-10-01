@@ -1,8 +1,11 @@
 // Routing rules for sign-in (ADR 0020): which pages need an account, where to send people afterwards.
 // Paths here are external URLs, so they may carry a locale prefix (`/th/settings`).
 
-/** App pages that need a signed-in user. Add new ones as they ship (collection, stats, …). */
-export const PROTECTED_PATHS = ["/home", "/collection", "/settings", "/title", "/recap", "/feed", "/people", "/board", "/challenges"] as const;
+/**
+ * App pages that need a signed-in user. Add new ones as they ship (collection, stats, …). Not `/feed`: visitors see
+ * the Journal's articles there (ADR 0062).
+ */
+export const PROTECTED_PATHS = ["/home", "/collection", "/settings", "/title", "/recap", "/people", "/board", "/challenges", "/me"] as const;
 
 /** `/th/settings` → { locale: "th", path: "/settings" }; unprefixed paths are the default locale. */
 export function splitLocale(pathname: string, locales: readonly string[], defaultLocale: string) {
@@ -49,3 +52,10 @@ export function hasAuthCookie(cookieNames: Iterable<string>): boolean {
   for (const name of cookieNames) if (/^sb-.+-auth-token(\.\d+)?$/.test(name)) return true;
   return false;
 }
+
+/**
+ * Runs before first paint (with the theme, in the layout's <script>): `<html data-auth>` when `hasAuthCookie` would
+ * say yes. The signed-in shell (the nav island, ADR 0050) shows from CSS on it, so static pages need no session
+ * read and nothing pops in after hydration. Sign-in and sign-out load a new page, so it's always current.
+ */
+export const SIGNED_IN_SCRIPT = `try{if(document.cookie.split("; ").some(function(c){return /^sb-.+-auth-token(\\.\\d+)?$/.test(c.split("=")[0])}))document.documentElement.dataset.auth=""}catch(e){}`;

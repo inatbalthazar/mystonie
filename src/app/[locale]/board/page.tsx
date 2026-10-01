@@ -61,9 +61,6 @@ export default async function BoardPage({ params, searchParams }: PageProps<"/[l
           <p className="font-hand text-2xl leading-none text-muted-foreground">{t("kicker")}</p>
           <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("title")}</h1>
         </div>
-        <Link href="/feed" className="flex min-h-11 shrink-0 items-center text-sm font-semibold text-brand">
-          {t("toFeed")}
-        </Link>
       </header>
 
       <nav aria-label={t("periodLabel")} className="flex gap-1 self-start rounded-full bg-muted p-1">

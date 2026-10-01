@@ -50,6 +50,14 @@ export function safeTimeZone(timeZone: string): string {
   }
 }
 
+/** The hour (0–23) on the clock in a zone at an instant. Unknown zones read as UTC. */
+export function localHour(instant: number, timeZone: string): number {
+  const hour = partFormat(safeTimeZone(timeZone))
+    .formatToParts(instant)
+    .find((p) => p.type === "hour");
+  return Number(hour?.value ?? 0) % 24;
+}
+
 /** Wall-clock fields of an instant in a zone, as if they were UTC (ms, whole seconds). */
 function wallClock(instant: number, timeZone: string): number {
   const fields: Record<string, number> = {};

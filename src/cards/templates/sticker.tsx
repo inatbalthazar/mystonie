@@ -28,6 +28,9 @@ export function StickerCard({ data, size, palette, host }: TemplateProps) {
         <p className="text-[36px] font-semibold opacity-90">
           {data.recap ? (
             t("titlesWatched", { count: data.recap.titleCount, period: data.recap.period ?? "week" })
+          ) : data.atlas ? (
+            // An Atlas card is about no title: only the day.
+            date
           ) : (
             <>
               {t("kind", { kind: data.kind })}

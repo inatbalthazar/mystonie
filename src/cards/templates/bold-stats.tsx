@@ -32,12 +32,25 @@ export function BoldStatsCard({ data, size, palette, host }: TemplateProps) {
           <CardTitle data={data} size={size} className={story ? "" : "line-clamp-2"} />
         </div>
         {data.recap ? (
-          // A week: which titles, rather than one title's facts.
-          <p className="line-clamp-2 text-[34px] text-[var(--card-muted)]">
-            {t("titlesWatched", { count: data.recap.titleCount, period: data.recap.period ?? "week" })}
-            {" · "}
-            {data.recap.titles.map((title) => title.name).join(", ")}
-          </p>
+          // A week: which titles, rather than one title's facts. Stats cards add their favourites (stage 4).
+          <>
+            <p className="line-clamp-2 text-[34px] text-[var(--card-muted)]">
+              {t("titlesWatched", { count: data.recap.titleCount, period: data.recap.period ?? "week" })}
+              {" · "}
+              {data.recap.titles.map((title) => title.name).join(", ")}
+            </p>
+            {data.recap.favourites && (
+              <p className="line-clamp-2 text-[34px]">
+                {data.recap.favourites.map((f, i) => (
+                  <span key={f.role}>
+                    {i > 0 && " · "}
+                    <span className="text-[var(--card-muted)]">{t("favourite", { role: f.role })}</span>{" "}
+                    <span className="font-bold">{f.name}</span>
+                  </span>
+                ))}
+              </p>
+            )}
+          </>
         ) : data.challenge ? (
           // A challenge: its month, and the title that completed it.
           <p className="line-clamp-2 text-[34px] text-[var(--card-muted)]">

@@ -1,6 +1,7 @@
 import type { ComponentType } from "react";
 import { isProTemplate, TEMPLATE_META, templatesFor, type TemplateId } from "@/core/cards/templates";
 import type { TemplateProps } from "./parts";
+import { AtlasCard } from "./templates/atlas";
 import { BoldStatsCard } from "./templates/bold-stats";
 import { CalendarCard } from "./templates/calendar";
 import { CartridgeCard } from "./templates/cartridge";
@@ -8,6 +9,7 @@ import { CollageCard } from "./templates/collage";
 import { FilmStripCard } from "./templates/film-strip";
 import { MangaPanelCard } from "./templates/manga-panel";
 import { PolaroidCard } from "./templates/polaroid";
+import { ReelCard } from "./templates/reel";
 import { SpineCard } from "./templates/spine";
 import { StoneCard } from "./templates/stone";
 import { StickerCard } from "./templates/sticker";
@@ -34,7 +36,9 @@ const COMPONENTS: Record<TemplateId, ComponentType<TemplateProps>> = {
   stone: StoneCard,
   calendar: CalendarCard,
   yearbook: YearbookCard,
+  reel: ReelCard,
   sticker: StickerCard,
+  atlas: AtlasCard,
 };
 
 export const TEMPLATES = TEMPLATE_META;

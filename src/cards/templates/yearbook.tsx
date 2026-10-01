@@ -19,14 +19,20 @@ export function YearbookCard({ data, size, palette, host }: TemplateProps) {
   const year = recap?.from.slice(0, 4) ?? "";
   const titles = recap?.titles ?? [];
   const highlights = recap?.highlights ?? {};
+  const [first, second] = (recap?.favourites ?? []).map((f) => ({ label: t("favourite", { role: f.role }), value: f.name }));
+  // The first favourite (stage 4) comes right after the genre; three fit a row, the story's taller page has two rows.
   const standouts = [
     highlights.genre && { label: t("topGenre"), value: highlights.genre },
+    first,
     highlights.month && {
       label: t("busiestMonth"),
       value: format.dateTime(new Date(`${highlights.month}-01T00:00:00Z`), { month: "long", timeZone: "UTC" }),
     },
     highlights.streak && { label: t("bestStreak"), value: t("streakDays", { count: highlights.streak }) },
-  ].filter((s): s is { label: string; value: string } => !!s);
+    second,
+  ]
+    .filter((s): s is { label: string; value: string } => !!s)
+    .slice(0, story ? 4 : 3);
 
   return (
     <CardRoot size={size} palette={palette} className={cn("p-[72px]", story ? "gap-[44px]" : "gap-[26px]")}>
@@ -84,7 +90,7 @@ export function YearbookCard({ data, size, palette, host }: TemplateProps) {
       )}
 
       {standouts.length > 0 && (
-        <dl className="relative flex items-start gap-[24px]">
+        <dl className={cn("relative gap-[24px]", standouts.length > 3 ? "grid grid-cols-2" : "flex items-start")}>
           {standouts.map((s) => (
             <div key={s.label} className="min-w-0 flex-1 rotate-[-1deg] rounded-[16px] bg-[var(--card-paper)] px-[24px] py-[18px] text-[var(--card-ink)] shadow-[0_10px_24px_rgba(0,0,0,0.25)] even:rotate-[1.5deg]">
               <dt className="truncate text-[24px] font-bold tracking-[0.12em] uppercase opacity-70 [&:lang(th)]:tracking-normal">{s.label}</dt>
