@@ -102,7 +102,7 @@ export function BoldStatsCard({ data, size, palette, host }: TemplateProps) {
           </div>
         )}
       </div>
-      <CardFooter host={host} username={footerUser(data)} className="relative mt-[48px] shrink-0" />
+      <CardFooter host={host} {...footerUser(data)} className="relative mt-[48px] shrink-0" />
     </CardRoot>
   );
 }

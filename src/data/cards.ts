@@ -1,5 +1,6 @@
 // Saved cards (S1 share artwork, ADR 0024). Server only.
 import { atlasCardCountries } from "@/core/atlas";
+import { isAvatarUrl, isOwnAvatar } from "@/core/avatar";
 import { regionsByCountry, regionsOf } from "@/core/atlas-regions";
 import { cardImagePath, parseCardData, type CardSave } from "@/core/cards/saved";
 import { isTemplateId, type TemplateId } from "@/core/cards/templates";
@@ -32,12 +33,12 @@ export function publicImageUrl(path: string): string | null {
 
 /**
  * Saves a card's inputs as the signed-in user (RLS). Saving the same card id again (another template, then
- * Share after Download) updates it. The footer's `@username` comes from the profile, never from the request.
+ * Share after Download) updates it. The footer's `@username` and photo (ADR 0068) come from the profile, never from the request.
  * A share also returns a signed URL the browser uploads the PNG to (the bucket has no client write access).
  */
 export async function saveCard(db: UserClient, userId: string, save: CardSave): Promise<{ uploadUrl: string | null } | null> {
   const [{ data: profile, error: profileError }, finishShare, completed, played, mapped] = await Promise.all([
-    db.from("profiles").select("username").eq("id", userId).single(),
+    db.from("profiles").select("username, avatar_url").eq("id", userId).single(),
     cardFinishShare(db, userId, save),
     completedChallenge(db, userId, save),
     playedReel(db, userId, save),
@@ -46,7 +47,9 @@ export async function saveCard(db: UserClient, userId: string, save: CardSave): 
   if (profileError) throw new Error(`profiles read failed: ${profileError.message}`);
   if (!completed || !played || !mapped) return null;
   const hideName = save.data.hide?.includes("username");
-  const params = { ...save.data, username: hideName ? null : profile.username, finishShare };
+  const storage = publicSupabaseEnv()?.url;
+  const photo = !hideName && !save.data.hide?.includes("photo") && storage && isOwnAvatar(profile.avatar_url, userId, storage) ? profile.avatar_url : null;
+  const params = { ...save.data, username: hideName ? null : profile.username, avatarUrl: photo, finishShare };
   const path = cardImagePath(userId, save.id);
 
   const { data: existing, error: readError } = await db.from("cards").select("id, shared_at").eq("id", save.id).maybeSingle();
@@ -176,12 +179,15 @@ function toUserCard(row: SharedCardRow): UserCard | null {
   const cardData = parseCardData(params);
   if (!cardData) return null;
   const username = typeof params.username === "string" ? params.username : null;
+  // Only a photo from our bucket, and only next to the username (ADR 0068).
+  const storage = publicSupabaseEnv()?.url;
+  const avatarUrl = username && storage && isAvatarUrl(params.avatarUrl, storage) ? params.avatarUrl : null;
   return {
     id: row.id,
     kind: row.kind as CardKind,
     templateId: row.template_id,
     size: row.size as CardSize,
-    data: { ...cardData, username },
+    data: { ...cardData, username, avatarUrl },
     imageUrl: row.image_path && row.shared_at ? publicImageUrl(row.image_path) : null,
     sharedAt: row.shared_at,
   };

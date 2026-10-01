@@ -6,6 +6,7 @@ import {
   cropSquare,
   enabledProviders,
   facebookPicture,
+  isAvatarUrl,
   isOwnAvatar,
   MAX_ZOOM,
   providerPhotoUrl,
@@ -43,6 +44,17 @@ describe("storage", () => {
     expect(isOwnAvatar(`${STORAGE}/storage/v1/object/public/avatars/someone-else/p1.webp`, USER, STORAGE)).toBe(false);
     expect(isOwnAvatar("https://lh3.googleusercontent.com/a/x=s96-c", USER, STORAGE)).toBe(false);
     expect(isOwnAvatar(null, USER, STORAGE)).toBe(false);
+  });
+
+  it("lets a card show only a photo from our bucket (ADR 0068)", () => {
+    const photo = `${STORAGE}/storage/v1/object/public/avatars/${USER}/0192f000-0000-7000-8000-0000000000aa.webp`;
+    expect(isAvatarUrl(photo, STORAGE)).toBe(true);
+    expect(isAvatarUrl(photo, `${STORAGE}/`)).toBe(true);
+    expect(isAvatarUrl(photo.replace("/avatars/", "/cards/"), STORAGE)).toBe(false);
+    expect(isAvatarUrl(`${STORAGE}/storage/v1/object/public/avatars/${USER}/../../cards/x.webp`, STORAGE)).toBe(false);
+    expect(isAvatarUrl(photo.replace(".webp", ".svg"), STORAGE)).toBe(false);
+    expect(isAvatarUrl("https://evil.example/storage/v1/object/public/avatars/" + photo.split("/avatars/")[1], STORAGE)).toBe(false);
+    expect(isAvatarUrl(null, STORAGE)).toBe(false);
   });
 });
 

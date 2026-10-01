@@ -115,7 +115,7 @@ export function MangaPanelCard({ data, size, palette, host }: TemplateProps) {
         <Review text={data.review} className={cn("relative text-[40px] leading-snug", story ? "line-clamp-2" : "line-clamp-1")} />
       </div>
 
-      <CardFooter host={host} username={footerUser(data)} className="shrink-0" />
+      <CardFooter host={host} {...footerUser(data)} className="shrink-0" />
     </CardRoot>
   );
 }

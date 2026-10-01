@@ -51,7 +51,7 @@ export function TicketCard({ data, size, palette, host }: TemplateProps) {
           )}
         </div>
       </div>
-      <CardFooter host={host} username={footerUser(data)} className="mt-[40px] w-full shrink-0" />
+      <CardFooter host={host} {...footerUser(data)} className="mt-[40px] w-full shrink-0" />
     </CardRoot>
   );
 }

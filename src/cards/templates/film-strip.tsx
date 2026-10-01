@@ -95,7 +95,7 @@ export function FilmStripCard({ data, size, palette, host }: TemplateProps) {
         {story && <Review text={data.review} className="line-clamp-2 px-[4px] text-[44px]/[1.15] opacity-80 [font-family:var(--card-hand)]" />}
       </div>
 
-      <CardFooter host={host} username={footerUser(data)} className={cn("w-full shrink-0", story ? "mt-[48px]" : "mt-[32px]")} />
+      <CardFooter host={host} {...footerUser(data)} className={cn("w-full shrink-0", story ? "mt-[48px]" : "mt-[32px]")} />
     </CardRoot>
   );
 }

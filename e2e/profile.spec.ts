@@ -1,7 +1,7 @@
 import { expect, test, type Page } from "@playwright/test";
 import { uuidv7 } from "../src/core/ids";
 import { LEGAL } from "../src/lib/legal";
-import { canSeed, lastEmail, mailpitUp, seedTitles, signUp, type SeedTitle } from "./helpers";
+import { canSeed, lastEmail, mailpitUp, mockSearch, openQuickAdd, seedTitles, signUp, type SeedTitle } from "./helpers";
 
 // Needs the local Supabase stack (sign-in via Mailpit, service role key for seeding). Titles are seeded, so TMDB
 // isn't needed.
@@ -186,7 +186,7 @@ test("language and theme apply at once and stick to the account", async ({ page,
   await expect(page).toHaveURL(/\/th$/);
 });
 
-test("a profile photo: picked, framed and uploaded, shown on the profile, then removed (ADR 0064)", async ({ page, request }) => {
+test("a profile photo: picked, framed and uploaded, shown on the profile and on cards, then removed (ADR 0064, ADR 0068)", async ({ page, request }) => {
   test.skip(!(await mailpitUp(request)) || !canSeed(), "local Supabase (Mailpit, service role key) is not available");
   await signUp(page, request, "photo", "/settings");
 
@@ -255,6 +255,33 @@ test("a profile photo: picked, framed and uploaded, shown on the profile, then r
   const username = ((await exported.json()) as { profile: { username: string } }).profile.username;
   await page.goto(`/u/${username}`);
   await expect(page.getByRole("main").locator(`img[src="${avatarUrl}"]`)).toBeVisible();
+
+  // On a card (ADR 0068): a circle before @username, one tap to hide, and the server stamps it on the saved card.
+  await seedTitles(request, [PARASITE]);
+  await mockSearch(page, [PARASITE]);
+  await openQuickAdd(page);
+  await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Parasite");
+  await page.getByRole("dialog").getByRole("button", { name: /^Parasite Movie/ }).first().click();
+  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  const celebration = page.getByRole("dialog", { name: "You finished Parasite!" });
+  const cardPhoto = celebration.locator(`[data-card] img[src="${avatarUrl}"]`);
+  await expect(cardPhoto).toBeVisible();
+  await expect.poll(() => cardPhoto.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth)).toBe(320);
+  const hidePhoto = celebration.getByRole("button", { name: "Photo", exact: true });
+  await hidePhoto.click();
+  await expect(cardPhoto).toHaveCount(0);
+  await hidePhoto.click();
+  await expect(cardPhoto).toBeVisible();
+  const savedCard = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/cards");
+  await celebration.getByRole("button", { name: "Download" }).click({ timeout: 15_000 });
+  const cardSave = await savedCard;
+  expect(cardSave.status()).toBe(201);
+  expect(cardSave.request().postDataJSON().data).not.toHaveProperty("avatarUrl");
+  const { id: cardId } = cardSave.request().postDataJSON() as { id: string };
+  const { base, headers } = service();
+  const stored = (await (await request.get(`${base}/cards?id=eq.${cardId}&select=params`, { headers })).json()) as { params: { avatarUrl: string | null } }[];
+  expect(stored[0]?.params.avatarUrl).toBe(avatarUrl);
+  await celebration.getByRole("button", { name: "Done" }).click();
 
   // Removing it goes back to the initial and deletes the file.
   await page.goto("/settings");

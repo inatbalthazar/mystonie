@@ -100,7 +100,7 @@ export function YearbookCard({ data, size, palette, host }: TemplateProps) {
         </dl>
       )}
 
-      <CardFooter host={host} username={footerUser(data)} className="relative shrink-0" />
+      <CardFooter host={host} {...footerUser(data)} className="relative shrink-0" />
     </CardRoot>
   );
 }

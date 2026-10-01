@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useId, useState, type FormEvent } from "react";
+import { forgetMyPhoto } from "@/cards/use-my-photo";
 import { BIO_MAX, bioFits, DISPLAY_NAME_MAX, normalizeBio, normalizeUsername, USERNAME_RE } from "@/core/account";
 import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -55,6 +56,7 @@ export function ProfileForm({
     const res = await fetch("/api/account/avatar", { method: "DELETE" }).catch(() => null);
     if (!res?.ok) return setStatus({ kind: "error", result: { ok: false, error: "unavailable" } });
     setPhoto(null);
+    forgetMyPhoto();
     setStatus({ kind: "idle" });
     router.refresh();
   }
@@ -102,6 +104,7 @@ export function ProfileForm({
           hasPhoto={photo !== null}
           onSaved={(url) => {
             setPhoto(url);
+            forgetMyPhoto();
             router.refresh();
           }}
         />

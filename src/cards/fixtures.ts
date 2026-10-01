@@ -1,5 +1,8 @@
 import type { CardData } from "@/core/cards/types";
 
+/** A profile photo for the footer (ADR 0068); real ones live in the avatars bucket. */
+const PHOTO = "/journal/authors/stonie.svg";
+
 /** Hard cases for the card lab and screenshot tests: long titles, every script, missing data. */
 export const CARD_FIXTURES: { id: string; data: CardData }[] = [
   {
@@ -8,7 +11,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     data: {
       kind: "series", name: "Stranger Things: The Upside Down Special Edition", year: 2016, runtimeMin: 50,
       posterUrl: "https://image.tmdb.org/t/p/w780/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
-      rating: 4, finishedOn: "2026-10-31", username: "stonie", survived: "jumpScares", finishShare: 0.004,
+      rating: 4, finishedOn: "2026-10-31", username: "stonie", avatarUrl: PHOTO, survived: "jumpScares", finishShare: 0.004,
     },
   },
   {
@@ -48,7 +51,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     data: {
       kind: "series", name: "Stranger Things", year: 2016, runtimeMin: 50,
       posterUrl: "https://image.tmdb.org/t/p/w780/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
-      finishedOn: "2026-09-27", username: "a_very_long_username_here",
+      finishedOn: "2026-09-27", username: "a_very_long_username_here", avatarUrl: PHOTO,
       progress: { season: 2, episode: 4, watched: 21, total: 42, watchedMin: 1050, milestone: 50 },
     },
   },
@@ -106,7 +109,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     id: "book-finish",
     data: {
       kind: "book", name: "Project Hail Mary", year: 2021, pageCount: 497, posterUrl: "/api/covers/-Ff2DwAAQBAJ?size=large",
-      rating: 5, review: "Rocky!! Best science buddy ever. Read it in two nights.", finishedOn: "2026-09-20", username: "stonie", finishShare: 0.042,
+      rating: 5, review: "Rocky!! Best science buddy ever. Read it in two nights.", finishedOn: "2026-09-20", username: "stonie", avatarUrl: PHOTO, finishShare: 0.042,
     },
   },
   {
@@ -138,7 +141,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     data: {
       kind: "game", name: "The Witcher 3: Wild Hunt – Complete Edition", year: 2015, playtimeHours: 43, hoursPlayed: 187,
       posterUrl: "https://media.rawg.io/media/resize/640/-/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg",
-      rating: 5, review: "Gwent took 40 of those hours and I regret nothing.", finishedOn: "2026-09-30", username: "stonie", finishShare: 0.18,
+      rating: 5, review: "Gwent took 40 of those hours and I regret nothing.", finishedOn: "2026-09-30", username: "stonie", avatarUrl: PHOTO, finishShare: 0.18,
     },
   },
   {
@@ -200,7 +203,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     id: "year-review",
     data: {
       kind: "series", name: "Stranger Things", posterUrl: "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
-      finishedOn: "2026-12-31", username: "a_very_long_username_here",
+      finishedOn: "2026-12-31", username: "a_very_long_username_here", avatarUrl: PHOTO,
       recap: {
         period: "year", from: "2026-01-01", to: "2026-12-31", minutes: 61234, episodes: 1432, finished: 187, titleCount: 240, readMinutes: 9120,
         titles: [
@@ -243,7 +246,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
   // Stage 4 Atlas: a few neighbours (the map zooms in) and many far apart (the world, tiny ones as dots).
   {
     id: "atlas-few",
-    data: { kind: "movie", name: "Atlas", posterUrl: null, finishedOn: "2026-10-01", username: "maya", atlas: { countries: ["ES", "FR", "IT", "PT"], stories: 0 } },
+    data: { kind: "movie", name: "Atlas", posterUrl: null, finishedOn: "2026-10-01", username: "maya", avatarUrl: PHOTO, atlas: { countries: ["ES", "FR", "IT", "PT"], stories: 0 } },
   },
   {
     id: "atlas-many",

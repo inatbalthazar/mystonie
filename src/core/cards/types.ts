@@ -74,12 +74,17 @@ export type CardData = {
   finishShare?: number | null;
   /** Printed in the footer (`@username`) of saved cards. The server sets it, never the browser. */
   username?: string | null;
+  /**
+   * The owner's profile photo, a small circle before `@username` in the footer (ADR 0068): a photo in our `avatars`
+   * bucket (`isAvatarUrl`). On a saved card the server sets it from the profile, never the browser; gone with the username.
+   */
+  avatarUrl?: string | null;
   /** What the user chose to leave off the card. */
   hide?: CardHideable[];
 };
 
-/** Things a user can hide on a card (S1 share artwork: "hide username or any stat"). */
-export const CARD_HIDEABLE = ["username", "time", "episodes", "seasons", "finisher"] as const;
+/** Things a user can hide on a card (S1 share artwork: "hide username or any stat"; the profile photo, ADR 0068). */
+export const CARD_HIDEABLE = ["username", "photo", "time", "episodes", "seasons", "finisher"] as const;
 export type CardHideable = (typeof CARD_HIDEABLE)[number];
 
 export type CardProgress = {

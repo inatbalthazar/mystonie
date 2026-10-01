@@ -8,6 +8,24 @@ import { prefsCookieOptions } from "@/lib/prefs";
 const noStore = { "Cache-Control": "no-store" };
 
 /**
+ * GET /api/account → { username, avatarUrl } | 401 | 503. Who the card editor prints in a card's footer: the photo
+ * before `@username` (ADR 0068), which the server stamps again from the profile when the card is saved.
+ */
+export async function GET() {
+  const supabase = await userClient();
+  if (!supabase) return Response.json({ error: "unavailable" }, { status: 503, headers: noStore });
+  const { data: auth } = await supabase.auth.getClaims();
+  const userId = auth?.claims.sub;
+  if (!userId) return Response.json({ error: "unauthorized" }, { status: 401, headers: noStore });
+  const { data, error } = await supabase.from("profiles").select("username, avatar_url").eq("id", userId).maybeSingle();
+  if (error) {
+    console.error("profile read failed", error.message);
+    return Response.json({ error: "unavailable" }, { status: 503, headers: noStore });
+  }
+  return Response.json({ username: data?.username ?? null, avatarUrl: data?.avatar_url ?? null }, { headers: noStore });
+}
+
+/**
  * PATCH /api/account { username?, displayName?, bio?, avatarUrl?: null, locale?, timeZone?, country?, theme?, visibility?, emailRecaps?, reelReminders?, atlasPublic? }
  * → the saved settings | 400 invalid | 401 | 409 username_taken | 422 name_not_allowed { field } | 503.
  * Settings are written as the user (RLS + column grants); the database re-checks the username, the name

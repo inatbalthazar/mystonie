@@ -24,7 +24,7 @@ The heart of Mystonie, modelled on Strava's post-activity share. Every finish or
 - Rendering is client-side (component → PNG, [ADR 0008](../../decisions/0008-client-side-card-rendering.md)). Link previews (`/c/[id]` OG image) use `@vercel/og` with Latin-safe content, or the stored PNG.
 - Cards store their inputs (`cards` table: kind, template, params) so they can be re-rendered and shown in the profile gallery. The PNG is uploaded to Supabase Storage on share.
 - Footer: `mystonie · @username` + short link `/c/[id]` → title page / sign-up ("Make your own card").
-- Users can hide username or any stat on a card.
+- Users can hide username or any stat on a card. The footer shows their profile photo before `@username` when they have one, unless they hide it ("Photo", [ADR 0068](../../decisions/0068-photo-on-cards.md)).
 - Weekly Recap is computed by a scheduled job (pg_cron → route handler) per user time zone. Only users with activity that week get one.
 
 ## Built ([ADR 0024](../../decisions/0024-card-saving-and-share-links.md))
@@ -33,7 +33,7 @@ The heart of Mystonie, modelled on Strava's post-activity share. Every finish or
   - It shows the FINISHED stamp landing (`motion-safe:animate-stamp`) and a short vibration where supported. Both are skipped under `prefers-reduced-motion`.
   - The card preview comes with **Share** as the primary button (**Copy card link** where files can't be shared, e.g. desktops).
   - Secondary buttons: **Download**, **Change style** (or swipe), **Sticker** (a checkerboard shows the transparency).
-  - Also: Story / Post size, and "Hide on card" (`@username`, watch time, episodes).
+  - Also: Story / Post size, and "Hide on card" (`@username`, Photo, watch time, episodes).
   - Rating and a one-line review are optional, below the actions. They are saved on the entry when the celebration closes (`PATCH /api/entries/[id] { rating, review }`).
   - **Skip** (then **Done**) is always in the sticky top bar.
   - "Make a card" in the edit sheet (finished entries) and "Make a Finish card" on the series page reopen it without the animation.

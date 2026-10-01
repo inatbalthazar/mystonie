@@ -85,7 +85,7 @@ export function SurvivedCard({ data, size, palette, host }: TemplateProps) {
         </div>
       </div>
 
-      <CardFooter host={host} username={footerUser(data)} className="w-full shrink-0" />
+      <CardFooter host={host} {...footerUser(data)} className="w-full shrink-0" />
     </CardRoot>
   );
 }

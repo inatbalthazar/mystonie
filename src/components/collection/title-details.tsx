@@ -1,10 +1,11 @@
 "use client";
 
 import { ChevronDownIcon, CircleCheckIcon, CircleHelpIcon, ExternalLinkIcon, StarIcon, TriangleAlertIcon } from "lucide-react";
-import { useFormatter, useTranslations } from "next-intl";
+import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useId, useState } from "react";
 import { DTDD_URL } from "@/core/catalog/dtdd";
 import { isScreenKind, type SearchResult } from "@/core/catalog/types";
+import { formatRuntime } from "@/core/format/runtime";
 import { imdbUrl, type TitlePreview } from "@/core/title-preview";
 import { Link } from "@/i18n/navigation";
 import { track } from "@/lib/analytics";
@@ -97,6 +98,7 @@ export function TitleDetails({ result, warning }: { result: Pick<SearchResult, "
 function Details({ preview, result }: { preview: TitlePreview; result: Pick<SearchResult, "kind" | "externalId"> }) {
   const t = useTranslations("TitleDetails");
   const format = useFormatter();
+  const locale = useLocale();
   const [more, setMore] = useState(false);
   const { title, facts } = preview;
   const kind = title.kind;
@@ -110,6 +112,8 @@ function Details({ preview, result }: { preview: TitlePreview; result: Pick<Sear
         })
       : null,
     title.runtimeMin && (kind === "movie" || kind === "series") ? t("runtime", { kind, minutes: title.runtimeMin }) : null,
+    kind === "book" && title.pageCount ? t("pages", { count: title.pageCount }) : null,
+    kind === "game" && title.playtimeHours ? t("playtime", { time: formatRuntime(title.playtimeHours * 60, locale) }) : null,
     preview.directors.length > 0 && t("directors", { kind, names: list(preview.directors) }),
     preview.cast.length > 0 && t("cast", { names: list(preview.cast) }),
     preview.makers.length > 0 && t("makers", { kind, names: list(preview.makers) }),

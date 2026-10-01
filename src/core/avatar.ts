@@ -30,6 +30,17 @@ export function isOwnAvatar(url: string | null, userId: string, storageUrl: stri
   return !!url && url.startsWith(`${storageUrl.replace(/\/+$/, "")}/storage/v1/object/public/avatars/${userId}/`);
 }
 
+const PHOTO_FILE_RE = /^[0-9a-f-]{36}\/[0-9a-f-]{36}\.(jpg|png|webp)$/;
+
+/**
+ * Whether `url` is a photo in our bucket, `<user id>/<photo id>.<ext>` (`storageUrl`: the Supabase URL). A card shows
+ * only these (ADR 0068): a card's link must not be able to show an arbitrary picture under our name.
+ */
+export function isAvatarUrl(url: unknown, storageUrl: string): url is string {
+  const prefix = `${storageUrl.replace(/\/+$/, "")}/storage/v1/object/public/avatars/`;
+  return typeof url === "string" && url.startsWith(prefix) && PHOTO_FILE_RE.test(url.slice(prefix.length));
+}
+
 /** Sign-in providers the sign-in page can offer, in the order of their buttons (each only when switched on). */
 export const OAUTH_PROVIDERS = ["google", "facebook"] as const;
 export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];

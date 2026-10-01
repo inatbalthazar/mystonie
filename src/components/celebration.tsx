@@ -10,6 +10,7 @@ import { downloadBlob, usePrerenderedCard } from "@/cards/export";
 import { HoursField, RatingField, ReviewField } from "@/cards/fields";
 import { useChallengeName, useHeadline, useRecapRange } from "@/cards/parts";
 import type { TemplateId } from "@/cards/registry";
+import { useMyPhoto } from "@/cards/use-my-photo";
 import { usePosterPalette } from "@/cards/use-poster-palette";
 import { isSurvivedKey, type SurvivedKey } from "@/core/catalog/dtdd";
 import type { TmdbKind } from "@/core/catalog/tmdb";
@@ -104,6 +105,8 @@ export function Celebration({ data, source, animate = false, username, host, onC
   const [hours, setHours] = useState(() => (data.hoursPlayed ? String(data.hoursPlayed) : ""));
   const hoursPlayed = isHoursPlayed(Number(hours)) ? Number(hours) : null;
   const [hide, setHide] = useState<CardHideable[]>([]);
+  // The photo before @username in the footer (ADR 0068); the server stamps it again when the card is saved.
+  const photo = useMyPhoto(!!username);
   const [delivered, setDelivered] = useState(false);
   const [notice, setNotice] = useState("");
   const canShare = useCanShareFiles();
@@ -118,6 +121,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
     review: source.kind === "finish" ? finalReview(review) : null,
     ...(asksHours ? { hoursPlayed } : {}),
     username: hide.includes("username") ? null : username,
+    avatarUrl: hide.includes("username") || hide.includes("photo") ? null : photo,
     hide,
     survived: templateId === "survived" ? survived : null,
   };
@@ -164,8 +168,8 @@ export function Celebration({ data, source, animate = false, username, host, onC
 
   /** Saves the card's inputs; with `blob`, publishes it and uploads the PNG. */
   async function save(blob: Blob | null) {
-    // The server prints the username from the profile; the browser never sends one.
-    const inputs = { ...card, username: undefined };
+    // The server prints the username and photo from the profile; the browser never sends them.
+    const inputs = { ...card, username: undefined, avatarUrl: undefined };
     const res = await fetch("/api/cards", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -255,6 +259,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
   const noTime = data.recap ? false : (read && !data.reading) || (data.kind === "game" && !gameHours(card));
   const hideable: CardHideable[] = [
     ...(username ? (["username"] as const) : []),
+    ...(username && photo ? (["photo"] as const) : []),
     ...(onlyUser || noTime ? [] : (["time"] as const)),
     ...(!onlyUser && (data.recap ? data.recap.episodes > 0 : data.kind === "series" || read) ? (["episodes"] as const) : []),
     ...(source.kind === "finish" && isRare(data.finishShare) ? (["finisher"] as const) : []),

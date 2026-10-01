@@ -75,7 +75,7 @@ export function CollageCard({ data, size, palette, host }: TemplateProps) {
       {data.recap && (
         <p className="relative mt-[20px] truncate text-[32px] opacity-70">{t("titlesWatched", { count: data.recap.titleCount, period: data.recap.period ?? "week" })}</p>
       )}
-      <CardFooter host={host} username={footerUser(data)} className="relative mt-[36px] shrink-0" />
+      <CardFooter host={host} {...footerUser(data)} className="relative mt-[36px] shrink-0" />
     </CardRoot>
   );
 }

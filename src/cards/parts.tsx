@@ -67,7 +67,9 @@ export function Poster({ url, className }: { url?: string | null; className?: st
           alt=""
           crossOrigin="anonymous"
           onError={(e) => (e.currentTarget.style.display = "none")}
-          className="size-full object-cover"
+          // Cropped toward the top: posters put faces in their upper third and the title at the bottom, so a centred
+          // crop in a wide window (Ticket, Polaroid's feed) cut heads off. Landscape art is cropped at the sides, unchanged.
+          className="size-full object-cover object-[50%_10%]"
         />
       )}
     </div>
@@ -316,21 +318,50 @@ export function useHeadline(data: CardData): string {
 }
 
 /** Brand footer on every card (growth loop): Stonie + `mystonie · @username` + the site. No QR. */
-export function CardFooter({ host, username, className }: { host: string; username?: string | null; className?: string }) {
+export function CardFooter({
+  host,
+  username,
+  avatarUrl,
+  className,
+}: {
+  host: string;
+  username?: string | null;
+  avatarUrl?: string | null;
+  className?: string;
+}) {
   const t = useTranslations("Card");
   return (
     <div className={cn("flex min-w-0 items-center gap-[16px] text-[32px]", className)}>
       {/* eslint-disable-next-line @next/next/no-img-element -- exported to PNG */}
       <img src="/icon.svg" alt="" width={60} height={60} />
       <span className={cn(DISPLAY, "shrink-0 text-[40px] font-extrabold tracking-[-0.02em]")}>{t("brand")}</span>
-      {username && <span className="min-w-0 truncate opacity-80">{t("byUser", { username })}</span>}
+      {username && (
+        <span className="flex min-w-0 items-center gap-[12px]">
+          {/* The owner's photo (ADR 0068): a small circle before the handle, never bigger than the logo. */}
+          {avatarUrl && (
+            // eslint-disable-next-line @next/next/no-img-element -- exported to PNG; must be a plain CORS image
+            <img
+              src={avatarUrl}
+              alt=""
+              crossOrigin="anonymous"
+              onError={(e) => (e.currentTarget.style.display = "none")}
+              className="size-[52px] shrink-0 rounded-full object-cover ring-[3px] ring-current/25"
+            />
+          )}
+          <span className="min-w-0 truncate opacity-80">{t("byUser", { username })}</span>
+        </span>
+      )}
       <span className="ml-auto shrink-0 opacity-70">{host}</span>
     </div>
   );
 }
 
-/** Footer props from the card data: the username unless the user hid it. */
-export const footerUser = (data: CardData) => (data.hide?.includes("username") ? null : data.username);
+/** Footer props from the card data: the username unless the user hid it, and their photo unless either is hidden (ADR 0068). */
+export function footerUser(data: CardData): { username: string | null; avatarUrl: string | null } {
+  const hide = data.hide ?? [];
+  const username = hide.includes("username") ? null : (data.username ?? null);
+  return { username, avatarUrl: username && !hide.includes("photo") ? (data.avatarUrl ?? null) : null };
+}
 
 /**
  * The rare-finish share a Finish card stamps (ADR 0067), or null: none (Mystonie under 1,000 members), not rare

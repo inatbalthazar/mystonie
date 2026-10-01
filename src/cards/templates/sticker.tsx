@@ -55,7 +55,7 @@ export function StickerCard({ data, size, palette, host }: TemplateProps) {
       )}
 
       <Stars rating={data.rating} className="text-[64px]" />
-      <CardFooter host={host} username={footerUser(data)} className="w-full max-w-[860px] justify-center text-[30px]" />
+      <CardFooter host={host} {...footerUser(data)} className="w-full max-w-[860px] justify-center text-[30px]" />
     </CardRoot>
   );
 }

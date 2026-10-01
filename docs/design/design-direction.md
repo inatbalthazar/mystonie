@@ -5,7 +5,7 @@ UI decides whether people adopt Mystonie, and the share artwork decides whether 
 ## Feel
 - **Strava clarity × collector's scrapbook.** Big, bold numbers and clean layouts, with personality from collectible details: stamps, ticket stubs, polaroids, tape and stickers.
 - **Global and brand-neutral.** Nothing should read as tied to one country. English copy is short, warm and a little playful ("Finished! 🎉", not "Saved successfully").
-- **Posters are the colour.** Neutral surfaces. Cards pull their palette from the poster, so every card is unique yet on-brand.
+- **Posters are the colour.** Neutral surfaces. Cards pull their palette from the poster, so every card is unique yet on-brand. A poster in a window wider than itself (Ticket, Polaroid's feed size) is cropped toward its top, 10% down, not its centre: faces sit in a poster's upper third, so a centred crop cut heads off (2026-10-02).
 
 ## Foundations
 - **Mobile-first, above everything else** ([ADR 0050](../decisions/0050-mobile-first-nav-island.md)): people use Mystonie on their phones, even though it's a website. Design at 360–430px first; tablets and desktops get the same single column, centred. The installed app (PWA) is the best home for it.

@@ -70,6 +70,7 @@ One file per decision: `NNNN-short-slug.md`, numbered in order. Write one whenev
 | [0065](0065-app-footer.md) | Signed in, the footer is an app's: one row of data credits (TMDB's logo, RAWG's link, as RAWG asks on every page); the language, Privacy, Terms, the beta and the tip link live in Settings (a new "About Mystonie" card). Signed out, the website footer stays | **Accepted** |
 | [0066](0066-details-in-the-collection.md) | A collection entry's sheet shows the title as the ➕ sheet does: poster, kind and year, genres, the warning note and, on request, "Details and content warnings" (same component and quota rule as ADR 0058) | **Accepted** |
 | [0067](0067-rare-finishes.md) | Rare finishes instead of "Finisher #N" (a finish isn't a race): the share of Mystonie's members who had finished the title at your first finish, kept for good; shown from 1,000 members, stamped on cards and tagged in the feed at 10% or less; the numbering stays underneath | **Accepted** |
+| [0068](0068-photo-on-cards.md) | The profile photo on cards: a small circle before `@username` in every template's footer, shown by default when there is one, hidden with "Photo" or with the username; the server stamps it from the profile, and a card shows only photos from our `avatars` bucket | **Accepted** |
 | [0021](0021-collection-tables-rules-in-the-database.md) | Collection tables enforce the day-one rules in the DB: UUID v7 check, no client DELETE, column grants, composite FKs for card ownership, public-profile reads via `private.is_public_profile` | **Accepted** |
 
 ## Template

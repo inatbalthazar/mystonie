@@ -65,6 +65,12 @@ describe("parseCardData", () => {
     expect(parseCardData({ kind: "movie", name: "M", finishedOn: "2026-09-26" })).toMatchObject({ posterUrl: null, genres: [], hide: [] });
   });
 
+  it("drops a photo the browser sends: the server stamps the profile's own (ADR 0068)", () => {
+    const parsed = parseCardData({ ...data, avatarUrl: "https://evil.example/me.png", hide: ["photo"] })!;
+    expect(parsed).not.toHaveProperty("avatarUrl");
+    expect(parsed.hide).toEqual(["photo"]);
+  });
+
   it("rejects bad inputs", () => {
     const bad = [
       { ...data, kind: "podcast" },

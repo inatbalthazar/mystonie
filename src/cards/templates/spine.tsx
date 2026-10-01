@@ -135,7 +135,7 @@ export function SpineCard({ data, size, palette, host }: TemplateProps) {
           </dl>
         )}
       </div>
-      <CardFooter host={host} username={footerUser(data)} className="relative mt-[40px] shrink-0" />
+      <CardFooter host={host} {...footerUser(data)} className="relative mt-[40px] shrink-0" />
     </CardRoot>
   );
 }

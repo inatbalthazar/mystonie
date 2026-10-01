@@ -10,12 +10,12 @@ const rest = () => {
   return { url: process.env.NEXT_PUBLIC_SUPABASE_URL!, headers: { apikey: key, Authorization: `Bearer ${key}` } };
 };
 
-/** The Matrix (movie 603, the draft's title card) in the title cache, so nothing needs TMDB; a real cached row stays. */
+/** The Matrix (movie 603, the draft's title card) in the title cache with its real poster, so nothing needs TMDB; a real cached row stays. */
 async function cacheMatrix(request: APIRequestContext): Promise<void> {
   const { url, headers } = rest();
   const res = await request.get(`${url}/rest/v1/titles?select=id&source=eq.tmdb&kind=eq.movie&external_id=eq.603`, { headers });
   if (((await res.json()) as unknown[]).length === 0) {
-    await seedTitles(request, [{ kind: "movie", externalId: "603", name: "The Matrix", year: 1999, posterPath: null, runtimeMin: 136 }]);
+    await seedTitles(request, [{ kind: "movie", externalId: "603", name: "The Matrix", year: 1999, posterPath: "/dXNAPwY7VrqMAo51EKhhCJfaGb5.jpg", runtimeMin: 136 }]);
   }
 }
 
