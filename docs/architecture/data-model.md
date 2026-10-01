@@ -79,11 +79,13 @@ The badge catalogue and rules are code (`src/core/badges.ts`), not a table. Sinc
 |---|---|---|
 | `title_finish_counts` | `title_id` (PK, → `titles` cascade), `finishers` (how many people ever finished it: the last number handed out), `updated_at` | Read: everyone. No client writes. Its row is the lock that serializes numbering for the title ([ADR 0039](../decisions/0039-finishers-trending-board.md)). |
 | `title_finishers` | PK (`title_id` → `titles` cascade, `user_id` → `profiles(id)` cascade), `number` (> 0), `created_at`. Unique (`title_id`, `number`) | The owner reads theirs (the export); nobody else, no client writes. Permanent: no soft delete, so a number survives un-finishing and deleting. |
-| `entries.finisher_no` | "Finisher #N": set by the `entries_assign_finisher` trigger (`private.assign_finisher()` → `private.finisher_number()`) when a live finish has none; kept afterwards | Not in the client column grants; the trigger overwrites whatever the service role sends. |
+| `title_finishers.members`, `.share`, `entries.finish_share`, `.finish_members` | Rare finishes ([ADR 0067](../decisions/0067-rare-finishes.md)): at a person's first finish of a title, how many members Mystonie had and the share of them that had finished it (> 0, ≤ 1), written by `private.finisher_number()` and copied onto the entry by the trigger; kept for good. Backfilled from the ledger and `profiles.created_at` (`20261020090000_stage4_finish_share.sql`) | Not in the client column grants; the trigger overwrites them. |
+| `entries.finisher_no` | "Finisher #N" (no longer shown since ADR 0067; the numbering stays): set by the `entries_assign_finisher` trigger (`private.assign_finisher()` → `private.finisher_number()`) when a live finish has none; kept afterwards | Not in the client column grants; the trigger overwrites whatever the service role sends. |
 
 Functions:
 - `trending_titles(p_days, p_limit)` (security definer, anon and signed in): titles with the most distinct people finishing, logging episodes or reading in the last 1–31 days, with `people` and `finishers`. A title needs at least 3 people (fixed in the function). Private profiles count only in totals. Indexes `entries_finished_at`, `episode_logs_watched_at`, `reading_logs_read_at`.
-- `following_feed()` also returns `finisher_no`.
+- `following_feed()`, `club_feed()` and `title_reviews()` return `finish_share` and `finish_members` (`finisher_no` until ADR 0067).
+- `member_count()` (security definer, anon and signed in): how many members (profiles) Mystonie has, for a title page's live share.
 
 All of it is in `20261004090000_stage3_finishers_trending.sql`, which also numbered the existing finishes in finish order (tested in `stage3_finishers.test.sql`). Local only so far. The board has no table: it is computed from the recap numbers (`periodRecaps` in `src/data/activity.ts`), read as the viewer.
 

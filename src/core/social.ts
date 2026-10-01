@@ -20,8 +20,8 @@ export type FeedItem = {
   mine: boolean;
   /** Badges this finish earned (S3 badges & shelf), stuck onto the feed card. */
   badges: BadgeId[];
-  /** "Finisher #N" of this finish (S3 finishers & the board); null for finishes from before numbering. */
-  finisherNo: number | null;
+  /** How rare this finish was (ADR 0067), or null (`shownShare`): the feed tags it when it's rare. */
+  finishShare: number | null;
 };
 
 /** Something that happened to the viewer: a Stamp on one of their finishes, or a new follower. */

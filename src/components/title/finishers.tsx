@@ -1,13 +1,15 @@
 import { getFormatter, getTranslations } from "next-intl/server";
+import { SHARE_MIN_MEMBERS } from "@/core/finish-share";
 import { titleFinishers } from "@/data/finishers";
 import type { UserClient } from "@/data/supabase-server";
 import { Link } from "@/i18n/navigation";
+import { formatShare } from "@/lib/share";
 import { cn } from "@/lib/utils";
 import { PaperCard } from "../paper-card";
 import { Avatar } from "../social/avatar";
 
-/** The finisher seal as the page draws it: brand ink, double ring; dashed and empty while it's still to earn. */
-function Seal({ number, empty = false, className }: { number: string; empty?: boolean; className?: string }) {
+/** The finishers seal as the page draws it: brand ink, double ring; dashed and empty while it's still to earn. */
+function Seal({ value, empty = false, className }: { value: string; empty?: boolean; className?: string }) {
   return (
     <span
       aria-hidden="true"
@@ -18,15 +20,16 @@ function Seal({ number, empty = false, className }: { number: string; empty?: bo
       )}
     >
       <span className={cn("flex size-full items-center justify-center rounded-full border-2 border-current", !empty && "border-dashed")}>
-        <span className="font-display leading-none font-extrabold tracking-[-0.02em] whitespace-nowrap">{number}</span>
+        <span className="font-display leading-none font-extrabold tracking-[-0.02em] whitespace-nowrap">{value}</span>
       </span>
     </span>
   );
 }
 
 /**
- * Finisher #N on a title page (S3 finishers & the board): your number (or the one you'd get), how many people finished
- * it on Mystonie, and the people you follow who did, in finishing order. Rendered inside Suspense.
+ * Finishers on a title page (S3 finishers & the board, ADR 0067): whether you finished it, how many people did and,
+ * once Mystonie has 1,000 members, what share of everyone that is; then the people you follow who did, newest first.
+ * No finisher numbers: a finish isn't a race. Rendered inside Suspense.
  */
 export async function TitleFinishers({ supabase, userId, titleId }: { supabase: UserClient; userId: string; titleId: string }) {
   const [data, t, format] = await Promise.all([
@@ -40,41 +43,33 @@ export async function TitleFinishers({ supabase, userId, titleId }: { supabase: 
   if (!data) return null;
   // eslint-disable-next-line react-hooks/purity -- a server render, once per request
   const now = Date.now();
-  const number = (n: number) => t("number", { number: format.number(n) });
-  const big = (n: number) => (String(n).length <= 3 ? "text-2xl" : String(n).length <= 5 ? "text-lg" : "text-sm");
+  const value = data.share ? formatShare(format, data.share) : format.number(data.count);
+  const big = value.length <= 3 ? "text-2xl" : value.length <= 4 ? "text-lg" : "text-base";
 
   return (
     <PaperCard className="flex flex-col gap-4 pt-6">
       <h2 className="font-display text-lg font-bold">{t("title")}</h2>
       <div className="flex items-center gap-4">
-        {data.mine ? (
-          <Seal number={number(data.mine)} className={cn("size-20", big(data.mine))} />
-        ) : (
-          <Seal number={number(data.count + 1)} empty className={cn("size-20", big(data.count + 1))} />
-        )}
+        <Seal value={value} empty={!data.mine} className={cn("size-20", big)} />
         <div className="flex min-w-0 flex-col gap-1">
-          {data.mine ? (
-            <p className="font-hand text-2xl leading-tight">
-              {t("mine")} {number(data.mine)}
-            </p>
-          ) : (
-            <p className="font-hand text-2xl leading-tight">
-              {t("next", { first: data.count === 0 ? "true" : "false", number: format.number(data.count + 1) })}
+          <p className="font-hand text-2xl leading-tight">{data.mine ? t("mine") : t("next", { first: data.count === 0 ? "true" : "false" })}</p>
+          {data.count > 0 && (
+            <p className="text-sm text-muted-foreground">
+              {t("count", { count: data.count })}
+              {data.share ? ` ${t("share", { share: formatShare(format, data.share) })}` : ""}
             </p>
           )}
-          {data.count > 0 && <p className="text-sm text-muted-foreground">{t("count", { count: data.count })}</p>}
         </div>
       </div>
 
       {data.friends.length > 0 && (
         <div className="flex flex-col gap-1">
           <h3 className="text-sm font-semibold">{t("friends")}</h3>
-          <ol className="flex flex-col">
+          <ul className="flex flex-col">
             {data.friends.map((f) => {
               const name = f.displayName || f.username;
               return (
                 <li key={f.id} className="flex items-center gap-3 border-b border-dashed border-border py-2 last:border-b-0">
-                  <span className="w-16 shrink-0 font-display text-sm font-extrabold text-brand tabular-nums">{number(f.number)}</span>
                   <Link href={`/u/${f.username}`} className="flex min-w-0 flex-1 items-center gap-2.5 rounded-lg hover:opacity-90">
                     <Avatar name={name} url={f.avatarUrl} className="size-8" />
                     <span className="flex min-w-0 flex-col">
@@ -85,10 +80,10 @@ export async function TitleFinishers({ supabase, userId, titleId }: { supabase: 
                 </li>
               );
             })}
-          </ol>
+          </ul>
         </div>
       )}
-      <p className="text-xs text-muted-foreground">{t("hint")}</p>
+      {!data.share && <p className="text-xs text-muted-foreground">{t("hint", { members: format.number(SHARE_MIN_MEMBERS) })}</p>}
     </PaperCard>
   );
 }

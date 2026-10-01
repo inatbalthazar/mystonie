@@ -382,18 +382,24 @@ describe("Survived cards (S2 content warnings)", () => {
   });
 });
 
-describe("Finisher numbers (S3 finishers & the board)", () => {
-  it("keeps a finish card's number and lets it be hidden", () => {
-    expect(parseCardData({ ...data, finisherNo: 1204 })?.finisherNo).toBe(1204);
-    expect(parseCardData(data)?.finisherNo).toBeNull();
-    expect(parseCardData({ ...data, finisherNo: 3, hide: ["finisher"] })?.hide).toEqual(["finisher"]);
+describe("Rare finishes (ADR 0067)", () => {
+  it("keeps a finish card's share and lets it be hidden", () => {
+    expect(parseCardData({ ...data, finishShare: 0.004 })?.finishShare).toBe(0.004);
+    expect(parseCardData(data)?.finishShare).toBeNull();
+    expect(parseCardData({ ...data, finishShare: 0.004, hide: ["finisher"] })?.hide).toEqual(["finisher"]);
   });
 
-  it("rejects odd numbers and numbers on anything but a finish", () => {
-    for (const finisherNo of [0, -1, 1.5, "12", 2_000_000_000]) {
-      expect(parseCardData({ ...data, finisherNo }), String(finisherNo)).toBeNull();
+  it("rejects odd shares and shares on anything but a finish", () => {
+    for (const finishShare of [0, -0.1, 1.5, "0.1", Number.NaN]) {
+      expect(parseCardData({ ...data, finishShare }), String(finishShare)).toBeNull();
     }
-    expect(parseCardData({ ...data, finisherNo: 3, progress })).toBeNull();
+    expect(parseCardData({ ...data, finishShare: 0.004, progress })).toBeNull();
+  });
+
+  it("ignores the finisher number of cards saved before", () => {
+    const old = parseCardData({ ...data, finisherNo: 1204 });
+    expect(old).not.toBeNull();
+    expect(old).not.toHaveProperty("finisherNo");
   });
 });
 
@@ -414,7 +420,7 @@ describe("Challenge cards (S3 challenges & clubs)", () => {
     expect(parseCardData({ ...data, challenge: { ...challenge, days: [0] } })).toBeNull();
     expect(parseCardData({ ...data, challenge: { ...challenge, days: [32] } })).toBeNull();
     expect(parseCardData({ ...data, challenge, progress })).toBeNull();
-    expect(parseCardData({ ...data, challenge, finisherNo: 3 })).toBeNull();
+    expect(parseCardData({ ...data, challenge, finishShare: 0.004 })).toBeNull();
     expect(parseCardSave({ ...save, data })).toBeNull();
     expect(parseCardSave({ ...save, entryId: ENTRY })).toBeNull();
     expect(parseCardSave({ ...save, templateId: "stone" })).toBeNull();
@@ -477,7 +483,7 @@ describe("Atlas cards (stage 4, ADR 0059)", () => {
       expect(parseCardData({ ...atlasData, atlas: bad }), JSON.stringify(bad)).toBeNull();
     }
     expect(parseCardData({ ...atlasData, posterUrl: "https://image.tmdb.org/t/p/w342/matrix.jpg" })).toBeNull();
-    expect(parseCardData({ ...atlasData, finisherNo: 3 })).toBeNull();
+    expect(parseCardData({ ...atlasData, finishShare: 0.004 })).toBeNull();
     expect(parseCardSave({ ...save, kind: "finish", entryId: ENTRY })).toBeNull();
     expect(parseCardSave({ ...save, kind: "stats", templateId: "boldStats" })).toBeNull();
     expect(parseCardSave({ ...save, data: { ...atlasData, atlas: null } })).toBeNull();

@@ -1,12 +1,13 @@
 import { posterUrl } from "@/core/catalog/images";
 import { sortCollection, type CollectionItem, type EntryPatch, type EntryStatus, type NewEntry } from "@/core/collection/entries";
+import { shownShare } from "@/core/finish-share";
 import { uuidv7 } from "@/core/ids";
 import type { Database } from "./database.types";
 import type { UserClient } from "./supabase-server";
 
 type EntryRow = Pick<
   Database["public"]["Tables"]["entries"]["Row"],
-  "id" | "status" | "finished_at" | "created_at" | "rating" | "review" | "hours_played" | "finisher_no"
+  "id" | "status" | "finished_at" | "created_at" | "rating" | "review" | "hours_played" | "finish_share" | "finish_members"
 >;
 type TitleRow = Pick<
   Database["public"]["Tables"]["titles"]["Row"],
@@ -28,7 +29,7 @@ type TitleRow = Pick<
 
 // The entry plus the title fields a collection row shows (RLS: the signed-in user's rows).
 const COLUMNS =
-  "id, status, finished_at, created_at, rating, review, hours_played, finisher_no, title:titles!inner(id, source, kind, external_id, name, year, poster_path, genres, runtime_min, episode_count, page_count, chapter_count, volume_count, playtime_hours)";
+  "id, status, finished_at, created_at, rating, review, hours_played, finish_share, finish_members, title:titles!inner(id, source, kind, external_id, name, year, poster_path, genres, runtime_min, episode_count, page_count, chapter_count, volume_count, playtime_hours)";
 
 function itemFromRow(row: EntryRow & { title: TitleRow }): CollectionItem {
   return {
@@ -39,7 +40,7 @@ function itemFromRow(row: EntryRow & { title: TitleRow }): CollectionItem {
     rating: row.rating,
     review: row.review,
     hoursPlayed: row.hours_played,
-    finisherNo: row.finisher_no,
+    finishShare: shownShare(row.finish_share, row.finish_members),
     title: {
       id: row.title.id,
       source: row.title.source as CollectionItem["title"]["source"],

@@ -17,12 +17,12 @@ type State = { status: "closed" | "loading" | "error" } | { status: "open"; prev
 const linkClass = "inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand underline-offset-2 hover:underline";
 
 /**
- * "Look before you add" (stage 4, ADR 0058): on the ➕ sheet's status step, the warning note for the viewer's
- * avoid-topics (from the search badge, then from the details once loaded) and, one tap away, the title's details:
- * synopsis, TMDB score, IMDb link, who made it and DoesTheDogDie's most-voted topics. Loaded only when asked for: a
- * DTDD lookup spends its small quota. The status buttons below stay where they are, so adding is still 3 taps.
+ * "Look before you add" (stage 4, ADR 0058): on the ➕ sheet's status step and a collection entry's sheet (ADR 0066), the
+ * warning note for the viewer's avoid-topics (from the search badge, then from the details once loaded) and, one tap away,
+ * the title's details: synopsis, TMDB score, IMDb link, who made it and DoesTheDogDie's most-voted topics. Loaded only
+ * when asked for: a DTDD lookup spends its small quota. The status buttons below stay where they are, so adding is still 3 taps.
  */
-export function TitleDetails({ result, warning }: { result: SearchResult; warning: string | null }) {
+export function TitleDetails({ result, warning }: { result: Pick<SearchResult, "kind" | "externalId">; warning: string | null }) {
   const t = useTranslations("TitleDetails");
   const panelId = useId();
   const warningLabel = useWarningLabel();
@@ -94,7 +94,7 @@ export function TitleDetails({ result, warning }: { result: SearchResult; warnin
   );
 }
 
-function Details({ preview, result }: { preview: TitlePreview; result: SearchResult }) {
+function Details({ preview, result }: { preview: TitlePreview; result: Pick<SearchResult, "kind" | "externalId"> }) {
   const t = useTranslations("TitleDetails");
   const format = useFormatter();
   const [more, setMore] = useState(false);

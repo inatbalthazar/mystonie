@@ -2,7 +2,10 @@ import { useFormatter, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { CardFooter, CardRoot, footerUser, CardTitle, DISPLAY, FinisherStamp, Poster, Review, Stars, useFinishedDate, useHeadline, useStats, type TemplateProps } from "../parts";
 
-/** Strava-style: huge condensed numbers, a strip of poster, the title. Best for series, progress and recaps. */
+/**
+ * Strava-style: huge condensed numbers, the poster, the title. Best for series, progress and recaps. The poster runs down
+ * to the numbers and fades into the card, like a Strava photo above its stats, so the middle is never left empty.
+ */
 export function BoldStatsCard({ data, size, palette, host }: TemplateProps) {
   const t = useTranslations("Card");
   const format = useFormatter();
@@ -13,13 +16,17 @@ export function BoldStatsCard({ data, size, palette, host }: TemplateProps) {
   const longest = Math.max(0, ...stats.map((s) => s.value.length));
   const numberSize =
     longest <= 3 ? (story ? "text-[176px]" : "text-[140px]") : longest <= 5 ? (story ? "text-[120px]" : "text-[100px]") : "text-[80px]";
+  const posterHeight = story ? "h-[1440px]" : "h-[980px]";
 
   return (
     <CardRoot size={size} palette={palette} className="p-[80px]">
-      <Poster url={data.posterUrl} className={cn("absolute inset-x-0 top-0 opacity-50", story ? "h-[800px]" : "h-[440px]")} />
-      <div className={cn("absolute inset-x-0 top-0 bg-gradient-to-b from-transparent to-[var(--card-bg)]", story ? "h-[800px]" : "h-[440px]")} />
+      <Poster url={data.posterUrl} className={cn("absolute inset-x-0 top-0 opacity-60", posterHeight)} />
+      <div
+        className={cn("absolute inset-x-0 top-0 bg-gradient-to-b from-[var(--card-bg)]/35 via-[var(--card-bg)]/60 via-60% to-[var(--card-bg)]", posterHeight)}
+      />
 
-      <div className="relative flex min-h-0 flex-1 flex-col gap-[28px]">
+      {/* Card text is always white (palette.ts): a soft shadow keeps it readable over a bright poster. */}
+      <div className="relative flex min-h-0 flex-1 flex-col gap-[28px] [text-shadow:0_2px_18px_rgb(0_0_0/0.6)]">
         <p className="flex items-center gap-[16px] text-[36px] font-bold tracking-[0.25em] text-[var(--card-accent)] uppercase">
           <span className="size-[20px] shrink-0 rounded-full bg-current" />
           <span className="truncate">{headline}</span>

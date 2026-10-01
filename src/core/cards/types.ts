@@ -67,10 +67,11 @@ export type CardData = {
    */
   survived?: SurvivedKey | null;
   /**
-   * On a Finish card: the finisher's number for this title ("Finisher #1,204", S3 finishers & the board). Handed
-   * out by the database; on a saved card the server sets it from the entry, never the browser.
+   * On a Finish card: the share of Mystonie that had finished the title when this person did (ADR 0067), 0–1, set
+   * only once Mystonie has 1,000 members (`shownShare`). The card stamps it when it's rare (`isRare`). Kept by the
+   * database; on a saved card the server sets it from the entry, never the browser.
    */
-  finisherNo?: number | null;
+  finishShare?: number | null;
   /** Printed in the footer (`@username`) of saved cards. The server sets it, never the browser. */
   username?: string | null;
   /** What the user chose to leave off the card. */

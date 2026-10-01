@@ -20,9 +20,11 @@ import type { CardData, CardHideable, CardSize } from "@/core/cards/types";
 import { isReadingKind } from "@/core/catalog/types";
 import { isHoursPlayed, type EntryNotes } from "@/core/collection/entries";
 import { shelfOfKind } from "@/core/collection/view";
+import { isRare } from "@/core/finish-share";
 import { uuidv7 } from "@/core/ids";
 import { Link } from "@/i18n/navigation";
 import { track } from "@/lib/analytics";
+import { formatShare } from "@/lib/share";
 import { cn } from "@/lib/utils";
 import { useOnline } from "./offline/outbox";
 
@@ -255,7 +257,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
     ...(username ? (["username"] as const) : []),
     ...(onlyUser || noTime ? [] : (["time"] as const)),
     ...(!onlyUser && (data.recap ? data.recap.episodes > 0 : data.kind === "series" || read) ? (["episodes"] as const) : []),
-    ...(source.kind === "finish" && data.finisherNo ? (["finisher"] as const) : []),
+    ...(source.kind === "finish" && isRare(data.finishShare) ? (["finisher"] as const) : []),
   ];
 
   /** The line under the stamp: what this card celebrates. */
@@ -322,12 +324,12 @@ export function Celebration({ data, source, animate = false, username, host, onC
           <h2 id="celebration-title" className="mt-1 font-hand text-2xl leading-tight text-balance">
             {title()}
           </h2>
-          {source.kind === "finish" && data.finisherNo && (
-            // The number arrives with the saved entry, a moment after the stamp.
+          {source.kind === "finish" && data.finishShare ? (
+            // How rare the finish was (ADR 0067), arriving with the saved entry a moment after the stamp.
             <p className="rounded-full bg-brand-soft px-3 py-1 text-sm font-bold text-brand motion-safe:animate-rise">
-              {t("finisherLine", { number: format.number(data.finisherNo) })}
+              {t("shareLine", { share: formatShare(format, data.finishShare), rare: String(isRare(data.finishShare)) })}
             </p>
-          )}
+          ) : null}
         </header>
 
         <div

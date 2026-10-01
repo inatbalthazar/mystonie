@@ -10,8 +10,10 @@ import { challengeUnit, findChallenge, isChallengeSlug } from "@/core/challenges
 import { CARD_DIMENSIONS, type CardData, type CardRecap, type CardSize, type Palette } from "@/core/cards/types";
 import { finishedKey, gameHours, titleSizeStep, watchMinutes } from "@/core/cards/text";
 import { countryName, isCountryCode } from "@/core/countries";
+import { isRare } from "@/core/finish-share";
 import { REEL_GUESSES } from "@/core/reel";
 import { recapFigures, wholeMonth } from "@/core/stats/recap";
+import { formatShare } from "@/lib/share";
 import { cn } from "@/lib/utils";
 
 export type TemplateProps = { data: CardData; size: CardSize; palette: Palette; host: string };
@@ -330,22 +332,26 @@ export function CardFooter({ host, username, className }: { host: string; userna
 /** Footer props from the card data: the username unless the user hid it. */
 export const footerUser = (data: CardData) => (data.hide?.includes("username") ? null : data.username);
 
-/** The finisher number a Finish card prints (S3 finishers & the board), or null: none yet, hidden, or another card. */
-export function cardFinisherNo(data: CardData): number | null {
-  if (!data.finisherNo || data.hide?.includes("finisher")) return null;
-  return data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas ? null : data.finisherNo;
+/**
+ * The rare-finish share a Finish card stamps (ADR 0067), or null: none (Mystonie under 1,000 members), not rare
+ * (over 10%), hidden, or another card.
+ */
+export function cardFinishShare(data: CardData): number | null {
+  if (!isRare(data.finishShare) || data.hide?.includes("finisher")) return null;
+  return data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas ? null : data.finishShare;
 }
 
 /**
- * "FINISHER #1,204": a round seal pressed onto the card, like a race number (S3 finishers & the board). Paper
- * behind the ink so it reads on any poster. Renders nothing without a number.
+ * "RARE FINISH · 0.4% · OF MYSTONIE": a round seal pressed onto the card when few people on Mystonie had finished the
+ * title (ADR 0067; it was a finisher number, but a finish isn't a race). Paper behind the ink so it reads on any
+ * poster. Renders nothing for a finish that isn't rare.
  */
 export function FinisherStamp({ data, className }: { data: CardData; className?: string }) {
   const t = useTranslations("Card");
   const format = useFormatter();
-  const no = cardFinisherNo(data);
-  if (!no) return null;
-  const value = `#${format.number(no)}`;
+  const share = cardFinishShare(data);
+  if (!share) return null;
+  const value = formatShare(format, share);
   const digits = value.length <= 4 ? "text-[84px]" : value.length <= 6 ? "text-[64px]" : value.length <= 8 ? "text-[50px]" : "text-[38px]";
   return (
     <div
@@ -356,9 +362,9 @@ export function FinisherStamp({ data, className }: { data: CardData; className?:
       )}
     >
       <div className="flex size-full flex-col items-center justify-center gap-[4px] rounded-full border-[2px] border-dashed border-current">
-        <span className="text-[24px] leading-none font-bold tracking-[0.22em] uppercase">{t("finisher")}</span>
+        <span className="text-[19px] leading-none font-bold tracking-[0.12em] whitespace-nowrap uppercase">{t("rareFinish")}</span>
         <span className={cn(DISPLAY, digits, "leading-none font-extrabold tracking-[-0.02em] whitespace-nowrap")}>{value}</span>
-        <span className="text-[18px] leading-none font-bold tracking-[0.2em] uppercase opacity-80">{t("brand")}</span>
+        <span className="text-[15px] leading-none font-bold tracking-[0.12em] whitespace-nowrap uppercase opacity-80">{t("ofMystonie")}</span>
       </div>
     </div>
   );

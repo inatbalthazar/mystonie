@@ -166,7 +166,7 @@ test("the check on top answers before you watch: the family set, a clear title, 
   noDtdd();
 });
 
-test("look before you add: the ➕ sheet shows a title's details and warnings on request (ADR 0058)", async ({ page, request }) => {
+test("look before you add: the ➕ sheet and a collection entry show a title's details and warnings on request (ADR 0058, ADR 0066)", async ({ page, request }) => {
   const noDtdd = noBrowserDtdd(page);
   // TMDB's details body and credits, as a real fetch would have cached them.
   const { url, headers } = rest();
@@ -231,6 +231,18 @@ test("look before you add: the ➕ sheet shows a title's details and warnings on
   await expect(sheet.getByRole("region", { name: "Content warnings" })).toContainText("No warning data yet.");
   await expect(sheet.getByRole("region", { name: "Content warnings" })).toContainText("No answer for your topics yet");
   await expect(sheet.getByRole("link", { name: "See it on IMDb" })).toHaveCount(0);
+
+  // The same look from the collection: an entry's sheet shows the note and, on a tap, the details (ADR 0066).
+  await page.goto("/collection");
+  await page.getByRole("button", { name: "Edit Warn Test Doghouse. Content warning: a dog dies" }).first().click();
+  const entry = page.getByRole("dialog", { name: "Warn Test Doghouse" });
+  await expect(entry.getByRole("note")).toHaveText("Content warning: a dog dies");
+  await entry.getByRole("button", { name: "Details and content warnings" }).click();
+  await expect(entry.getByText("A family dog and a very long night.")).toBeVisible();
+  await expect(entry.getByText("Directed by Dee Rector")).toBeVisible();
+  await expect(entry.getByRole("region", { name: "Content warnings" }).getByRole("listitem")).toHaveCount(3);
+  await expect(entry.getByRole("radio", { name: "Want to watch" })).toBeChecked();
+  expect(await checkedAt(request, "973001")).toBe(before); // still from the cache
   noDtdd();
 });
 

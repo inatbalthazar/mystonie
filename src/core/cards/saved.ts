@@ -364,9 +364,12 @@ export function parseCardData(v: unknown): CardData | null {
   ) {
     return null;
   }
-  // Only a Finish card has a finisher number.
-  const finisherNo = v.finisherNo ?? null;
-  if (finisherNo !== null && (!int(finisherNo, 1, 1_000_000_000) || num(progress, reading, recap, milestone, challenge, reel, atlas) > 0))
+  // Only a Finish card has a rare-finish share (ADR 0067). Cards saved before it carried `finisherNo`, now ignored.
+  const finishShare = v.finishShare ?? null;
+  if (
+    finishShare !== null &&
+    (typeof finishShare !== "number" || !(finishShare > 0 && finishShare <= 1) || num(progress, reading, recap, milestone, challenge, reel, atlas) > 0)
+  )
     return null;
   return {
     kind: kind as CardData["kind"],
@@ -394,7 +397,7 @@ export function parseCardData(v: unknown): CardData | null {
     ...(reel ? { reel } : {}),
     ...(atlas ? { atlas } : {}),
     survived: survived as SurvivedKey | null,
-    finisherNo: finisherNo as number | null,
+    finishShare: finishShare as number | null,
     hide: [...new Set((hide as CardHideable[] | undefined) ?? [])],
   };
 }

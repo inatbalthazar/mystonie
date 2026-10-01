@@ -44,8 +44,8 @@ export type CollectionItem = {
   review?: string | null;
   /** A game: the hours the player says it took (asked after the celebration too). */
   hoursPlayed?: number | null;
-  /** "Finisher #N": set by the database the first time the user finishes the title, and kept for good. */
-  finisherNo?: number | null;
+  /** How rare the finish was (ADR 0067): the share of Mystonie that had finished the title then, or null (`shownShare`). */
+  finishShare?: number | null;
   title: CollectionTitle;
 };
 

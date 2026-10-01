@@ -51,6 +51,7 @@ import { ShareCollection } from "@/components/stats/share-collection";
 import type { CardRecap, CollectionArea } from "@/core/cards/types";
 import { CollectionControls, CollectionSummary, PlaySummary, ReadSummary, ShelfTabs } from "./collection-header";
 import { QuickAdd } from "./quick-add";
+import { TitleDetails } from "./title-details";
 
 /** A row as shown: the server's entry with the changes still on this device laid over it (S3 offline). */
 type Row = Synced<CollectionItem>;
@@ -380,6 +381,7 @@ export function CollectionView({
         {editing && (
           <EntryEditor
             item={editing}
+            warning={warnings[editing.title.id ?? ""]}
             timeZone={timeZone}
             onSave={(change) => update(editing, change)}
             onCard={() => {
@@ -612,24 +614,34 @@ function cardData(item: Row, timeZone: string): CardData {
     hoursPlayed: item.hoursPlayed ?? null,
     rating: item.rating ?? null,
     review: item.review ?? null,
-    finisherNo: item.finisherNo ?? null,
+    finishShare: item.finishShare ?? null,
     finishedOn: localDateKey(Date.parse(item.finishedAt ?? item.addedAt), timeZone),
   };
 }
 
+/**
+ * A collection entry's sheet: the title as the ➕ sheet shows it (poster, kind and year, the warning note and, on request,
+ * its details and content warnings, ADR 0066), then its status, finish date, card and page links.
+ */
 function EntryEditor({
   item,
+  warning,
   timeZone,
   onSave,
   onCard,
 }: {
   item: Row;
+  /** The user's avoid-topics this title has a Yes for (the row's badge). */
+  warning?: BadgeTopic[];
   timeZone: string;
   onSave: (change: { status: EntryStatus; finishedAt: string | null } | { deleted: true }) => void;
   /** "Make a card" for a finished entry. */
   onCard: () => void;
 }) {
   const t = useTranslations("Collection");
+  const home = useTranslations("Home");
+  const format = useFormatter();
+  const warningLabel = useWarningLabel();
   const groupId = useId();
   const dateId = useId();
   const [today] = useState(() => localDateKey(Date.now(), timeZone));
@@ -642,8 +654,29 @@ function EntryEditor({
   const finishedAt = status !== "finished" ? null : item.finishedAt && date === originalDate ? item.finishedAt : finishedAtForDate(date, timeZone);
   const valid = status !== "finished" || !!finishedAt;
 
+  const { title } = item;
+  const game = title.kind === "game";
+
   return (
     <div className="flex flex-col gap-5">
+      <div className="flex items-center gap-4">
+        {/* A game's key art is landscape: it keeps its shape here, as in the ➕ sheet. */}
+        <span
+          className={cn(
+            "relative shrink-0 -rotate-2 overflow-hidden rounded-lg bg-muted shadow-md ring-4 ring-card",
+            game ? "aspect-video w-32" : "aspect-[2/3] w-20",
+          )}
+        >
+          {title.posterUrl && <Image src={title.posterUrl} alt="" fill unoptimized sizes={game ? "128px" : "80px"} className="object-cover" />}
+        </span>
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="text-sm text-muted-foreground">{home("titleMeta", { kind: title.kind, year: title.year ?? "none" })}</p>
+          {title.genres?.length ? <p className="text-sm text-muted-foreground">{format.list(title.genres.slice(0, 3), { type: "unit" })}</p> : null}
+        </div>
+      </div>
+
+      <TitleDetails key={titleKey(title)} result={title} warning={warningLabel(warning)} />
+
       <fieldset className="flex flex-col gap-2">
         <legend id={groupId} className="mb-2 text-sm font-semibold">
           {t("status")}

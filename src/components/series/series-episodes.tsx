@@ -34,7 +34,7 @@ export function entrySnapshot(body: unknown): { status: EntryStatus; entry: Seri
   if (!saved) return null;
   return {
     status: saved.status,
-    entry: { id: saved.id, finishedAt: saved.finishedAt, rating: saved.rating ?? null, review: saved.review ?? null, finisherNo: saved.finisherNo ?? null },
+    entry: { id: saved.id, finishedAt: saved.finishedAt, rating: saved.rating ?? null, review: saved.review ?? null, finishShare: saved.finishShare ?? null },
   };
 }
 
@@ -198,7 +198,7 @@ export function SeriesEpisodes({
     ...card,
     rating: entry?.rating ?? null,
     review: entry?.review ?? null,
-    finisherNo: entry?.finisherNo ?? null,
+    finishShare: entry?.finishShare ?? null,
     finishedOn: entry?.finishedAt ? localDateKey(Date.parse(entry.finishedAt), timeZone) : today,
   };
 

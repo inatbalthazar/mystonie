@@ -30,7 +30,7 @@ UI decides whether people adopt Mystonie, and the share artwork decides whether 
 |---|---|---|
 | **Ticket** | cinema ticket stub with perforation, seat/row replaced by stats | movies |
 | **Polaroid** | poster in a polaroid frame, handwritten-style review | anything |
-| **Bold Stats** | Strava-like: huge numbers, minimal poster crop | series, recaps |
+| **Bold Stats** | Strava-like: huge numbers below the poster, which runs down to them under a tint of the card colour (no empty middle, 2026-10-01) | series, recaps |
 | **Spine** (stage 2) | a book spine on a shelf, cover facing out, stamp or bookmark | books, manga |
 | **Manga Panel** (stage 2) | ink panels on paper, speech bubble, screentone, focus lines | manga |
 | **Stone** (stage 2) | the number carved into Stonie's tablet, the title that got there pasted below | milestones |

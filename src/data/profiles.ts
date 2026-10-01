@@ -113,7 +113,7 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
     table((from, to) =>
       db
         .from("entries")
-        .select("id, status, finished_at, rating, review, hours_played, finisher_no, created_at, updated_at, deleted_at, title:titles(source, kind, external_id, name, year)")
+        .select("id, status, finished_at, rating, review, hours_played, finisher_no, finish_share, finish_members, created_at, updated_at, deleted_at, title:titles(source, kind, external_id, name, year)")
         .eq("user_id", user.id)
         .order("id")
         .range(from, to),

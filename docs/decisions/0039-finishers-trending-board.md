@@ -1,6 +1,6 @@
 # ADR 0039: Finisher numbers handed out by the database, trending counts from 3 people, the board computed from recaps
 
-**Status:** Accepted · **Date:** 2026-09-29
+**Status:** Accepted · **Date:** 2026-09-29 · The numbers are no longer shown since [ADR 0067](0067-rare-finishes.md) (rare finishes); the numbering below still runs
 
 ## Context
 The third stage 3 task ([S3 finishers & the board](../product/features/S3-finishers-board.md)) adds three things:

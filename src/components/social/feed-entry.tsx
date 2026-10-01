@@ -3,8 +3,10 @@
 import Image from "next/image";
 import { useFormatter, useTranslations } from "next-intl";
 import { Stars } from "@/cards/parts";
+import { isRare } from "@/core/finish-share";
 import type { FeedItem } from "@/core/social";
 import { Link } from "@/i18n/navigation";
+import { formatShare } from "@/lib/share";
 import { Sticker } from "../badges/sticker";
 import { Avatar } from "./avatar";
 import { StampButton } from "./stamp-button";
@@ -58,10 +60,10 @@ export function FeedEntry({ item, now, index, readOnly = false }: { item: FeedIt
         <div className="flex min-w-0 flex-1 flex-col gap-1.5">
           <p className="flex flex-wrap items-center gap-2 font-display text-xs font-extrabold tracking-[0.12em] text-brand uppercase [&:lang(th)]:tracking-normal">
             {t("finishedLabel")}
-            {item.finisherNo && (
-              // The finisher number, as a little inked seal.
+            {isRare(item.finishShare) && (
+              // A rare finish (ADR 0067), as a little inked seal.
               <span className="-rotate-3 rounded-full border-2 border-double border-brand/70 px-2 py-0.5 tracking-normal normal-case">
-                {t("finisherNo", { number: format.number(item.finisherNo) })}
+                {t("rareFinish", { share: formatShare(format, item.finishShare) })}
               </span>
             )}
           </p>

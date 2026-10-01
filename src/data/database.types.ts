@@ -279,6 +279,8 @@ export type Database = {
           created_at: string
           deleted_at: string | null
           edited_at: string
+          finish_members: number | null
+          finish_share: number | null
           finished_at: string | null
           finisher_no: number | null
           hours_played: number | null
@@ -294,6 +296,8 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           edited_at?: string
+          finish_members?: number | null
+          finish_share?: number | null
           finished_at?: string | null
           finisher_no?: number | null
           hours_played?: number | null
@@ -309,6 +313,8 @@ export type Database = {
           created_at?: string
           deleted_at?: string | null
           edited_at?: string
+          finish_members?: number | null
+          finish_share?: number | null
           finished_at?: string | null
           finisher_no?: number | null
           hours_played?: number | null
@@ -1296,19 +1302,25 @@ export type Database = {
       title_finishers: {
         Row: {
           created_at: string
+          members: number | null
           number: number
+          share: number | null
           title_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
+          members?: number | null
           number: number
+          share?: number | null
           title_id: string
           user_id: string
         }
         Update: {
           created_at?: string
+          members?: number | null
           number?: number
+          share?: number | null
           title_id?: string
           user_id?: string
         }
@@ -1679,9 +1691,63 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      pg_all_foreign_keys: {
+        Row: {
+          fk_columns: unknown[] | null
+          fk_constraint_name: unknown
+          fk_schema_name: unknown
+          fk_table_name: unknown
+          fk_table_oid: unknown
+          is_deferrable: boolean | null
+          is_deferred: boolean | null
+          match_type: string | null
+          on_delete: string | null
+          on_update: string | null
+          pk_columns: unknown[] | null
+          pk_constraint_name: unknown
+          pk_index_name: unknown
+          pk_schema_name: unknown
+          pk_table_name: unknown
+          pk_table_oid: unknown
+        }
+        Relationships: []
+      }
+      tap_funky: {
+        Row: {
+          args: string | null
+          is_definer: boolean | null
+          is_strict: boolean | null
+          is_visible: boolean | null
+          kind: unknown
+          langoid: unknown
+          name: unknown
+          oid: unknown
+          owner: unknown
+          returns: string | null
+          returns_set: boolean | null
+          schema: unknown
+          volatility: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
+      _cleanup: { Args: never; Returns: boolean }
+      _contract_on: { Args: { "": string }; Returns: unknown }
+      _currtest: { Args: never; Returns: number }
+      _db_privs: { Args: never; Returns: unknown[] }
+      _extensions: { Args: never; Returns: unknown[] }
+      _get: { Args: { "": string }; Returns: number }
+      _get_latest: { Args: { "": string }; Returns: number[] }
+      _get_note: { Args: { "": string }; Returns: string }
+      _is_verbose: { Args: never; Returns: boolean }
+      _prokind: { Args: { p_oid: unknown }; Returns: unknown }
+      _query: { Args: { "": string }; Returns: string }
+      _refine_vol: { Args: { "": string }; Returns: string }
+      _retval: { Args: { "": string }; Returns: string }
+      _table_privs: { Args: never; Returns: unknown[] }
+      _temptypes: { Args: { "": string }; Returns: string }
+      _todo: { Args: never; Returns: string }
       avoid_warnings: {
         Args: { p_title_ids: string[] }
         Returns: {
@@ -1725,8 +1791,9 @@ export type Database = {
           card_image_path: string
           display_name: string
           entry_id: string
+          finish_members: number
+          finish_share: number
           finished_at: string
-          finisher_no: number
           poster_path: string
           rating: number
           review: string
@@ -1762,6 +1829,42 @@ export type Database = {
           year: number
         }[]
       }
+      col_is_null:
+        | {
+            Args: {
+              column_name: unknown
+              description?: string
+              schema_name: unknown
+              table_name: unknown
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              column_name: unknown
+              description?: string
+              table_name: unknown
+            }
+            Returns: string
+          }
+      col_not_null:
+        | {
+            Args: {
+              column_name: unknown
+              description?: string
+              schema_name: unknown
+              table_name: unknown
+            }
+            Returns: string
+          }
+        | {
+            Args: {
+              column_name: unknown
+              description?: string
+              table_name: unknown
+            }
+            Returns: string
+          }
       community_avoid_hits: {
         Args: { p_title_ids: string[] }
         Returns: {
@@ -1770,6 +1873,28 @@ export type Database = {
           topic_id: number
         }[]
       }
+      diag:
+        | {
+            Args: { msg: unknown }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.diag(msg => text), public.diag(msg => anyelement). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+        | {
+            Args: { msg: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.diag(msg => text), public.diag(msg => anyelement). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+      diag_test_name: { Args: { "": string }; Returns: string }
+      do_tap:
+        | { Args: never; Returns: string[] }
+        | { Args: { "": string }; Returns: string[] }
+      fail:
+        | { Args: never; Returns: string }
+        | { Args: { "": string }; Returns: string }
+      findfuncs: { Args: { "": string }; Returns: string[] }
+      finish: { Args: { exception_on_failure?: boolean }; Returns: string[] }
       follow_counts: {
         Args: { p_user_id: string }
         Returns: {
@@ -1786,8 +1911,9 @@ export type Database = {
           card_image_path: string
           display_name: string
           entry_id: string
+          finish_members: number
+          finish_share: number
           finished_at: string
-          finisher_no: number
           poster_path: string
           rating: number
           review: string
@@ -1803,8 +1929,13 @@ export type Database = {
           username: string
         }[]
       }
+      format_type_string: { Args: { "": string }; Returns: string }
+      has_unique: { Args: { "": string }; Returns: string }
+      in_todo: { Args: never; Returns: boolean }
+      is_empty: { Args: { "": string }; Returns: string }
       is_reserved_username: { Args: { name: string }; Returns: boolean }
       is_time_zone: { Args: { tz: string }; Returns: boolean }
+      isnt_empty: { Args: { "": string }; Returns: string }
       journal_stamp_counts: {
         Args: never
         Returns: {
@@ -1812,6 +1943,8 @@ export type Database = {
           stamps: number
         }[]
       }
+      lives_ok: { Args: { "": string }; Returns: string }
+      member_count: { Args: never; Returns: number }
       monthly_recap_candidates: {
         Args: { p_limit: number; p_now: string }
         Returns: {
@@ -1852,6 +1985,15 @@ export type Database = {
           username: string
         }[]
       }
+      no_plan: { Args: never; Returns: boolean[] }
+      num_failed: { Args: never; Returns: number }
+      os_name: { Args: never; Returns: string }
+      pass:
+        | { Args: never; Returns: string }
+        | { Args: { "": string }; Returns: string }
+      pg_version: { Args: never; Returns: string }
+      pg_version_num: { Args: never; Returns: number }
+      pgtap_version: { Args: never; Returns: number }
       public_profile: {
         Args: { p_username: string }
         Returns: {
@@ -1888,6 +2030,9 @@ export type Database = {
           user_id: string
         }[]
       }
+      runtests:
+        | { Args: never; Returns: string[] }
+        | { Args: { "": string }; Returns: string[] }
       scene_warning_tally: {
         Args: { p_warning_id: string }
         Returns: {
@@ -1921,7 +2066,11 @@ export type Database = {
           template_id: string
         }[]
       }
+      skip:
+        | { Args: { "": string }; Returns: string }
+        | { Args: { how_many: number; why: string }; Returns: string }
       suggest_username: { Args: { seed: string }; Returns: string }
+      throws_ok: { Args: { "": string }; Returns: string }
       title_reviews: {
         Args: { p_limit?: number; p_title_id: string }
         Returns: {
@@ -1930,8 +2079,9 @@ export type Database = {
           card_image_path: string
           display_name: string
           entry_id: string
+          finish_members: number
+          finish_share: number
           finished_at: string
-          finisher_no: number
           poster_path: string
           rating: number
           review: string
@@ -1966,6 +2116,15 @@ export type Database = {
           unit: string
         }[]
       }
+      todo:
+        | { Args: { how_many: number }; Returns: boolean[] }
+        | { Args: { how_many: number; why: string }; Returns: boolean[] }
+        | { Args: { why: string }; Returns: boolean[] }
+        | { Args: { how_many: number; why: string }; Returns: boolean[] }
+      todo_end: { Args: never; Returns: boolean[] }
+      todo_start:
+        | { Args: never; Returns: boolean[] }
+        | { Args: { "": string }; Returns: boolean[] }
       trending_titles: {
         Args: { p_days?: number; p_limit?: number }
         Returns: {
@@ -2017,7 +2176,9 @@ export type Database = {
       [_ in never]: never
     }
     CompositeTypes: {
-      [_ in never]: never
+      _time_trial_type: {
+        a_time: number | null
+      }
     }
   }
 }

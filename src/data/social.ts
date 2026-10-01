@@ -3,6 +3,7 @@
 import { isBadgeId, type BadgeId } from "@/core/badges";
 import { posterUrl } from "@/core/catalog/images";
 import type { TitleKind } from "@/core/catalog/types";
+import { shownShare } from "@/core/finish-share";
 import { uuidv7 } from "@/core/ids";
 import { FEED_PAGE, type ActivityItem, type FeedCursor, type FeedItem, type Person } from "@/core/social";
 import { publicImageUrl } from "./cards";
@@ -52,7 +53,7 @@ export async function feedItems(db: UserClient, viewerId: string, data: readonly
     card: r.card_id ? { id: r.card_id, imageUrl: r.card_image_path ? publicImageUrl(r.card_image_path) : null } : null,
     mine: r.user_id === viewerId,
     badges: earned.get(`${r.user_id}:${r.title_id}`) ?? [],
-    finisherNo: r.finisher_no ?? null,
+    finishShare: shownShare(r.finish_share, r.finish_members),
   }));
 }
 

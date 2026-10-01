@@ -5,6 +5,7 @@ import { cardImagePath, parseCardData, type CardSave } from "@/core/cards/saved"
 import { isTemplateId, type TemplateId } from "@/core/cards/templates";
 import type { CardData, CardKind, CardSize } from "@/core/cards/types";
 import { isCountryCode } from "@/core/countries";
+import { shownShare } from "@/core/finish-share";
 import { userPlaces, userRegions } from "./atlas";
 import { linkRecapCard } from "./recaps";
 import { adminClient } from "./supabase-admin";
@@ -35,9 +36,9 @@ export function publicImageUrl(path: string): string | null {
  * A share also returns a signed URL the browser uploads the PNG to (the bucket has no client write access).
  */
 export async function saveCard(db: UserClient, userId: string, save: CardSave): Promise<{ uploadUrl: string | null } | null> {
-  const [{ data: profile, error: profileError }, finisherNo, completed, played, mapped] = await Promise.all([
+  const [{ data: profile, error: profileError }, finishShare, completed, played, mapped] = await Promise.all([
     db.from("profiles").select("username").eq("id", userId).single(),
-    cardFinisherNo(db, userId, save),
+    cardFinishShare(db, userId, save),
     completedChallenge(db, userId, save),
     playedReel(db, userId, save),
     ownAtlas(db, userId, save),
@@ -45,7 +46,7 @@ export async function saveCard(db: UserClient, userId: string, save: CardSave): 
   if (profileError) throw new Error(`profiles read failed: ${profileError.message}`);
   if (!completed || !played || !mapped) return null;
   const hideName = save.data.hide?.includes("username");
-  const params = { ...save.data, username: hideName ? null : profile.username, finisherNo };
+  const params = { ...save.data, username: hideName ? null : profile.username, finishShare };
   const path = cardImagePath(userId, save.id);
 
   const { data: existing, error: readError } = await db.from("cards").select("id, shared_at").eq("id", save.id).maybeSingle();
@@ -146,14 +147,14 @@ async function completedChallenge(db: UserClient, userId: string, save: CardSave
 }
 
 /**
- * The finisher number a card may print: the entry's own (S3 finishers & the board), only on a Finish card, and not
- * when the user hid it. Whatever the browser sent is ignored.
+ * The rare-finish share a card may print (ADR 0067): the entry's own, only on a Finish card, and not when the user hid
+ * it. Whatever the browser sent is ignored.
  */
-async function cardFinisherNo(db: UserClient, userId: string, save: CardSave): Promise<number | null> {
+async function cardFinishShare(db: UserClient, userId: string, save: CardSave): Promise<number | null> {
   if (save.kind !== "finish" || !save.entryId || save.data.hide?.includes("finisher")) return null;
-  const { data, error } = await db.from("entries").select("finisher_no").eq("id", save.entryId).eq("user_id", userId).maybeSingle();
+  const { data, error } = await db.from("entries").select("finish_share, finish_members").eq("id", save.entryId).eq("user_id", userId).maybeSingle();
   if (error) throw new Error(`entries read failed: ${error.message}`);
-  return data?.finisher_no ?? null;
+  return data ? shownShare(data.finish_share, data.finish_members) : null;
 }
 
 type SharedCardRow = {

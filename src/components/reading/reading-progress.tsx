@@ -168,7 +168,7 @@ export function ReadingProgress({
     ...card,
     rating: entry?.rating ?? null,
     review: entry?.review ?? null,
-    finisherNo: entry?.finisherNo ?? null,
+    finishShare: entry?.finishShare ?? null,
     finishedOn: entry?.finishedAt ? localDateKey(Date.parse(entry.finishedAt), timeZone) : today,
   };
   const history = [...logs].sort((a, b) => Date.parse(b.readAt) - Date.parse(a.readAt) || (a.id < b.id ? 1 : -1)).slice(0, HISTORY);

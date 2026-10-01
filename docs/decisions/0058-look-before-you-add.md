@@ -1,6 +1,6 @@
 # ADR 0058: Look before you add: a title's details and warnings in the ➕ sheet, on request
 
-**Status:** Accepted · **Date:** 2026-10-01
+**Status:** Accepted · **Date:** 2026-10-01 · A collection entry's sheet shows the same details since [ADR 0066](0066-details-in-the-collection.md)
 
 ## Context
 The owner (2026-10-01) asked for content warnings from the search on, and for the add step to show a title's details from IMDb and DoesTheDogDie, for people who want to look before they add.

@@ -12,6 +12,7 @@ import { TitleClubs } from "@/components/title/title-clubs";
 import { posterUrl } from "@/core/catalog/images";
 import type { ReadingKind, Title } from "@/core/catalog/types";
 import type { EntryStatus } from "@/core/collection/entries";
+import { shownShare } from "@/core/finish-share";
 import { titleReadingLogs } from "@/data/reading";
 import type { UserClient } from "@/data/supabase-server";
 import { avoidTopicIds } from "@/data/warnings";
@@ -34,7 +35,7 @@ export async function ReadingTitle({
   const t = await getTranslations("Reading");
   const [{ data: profile }, { data: entry }, logs, avoid] = await Promise.all([
     supabase.from("profiles").select("time_zone, username").eq("id", userId).single(),
-    supabase.from("entries").select("id, status, finished_at, rating, review, finisher_no").eq("user_id", userId).eq("title_id", title.id).is("deleted_at", null).maybeSingle(),
+    supabase.from("entries").select("id, status, finished_at, rating, review, finish_share, finish_members").eq("user_id", userId).eq("title_id", title.id).is("deleted_at", null).maybeSingle(),
     titleReadingLogs(supabase, userId, title.id),
     avoidTopicIds(supabase, userId),
   ]);
@@ -70,7 +71,7 @@ export async function ReadingTitle({
         lengths={{ kind, pageCount, chapterCount, volumeCount }}
         initialLogs={logs}
         initialStatus={(entry?.status as EntryStatus | undefined) ?? null}
-        initialEntry={entry && { id: entry.id, finishedAt: entry.finished_at, rating: entry.rating, review: entry.review, finisherNo: entry.finisher_no }}
+        initialEntry={entry && { id: entry.id, finishedAt: entry.finished_at, rating: entry.rating, review: entry.review, finishShare: shownShare(entry.finish_share, entry.finish_members) }}
         timeZone={profile?.time_zone ?? "UTC"}
         card={{ kind, name, year, posterUrl: cover, genres, pageCount, chapterCount, volumeCount }}
         username={profile?.username ?? ""}

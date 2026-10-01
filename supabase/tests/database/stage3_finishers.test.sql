@@ -131,15 +131,15 @@ select results_eq(
   'a longer window brings them back'
 );
 
--- The Following feed shows each finish's number.
+-- The Following feed carries each finish's share in place of its number (ADR 0067): the first of a title's finishers.
 insert into public.follows (id, follower_id, followee_id) values
   ('01926000-0000-7000-8000-0000000007c1', '00000000-0000-7000-8000-0000000007f2', '00000000-0000-7000-8000-0000000007f1');
 set local role authenticated;
 set local request.jwt.claims to '{"sub": "00000000-0000-7000-8000-0000000007f2", "role": "authenticated"}';
 select results_eq(
-  $$ select finisher_no from public.following_feed(null, null, 50) where entry_id = '01926000-0000-7000-8000-0000000007e3' $$,
-  $$ values (1) $$,
-  'the feed carries the finisher number'
+  $$ select finish_share * finish_members from public.following_feed(null, null, 50) where entry_id = '01926000-0000-7000-8000-0000000007e3' $$,
+  $$ values (1::numeric) $$,
+  'the feed carries the share of the first finisher'
 );
 
 -- Deleting an account removes its numbers, but never frees them: the next finisher is #5.

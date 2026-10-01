@@ -1,15 +1,23 @@
-# S3 · Finisher #N, trending from our own logs, and the board
+# S3 · Finishers (rare finishes), trending from our own logs, and the board
 
 **Stage:** 3 · **Built:** [ADR 0039](../../decisions/0039-finishers-trending-board.md) · From the brief's "Segment + Leaderboard" (Strava) and [later: gated features](../later/README.md)
 
 ## Summary
 Strava's segments and leaderboards, for finishing things.
-- Everyone who finishes a title gets a numbered stamp: **"Finisher #1,204"**. It goes on the Finish card, the celebration, the title page and the feed.
+- ~~Everyone who finishes a title gets a numbered stamp: "Finisher #1,204"~~. Since [ADR 0067](../../decisions/0067-rare-finishes.md) a finish shows how **rare** it is instead: **"0.4% of Mystonie has finished this"**, on the celebration, the Finish card's seal (when rare), the title page and the feed. A finish isn't a race.
 - **Trending on Home** starts with what people on Mystonie finished, watched or read this week.
 - **The board** ranks you and the people you follow by this week's (or month's) time.
 
 ## Rules
-### Finisher #N
+### Rare finishes ([ADR 0067](../../decisions/0067-rare-finishes.md))
+- **The share:** finishers of the title out of all of Mystonie's members, at your first finish of it, kept for good (a shared card never changes).
+- **Shown** only when it was taken with Mystonie at 1,000 members or more; before that the title page shows the count and says shares come at 1,000 members.
+- **Rare** is 10% or less: the Finish card's seal "RARE FINISH · 0.4% · OF MYSTONIE" ("Hide on card": "Rare finish") and the feed's "Rare finish · 0.4%" tag. The celebration says the share for every finish ("A rare finish: only 0.4% …" or "48% of Mystonie has finished this").
+- **Title page:** "You finished it.", the count and the title's share now ("That's 3.2% of everyone on Mystonie"), and the people you follow who finished it, newest first, without numbers.
+- **Printed** as whole percents from 10%, one decimal from 1%, one significant digit below ("0.03%"), "<0.01%" below that.
+- The data export has each entry's `finish_share` and `finish_members` next to `finisher_no`.
+
+### Numbering (underneath, ADR 0039: still runs, but its seal, celebration line, title page and feed bits below were replaced by rare finishes above)
 - **Numbering:** the first time someone finishes a title, the database gives them the next number for it (1, 2, 3, …).
   - Numbers are race-free: never a repeat, never a gap.
   - A number is kept for good: un-finishing, deleting the entry or finishing again keeps it.

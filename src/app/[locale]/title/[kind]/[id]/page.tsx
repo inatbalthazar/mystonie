@@ -20,6 +20,7 @@ import { tmdbImageUrl } from "@/core/catalog/tmdb";
 import { isExternalId, isReadingKind, isTitleKind, type Episode } from "@/core/catalog/types";
 import type { EntryStatus } from "@/core/collection/entries";
 import { countryFromRequest, isCountryCode } from "@/core/countries";
+import { shownShare } from "@/core/finish-share";
 import { ensureEpisodes, episodeLogs, type SeriesEpisodes as Series } from "@/data/episodes";
 import { userClient } from "@/data/supabase-server";
 import { ensureTitle } from "@/data/titles";
@@ -97,7 +98,7 @@ export default async function TitlePage({ params, searchParams }: PageProps<"/[l
   const isMovie = title.title.kind === "movie";
   const [{ data: profile }, { data: entry }, logs, requestHeaders, avoid, query] = await Promise.all([
     supabase.from("profiles").select("time_zone, username, country").eq("id", userId).single(),
-    supabase.from("entries").select("id, status, finished_at, rating, review, finisher_no").eq("user_id", userId).eq("title_id", title.id).is("deleted_at", null).maybeSingle(),
+    supabase.from("entries").select("id, status, finished_at, rating, review, finish_share, finish_members").eq("user_id", userId).eq("title_id", title.id).is("deleted_at", null).maybeSingle(),
     isMovie ? null : episodeLogs(supabase, userId, [title.id]),
     headers(),
     avoidTopicIds(supabase, userId),
@@ -197,7 +198,7 @@ export default async function TitlePage({ params, searchParams }: PageProps<"/[l
           ended={series?.ended ?? false}
           initialLogs={logs?.get(title.id) ?? []}
           initialStatus={(entry?.status as EntryStatus | undefined) ?? null}
-          initialEntry={entry && { id: entry.id, finishedAt: entry.finished_at, rating: entry.rating, review: entry.review, finisherNo: entry.finisher_no }}
+          initialEntry={entry && { id: entry.id, finishedAt: entry.finished_at, rating: entry.rating, review: entry.review, finishShare: shownShare(entry.finish_share, entry.finish_members) }}
           timeZone={profile?.time_zone ?? "UTC"}
           card={{
             kind: "series",

@@ -156,7 +156,7 @@ export type EntrySnapshot = {
   review: string | null;
   /** A game: the hours played. */
   hoursPlayed?: number | null;
-  finisherNo?: number | null;
+  finishShare?: number | null;
 };
 
 export type TitleState = { status: EntryStatus | null; entry: EntrySnapshot | null };

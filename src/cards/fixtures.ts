@@ -8,7 +8,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     data: {
       kind: "series", name: "Stranger Things: The Upside Down Special Edition", year: 2016, runtimeMin: 50,
       posterUrl: "https://image.tmdb.org/t/p/w780/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
-      rating: 4, finishedOn: "2026-10-31", username: "stonie", survived: "jumpScares", finisherNo: 1204,
+      rating: 4, finishedOn: "2026-10-31", username: "stonie", survived: "jumpScares", finishShare: 0.004,
     },
   },
   {
@@ -16,7 +16,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     data: {
       kind: "series", name: "Stranger Things", year: 2016, episodeCount: 42, seasonCount: 5, runtimeMin: 50,
       posterUrl: "https://image.tmdb.org/t/p/w780/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
-      rating: 4.5, review: "Cried at the finale. Worth every one of those episodes, honestly.", finishedOn: "2026-09-26", finisherNo: 7,
+      rating: 4.5, review: "Cried at the finale. Worth every one of those episodes, honestly.", finishedOn: "2026-09-26", finishShare: 0.32,
     },
   },
   {
@@ -24,7 +24,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     data: {
       kind: "movie", name: "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb", year: 1964, runtimeMin: 95,
       posterUrl: "https://image.tmdb.org/t/p/w780/gHm96BRW4GoI339rF1vYoYTB6Qe.jpg",
-      rating: 3.5, review: "หนังเก่าแต่ยังตลกมาก ฉากสุดท้ายคือที่สุด ใครยังไม่ดูต้องไปดู", finishedOn: "2026-01-05", finisherNo: 1234567,
+      rating: 3.5, review: "หนังเก่าแต่ยังตลกมาก ฉากสุดท้ายคือที่สุด ใครยังไม่ดูต้องไปดู", finishedOn: "2026-01-05", finishShare: 0.00004,
     },
   },
   {
@@ -106,7 +106,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     id: "book-finish",
     data: {
       kind: "book", name: "Project Hail Mary", year: 2021, pageCount: 497, posterUrl: "/api/covers/-Ff2DwAAQBAJ?size=large",
-      rating: 5, review: "Rocky!! Best science buddy ever. Read it in two nights.", finishedOn: "2026-09-20", username: "stonie", finisherNo: 42,
+      rating: 5, review: "Rocky!! Best science buddy ever. Read it in two nights.", finishedOn: "2026-09-20", username: "stonie", finishShare: 0.042,
     },
   },
   {
@@ -114,7 +114,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     data: {
       kind: "manga", name: "チェンソーマン 第一部 公安編 — a very long subtitle to push the layout further", year: 2018,
       chapterCount: 232, volumeCount: 24, posterUrl: "https://s4.anilist.co/file/anilistcdn/media/manga/cover/large/bx105778-euxXZEIfDY2u.png",
-      rating: 4.5, review: "最後のページで叫んだ。最高のマンガ、もう一度最初から読みたい！", finishedOn: "2026-09-27", finisherNo: 98765,
+      rating: 4.5, review: "最後のページで叫んだ。最高のマンガ、もう一度最初から読みたい！", finishedOn: "2026-09-27", finishShare: 0.0009,
     },
   },
   {
@@ -138,7 +138,7 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     data: {
       kind: "game", name: "The Witcher 3: Wild Hunt – Complete Edition", year: 2015, playtimeHours: 43, hoursPlayed: 187,
       posterUrl: "https://media.rawg.io/media/resize/640/-/games/618/618c2031a07bbff6b4f611f10b6bcdbc.jpg",
-      rating: 5, review: "Gwent took 40 of those hours and I regret nothing.", finishedOn: "2026-09-30", username: "stonie", finisherNo: 1204,
+      rating: 5, review: "Gwent took 40 of those hours and I regret nothing.", finishedOn: "2026-09-30", username: "stonie", finishShare: 0.18,
     },
   },
   {

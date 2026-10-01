@@ -2,8 +2,10 @@ import { expect, test, type APIRequestContext } from "@playwright/test";
 import { uuidv7 } from "../src/core/ids";
 import { canSeed, mailpitUp, mockSearch, openQuickAdd, seedTitles, signUp, uniqueEmail, type SeedTitle } from "./helpers";
 
-// S3 finishers & the board (ADR 0039). Needs the local Supabase stack: the service role creates the other collectors
-// and their finishes; the signed-in flow also needs Mailpit. Titles are seeded and /api/search is mocked.
+// S3 finishers & the board (ADR 0039), with rare finishes in place of finisher numbers (ADR 0067). Needs the local
+// Supabase stack: the service role creates the other collectors and their finishes; the signed-in flow also needs
+// Mailpit. Titles are seeded and /api/search is mocked. Shares show only once Mystonie has 1,000 members, so the test
+// checks whichever applies to this database (a fresh one in CI has fewer).
 
 const rest = () => {
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY!;
@@ -51,7 +53,7 @@ test("finisher numbers are race-free: many people finishing at once get 1…N, n
   expect(await counts.json()).toEqual([{ finishers: 12 }]);
 });
 
-test("Finisher #N on the celebration, the saved card, the title page and the feed; the board; trending", async ({ page, request }) => {
+test("rare finishes on the celebration, the saved card, the title page and the feed (no numbers); the board; trending", async ({ page, request }) => {
   test.skip(!(await mailpitUp(request)) || !canSeed(), "local Supabase (Mailpit, service role key) is not available");
   test.setTimeout(150_000);
   const stamp = Date.now().toString(36);
@@ -59,7 +61,7 @@ test("Finisher #N on the celebration, the saved card, the title page and the fee
   await seedTitles(request, [movie]);
   const title = await titleId(request, movie.externalId);
 
-  // Two people finished it before: a public one the viewer will follow (#1) and one more (#2).
+  // Two people finished it before: a public one the viewer will follow and one more.
   const [ada, bo] = await Promise.all([createUser(request, "fin-ada"), createUser(request, "fin-bo")]);
   const { url, headers } = rest();
   const adaName = `ada_${stamp}`;
@@ -75,20 +77,34 @@ test("Finisher #N on the celebration, the saved card, the title page and the fee
   const followed = await page.request.post("/api/follows", { data: { userId: ada, follow: true } });
   expect(followed.ok(), await followed.text()).toBe(true);
 
-  // Quick add → Finished: the celebration says #3, and the card carries the seal.
+  const members = (await (await request.post(`${url}/rest/v1/rpc/member_count`, { headers })).json()) as number;
+  const shown = members >= 1000;
+  const pct = /[\d.]+%/;
+
+  // Quick add → Finished: how rare the finish was, and the card's seal (3 of every member is rare).
   await page.goto("/collection");
   await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill(movie.name);
   await page.getByRole("dialog").getByRole("button", { name: new RegExp(`^${movie.name} Movie`) }).click();
   await page.getByRole("button", { name: "Finished", exact: true }).click();
   const celebration = page.getByRole("dialog", { name: `You finished ${movie.name}!` });
-  await expect(celebration.getByText("You're finisher #3 on Mystonie")).toBeVisible();
-  await expect(celebration.locator("[data-finisher]").first()).toContainText("#3");
+  await expect(celebration.getByRole("heading", { name: `You finished ${movie.name}!` })).toBeVisible();
+  if (shown) {
+    await expect(celebration.getByText(/^A rare finish: only [\d.]+% of Mystonie has finished this$/)).toBeVisible();
+    await expect(celebration.locator("[data-finisher]").first()).toContainText(pct);
+    await expect(celebration.locator("[data-finisher]").first()).toContainText("Rare finish");
+  } else {
+    await expect(celebration.getByText(/of Mystonie has finished this/)).toHaveCount(0);
+    await expect(celebration.locator("[data-finisher]")).toHaveCount(0);
+  }
+  await expect(celebration.getByText(/#3|Finisher #/)).toHaveCount(0);
 
-  // Downloading saves the card; the server writes the entry's number, whatever the browser claims.
+  // Downloading saves the card; the server writes the entry's share, whatever the browser claims.
   const mine = (await (
-    await request.get(`${url}/rest/v1/entries?select=id,finisher_no,user_id&title_id=eq.${title}&finisher_no=eq.3`, { headers })
-  ).json()) as { id: string }[];
+    await request.get(`${url}/rest/v1/entries?select=id,finish_share,finish_members&title_id=eq.${title}&finisher_no=eq.3`, { headers })
+  ).json()) as { id: string; finish_share: number; finish_members: number }[];
+  expect(mine[0]!.finish_members).toBeGreaterThanOrEqual(3);
+  expect(Number(mine[0]!.finish_share)).toBeCloseTo(3 / mine[0]!.finish_members, 6);
   const cardId = uuidv7();
   const saved = await page.request.post("/api/cards", {
     data: {
@@ -97,26 +113,37 @@ test("Finisher #N on the celebration, the saved card, the title page and the fee
       templateId: "polaroid",
       size: "story",
       entryId: mine[0]!.id,
-      data: { kind: "movie", name: movie.name, finishedOn: "2026-10-01", finisherNo: 1 },
+      data: { kind: "movie", name: movie.name, finishedOn: "2026-10-01", finishShare: 0.9 },
       share: false,
     },
   });
   expect(saved.ok(), await saved.text()).toBe(true);
-  const card = (await (await request.get(`${url}/rest/v1/cards?select=params&id=eq.${cardId}`, { headers })).json()) as { params: { finisherNo: number } }[];
-  expect(card[0]!.params.finisherNo).toBe(3);
+  const card = (await (await request.get(`${url}/rest/v1/cards?select=params&id=eq.${cardId}`, { headers })).json()) as { params: { finishShare: number | null } }[];
+  expect(card[0]!.params.finishShare).toBe(shown ? Number(mine[0]!.finish_share) : null);
   await celebration.getByRole("button", { name: "Skip" }).click();
 
-  // The title page: your number, the count, and Ada (#1) among the people you follow.
+  // The title page: you finished it, the count and its share of everyone, and Ada among the people you follow.
   const main = page.getByRole("main");
   await page.goto(`/title/movie/${movie.externalId}`);
   await expect(main.getByRole("heading", { name: "Finishers" })).toBeVisible();
-  await expect(main.getByText("You're finisher #3")).toBeVisible();
-  await expect(main.getByText("3 people finished this on Mystonie.")).toBeVisible();
-  await expect(main.getByRole("listitem").filter({ hasText: "Ada Finisher" })).toContainText("#1");
+  await expect(main.getByText("You finished it.")).toBeVisible();
+  if (shown) {
+    await expect(main.getByText(/^3 people finished this on Mystonie\. That's [\d.<]+% of everyone on Mystonie\.$/)).toBeVisible();
+  } else {
+    await expect(main.getByText("3 people finished this on Mystonie.", { exact: true })).toBeVisible();
+    await expect(main.getByText("Once Mystonie has 1,000 members, this shows how rare finishing it is.")).toBeVisible();
+  }
+  const adaRow = main.getByRole("listitem").filter({ hasText: "Ada Finisher" });
+  await expect(adaRow).toContainText("finished");
+  await expect(adaRow).not.toContainText("#");
 
-  // The feed shows Ada's number on her finish.
+  // The feed tags Ada's finish as rare (she was the first of every member), never with a number.
   await page.goto("/feed");
-  await expect(main.getByRole("article").filter({ hasText: "Ada Finisher" }).getByText("Finisher #1")).toBeVisible();
+  const adaPost = main.getByRole("article").filter({ hasText: "Ada Finisher" });
+  await expect(adaPost).toBeVisible();
+  if (shown) await expect(adaPost.getByText(/^Rare finish · [\d.<]+%$/)).toBeVisible();
+  else await expect(adaPost.getByText(/Rare finish/)).toHaveCount(0);
+  await expect(adaPost.getByText(/Finisher #/)).toHaveCount(0);
 
   // The board: Ada and you, both 100 minutes and one finish this week, so you share first place.
   await page.goto("/board");
