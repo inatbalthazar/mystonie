@@ -594,6 +594,8 @@
     "styleLabelPro": "{style} (Pro) · ปัดเพื่อเปลี่ยนสไตล์",
     "proLocked": "{style} เป็นสไตล์ Pro แชร์และดาวน์โหลดได้เมื่อเป็น Pro",
     "proUnlock": "ปลดล็อก",
+    "proSoon": "{style} เป็นสไตล์ Pro แชร์และดาวน์โหลดได้เมื่อ Pro เปิดให้สมัคร",
+    "proSee": "ดู Pro",
     "survivedOffer": "คุณผ่าน{scare, select, jumpScares {ฉากตุ้งแช่} zombies {ซอมบี้} possession {ผีเข้า} ghosts {ผี} clowns {ตัวตลก} dolls {ตุ๊กตาหลอน} gore {เลือดสาด} spiders {แมงมุม} snakes {งู} sharks {ฉลาม} other {เข็มฉีดยา}}มาได้แล้ว",
     "survivedTry": "ทำเป็นการ์ด Survived",
     "shareOffline": "แชร์ได้เมื่อกลับมาออนไลน์",

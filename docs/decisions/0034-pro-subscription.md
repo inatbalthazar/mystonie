@@ -1,6 +1,6 @@
 # ADR 0034: Pro through Stripe's REST API, entitlements from subscription webhooks only, built and tested in test mode behind `PRO_ENABLED`
 
-**Status:** Accepted · **Date:** 2026-09-29
+**Status:** Accepted, Pro templates on show even while Pro is off since [ADR 0079](0079-pro-styles-on-show-and-card-swipe.md) · **Date:** 2026-09-29
 
 ## Context
 The stage 2 task "Stripe Pro subscription + premium templates" ([S2 Pro](../product/features/S2-pro-subscription.md)) was an owner task: Pro can't take real money before the owner moves to Vercel Pro and gets TMDB's commercial terms, since Vercel Hobby and TMDB's free API are both non-commercial. The owner wants as much as possible finished on free tiers, and chose to have Pro built and tested now in Stripe test mode (free), switched off until go-live.

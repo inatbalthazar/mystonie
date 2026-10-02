@@ -2,7 +2,7 @@
 
 import { DownloadIcon, Share2Icon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { cardShareUrl, cycle, finalReview, localDateString } from "@/core/cards/edit";
 import type { CardData, CardSize } from "@/core/cards/types";
 import { SignUpPrompt } from "@/components/sign-up-prompt";
@@ -13,6 +13,7 @@ import { CardPreview } from "./card-preview";
 import { RatingField, ReviewField } from "./fields";
 import { downloadBlob, usePrerenderedCard } from "./export";
 import { DEFAULT_TEMPLATE, FINISH_TEMPLATES, type TemplateId } from "./registry";
+import { StyleSwipe } from "./style-swipe";
 import { usePosterPalette } from "./use-poster-palette";
 
 type Props = {
@@ -21,8 +22,6 @@ type Props = {
   paletteSource?: string | null;
   host: string;
 };
-
-const SWIPE_PX = 40;
 
 /** Card editor: template (buttons or swipe), size, rating, review, date, then Share / Download. */
 export function CardStudio({ data, paletteSource, host }: Props) {
@@ -58,20 +57,6 @@ export function CardStudio({ data, paletteSource, host }: Props) {
   const palette = usePosterPalette(paletteSource ?? data.posterUrl);
   const cardRef = useRef<HTMLDivElement>(null);
   const png = usePrerenderedCard(cardRef, size, JSON.stringify([template, size, card, palette]));
-
-  const swipeStart = useRef<{ x: number; y: number } | null>(null);
-  function onPointerDown(e: PointerEvent) {
-    swipeStart.current = { x: e.clientX, y: e.clientY };
-  }
-  function onPointerUp(e: PointerEvent) {
-    const start = swipeStart.current;
-    swipeStart.current = null;
-    if (!start) return;
-    const dx = e.clientX - start.x;
-    if (Math.abs(dx) >= SWIPE_PX && Math.abs(dx) > Math.abs(e.clientY - start.y)) {
-      switchTemplate(cycle(FINISH_TEMPLATES, template, dx < 0 ? 1 : -1), "swipe");
-    }
-  }
 
   function filename() {
     const slug = data.name.toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-|-$/g, "") || "card";
@@ -114,16 +99,15 @@ export function CardStudio({ data, paletteSource, host }: Props) {
         ))}
       </div>
 
-      <div
-        className="mx-auto w-full max-w-sm touch-pan-y select-none"
-        onPointerDown={onPointerDown}
-        onPointerUp={onPointerUp}
-        onPointerCancel={() => (swipeStart.current = null)}
-        onDragStart={(e) => e.preventDefault()}
+      {/* The swipe slides the card like the celebration's (ADR 0079). */}
+      <StyleSwipe
+        onStep={(step, via) => switchTemplate(cycle(FINISH_TEMPLATES, template, step), via)}
+        canSwipe={FINISH_TEMPLATES.length > 1}
+        label={t("swipeHint")}
+        className="mx-auto w-full max-w-sm"
       >
         <CardPreview template={template} data={card} size={size} palette={palette} host={host} cardRef={cardRef} />
-        <p className="mt-2 text-center text-xs text-muted-foreground">{t("swipeHint")}</p>
-      </div>
+      </StyleSwipe>
 
       <div role="group" aria-label={t("size")} className="mx-auto flex w-full max-w-xs gap-1 rounded-full bg-muted p-1">
         {(["story", "feed"] as const).map((s) => (

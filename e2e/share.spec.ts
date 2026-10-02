@@ -64,6 +64,27 @@ test("finish → celebration → publish the card → /c/[id] with its preview",
   await again.getByRole("button", { name: "Download" }).click({ timeout: 15_000 });
   expect((await download).suggestedFilename()).toBe("mystonie-parasite-sticker.png");
   expect(await events(page)).toContainEqual(["card_downloaded", expect.objectContaining({ tpl: "sticker", card: "sticker" })]);
+
+  // Back to the styles: a swipe left steps to the next (ADR 0079), and the Pro style is on it, locked without Pro,
+  // even while Pro isn't on sale.
+  await again.getByRole("button", { name: "Sticker" }).click();
+  await expect(again.getByText("Polaroid · swipe for another style")).toBeVisible();
+  const card = again.locator("[data-style-swipe] [data-card]");
+  await card.scrollIntoViewIfNeeded();
+  const box = (await card.boundingBox())!;
+  const y = box.y + box.height / 3;
+  await page.mouse.move(box.x + box.width * 0.85, y);
+  await page.mouse.down();
+  await page.mouse.move(box.x + box.width * 0.15, y, { steps: 6 });
+  await page.mouse.up();
+  await expect(again.getByText("Bold Stats · swipe for another style")).toBeVisible();
+  expect(await events(page)).toContainEqual(["template_switched", { tpl: "boldStats", via: "swipe" }]);
+  await again.getByRole("button", { name: "Change style" }).click();
+  await expect(again.getByText("Film Strip (Pro) · swipe for another style")).toBeVisible();
+  await expect(again.getByText("Film Strip is a Pro style.", { exact: false })).toBeVisible();
+  await expect(again.getByRole("link", { name: process.env.PRO_ENABLED === "true" ? "Unlock" : "See Pro" })).toHaveAttribute("href", "/pro");
+  await expect(again.getByRole("button", { name: "Download" })).toBeDisabled();
+  await expect(again.getByRole("button", { name: "Copy card link" })).toBeDisabled();
   await again.getByRole("button", { name: "Done" }).click();
 
   // The public page, signed out: the card, its line and the CTA. No username (hidden).

@@ -2,10 +2,11 @@
 
 import { DownloadIcon, LinkIcon, LockIcon, PaletteIcon, Share2Icon, SparklesIcon, StickerIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
-import { useEffect, useRef, useState, type PointerEvent } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePro } from "@/components/pro/use-pro";
 import { useCanShareFiles } from "@/cards/can-share";
 import { CardPreview } from "@/cards/card-preview";
+import { StyleSwipe, type StyleSwipeHandle } from "@/cards/style-swipe";
 import { downloadBlob, usePrerenderedCard } from "@/cards/export";
 import { HoursField, RatingField, ReviewField } from "@/cards/fields";
 import { useChallengeName, useHeadline, useRecapRange } from "@/cards/parts";
@@ -73,8 +74,6 @@ function useSurvived(target: { kind: TmdbKind; externalId: string } | undefined)
   return survived;
 }
 
-const SWIPE_PX = 40;
-
 /**
  * The celebration (S1 share artwork → Celebration flow): a full-screen moment with the FINISHED stamp, the
  * card with **Share** first, then Download / Change style / Sticker, and the optional rating and review.
@@ -90,8 +89,8 @@ export function Celebration({ data, source, animate = false, username, host, onC
   const [cardId] = useState(uuidv7);
   const pro = usePro();
   const survived = useSurvived(source.kind === "finish" ? survivedFor : undefined);
-  // Pro templates (ADR 0034) show only where Pro can be bought; without Pro they're a locked preview.
-  const styles = templatesFor(source.kind, data.kind, { survived: !!survived }).filter((id) => !isProTemplate(id) || pro?.available);
+  // Pro templates (ADR 0034) are a locked preview without Pro, on show even before Pro is on sale (ADR 0079).
+  const styles = templatesFor(source.kind, data.kind, { survived: !!survived });
   const [template, setTemplate] = useState<TemplateId>(() => defaultTemplate(source.kind, data.kind));
   const range = useRecapRange(data.recap);
   const headline = useHeadline(data);
@@ -146,24 +145,19 @@ export function Celebration({ data, source, animate = false, username, host, onC
     onClose(changed ? { rating, review: finalReview(review), ...(asksHours ? { hoursPlayed } : {}) } : null);
   }
 
-  function changeStyle(step: 1 | -1 = 1) {
-    setSticker(false);
-    const next = cycle(styles, template, step);
+  function step(by: 1 | -1, via: "swipe" | "button") {
+    const next = cycle(styles, template, by);
     setTemplate(next);
-    track("template_switched", { tpl: next, via: "button" });
+    track("template_switched", { tpl: next, via });
   }
 
-  const swipeStart = useRef<{ x: number; y: number } | null>(null);
-  function onPointerUp(e: PointerEvent) {
-    const start = swipeStart.current;
-    swipeStart.current = null;
-    if (!start || sticker) return;
-    const dx = e.clientX - start.x;
-    if (Math.abs(dx) >= SWIPE_PX && Math.abs(dx) > Math.abs(e.clientY - start.y)) {
-      const next = cycle(styles, template, dx < 0 ? 1 : -1);
-      setTemplate(next);
-      track("template_switched", { tpl: next, via: "swipe" });
-    }
+  // Change style slides the card like a swipe does (ADR 0079); from the sticker, it's back to the styles at once.
+  const swipe = useRef<StyleSwipeHandle>(null);
+  function changeStyle() {
+    if (sticker) {
+      setSticker(false);
+      step(1, "button");
+    } else swipe.current?.go(1);
   }
 
   /** Saves the card's inputs; with `blob`, publishes it and uploads the PNG. */
@@ -337,12 +331,13 @@ export function Celebration({ data, source, animate = false, username, host, onC
           ) : null}
         </header>
 
-        <div
-          className={cn("mx-auto w-full max-w-[14rem] touch-pan-y select-none", animate && "motion-safe:animate-rise")}
-          onPointerDown={(e) => (swipeStart.current = { x: e.clientX, y: e.clientY })}
-          onPointerUp={onPointerUp}
-          onPointerCancel={() => (swipeStart.current = null)}
-          onDragStart={(e) => e.preventDefault()}
+        <StyleSwipe
+          ref={swipe}
+          onStep={step}
+          canSwipe={!sticker && styles.length > 1}
+          dots={{ index: styles.indexOf(template), locked: styles.map((id) => isProTemplate(id) && !pro?.pro) }}
+          label={sticker ? t("stickerHint") : t(isProTemplate(template) ? "styleLabelPro" : "styleLabel", { style: tc(`templates.${template}`) })}
+          className={cn("mx-auto w-full max-w-[14rem]", animate && "motion-safe:animate-rise")}
         >
           <div
             className={cn(
@@ -352,10 +347,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
           >
             <CardPreview template={templateId} data={card} size={size} palette={palette} host={host} cardRef={cardRef} />
           </div>
-          <p className="mt-2 text-center text-xs text-muted-foreground" aria-live="polite">
-            {sticker ? t("stickerHint") : t(isProTemplate(template) ? "styleLabelPro" : "styleLabel", { style: tc(`templates.${template}`) })}
-          </p>
-        </div>
+        </StyleSwipe>
 
         {survived && template !== "survived" && !sticker && (
           <button
@@ -376,12 +368,13 @@ export function Celebration({ data, source, animate = false, username, host, onC
         {locked && (
           <div className="flex items-center gap-3 rounded-2xl bg-brand-soft/60 p-3 ring-1 ring-brand/30">
             <LockIcon className="size-5 shrink-0 text-brand" aria-hidden="true" />
-            <p className="flex-1 text-sm">{t("proLocked", { style: tc(`templates.${template}`) })}</p>
+            {/* Before Pro is on sale (ADR 0055) the style is still on show, saying it's coming (ADR 0079). */}
+            <p className="flex-1 text-sm">{t(pro?.available ? "proLocked" : "proSoon", { style: tc(`templates.${template}`) })}</p>
             <Link
               href="/pro"
               className="inline-flex h-11 shrink-0 items-center rounded-full bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90 press"
             >
-              {t("proUnlock")}
+              {t(pro?.available ? "proUnlock" : "proSee")}
             </Link>
           </div>
         )}

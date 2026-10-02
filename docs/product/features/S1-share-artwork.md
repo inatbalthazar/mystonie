@@ -33,6 +33,7 @@ The heart of Mystonie, modelled on Strava's post-activity share. Every finish or
   - It shows the FINISHED stamp landing (`motion-safe:animate-stamp`) and a short vibration where supported. Both are skipped under `prefers-reduced-motion`.
   - The card preview comes with **Share** as the primary button (**Copy card link** where files can't be shared, e.g. desktops).
   - Secondary buttons: **Download**, **Change style** (or swipe), **Sticker** (a checkerboard shows the transparency).
+  - The swipe ([ADR 0079](../../decisions/0079-pro-styles-on-show-and-card-swipe.md)): the card follows the finger and slides between styles; a card peeks out behind it, dots count the styles (a lock for Pro), and it nudges aside on its own until the first swipe.
   - Also: Story / Post size, and "Hide on card" (`@username`, Photo, watch time, episodes).
   - Rating and a one-line review are optional, below the actions. They are saved on the entry when the celebration closes (`PATCH /api/entries/[id] { rating, review }`).
   - **Skip** (then **Done**) is always in the sticky top bar.

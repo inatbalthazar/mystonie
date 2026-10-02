@@ -29,7 +29,7 @@ Before this change:
   - "Planned prices … may change"
 - Settings always has the Pro card. While Pro is off it reads "Not on sale during the beta. See what it will add."
 - Selling is still controlled by ADR 0034's one switch (`PRO_ENABLED` and the Stripe keys). Production has it off, so the buttons are grey there. A machine with Stripe **test** keys (this one's `.env.local`) keeps Checkout working, so `e2e/pro.spec.ts` still runs.
-- Pro card styles stay hidden while Pro is off, as before.
+- Pro card styles stay hidden while Pro is off, as before. (Since [ADR 0079](0079-pro-styles-on-show-and-card-swipe.md) they're on show, locked, with See Pro.)
 
 **Report a problem** (`/feedback`, `POST /api/feedback`):
 - **The form:** a kind (Something's broken · An idea · Something else) and a message of up to 2,000 characters. Signed-out visitors can send one too, so problems with signing in can be reported. Spam protection is the same as for reports: a honeypot, and 10 an hour per IP.

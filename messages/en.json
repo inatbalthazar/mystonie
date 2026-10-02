@@ -688,6 +688,8 @@
     "styleLabelPro": "{style} (Pro) · swipe for another style",
     "proLocked": "{style} is a Pro style. Share and download it with Pro.",
     "proUnlock": "Unlock",
+    "proSoon": "{style} is a Pro style. Share and download it once Pro opens.",
+    "proSee": "See Pro",
     "survivedOffer": "You made it through {scare, select, jumpScares {the jump scares} zombies {the zombies} possession {the possession} ghosts {the ghosts} clowns {the clowns} dolls {the creepy dolls} gore {the gore} spiders {the spiders} snakes {the snakes} sharks {the sharks} other {the needles}}.",
     "survivedTry": "Make it a Survived card",
     "shareOffline": "Share once you're online",

@@ -13,6 +13,7 @@ The owner (2026-10-02) asked to move the row to Home, and how people would know 
 - Each is an icon on a small card, slightly crooked like the rest of the album, with its name under it.
 - **All five are in sight at 360 px**, so there is nothing to swipe and nothing to discover. That answers the owner's question by removing the scroll instead of hinting at it.
 - The names are short ("Reel", not "Reel of the Day") so each fits on one line at 360 px.
+- The Reel's icon is a puzzle piece, not a clapperboard: with the short name, a clapperboard read as a video (like other apps' reels), and the reel is a guessing game.
 
 **The Feed** keeps its tabs (Following, Articles, Saved) and the visitors' Sign in. Its row is gone.
 

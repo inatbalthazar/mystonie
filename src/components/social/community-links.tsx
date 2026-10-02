@@ -1,4 +1,4 @@
-import { ClapperboardIcon, FlagIcon, ShieldIcon, TrophyIcon, UsersIcon } from "lucide-react";
+import { FlagIcon, PuzzleIcon, ShieldIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -7,7 +7,7 @@ const LINKS = [
   { href: "/board", icon: TrophyIcon, name: "board" },
   { href: "/challenges", icon: FlagIcon, name: "challenges" },
   { href: "/clubs", icon: ShieldIcon, name: "clubs" },
-  { href: "/reel", icon: ClapperboardIcon, name: "reel" },
+  { href: "/reel", icon: PuzzleIcon, name: "reel" },
   { href: "/people", icon: UsersIcon, name: "people" },
 ] as const;
 
