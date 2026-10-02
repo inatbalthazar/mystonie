@@ -18,7 +18,8 @@ The owner then asked for installing to come first (2026-10-03): "I don't want pe
   - Chromium's `appinstalled` event, which also covers the address bar's own install icon;
   - "It's on my home screen".
 
-  Home's install card hides once it's set.
+  Home's install card hides once it's set, and the install sheet doesn't ask.
+- **An out-of-date "installed" is forgotten** when Chromium fires `beforeinstallprompt`, which it does only while the app isn't installed. It happens on Android, where a phone that once opened the installed app shares the browser's storage, even after the app is deleted. Without this, the owner's phone got no invitation and a ticked step (2026-10-03). Elsewhere (iOS) nothing tells us, so the flag stands. It's set there only by "It's on my home screen".
 - `askedInstallWay` (`src/core/install.ts`) picks the way for a request. Unlike `installWay`, it treats a computer as `desktop`, not `none`, and doesn't skip automation. Nobody on a computer is asked unprompted. Analytics: `install_prompt` gains `way: "desktop"` and `requested: true`.
 
 ### Install first (the second request)

@@ -38,6 +38,9 @@ export function PwaListener() {
     const onPrompt = (event: Event) => {
       event.preventDefault(); // keep it for our own "Install" button
       installEvent = event as InstallPromptEvent;
+      // Chromium only offers this while the app isn't installed: an earlier "installed" (since uninstalled, or an
+      // Android phone that once opened the app, which shares the browser's storage) is out of date.
+      forgetInstalled();
       notify();
     };
     const onInstalled = () => {
@@ -84,6 +87,14 @@ export function markInstalled() {
     // Storage blocked: it counts until the page reloads.
   }
   notify();
+}
+
+function forgetInstalled() {
+  try {
+    window.localStorage.removeItem(INSTALLED);
+  } catch {
+    // Storage blocked: nothing was kept.
+  }
 }
 
 const ASK = "mystonie:install";

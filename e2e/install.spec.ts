@@ -133,3 +133,28 @@ test.describe("signed in, in an iPhone's Safari", () => {
     await expect(page.locator("[data-install-step]")).toHaveCount(0);
   });
 });
+
+test("an out-of-date “installed” (Chrome offers to install again) neither silences the sheet nor ticks the step", async ({ page, baseURL }) => {
+  await asPerson(page);
+  await page.addInitScript(() => window.localStorage.setItem("mystonie.installed", "1"));
+  await page.context().addCookies([{ name: "sb-e2e-auth-token", value: "x", url: baseURL ?? "http://localhost:3000" }]);
+  await page.route("**/api/getting-started", (route) =>
+    route.fulfill({ json: { facts: { entries: 1, cards: 1, avoidTopics: 1, following: 1, clubs: 0 } } }),
+  );
+  await page.goto("/privacy");
+  // Chrome's offer, sent again until the page has hydrated and caught it.
+  await expect(async () => {
+    await page.evaluate(() => {
+      const event = Object.assign(new Event("beforeinstallprompt", { cancelable: true }), {
+        prompt: async () => {},
+        userChoice: Promise.resolve({ outcome: "dismissed" }),
+      });
+      window.dispatchEvent(event);
+    });
+    await expect(sheet(page).getByRole("button", { name: "Install" })).toBeVisible({ timeout: 1500 });
+  }).toPass({ timeout: 15_000 });
+  expect(await page.evaluate(() => window.localStorage.getItem("mystonie.installed"))).toBeNull();
+  await sheet(page).getByRole("button", { name: "Not now" }).click();
+  await page.locator("[data-getting-started]").click();
+  await expect(page.locator("[data-install-step]")).toBeVisible();
+});

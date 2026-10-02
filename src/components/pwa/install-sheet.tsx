@@ -115,7 +115,8 @@ export function InstallSheet() {
     };
     timer = setTimeout(check, signedIn() ? SIGNED_IN_DELAY_MS : DELAY_MS);
     return () => clearTimeout(timer);
-  }, [pathname, asked]);
+    // `ready`: Chrome's offer can come after the first look, and it clears an out-of-date "installed".
+  }, [pathname, asked, ready]);
 
   // Asked for: still inside the tap, so the browser's own dialog may open straight away.
   useEffect(
