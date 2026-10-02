@@ -14,7 +14,7 @@ test("stats: empty state, then numbers that match the collection, and Share stat
   await signUp(page, request, "stats", "/stats");
 
   // Me's Stats tab (ADR 0053). Nothing logged yet: the page points to logging the first title.
-  const meTabs = page.getByRole("navigation", { name: "Your album and stats" });
+  const meTabs = page.getByRole("navigation", { name: "Your album, stats and cards" });
   await expect(page).toHaveTitle("Stats · Mystonie");
   await expect(meTabs.getByRole("link", { name: "Stats" })).toHaveAttribute("aria-current", "page");
   await page.getByRole("link", { name: "Log your first title" }).click();

@@ -29,6 +29,8 @@ export function DividerTabs<T extends string>({
           <li key={tab.value}>
             <Link
               href={tab.href}
+              // The whole page ahead of the tap, like the nav island's (ADR 0075).
+              prefetch
               data-tab
               aria-current={tab.value === current ? "page" : undefined}
               className={cn(

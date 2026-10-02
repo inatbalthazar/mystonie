@@ -1,3 +1,4 @@
+import { FreshPage } from "@/components/motion/fresh-page";
 import { FlameIcon } from "lucide-react";
 import type { Metadata } from "next";
 import Image from "next/image";
@@ -158,6 +159,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
+      <FreshPage />
       <SignupFromCard newAccount={newAccount} />
       <header className="flex flex-col gap-1">
         <p className="font-hand text-2xl leading-none text-muted-foreground">
@@ -202,9 +204,10 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
           <h2 id="recent-cards" className="font-display text-xl font-extrabold">
             {t("recentCards")}
           </h2>
-          {cards.some((c) => c.sharedAt) && profile && (
-            <Link href={`/u/${profile.username}`} className="flex min-h-11 items-center text-sm font-semibold text-brand">
-              {t("seeProfile")}
+          {/* Every card is on Me's Cards tab (ADR 0076). */}
+          {cards.length > 0 && (
+            <Link href="/me/cards" className="flex min-h-11 items-center text-sm font-semibold text-brand">
+              {t("seeAllCards")}
             </Link>
           )}
         </div>

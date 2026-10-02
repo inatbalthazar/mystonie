@@ -209,8 +209,6 @@ export function useSectionName(): (section: AlbumSection) => string {
   const journal = useTranslations("Journal");
   return (section) => {
     switch (section) {
-      case "cards":
-        return profile("gallery");
       case "watching":
         return profile("watchingNow");
       case "shelf":

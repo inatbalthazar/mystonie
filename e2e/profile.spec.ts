@@ -95,10 +95,16 @@ test("profile settings, export, the public page, reports and privacy", async ({ 
   await expect(guest.getByRole("main").getByText("Bong Joon-ho fan 🎬")).toBeVisible();
   await expect(guest.getByRole("link", { name: /example.com/ })).toHaveCount(0);
   await expect(guest.getByRole("region", { name: "Right now" })).toContainText("Dune: Part Two");
-  await expect(guest.getByRole("region", { name: "Card gallery" }).getByRole("link", { name: "Card: Parasite" })).toHaveAttribute(
+  // No card gallery on an album (ADR 0076): the cards are on the owner's Cards tab, each shared one at its own link.
+  await expect(guest.getByRole("link", { name: "Card: Parasite" })).toHaveCount(0);
+  const own = await page.context().newPage();
+  await own.goto("/me/cards");
+  await expect(own.getByRole("link", { name: "Cards", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(own.getByRole("region", { name: "Your cards" }).getByRole("link", { name: "Card: Parasite" })).toHaveAttribute(
     "href",
     `/c/${cardId}`,
   );
+  await own.close();
 
   // …and can report it.
   await guest.getByRole("button", { name: "Report" }).click();
@@ -317,8 +323,8 @@ test("the album as its owner arranges it: favourites on the shelf, sections move
   const headings = (p: Page) => p.getByRole("main").getByRole("heading", { level: 2 });
   const shelf = (p: Page) => p.getByRole("region", { name: "The shelf" }).getByRole("listitem");
 
-  // The default order: the cards first.
-  await expect(headings(page)).toHaveText(["All time so far", "Card gallery", "The shelf", "Clubs"]);
+  // The default order (nothing being watched, so no "Right now"); no card gallery (ADR 0076).
+  await expect(headings(page)).toHaveText(["All time so far", "The shelf", "Clubs"]);
   await expect(shelf(page).first()).toHaveAttribute("title", "Charlie Album Film");
 
   // Pin the oldest finish as a favourite: it stands first, with a star.
@@ -342,29 +348,28 @@ test("the album as its owner arranges it: favourites on the shelf, sections move
   await main.getByRole("button", { name: "Arrange" }).click();
   const arrange = page.getByRole("dialog", { name: "Arrange your album" });
   await arrange.getByRole("button", { name: "Move The shelf up" }).click();
-  await arrange.getByRole("button", { name: "Move The shelf up" }).click();
   await arrange.getByRole("button", { name: "Hide Clubs" }).click();
   await expect(arrange.getByRole("button", { name: "Show Clubs" })).toBeVisible();
   const layoutSaved = saved(page);
   await arrange.getByRole("button", { name: "Save", exact: true }).click();
   expect((await layoutSaved).request().postDataJSON()).toEqual({
-    albumOrder: ["shelf", "cards", "watching", "stickers", "atlas", "patches", "clubs", "saved"],
+    albumOrder: ["shelf", "watching", "stickers", "atlas", "patches", "clubs", "saved"],
     albumHidden: ["clubs"],
   });
   await expect(arrange).toBeHidden();
-  await expect(headings(page)).toHaveText(["All time so far", "The shelf", "Card gallery"]);
+  await expect(headings(page)).toHaveText(["All time so far", "The shelf"]);
 
   // Dragging a row by its handle moves it; closing without saving keeps the saved order.
   await main.getByRole("button", { name: "Arrange" }).click();
   const rows = arrange.getByRole("listitem");
   await expect(rows.first()).toContainText("The shelf");
-  const handle = (await arrange.getByRole("button", { name: /^Move Card gallery \(drag/ }).boundingBox())!;
+  const handle = (await arrange.getByRole("button", { name: /^Move Right now \(drag/ }).boundingBox())!;
   const step = (await rows.first().boundingBox())!.height + 8;
   await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
   await page.mouse.down();
   for (let i = 1; i <= 5; i++) await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2 - (step * i) / 5);
   await page.mouse.up();
-  await expect(rows.first()).toContainText("Card gallery");
+  await expect(rows.first()).toContainText("Right now");
   await page.keyboard.press("Escape");
   await expect(arrange).toBeHidden();
   await main.getByRole("button", { name: "Arrange" }).click();
@@ -375,7 +380,7 @@ test("the album as its owner arranges it: favourites on the shelf, sections move
   const visitor = await browser.newContext();
   const guest = await visitor.newPage();
   await guest.goto(`/u/${username}`);
-  await expect(headings(guest)).toHaveText(["All time so far", "The shelf", "Card gallery"]);
+  await expect(headings(guest)).toHaveText(["All time so far", "The shelf"]);
   await expect(shelf(guest).first()).toHaveAttribute("title", "Alpha Album Film");
   await visitor.close();
 });

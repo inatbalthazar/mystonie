@@ -3,9 +3,10 @@ import type { CSSProperties, ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Skeletons (ADR 0070): a page's shape in muted paper with a slow sheen, shown by its `loading.tsx` the moment you tap,
- * while the server reads its data. Each one follows its page's layout, so nothing jumps when the page arrives. It fades
- * in only after 150ms (globals.css), so a page that comes quickly never flashes one.
+ * Skeletons (ADR 0070, ADR 0075): a page's shape in faint, still paper, shown by its `loading.tsx` while the server
+ * reads its data. Each one follows its page's layout, so nothing jumps when the page arrives. It fades in only after
+ * 300ms (globals.css), so a page that comes quickly never flashes one. The tabs' pages are prefetched whole and rarely
+ * need one.
  */
 
 /** One block of a skeleton. */
@@ -151,15 +152,15 @@ export function SectionBones({ children }: { children: ReactNode }) {
   );
 }
 
-/** An album (Me, a profile): the cover, Me's tabs, the numbers and the card gallery. */
+/** An album (Me, a profile): the cover, Me's tabs (Album · Stats · Cards), the numbers and the shelf. */
 export function AlbumBones({ tabs = false }: { tabs?: boolean }) {
   return (
     <SkeletonPage>
       <CoverBones />
-      {tabs && <TabBones count={2} />}
+      {tabs && <TabBones count={3} />}
       <TicketBones />
       <SectionBones>
-        <PosterBones count={4} columns={2} card />
+        <PosterBones count={6} />
       </SectionBones>
     </SkeletonPage>
   );

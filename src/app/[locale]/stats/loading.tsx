@@ -5,7 +5,7 @@ export default function StatsLoading() {
   return (
     <SkeletonPage>
       <CoverBones />
-      <TabBones count={2} />
+      <TabBones count={3} />
       <div className="flex gap-2">
         {[16, 18, 14, 20].map((w) => (
           <Bone key={w} className="h-11 rounded-full" style={{ width: `${w * 4}px` }} />

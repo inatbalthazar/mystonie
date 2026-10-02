@@ -63,7 +63,8 @@ test("Home: up next, recent cards, trending into quick add, install prompt", asy
   await expect(cards.getByRole("link", { name: "Card: Parasite" })).toHaveAttribute("href", `/c/${shared}`);
   await expect(cards.getByRole("img", { name: "Card: Dune: Part Two" })).toBeVisible();
   await expect(cards.getByRole("link", { name: "Card: Dune: Part Two" })).toHaveCount(0);
-  await expect(cards.getByRole("link", { name: "See your page" })).toHaveAttribute("href", /^\/u\//);
+  // Every card is on Me's Cards tab (ADR 0076).
+  await expect(cards.getByRole("link", { name: "See all" })).toHaveAttribute("href", "/me/cards");
 
   // Trending (needs TMDB): each title opens quick add on its status step.
   const trending = main.getByRole("region", { name: "Trending this week" });

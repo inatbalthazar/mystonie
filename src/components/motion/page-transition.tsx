@@ -7,13 +7,14 @@ import { settleNavDirection } from "./nav-motion";
 const SETTLE_MS = 500;
 
 /**
- * The page slides in, so its own entrance (globals.css: `body > main` settling in, a skeleton's late fade) would only
- * fade it twice: those end at once, and the slide alone brings it in (a skeleton included, rather than empty paper).
+ * The page slides in, so its own entrance (globals.css: `body > main` settling in) would only fade it twice: it ends
+ * at once, and the slide alone brings it in. A skeleton keeps its late fade (ADR 0075), so a page that comes within
+ * 300ms never flashes one.
  */
 function endEntrances() {
-  for (const main of document.querySelectorAll("body > main")) {
+  for (const main of document.querySelectorAll("body > main:not([data-skeleton])")) {
     for (const animation of main.getAnimations()) {
-      if (animation instanceof CSSAnimation && (animation.animationName === "enter" || animation.animationName === "fade")) {
+      if (animation instanceof CSSAnimation && animation.animationName === "enter") {
         animation.finish();
       }
     }

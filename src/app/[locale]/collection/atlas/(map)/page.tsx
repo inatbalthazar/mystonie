@@ -1,3 +1,4 @@
+import { FreshPage } from "@/components/motion/fresh-page";
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -61,6 +62,7 @@ export default async function AtlasPage({ params }: PageProps<"/[locale]/collect
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 px-4 pt-10 pb-28">
+      <FreshPage />
       <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("title")}</h1>
       <div className="flex flex-col gap-6">
         <ShelfTabs shelf="atlas" />

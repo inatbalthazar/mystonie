@@ -22,7 +22,7 @@ The heart of Mystonie, modelled on Strava's post-activity share. Every finish or
 ## Rules
 - Templates live in `src/cards/templates/*`. Each is a React component + metadata (`id`, `kinds`, `sizes`, `tier: free|pro`). Adding a template requires no other code changes.
 - Rendering is client-side (component → PNG, [ADR 0008](../../decisions/0008-client-side-card-rendering.md)). Link previews (`/c/[id]` OG image) use `@vercel/og` with Latin-safe content, or the stored PNG.
-- Cards store their inputs (`cards` table: kind, template, params) so they can be re-rendered and shown in the profile gallery. The PNG is uploaded to Supabase Storage on share.
+- Cards store their inputs (`cards` table: kind, template, params) so they can be re-rendered and shown on Me's Cards tab ([ADR 0076](../../decisions/0076-cards-tab.md)). The PNG is uploaded to Supabase Storage on share.
 - Footer: `mystonie · @username` + short link `/c/[id]` → title page / sign-up ("Make your own card").
 - Users can hide username or any stat on a card. The footer shows their profile photo before `@username` when they have one, unless they hide it ("Photo", [ADR 0068](../../decisions/0068-photo-on-cards.md)).
 - Weekly Recap is computed by a scheduled job (pg_cron → route handler) per user time zone. Only users with activity that week get one.

@@ -109,7 +109,7 @@ test("the nav island: the lit tab, ➕ from anywhere and in place on the collect
   await expect(page).toHaveTitle("Me · Mystonie");
   await expect(page.getByRole("heading", { level: 1 })).toHaveText(/^island_\d+$/);
   await expect(page.getByRole("group", { name: "Share my collection" })).toBeVisible();
-  const meTabs = page.getByRole("navigation", { name: "Your album and stats" });
+  const meTabs = page.getByRole("navigation", { name: "Your album, stats and cards" });
   await expect(meTabs.getByRole("link", { name: "Album" })).toHaveAttribute("aria-current", "page");
   await meTabs.getByRole("link", { name: "Stats" }).click();
   await expect(page).toHaveURL(/\/stats$/);

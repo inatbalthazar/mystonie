@@ -1,6 +1,6 @@
 # ADR 0070: Motion, skeletons and swipes
 
-**Status:** Accepted · **Date:** 2026-10-02
+**Status:** Accepted, skeletons and tab loading changed by [ADR 0075](0075-instant-tabs.md) · **Date:** 2026-10-02
 
 ## Context
 Mystonie moved with almost no animation: the FINISHED stamp and the card rising in the celebration, a stamp on a Stamp. Pages swapped at once after a blank wait, sheets popped in, buttons came in four shapes (`rounded-xl`, `rounded-2xl`, `rounded-full`, and a few `rounded-lg`), and a slow page showed nothing until all its data had arrived.

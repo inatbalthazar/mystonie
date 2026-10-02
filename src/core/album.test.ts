@@ -8,11 +8,13 @@ describe("albumOrder", () => {
   });
 
   it("follows the saved order and adds what it doesn't name at the end, in the default order", () => {
-    expect(albumOrder(["shelf", "cards"])).toEqual(["shelf", "cards", "watching", "stickers", "atlas", "patches", "clubs", "saved"]);
+    expect(albumOrder(["shelf", "clubs"])).toEqual(["shelf", "clubs", "watching", "stickers", "atlas", "patches", "saved"]);
+    // The cards left the album (ADR 0076): an old saved order skips them.
+    expect(albumOrder(["cards", "shelf"])).toEqual(["shelf", "watching", "stickers", "atlas", "patches", "clubs", "saved"]);
   });
 
   it("skips unknown sections (one removed later) and repeats", () => {
-    expect(albumOrder(["gone", "clubs", "clubs", 3]).slice(0, 2)).toEqual(["clubs", "cards"]);
+    expect(albumOrder(["gone", "clubs", "clubs", 3]).slice(0, 2)).toEqual(["clubs", "watching"]);
     expect(albumOrder(["gone", "clubs", "clubs"])).toHaveLength(ALBUM_SECTIONS.length);
   });
 });
@@ -27,7 +29,8 @@ describe("albumHidden", () => {
 
 describe("parseAlbumSections", () => {
   it("takes known sections and drops repeats", () => {
-    expect(parseAlbumSections(["shelf", "cards", "shelf"])).toEqual(["shelf", "cards"]);
+    expect(parseAlbumSections(["shelf", "clubs", "shelf"])).toEqual(["shelf", "clubs"]);
+    expect(parseAlbumSections(["shelf", "cards"])).toBeNull();
     expect(parseAlbumSections([])).toEqual([]);
   });
 
@@ -42,12 +45,12 @@ describe("moveSection", () => {
   const order = albumOrder(null);
 
   it("moves a section and keeps the others in order", () => {
-    expect(moveSection(order, "shelf", 0).slice(0, 4)).toEqual(["shelf", "cards", "watching", "stickers"]);
-    expect(moveSection(order, "cards", 2).slice(0, 4)).toEqual(["watching", "shelf", "cards", "stickers"]);
+    expect(moveSection(order, "shelf", 0).slice(0, 4)).toEqual(["shelf", "watching", "stickers", "atlas"]);
+    expect(moveSection(order, "watching", 2).slice(0, 4)).toEqual(["shelf", "stickers", "watching", "atlas"]);
   });
 
   it("clamps past either end", () => {
-    expect(moveSection(order, "cards", -3)).toEqual(order);
-    expect(moveSection(order, "cards", 99).at(-1)).toBe("cards");
+    expect(moveSection(order, "watching", -3)).toEqual(order);
+    expect(moveSection(order, "watching", 99).at(-1)).toBe("watching");
   });
 });

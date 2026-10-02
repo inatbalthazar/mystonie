@@ -1,3 +1,4 @@
+import { FreshPage } from "@/components/motion/fresh-page";
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -36,15 +37,18 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
     .single();
   if (error) throw new Error(`profile read failed: ${error.message}`);
   return (
-    <ProfileAlbum
-      db={db}
-      viewerId={userId}
-      locale={locale}
-      timeZone={me.time_zone}
-      privateToOthers={me.visibility === "private"}
-      me
-      layout={albumLayout(me.album_order, me.album_hidden, me.shelf_pins)}
-      profile={{ id: me.id, username: me.username, displayName: me.display_name, bio: me.bio, avatarUrl: me.avatar_url, joinedAt: me.created_at }}
-    />
+    <>
+      <FreshPage />
+      <ProfileAlbum
+        db={db}
+        viewerId={userId}
+        locale={locale}
+        timeZone={me.time_zone}
+        privateToOthers={me.visibility === "private"}
+        me
+        layout={albumLayout(me.album_order, me.album_hidden, me.shelf_pins)}
+        profile={{ id: me.id, username: me.username, displayName: me.display_name, bio: me.bio, avatarUrl: me.avatar_url, joinedAt: me.created_at }}
+      />
+    </>
   );
 }

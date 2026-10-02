@@ -6,6 +6,7 @@ import type { MouseEvent } from "react";
 import { NAV_TAB_PATHS, navTab, type NavTab } from "@/core/nav";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { useChangeWatch } from "./motion/fresh-on-show";
 import { useFeedDots, useFeedNewsCheck } from "./social/feed-news";
 
 /**
@@ -46,6 +47,8 @@ export function NavIsland() {
   const path = usePathname();
   const current = navTab(path);
   useFeedNewsCheck(path);
+  // The tabs it prefetches refresh when shown after a change (ADR 0075).
+  useChangeWatch();
   const dots = useFeedDots();
   // On the feed's pages, the tabs and the Reel chip carry the dots instead.
   const feedNews = (dots.following || dots.articles || dots.reel) && current !== "feed";
@@ -65,6 +68,8 @@ export function NavIsland() {
     return (
       <Link
         href={NAV_TAB_PATHS[id].href}
+        // The whole page, ahead of the tap, so switching tabs shows it at once (ADR 0075).
+        prefetch
         aria-current={active ? "page" : undefined}
         aria-label={dot ? t("feedNews") : undefined}
         className={cn(

@@ -255,10 +255,6 @@
     62% { translate: 0 0; scale: 1.08 0.92; }
     76% { scale: 1 1; }
   }
-  @keyframes shimmer {
-    from { background-position: 150% 0; }
-    to { background-position: -50% 0; }
-  }
 }
 
 /* A press: the button gives a little under the finger and springs back. Buttons get it here; links that look like
@@ -319,23 +315,20 @@
   }
 }
 
-/* A skeleton block: the page's shape in muted paper, with a slow sheen passing over it. */
+/* A skeleton block: the page's shape in faint, still paper (ADR 0075: a sheen kept moving under the eye on every wait). */
 @utility skeleton {
-  background-color: color-mix(in oklch, var(--muted), var(--foreground) 4%);
-  background-image: linear-gradient(100deg, transparent 30%, color-mix(in oklch, var(--card) 65%, transparent) 50%, transparent 70%);
-  background-size: 200% 100%;
-  animation: shimmer 1.6s linear infinite;
+  background-color: color-mix(in oklch, var(--muted) 70%, transparent);
 }
 
 /* Every page settles in as it arrives in the running app (after a navigation, or when it replaces its skeleton); the
-   page of the first HTML shows at once (NavMotion ends its entrance), for a quick first paint. A skeleton waits 150ms before it fades
+   page of the first HTML shows at once (NavMotion ends its entrance), for a quick first paint. A skeleton waits 300ms before it fades
    in, so a page that comes quickly never flashes one. */
 :root[data-app] body > main:not([data-skeleton]) {
   animation: var(--animate-enter);
   animation-duration: 300ms;
 }
 body > main[data-skeleton] {
-  animation: fade 260ms ease-out 150ms both;
+  animation: fade 260ms ease-out 300ms both;
 }
 
 /* Page transitions (React <ViewTransition>, src/components/motion/page-transition.tsx). Only the page moves: the

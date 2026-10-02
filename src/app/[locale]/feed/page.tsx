@@ -1,3 +1,4 @@
+import { FreshPage } from "@/components/motion/fresh-page";
 import { ClapperboardIcon, FlagIcon, LogInIcon, ShieldIcon, TrophyIcon, UsersIcon } from "lucide-react";
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
@@ -84,6 +85,7 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
+      <FreshPage />
       {/* Opening a tab clears its dot (ADR 0054, ADR 0074). */}
       {userId && tab === "following" && <FollowingSeen user={userId} now={new Date(now).toISOString()} />}
       {userId && tab === "articles" && <ArticlesSeen user={userId} now={new Date(now).toISOString()} article={newestArticle} />}

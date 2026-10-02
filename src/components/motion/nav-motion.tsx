@@ -107,6 +107,19 @@ export function NavMotion() {
       const target = effect instanceof KeyframeEffect ? effect.target : null;
       if (target?.matches("body > main, .stagger > *")) animation.finish();
     }
+    // Once a page transition has played, its direction goes. A page shown from the router's cache (ADR 0075) doesn't
+    // always tell its <ViewTransition> it entered (`settleNavDirection` in PageTransition), so this doesn't rely on it.
+    const start = document.startViewTransition?.bind(document);
+    if (start) {
+      document.startViewTransition = ((arg: Parameters<typeof start>[0]) => {
+        const at = setAt;
+        const transition = start(arg);
+        void transition.finished.finally(() => {
+          if (setAt === at) clearNavDirection();
+        });
+        return transition;
+      }) as typeof document.startViewTransition;
+    }
     function onClick(event: MouseEvent) {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const direction = event.target instanceof Element ? directionOf(event.target) : null;
@@ -120,6 +133,7 @@ export function NavMotion() {
     return () => {
       document.removeEventListener("click", onClick, true);
       window.removeEventListener("popstate", onPopState);
+      if (start) document.startViewTransition = start;
     };
   }, []);
   return null;

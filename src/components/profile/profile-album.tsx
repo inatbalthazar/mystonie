@@ -10,7 +10,6 @@ import { ClubCrest } from "@/components/clubs/crest";
 import { AreaSummary } from "@/components/collection/collection-header";
 import { SwipeArea } from "@/components/motion/swipe-area";
 import { ReportButton } from "@/components/report-button";
-import { SharedCardImage } from "@/components/shared-card";
 import { BlockButton } from "@/components/social/block-button";
 import { ShareCollection } from "@/components/stats/share-collection";
 import type { AlbumLayout, AlbumSection } from "@/core/album";
@@ -23,7 +22,6 @@ import { weekStartFor } from "@/core/stats/period";
 import { collectionAreaTotals, collectionCards } from "@/core/stats/report";
 import { userPlaces } from "@/data/atlas";
 import { userBadges } from "@/data/badges";
-import { sharedCards } from "@/data/cards";
 import { userPatches } from "@/data/challenges";
 import { userClubs } from "@/data/clubs";
 import { currentlyWatching } from "@/data/profiles";
@@ -37,11 +35,9 @@ import { siteUrl } from "@/lib/site";
 import { AlbumCover, type AlbumProfile } from "./album-cover";
 import { ArrangeAlbum } from "./arrange-album";
 import { MeTabs } from "./me-tabs";
-import { PreviewList } from "./preview-list";
 import { Shelf } from "./shelf";
 import { ShelfFavourites } from "./shelf-favourites";
 
-const GALLERY_MAX = 30;
 const WATCHING_MAX = 6;
 const SHELF_MAX = 48;
 const SAVED_MAX = 3;
@@ -50,12 +46,12 @@ export type { AlbumProfile } from "./album-cover";
 
 /**
  * A collector's album (S1 profile & privacy): under the cover, the pinned all-time numbers, then its sections in the
- * order its owner arranged, minus the hidden ones (`layout`, ADR 0069): shared cards newest first, what they're
- * watching now, the Shelf with its favourites and their stickers (S3 badges & shelf), their Atlas when shown (stage 4,
+ * order its owner arranged, minus the hidden ones (`layout`, ADR 0069): what they're watching now, the Shelf with its favourites and their stickers (S3 badges & shelf), their Atlas when shown (stage 4,
  * ADR 0059), their challenge patches and clubs (S3 challenges & clubs), and the owner's saved articles. Long ones show
  * two rows and "Show all". Visitors see it at /u/<username>; the owner also at /me, the nav island's Me (ADR 0050), even
  * while it's private to everyone else (`privateToOthers`), as the Album tab next to Stats (`me`, ADR 0053). The
- * owner gets Share my collection and Settings, and on Me "Arrange" and "Pick favourites".
+ * owner gets Share my collection and Settings, and on Me "Arrange" and "Pick favourites". No cards: they're the owner's,
+ * on Me's Cards tab (ADR 0076), and each shared one has its own page.
  */
 export async function ProfileAlbum({
   db,
@@ -79,10 +75,9 @@ export async function ProfileAlbum({
   me?: boolean;
 }) {
   const isOwner = viewerId === profile.id;
-  const [rows, watching, cards, counts, awarded, patches, clubs, saved, places, atlasPublic, t, tb, tc, tl, tj] = await Promise.all([
+  const [rows, watching, counts, awarded, patches, clubs, saved, places, atlasPublic, t, tb, tc, tl, tj] = await Promise.all([
     statsRows(db, profile.id),
     currentlyWatching(db, profile.id, WATCHING_MAX),
-    sharedCards(db, profile.id, GALLERY_MAX),
     followCounts(db, profile.id).catch((error: unknown) => {
       console.error(error);
       return null;
@@ -129,45 +124,8 @@ export async function ProfileAlbum({
       collectionCards(rows.titles, rows.entries, rows.logs, { timeZone, weekStart: weekStartFor(locale), now: Date.now() }, rows.reads)
     : null;
 
-  // Every section, by name; empty ones are null (the gallery always shows, as an invitation when empty).
+  // Every section, by name; empty ones are null.
   const sections: Record<AlbumSection, ReactNode> = {
-    cards: (
-      <section aria-labelledby="card-gallery" className="flex flex-col gap-4">
-        <h2 id="card-gallery" className="font-display text-xl font-extrabold">
-          {t("gallery")}
-        </h2>
-        {cards.length === 0 ? (
-          <p className="rounded-2xl border-2 border-dashed border-border px-4 py-8 text-center font-hand text-2xl text-muted-foreground">
-            {t("galleryEmpty")}
-          </p>
-        ) : (
-          <PreviewList
-            phone={4}
-            wide={6}
-            className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3"
-            itemClassNames={cards.map((_, i) => (i % 3 === 1 ? "rotate-[1.2deg]" : i % 3 === 2 ? "rotate-[-0.8deg]" : "rotate-[-1.6deg]"))}
-            items={cards.map((card) => (
-              <Link
-                key={card.id}
-                href={`/c/${card.id}`}
-                className="block rounded-lg shadow-[0_2px_4px_rgb(0_0_0/0.08),0_14px_28px_-16px_rgb(0_0_0/0.45)] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-ring"
-              >
-                <SharedCardImage
-                  imageUrl={card.imageUrl}
-                  alt={t("cardAlt", { name: card.data.reel ? t("reelCard", { number: card.data.reel.number }) : card.data.atlas?.regions ? t("atlasRegionsCard", { country: card.data.name }) : card.data.atlas ? t("atlasCard", { count: card.data.atlas.countries.length }) : card.data.milestone ? t("milestoneCard") : card.data.recap?.highlights ? t("yearCard") : card.data.recap ? t("recapCard") : card.data.name })}
-                  templateId={card.templateId}
-                  size={card.size}
-                  data={card.data}
-                  host={host}
-                  lazy
-                />
-              </Link>
-            ))}
-          />
-        )}
-      </section>
-    ),
-
     watching: watching.length > 0 && (
       <section aria-labelledby="watching-now" className="flex flex-col gap-3">
         <h2 id="watching-now" className="font-display text-xl font-extrabold">

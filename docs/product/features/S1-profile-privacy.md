@@ -3,10 +3,11 @@
 **Stage:** 1 · **Built:** [ADR 0027](../../decisions/0027-public-profiles-preferences-reports.md)
 
 ## Profile
-`/u/[username]` shows a **card gallery** (the user's shared cards, newest first, up to 30), headline stats (the all-time collection summary) and what they're watching now (up to 6 posters). It's the "collection book" others can visit.
+`/u/[username]` shows headline stats (the all-time collection summary) and what they're watching now (up to 6 posters). It's the "collection book" others can visit.
 - **The album's order** ([ADR 0069](../../decisions/0069-arrange-the-album.md)):
   - The cover and the all-time numbers stay on top.
-  - The other sections follow in the owner's order, minus the ones they hid. The default order: Card gallery, Right now, The shelf, Stickers, Atlas, Challenge patches, Clubs, Saved to read (owner only).
+  - The other sections follow in the owner's order, minus the ones they hid. The default order: Right now, The shelf, Stickers, Atlas, Challenge patches, Clubs, Saved to read (owner only).
+  - **No card gallery** ([ADR 0076](../../decisions/0076-cards-tab.md)): an album full of cards drowned the rest, and visitors didn't come for them. The owner finds every card they made (shared or only downloaded) on Me's **Cards** tab (`/me/cards`, Album · Stats · Cards), 24 at a time; each shared card keeps its own page.
   - Long sections show two rows and "Show all (N)": 4 cards on phones (6 from 640 px), two shelves. Right now scrolls sideways on phones.
   - On Me, "Arrange" opens a sheet where the owner moves sections by a drag handle or arrows and hides them with an eye. The Atlas's eye is "Show my Atlas on my profile".
   - Hiding takes a section off the album; it doesn't make anything private.

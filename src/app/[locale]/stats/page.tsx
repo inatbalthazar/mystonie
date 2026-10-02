@@ -1,3 +1,4 @@
+import { FreshPage } from "@/components/motion/fresh-page";
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -102,6 +103,7 @@ export default async function StatsPage({ params, searchParams }: PageProps<"/[l
 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
+      <FreshPage />
       <AlbumCover
         profile={{
           id: profile.id,
@@ -116,7 +118,7 @@ export default async function StatsPage({ params, searchParams }: PageProps<"/[l
       />
       <MeTabs current="stats" />
       {/* Swiping right goes back to the Album, the tab before (ADR 0070). */}
-      <SwipeArea prev="/me" className="flex flex-col gap-8">
+      <SwipeArea prev="/me" next="/me/cards" className="flex flex-col gap-8">
         {empty ? (
           <>
             <StatsEmpty />
