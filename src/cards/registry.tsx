@@ -1,14 +1,18 @@
 import type { ComponentType } from "react";
 import { isProTemplate, TEMPLATE_META, templatesFor, type TemplateId } from "@/core/cards/templates";
 import type { TemplateProps } from "./parts";
+import { ArcadeCard } from "./templates/arcade";
 import { AtlasCard } from "./templates/atlas";
 import { BoldStatsCard } from "./templates/bold-stats";
 import { CalendarCard } from "./templates/calendar";
 import { CartridgeCard } from "./templates/cartridge";
 import { CollageCard } from "./templates/collage";
 import { FilmStripCard } from "./templates/film-strip";
+import { GildedCard } from "./templates/gilded";
+import { LineupCard } from "./templates/lineup";
 import { MangaPanelCard } from "./templates/manga-panel";
 import { PolaroidCard } from "./templates/polaroid";
+import { PremiereCard } from "./templates/premiere";
 import { ReelCard } from "./templates/reel";
 import { SpineCard } from "./templates/spine";
 import { StoneCard } from "./templates/stone";
@@ -39,6 +43,10 @@ const COMPONENTS: Record<TemplateId, ComponentType<TemplateProps>> = {
   reel: ReelCard,
   sticker: StickerCard,
   atlas: AtlasCard,
+  premiere: PremiereCard,
+  gilded: GildedCard,
+  arcade: ArcadeCard,
+  lineup: LineupCard,
 };
 
 export const TEMPLATES = TEMPLATE_META;

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { cardImagePath, crossedMilestone, parseCardData, parseCardSave, parseRecap, readingProgress } from "./saved";
-import { defaultTemplate, templateFits, templatesFor } from "./templates";
+import { defaultTemplate, isProTemplate, TEMPLATE_IDS, templateFits, templatesFor } from "./templates";
 
 const ID = "01926000-0000-7000-8000-000000000001";
 const ENTRY = "01926000-0000-7000-8000-000000000002";
@@ -251,19 +251,19 @@ describe("parseRecap", () => {
 
 describe("templates", () => {
   it("lists templates per card kind", () => {
-    expect(templatesFor("finish", "movie")).toEqual(["ticket", "polaroid", "boldStats", "filmStrip"]);
-    expect(templatesFor("progress", "series")).toEqual(["polaroid", "boldStats", "filmStrip"]);
-    expect(templatesFor("weekly_recap", "series")).toEqual(["boldStats", "collage"]);
-    expect(templatesFor("stats", "movie")).toEqual(["boldStats", "collage"]);
+    expect(templatesFor("finish", "movie")).toEqual(["ticket", "polaroid", "boldStats", "filmStrip", "premiere"]);
+    expect(templatesFor("progress", "series")).toEqual(["polaroid", "boldStats", "filmStrip", "premiere"]);
+    expect(templatesFor("weekly_recap", "series")).toEqual(["boldStats", "collage", "lineup"]);
+    expect(templatesFor("stats", "movie")).toEqual(["boldStats", "collage", "lineup"]);
     expect(templatesFor("sticker", "movie")).toEqual(["sticker"]);
     expect(templateFits("ticket", "progress", "story", "series")).toBe(false);
   });
 
   it("adds the spine for books and manga, and the manga panel for manga only (S2 books & manga)", () => {
-    expect(templatesFor("finish", "book")).toEqual(["ticket", "polaroid", "boldStats", "spine"]);
-    expect(templatesFor("finish", "manga")).toEqual(["ticket", "polaroid", "boldStats", "spine", "mangaPanel"]);
-    expect(templatesFor("progress", "manga")).toEqual(["polaroid", "boldStats", "spine", "mangaPanel"]);
-    expect(templatesFor("progress", "book")).toEqual(["polaroid", "boldStats", "spine"]);
+    expect(templatesFor("finish", "book")).toEqual(["ticket", "polaroid", "boldStats", "spine", "gilded"]);
+    expect(templatesFor("finish", "manga")).toEqual(["ticket", "polaroid", "boldStats", "spine", "mangaPanel", "gilded"]);
+    expect(templatesFor("progress", "manga")).toEqual(["polaroid", "boldStats", "spine", "mangaPanel", "gilded"]);
+    expect(templatesFor("progress", "book")).toEqual(["polaroid", "boldStats", "spine", "gilded"]);
     expect(templatesFor("sticker", "manga")).toEqual(["sticker"]);
     expect(templateFits("spine", "finish", "feed", "movie")).toBe(false);
     expect(templateFits("mangaPanel", "progress", "story", "book")).toBe(false);
@@ -272,12 +272,33 @@ describe("templates", () => {
   });
 
   it("adds the cartridge for a game's finish, and opens on it (S3 games)", () => {
-    expect(templatesFor("finish", "game")).toEqual(["ticket", "polaroid", "boldStats", "cartridge"]);
+    expect(templatesFor("finish", "game")).toEqual(["ticket", "polaroid", "boldStats", "cartridge", "arcade"]);
     expect(defaultTemplate("finish", "game")).toBe("cartridge");
     expect(templateFits("cartridge", "finish", "feed", "game")).toBe(true);
     expect(templateFits("cartridge", "finish", "story", "movie")).toBe(false);
     expect(templateFits("cartridge", "progress", "story", "game")).toBe(false);
     expect(templateFits("filmStrip", "finish", "story", "game")).toBe(false);
+  });
+
+  it("has a Pro style for each kind of card, last on the swipe and never the one a card opens on (ADR 0084)", () => {
+    expect(TEMPLATE_IDS.filter(isProTemplate)).toEqual(["filmStrip", "premiere", "gilded", "arcade", "lineup"]);
+    const lastIsPro = (ids: string[]) => ids.at(-1);
+    expect(lastIsPro(templatesFor("finish", "series"))).toBe("premiere");
+    expect(lastIsPro(templatesFor("progress", "book"))).toBe("gilded");
+    expect(lastIsPro(templatesFor("finish", "manga"))).toBe("gilded");
+    expect(lastIsPro(templatesFor("finish", "game"))).toBe("arcade");
+    for (const kind of ["weekly_recap", "monthly_recap", "stats", "year_review"] as const) expect(lastIsPro(templatesFor(kind, "book"))).toBe("lineup");
+    // Each draws only its own kind of title and card.
+    expect(templateFits("premiere", "finish", "feed", "book")).toBe(false);
+    expect(templateFits("gilded", "finish", "story", "movie")).toBe(false);
+    expect(templateFits("arcade", "progress", "story", "game")).toBe(false);
+    expect(templateFits("arcade", "finish", "story", "series")).toBe(false);
+    expect(templateFits("lineup", "finish", "story", "movie")).toBe(false);
+    expect(templateFits("lineup", "milestone", "story", "movie")).toBe(false);
+    expect(templateFits("lineup", "year_review", "feed", "game")).toBe(true);
+    for (const kind of ["finish", "progress", "weekly_recap", "stats", "year_review"] as const) {
+      for (const title of ["movie", "series", "book", "manga", "game"] as const) expect(isProTemplate(defaultTemplate(kind, title))).toBe(false);
+    }
   });
 
   it("opens a new card on the template made for its title", () => {
@@ -368,7 +389,7 @@ describe("Survived cards (S2 content warnings)", () => {
   const finish = { id: ID, kind: "finish", templateId: "survived", size: "story", entryId: ENTRY, data: { ...data, survived: "jumpScares" } };
 
   it("offers the Survived template first, only when there's a scare", () => {
-    expect(templatesFor("finish", "movie", { survived: true })).toEqual(["survived", "ticket", "polaroid", "boldStats", "filmStrip"]);
+    expect(templatesFor("finish", "movie", { survived: true })).toEqual(["survived", "ticket", "polaroid", "boldStats", "filmStrip", "premiere"]);
     expect(templatesFor("finish", "book", { survived: true })).not.toContain("survived");
     expect(templatesFor("progress", "series", { survived: true })).not.toContain("survived");
   });

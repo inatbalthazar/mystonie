@@ -92,7 +92,7 @@ describe("yearInReview", () => {
     const review = yearInReview(titles, entries, logs, [], { ...options, now: Date.parse("2027-01-15T00:00:00Z") });
     const card = { id: "01926000-0000-7000-8000-000000000001", kind: "year_review", templateId: "yearbook", size: "story", data: recapCardData(review.card!) };
     expect(parseCardSave(card)).toMatchObject({ kind: "year_review", data: { recap: { highlights: { streak: 3 } } } });
-    expect(templatesFor("year_review", "book")).toEqual(["boldStats", "collage", "yearbook"]);
+    expect(templatesFor("year_review", "book")).toEqual(["boldStats", "collage", "yearbook", "lineup"]);
     for (const bad of [
       { ...card, kind: "stats" }, // highlights are a Year in Review's
       { ...card, recapId: "01926000-0000-7000-8000-000000000002" },

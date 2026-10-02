@@ -47,6 +47,15 @@ export const TEMPLATE_META = [
   // Stage 4 Atlas: the world map with the countries you've been to coloured in, like a scratch map.
   { id: "atlas", kinds: ["atlas"], sizes: BOTH_SIZES, tier: "free" },
   { id: "sticker", kinds: ["sticker"], sizes: BOTH_SIZES, tier: "free" },
+  // More Pro (ADR 0084), one for each kind of card, last on the swipe. Opening night: the poster in a gold case ringed
+  // with bulbs, the title on the lit letter board. Movies and series.
+  { id: "premiere", kinds: ["finish", "progress"], sizes: BOTH_SIZES, tier: "pro", titleKinds: ["movie", "series"] },
+  // A collector's clothbound edition: gold-stamped title, the cover tipped in, an Ex libris bookplate. Books and manga.
+  { id: "gilded", kinds: ["finish", "progress"], sizes: BOTH_SIZES, tier: "pro", titleKinds: ["book", "manga"] },
+  // Game clear on an arcade CRT, under a neon marquee, with a high-score table. Games.
+  { id: "arcade", kinds: ["finish"], sizes: BOTH_SIZES, tier: "pro", titleKinds: ["game"] },
+  // The period as a festival poster: duotone print, the most watched title headlining, the numbers on a ticket stub.
+  { id: "lineup", kinds: ["weekly_recap", "monthly_recap", "stats", "year_review"], sizes: BOTH_SIZES, tier: "pro" },
 ] as const satisfies readonly TemplateMeta[];
 
 export type TemplateId = (typeof TEMPLATE_META)[number]["id"];

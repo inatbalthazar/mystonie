@@ -99,7 +99,11 @@
       "calendar": "Calendar",
       "cartridge": "ตลับเกม",
       "reel": "Film Frames",
-      "atlas": "แผนที่ขูด"
+      "atlas": "แผนที่ขูด",
+      "premiere": "รอบปฐมทัศน์",
+      "gilded": "ฉบับปกทอง",
+      "arcade": "ตู้เกม",
+      "lineup": "ไลน์อัป"
     },
     "sizes": {
       "story": "สตอรี่ 9:16",
@@ -166,6 +170,9 @@
     "importHeadline": "นำเข้า{unit, select, book {หนังสือ {count, plural, other {# เล่ม}}} series {ซีรีส์ {count, plural, other {# เรื่อง}}} manga {มังงะ {count, plural, other {# เรื่อง}}} game {เกม {count, plural, other {# เกม}}} title {{count, plural, other {# เรื่อง}}} other {หนัง {count, plural, other {# เรื่อง}}}}",
     "filmEdge": "Mystonie 400 · Safety film",
     "filmFrame": "▸ 12A",
+    "exLibris": "Ex libris",
+    "gameClear": "เคลียร์เกม!",
+    "lineupMore": "{count, plural, other {+ อีก # เรื่อง}}",
     "survivedBadge": "รอดมาได้",
     "survivedHeadline": "รอดจาก{scare, select, jumpScares {ฉากตุ้งแช่} zombies {ซอมบี้} possession {ผีเข้า} ghosts {ผี} clowns {ตัวตลก} dolls {ตุ๊กตาหลอน} gore {เลือดสาด} spiders {แมงมุม} snakes {งู} sharks {ฉลาม} other {เข็มฉีดยา}}มาได้",
     "areaHeadline": "{area, select, watch {ที่ดูมาทั้งหมด} read {ที่อ่านมาทั้งหมด} play {ที่เล่นมาทั้งหมด} other {ตลอดกาล}}",

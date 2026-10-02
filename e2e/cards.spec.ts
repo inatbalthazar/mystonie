@@ -40,7 +40,12 @@ test("every template × size × hard case stays inside the card", async ({ page 
   // Games (S3 games): the 3 finish templates, the Cartridge + the sticker.
   // Reel of the Day (stage 4): Film Frames + the sticker. The Atlas (stage 4): Scratch map + the sticker, for two
   // world cards and two country cards (ADR 0060).
-  expect(count).toBe(5 * 4 * 2 + 2 * 3 * 2 + 3 * 3 * 2 + (5 + 6) * 2 + (5 + 4) * 2 + 2 * 3 * 2 + 3 * 2 + 2 * 4 * 2 + 7 * 2 + 6 * 2 + 2 * 3 * 2 + 2 * 5 * 2 + 2 * 2 * 2 + 4 * 2 * 2);
+  // More Pro (ADR 0084): Premiere on the same 8 movie and series fixtures as the Film Strip, Gilded on the 4 books and
+  // manga, the Arcade on the 2 games and the Lineup on the 6 recaps, stats and years.
+  expect(count).toBe(
+    5 * 4 * 2 + 2 * 3 * 2 + 3 * 3 * 2 + (5 + 6) * 2 + (5 + 4) * 2 + 2 * 3 * 2 + 3 * 2 + 2 * 4 * 2 + 7 * 2 + 6 * 2 + 2 * 3 * 2 + 2 * 5 * 2 + 2 * 2 * 2 + 4 * 2 * 2 +
+      (8 + 4 + 2 + 6) * 2,
+  );
 
   for (let i = 0; i < count; i++) {
     const card = cards.nth(i);

@@ -42,6 +42,9 @@ export function CardRoot({ size, palette, className, children }: { size: CardSiz
     // Brand display face for headlines and numbers; handwriting for polaroid captions.
     "--card-display": `var(--font-bricolage), ${NOTO}`,
     "--card-hand": `var(--font-caveat), ${NOTO}`,
+    // Pro faces (ADR 0084): Gilded's book serif and the Arcade's pixel letters.
+    "--card-serif": `var(--font-cormorant), ${NOTO}`,
+    "--card-pixel": `var(--font-press-start), ${NOTO}`,
     // Stamp ink: the brand coral (reads on the paper stock).
     "--card-stamp": "#cf3c12",
   } as CSSProperties;

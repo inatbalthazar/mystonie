@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Bricolage_Grotesque, Caveat, Geist, Noto_Sans_Thai } from "next/font/google";
+import { Bricolage_Grotesque, Caveat, Cormorant_Garamond, Geist, Noto_Sans_Thai, Press_Start_2P } from "next/font/google";
 import { notFound } from "next/navigation";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -35,6 +35,11 @@ const bricolage = Bricolage_Grotesque({ variable: "--font-bricolage", subsets: [
 // Handwriting for polaroid captions: only cards use it, so it isn't preloaded. One static weight
 // (captions are regular) is ~half the size of the variable font.
 const caveat = Caveat({ variable: "--font-caveat", subsets: ["latin"], weight: "400", preload: false });
+
+// The Pro cards' own faces (ADR 0084): a book serif for Gilded and pixel letters for the Arcade. Only those cards use
+// them, so they aren't preloaded: nothing downloads until one of those cards is drawn.
+const cormorant = Cormorant_Garamond({ variable: "--font-cormorant", subsets: ["latin"], weight: ["600", "700"], preload: false });
+const pressStart = Press_Start_2P({ variable: "--font-press-start", subsets: ["latin"], weight: "400", preload: false });
 
 // Thai card fallback. Not preloaded: its @font-face rules use unicode-range, so the browser only
 // downloads it when a card contains Thai. Korean/Japanese load on demand (src/cards/cjk-fonts.ts).
@@ -76,7 +81,7 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
   return (
     <html
       lang={locale}
-      className={`${geistSans.variable} ${bricolage.variable} ${caveat.variable} ${notoThai.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${bricolage.variable} ${caveat.variable} ${cormorant.variable} ${pressStart.variable} ${notoThai.variable} h-full antialiased`}
       suppressHydrationWarning // the pre-paint script sets data-theme and data-auth before React hydrates
     >
       <body className="min-h-full flex flex-col">

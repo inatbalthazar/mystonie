@@ -39,6 +39,10 @@ UI decides whether people adopt Mystonie, and the share artwork decides whether 
 | **Stone** (stage 2) | the number carved into Stonie's tablet, the title that got there pasted below | milestones |
 | **Yearbook** (stage 2) | the year in huge type, the top posters pasted across, three standouts | Year in Review |
 | **Film Strip** (stage 2, Pro) | the poster as a frame of 35 mm film taped into the album, with a paper label | movies, series |
+| **Premiere** (stage 4, Pro) | opening night: the moment in lights on a gold marquee sign, the poster under glass in a gold case ringed with bulbs, the title on a lit letter board, the review as the critic quote ([ADR 0084](../decisions/0084-more-pro-styles.md)) | movies, series |
+| **Gilded** (stage 4, Pro) | a collector's clothbound edition: deepened cloth with its weave, a gilt frame, the title stamped in gold (Cormorant Garamond), the cover tipped into a gilt-ruled plate, an Ex libris bookplate with the review as an inscription | books, manga |
+| **Arcade** (stage 4, Pro) | game clear: the title in a neon marquee, the key art on a CRT with GAME CLEAR! (Press Start 2P), a high-score table and the review in an RPG dialogue box, over a neon grid | games |
+| **Lineup** (stage 4, Pro) | the period as a festival poster: the headliner's poster in duotone with a halftone screen, the period in giant condensed caps, the most watched title headlining the bill, the numbers on a ticket stub | recaps, stats, Year in Review |
 | **Survived** (stage 2) | a stitched "I SURVIVED" merit patch with the scare's emoji, sewn next to the taped-in poster; offered only when DTDD says the title has a fun scare ([ADR 0035](../decisions/0035-content-warnings-cache-and-survived.md)) | scary movies and series |
 
 Sizes: 9:16 (Stories/TikTok) and 4:5 (feed). Footer: `mystonie · @username` + short link. No QR.

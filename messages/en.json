@@ -100,7 +100,11 @@
       "calendar": "Calendar",
       "cartridge": "Cartridge",
       "reel": "Film Frames",
-      "atlas": "Scratch map"
+      "atlas": "Scratch map",
+      "premiere": "Premiere",
+      "gilded": "Gilded",
+      "arcade": "Arcade",
+      "lineup": "Lineup"
     },
     "sizes": {
       "story": "Story 9:16",
@@ -168,6 +172,9 @@
     "importHeadline": "Imported {unit, select, book {{count, plural, one {# book} other {# books}}} series {{count, plural, one {# show} other {# shows}}} manga {{count, plural, other {# manga}}} game {{count, plural, one {# game} other {# games}}} title {{count, plural, one {# title} other {# titles}}} other {{count, plural, one {# film} other {# films}}}}",
     "filmEdge": "Mystonie 400 · Safety film",
     "filmFrame": "▸ 12A",
+    "exLibris": "Ex libris",
+    "gameClear": "Game clear!",
+    "lineupMore": "{count, plural, other {+# more}}",
     "survivedBadge": "I survived",
     "survivedHeadline": "Survived {scare, select, jumpScares {the jump scares} zombies {the zombies} possession {the possession} ghosts {the ghosts} clowns {the clowns} dolls {the creepy dolls} gore {the gore} spiders {the spiders} snakes {the snakes} sharks {the sharks} other {the needles}}",
     "areaHeadline": "{area, select, watch {All I've watched} read {All I've read} play {All I've played} other {All time}}",
