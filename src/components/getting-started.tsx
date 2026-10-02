@@ -52,7 +52,7 @@ export function ShowGettingStarted() {
         write(SKIPPED, false);
         write(CELEBRATED, false);
       }}
-      className="inline-flex h-11 items-center rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
+      className="inline-flex h-11 items-center rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press"
     >
       {t("show")}
     </button>
@@ -263,7 +263,7 @@ function Celebration({ g, onDone }: { g: GettingStarted; onDone: () => void }) {
       <div className="w-full">
         <Bar g={g} />
       </div>
-      <button type="button" onClick={onDone} className="h-11 rounded-xl bg-brand px-5 font-semibold text-brand-foreground hover:bg-brand/90">
+      <button type="button" onClick={onDone} className="h-11 rounded-full bg-brand px-5 font-semibold text-brand-foreground hover:bg-brand/90 press">
         {t("doneButton")}
       </button>
     </div>

@@ -178,7 +178,7 @@ export function PushPrompt({ publicKey }: { publicKey: string }) {
             if (await enable()) setHidden(true);
           }}
           disabled={busy}
-          className="h-11 rounded-xl bg-brand px-4 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60"
+          className="h-11 rounded-full bg-brand px-4 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60 press"
         >
           {t("pushOn")}
         </button>
@@ -188,7 +188,7 @@ export function PushPrompt({ publicKey }: { publicKey: string }) {
             rememberDismissed(PROMPT_DISMISSED);
             setHidden(true);
           }}
-          className="h-11 rounded-xl px-4 font-semibold ring-1 ring-border hover:bg-muted"
+          className="h-11 rounded-full px-4 font-semibold ring-1 ring-border hover:bg-muted press"
         >
           {t("notNow")}
         </button>

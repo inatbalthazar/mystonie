@@ -37,6 +37,19 @@ describe("parseAccountPatch", () => {
     });
   });
 
+  it("takes the album as arranged: its order, hidden sections and shelf favourites (ADR 0069)", () => {
+    const pin = "00000000-0000-4000-8000-000000000001";
+    expect(parseAccountPatch({ albumOrder: ["shelf", "cards"], albumHidden: ["saved"], shelfPins: [pin, pin] }, locales)).toEqual({
+      album_order: ["shelf", "cards"],
+      album_hidden: ["saved"],
+      shelf_pins: [pin],
+    });
+    expect(parseAccountPatch({ albumOrder: ["feed"] }, locales)).toBeNull();
+    // The Atlas hides with its own switch.
+    expect(parseAccountPatch({ albumHidden: ["atlas"] }, locales)).toBeNull();
+    expect(parseAccountPatch({ shelfPins: ["x"] }, locales)).toBeNull();
+  });
+
   it("keeps only the fields that were sent", () => {
     expect(parseAccountPatch({ theme: "light" }, locales)).toEqual({ theme: "light" });
   });

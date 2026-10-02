@@ -290,3 +290,92 @@ test("a profile photo: picked, framed and uploaded, shown on the profile and on 
   await expect(main.getByRole("button", { name: "Add photo" })).toBeVisible();
   await expect.poll(async () => (await request.get(avatarUrl)).status()).toBeGreaterThanOrEqual(400);
 });
+
+test("the album as its owner arranges it: favourites on the shelf, sections moved and hidden (ADR 0069)", async ({ page, request, browser }) => {
+  test.skip(!(await mailpitUp(request)) || !canSeed(), "local Supabase (Mailpit, service role key) is not available");
+  const films: SeedTitle[] = ["Alpha", "Bravo", "Charlie"].map((name, i) => ({
+    kind: "movie",
+    externalId: `990690${i}`,
+    name: `${name} Album Film`,
+    year: 2020 + i,
+    posterPath: null,
+    runtimeMin: 100,
+  }));
+  await seedTitles(request, films);
+  await signUp(page, request, "arrange", "/me");
+  const username = `arr_${Date.now().toString(36)}`;
+  expect((await page.request.patch("/api/account", { data: { username } })).ok()).toBe(true);
+  // Finished one after another: the shelf shows Charlie, Bravo, Alpha.
+  for (const film of films) {
+    const res = await page.request.post("/api/entries", {
+      data: { id: uuidv7(), title: { source: "tmdb", kind: "movie", externalId: film.externalId }, status: "finished" },
+    });
+    expect(res.ok(), await res.text()).toBe(true);
+  }
+  await page.reload();
+  const main = page.getByRole("main");
+  const headings = (p: Page) => p.getByRole("main").getByRole("heading", { level: 2 });
+  const shelf = (p: Page) => p.getByRole("region", { name: "The shelf" }).getByRole("listitem");
+
+  // The default order: the cards first.
+  await expect(headings(page)).toHaveText(["All time so far", "Card gallery", "The shelf", "Clubs"]);
+  await expect(shelf(page).first()).toHaveAttribute("title", "Charlie Album Film");
+
+  // Pin the oldest finish as a favourite: it stands first, with a star.
+  await expect(async () => {
+    // Retried: a tap before hydration is lost.
+    await main.getByRole("button", { name: "Pick favourites" }).click();
+    await expect(page.getByRole("dialog", { name: "Favourites on your shelf" })).toBeVisible({ timeout: 2000 });
+  }).toPass();
+  const favourites = page.getByRole("dialog", { name: "Favourites on your shelf" });
+  await favourites.getByRole("button", { name: "Alpha Album Film" }).click();
+  await expect(favourites.getByRole("button", { name: "Alpha Album Film" })).toHaveAttribute("aria-pressed", "true");
+  const pinSaved = saved(page);
+  await favourites.getByRole("button", { name: "Save" }).click();
+  expect((await pinSaved).request().postDataJSON()).toEqual({ shelfPins: [expect.any(String)] });
+  await expect(favourites).toBeHidden();
+  await expect(shelf(page).first()).toHaveAttribute("title", "Alpha Album Film");
+  await expect(shelf(page).first()).toContainText("Favourite");
+  await expect(page.getByRole("region", { name: "The shelf" })).toContainText("Favourites first, then newest.");
+
+  // Arrange: the shelf to the top with its arrows, Clubs hidden.
+  await main.getByRole("button", { name: "Arrange" }).click();
+  const arrange = page.getByRole("dialog", { name: "Arrange your album" });
+  await arrange.getByRole("button", { name: "Move The shelf up" }).click();
+  await arrange.getByRole("button", { name: "Move The shelf up" }).click();
+  await arrange.getByRole("button", { name: "Hide Clubs" }).click();
+  await expect(arrange.getByRole("button", { name: "Show Clubs" })).toBeVisible();
+  const layoutSaved = saved(page);
+  await arrange.getByRole("button", { name: "Save", exact: true }).click();
+  expect((await layoutSaved).request().postDataJSON()).toEqual({
+    albumOrder: ["shelf", "cards", "watching", "stickers", "atlas", "patches", "clubs", "saved"],
+    albumHidden: ["clubs"],
+  });
+  await expect(arrange).toBeHidden();
+  await expect(headings(page)).toHaveText(["All time so far", "The shelf", "Card gallery"]);
+
+  // Dragging a row by its handle moves it; closing without saving keeps the saved order.
+  await main.getByRole("button", { name: "Arrange" }).click();
+  const rows = arrange.getByRole("listitem");
+  await expect(rows.first()).toContainText("The shelf");
+  const handle = (await arrange.getByRole("button", { name: /^Move Card gallery \(drag/ }).boundingBox())!;
+  const step = (await rows.first().boundingBox())!.height + 8;
+  await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2);
+  await page.mouse.down();
+  for (let i = 1; i <= 5; i++) await page.mouse.move(handle.x + handle.width / 2, handle.y + handle.height / 2 - (step * i) / 5);
+  await page.mouse.up();
+  await expect(rows.first()).toContainText("Card gallery");
+  await page.keyboard.press("Escape");
+  await expect(arrange).toBeHidden();
+  await main.getByRole("button", { name: "Arrange" }).click();
+  await expect(rows.first()).toContainText("The shelf");
+  await page.keyboard.press("Escape");
+
+  // Visitors get the album as arranged.
+  const visitor = await browser.newContext();
+  const guest = await visitor.newPage();
+  await guest.goto(`/u/${username}`);
+  await expect(headings(guest)).toHaveText(["All time so far", "The shelf", "Card gallery"]);
+  await expect(shelf(guest).first()).toHaveAttribute("title", "Alpha Album Film");
+  await visitor.close();
+});

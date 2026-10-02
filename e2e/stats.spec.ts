@@ -35,7 +35,7 @@ test("stats: empty state, then numbers that match the collection, and Share stat
   await expect(page.getByRole("main").locator("dd").first()).toHaveText("2h 13m");
   await page.getByRole("link", { name: "All time" }).click();
   await expect(page).toHaveURL(/period=all/);
-  const stats = await numbers(page, "main > section:has(> dl)");
+  const stats = await numbers(page, "main section:has(> dl)");
   expect(stats.slice(0, 3)).toEqual(collection);
   await expect(page.getByText("Longest movie")).toBeVisible();
   await expect(page.getByRole("main")).toContainText("Parasite");

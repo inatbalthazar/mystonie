@@ -1,7 +1,10 @@
+import { StarIcon } from "lucide-react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
+import type { ReactNode } from "react";
 import type { ShelfTitle } from "@/core/shelf";
 import { cn } from "@/lib/utils";
+import { ShelfRows } from "./shelf-rows";
 
 /** Spine colours: dark cloth bindings that hold small white type at ≥ 4.5:1 in both themes. */
 const SPINES = ["#7a2e2e", "#2d4a6b", "#35533a", "#6b4c1f", "#4b2f5e", "#1f5a5a", "#7a3d12", "#3a3a4a", "#6b1f3f", "#274060"];
@@ -17,19 +20,36 @@ function hash(id: string): number {
  * The Shelf (S3 badges & shelf): everything a profile finished, newest first, standing on wooden shelves. Movies
  * and series face out as cases (their posters), books and manga show their spines, and games stand as game cases
  * (their key art under a platform band, S3 games). Rows are fixed-height slots
- * with a plank drawn under each by the background, so the planks line up however the items wrap.
+ * with a plank drawn under each by the background, so the planks line up however the items wrap. The owner's pinned
+ * favourites (the first `pinned` items) lead with a star (ADR 0069); two shelves show until "Show all".
+ * `favourites`: the owner's "Pick favourites", on Me.
  */
-export async function Shelf({ items, more }: { items: ShelfTitle[]; more: number }) {
+export async function Shelf({ items, pinned = 0, more, favourites }: { items: ShelfTitle[]; pinned?: number; more: number; favourites?: ReactNode }) {
   const t = await getTranslations("Profile");
+  // A star over a favourite's top edge: `height` is the item's, standing on the 112px row's floor.
+  const star = (i: number, height: number) =>
+    i < pinned && (
+      <>
+        <span className="sr-only">{t("shelfFavourite")}</span>
+        <span
+          aria-hidden="true"
+          style={{ top: `${Math.max(0, 112 - height - 8)}px` }}
+          className="absolute left-1/2 z-10 flex size-4 -translate-x-1/2 items-center justify-center rounded-full bg-brand text-brand-foreground ring-2 ring-background"
+        >
+          <StarIcon className="size-2.5 fill-current" />
+        </span>
+      </>
+    );
   return (
     <section aria-labelledby="shelf" className="flex flex-col gap-3">
       <div className="flex flex-wrap items-baseline justify-between gap-x-3">
         <h2 id="shelf" className="font-display text-xl font-extrabold">
           {t("shelf")}
         </h2>
-        <p className="font-hand text-xl leading-none text-muted-foreground">{t("shelfHint")}</p>
+        <p className="font-hand text-xl leading-none text-muted-foreground">{t(pinned > 0 ? "shelfHintPinned" : "shelfHint")}</p>
       </div>
-      <ul
+      <ShelfRows
+        count={items.length}
         className={cn(
           "flex flex-wrap items-end gap-x-1.5 gap-y-3 overflow-hidden rounded-xl bg-muted/50 px-3 pb-3 shadow-inner ring-1 ring-border",
           // A plank under every 112px row (+ the 12px gap it fills).
@@ -42,17 +62,19 @@ export async function Shelf({ items, more }: { items: ShelfTitle[]; more: number
           const label = <span className="sr-only">{t("shelfItem", { name: item.name, kind: item.kind })}</span>;
           if (item.kind === "book" || item.kind === "manga") {
             const manga = item.kind === "manga";
+            const height = 84 + (h % 5) * 6;
             return (
-              <li key={item.id} title={item.name} className="flex h-[112px] items-end">
+              <li key={item.id} title={item.name} className="relative flex h-[112px] items-end">
                 {label}
+                {star(i, height)}
                 <span
                   aria-hidden="true"
-                  style={{ backgroundColor: SPINES[h % SPINES.length], height: `${84 + (h % 5) * 6}px` }}
+                  style={{ backgroundColor: SPINES[h % SPINES.length], height: `${height}px` }}
                   className={cn(
                     "relative flex flex-col items-center overflow-hidden rounded-[3px] py-2 text-white shadow-[inset_-3px_0_0_rgb(0_0_0/0.25),inset_2px_0_0_rgb(255_255_255/0.12),0_2px_3px_rgb(0_0_0/0.3)]",
                     manga ? "w-[22px]" : "w-[28px]",
                     // Now and then a book leans on its neighbour.
-                    i % 9 === 4 && "origin-bottom-left rotate-[5deg]",
+                    i % 9 === 4 && i >= pinned && "origin-bottom-left rotate-[5deg]",
                   )}
                 >
                   <span className="absolute inset-x-0 top-1.5 h-px bg-white/40" />
@@ -66,8 +88,9 @@ export async function Shelf({ items, more }: { items: ShelfTitle[]; more: number
           }
           if (item.kind === "game") {
             return (
-              <li key={item.id} title={item.name} className="flex h-[112px] items-end">
+              <li key={item.id} title={item.name} className="relative flex h-[112px] items-end">
                 {label}
+                {star(i, 90)}
                 <span
                   aria-hidden="true"
                   className="relative flex h-[90px] w-[72px] flex-col overflow-hidden rounded-[4px] bg-[#23232b] shadow-[0_2px_4px_rgb(0_0_0/0.35)] ring-1 ring-black/10"
@@ -91,8 +114,9 @@ export async function Shelf({ items, more }: { items: ShelfTitle[]; more: number
             );
           }
           return (
-            <li key={item.id} title={item.name} className="flex h-[112px] items-end">
+            <li key={item.id} title={item.name} className="relative flex h-[112px] items-end">
               {label}
+              {star(i, 100)}
               <span
                 aria-hidden="true"
                 className={cn(
@@ -112,7 +136,8 @@ export async function Shelf({ items, more }: { items: ShelfTitle[]; more: number
             </li>
           );
         })}
-      </ul>
+      </ShelfRows>
+      {favourites}
       {more > 0 && <p className="text-center font-hand text-xl text-muted-foreground">{t("shelfMore", { count: more })}</p>}
     </section>
   );

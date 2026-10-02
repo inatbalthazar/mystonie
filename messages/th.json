@@ -196,6 +196,9 @@
     "showAll": "ดูทั้งหมด ({count})",
     "showLess": "ย่อลง"
   },
+  "Loading": {
+    "page": "กำลังโหลด…"
+  },
   "Back": {
     "back": "กลับ",
     "backTo": "กลับไป {page}",
@@ -706,7 +709,34 @@
     "tabAlbum": "อัลบั้ม",
     "tabStats": "สถิติ",
     "atlasCard": "Atlas {count} ประเทศ",
-    "atlasRegionsCard": "Atlas ของ{country}"
+    "atlasRegionsCard": "Atlas ของ{country}",
+    "shelfHintPinned": "เรื่องโปรดก่อน แล้วตามด้วยเรื่องล่าสุด",
+    "shelfFavourite": "เรื่องโปรด"
+  },
+  "Album": {
+    "arrange": "จัดเรียง",
+    "arrangeTitle": "จัดเรียงอัลบั้ม",
+    "arrangeHint": "ลากที่ที่จับ หรือใช้ลูกศรเพื่อย้าย ส่วนหน้าปกและตัวเลขรวมอยู่บนสุดเสมอ",
+    "drag": "ย้าย{section} (ลาก หรือใช้ปุ่มลูกศร)",
+    "moveUp": "ย้าย{section}ขึ้น",
+    "moveDown": "ย้าย{section}ลง",
+    "hide": "ซ่อน{section}",
+    "show": "แสดง{section}",
+    "moved": "{section}: ลำดับที่ {position} จาก {total}",
+    "onlyYou": "คุณเห็นคนเดียว",
+    "hiddenNote": "การซ่อนแค่เอาส่วนนั้นออกจากอัลบั้ม ถ้าไม่อยากให้ใครเห็นคอลเลกชัน ให้ตั้งโปรไฟล์เป็นส่วนตัวใน Settings ส่วนที่ยังว่างจะไม่แสดง",
+    "reset": "ลำดับเริ่มต้น",
+    "resetDone": "กลับไปใช้ลำดับเริ่มต้นแล้ว",
+    "favourites": "เลือกเรื่องโปรด",
+    "favouritesTitle": "เรื่องโปรดบนชั้นสะสม",
+    "favouritesHint": "ปักได้สูงสุด {max} เรื่อง จะตั้งอยู่หน้าสุดของชั้นพร้อมดาว",
+    "favouritesFull": "ครบ {max} เรื่องแล้ว เอาออกหนึ่งเรื่องก่อนจึงเลือกเรื่องใหม่ได้",
+    "favouritesSearch": "ค้นหาเรื่องที่จบแล้ว",
+    "favouritesNone": "ไม่พบเรื่องที่ตรงกัน",
+    "save": "บันทึก",
+    "saving": "กำลังบันทึก…",
+    "failed": "บันทึกไม่สำเร็จ ลองอีกครั้ง",
+    "close": "ปิด"
   },
   "Social": {
     "follow": "ติดตาม",

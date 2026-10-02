@@ -4,6 +4,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { AtlasView, type StoryCountry } from "@/components/atlas/atlas-view";
 import type { CountryRegionCount } from "@/components/atlas/country-sheet";
 import { ShelfTabs } from "@/components/collection/collection-header";
+import { SwipeArea } from "@/components/motion/swipe-area";
 import { storiesByCountry } from "@/core/atlas";
 import { regionsByCountry, regionsOf } from "@/core/atlas-regions";
 import { localizedPath } from "@/core/auth";
@@ -63,17 +64,20 @@ export default async function AtlasPage({ params }: PageProps<"/[locale]/collect
       <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("title")}</h1>
       <div className="flex flex-col gap-6">
         <ShelfTabs shelf="atlas" />
-        <AtlasView
-          initialPlaces={places}
-          stories={stories}
-          regions={regions}
-          options={options}
-          thisYear={new Date().getUTCFullYear()}
-          atlasPublic={profile.atlas_public}
-          profilePublic={profile.visibility === "public"}
-          username={profile.username}
-          host={siteUrl().host}
-        />
+        {/* Swiping right goes back to Play, the shelf before (ADR 0070); the map keeps its own drags. */}
+        <SwipeArea prev="/collection?shelf=play">
+          <AtlasView
+            initialPlaces={places}
+            stories={stories}
+            regions={regions}
+            options={options}
+            thisYear={new Date().getUTCFullYear()}
+            atlasPublic={profile.atlas_public}
+            profilePublic={profile.visibility === "public"}
+            username={profile.username}
+            host={siteUrl().host}
+          />
+        </SwipeArea>
       </div>
     </main>
   );

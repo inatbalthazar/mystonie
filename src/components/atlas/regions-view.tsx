@@ -4,6 +4,7 @@ import { CheckIcon, Share2Icon, ZoomInIcon, ZoomOutIcon } from "lucide-react";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { Celebration } from "@/components/celebration";
+import { StonieHop } from "@/components/motion/stonie-hop";
 import { PaperCard } from "@/components/paper-card";
 import { isVisited, searchRegions, type Place } from "@/core/atlas";
 import type { CardData } from "@/core/cards/types";
@@ -155,7 +156,8 @@ export function RegionsView({
                 />
               </div>
             ) : (
-              <p className="flex aspect-[4/3] items-center justify-center px-6 text-center text-sm text-muted-foreground">
+              <p className="flex aspect-[4/3] flex-col items-center justify-center gap-2 px-6 text-center text-sm text-muted-foreground">
+                {map !== "error" && <StonieHop />}
                 {map === "error" ? t("regionsMapError") : t("loadingMap")}
               </p>
             )}

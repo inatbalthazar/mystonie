@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { AnalyticsEvents } from "@/core/analytics";
 import { Link, useRouter } from "@/i18n/navigation";
 import { track } from "@/lib/analytics";
+import { haptic } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 
 type Problem = null | "error" | "limited" | "gone";
@@ -33,6 +34,7 @@ export function FollowButton({
   const t = useTranslations("Social");
   const router = useRouter();
   const [following, setFollowing] = useState(initial);
+  const [justFollowed, setJustFollowed] = useState(false);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState<Problem>(null);
   const base = "inline-flex h-11 shrink-0 items-center justify-center gap-1.5 rounded-full px-4 text-sm font-bold transition-colors";
@@ -49,6 +51,8 @@ export function FollowButton({
   async function toggle() {
     const want = !following;
     setFollowing(want);
+    setJustFollowed(want);
+    if (want) haptic();
     setBusy(true);
     setProblem(null);
     try {
@@ -87,7 +91,7 @@ export function FollowButton({
             : "bg-brand text-brand-foreground shadow-sm hover:bg-brand/90",
         )}
       >
-        {following ? <CheckIcon className="size-4" aria-hidden="true" /> : <PlusIcon className="size-4" aria-hidden="true" />}
+        {following ? <CheckIcon className={cn("size-4", justFollowed && "animate-pop")} aria-hidden="true" /> : <PlusIcon className="size-4" aria-hidden="true" />}
         {following ? t("following") : t("follow")}
       </button>
       <span aria-live="polite" className="text-xs text-destructive empty:hidden">

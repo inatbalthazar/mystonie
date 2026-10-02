@@ -44,7 +44,7 @@ export function FeedbackForm({ initialKind, page, errorRef, signedIn }: { initia
     return (
       <div role="status" className="flex flex-col items-start gap-3 rounded-2xl bg-brand-soft/60 p-5">
         <p className="font-hand text-2xl">{t("done")}</p>
-        <button type="button" onClick={() => setStatus("idle")} className="h-11 rounded-xl px-4 font-semibold ring-1 ring-border hover:bg-muted">
+        <button type="button" onClick={() => setStatus("idle")} className="h-11 rounded-full px-4 font-semibold ring-1 ring-border hover:bg-muted press">
           {t("another")}
         </button>
       </div>
@@ -97,7 +97,7 @@ export function FeedbackForm({ initialKind, page, errorRef, signedIn }: { initia
       <button
         type="submit"
         disabled={!message.trim() || left < 0 || status === "sending"}
-        className="h-12 rounded-2xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50"
+        className="h-12 rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50 press"
       >
         {status === "sending" ? t("sending") : t("submit")}
       </button>

@@ -36,7 +36,7 @@ export default async function AuthConfirmPage({ params, searchParams }: PageProp
             <input type="hidden" name="token_hash" value={tokenHash} />
             <input type="hidden" name="type" value={type} />
             <input type="hidden" name="next" value={next} />
-            <button type="submit" className="h-12 w-full rounded-xl bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90">
+            <button type="submit" className="h-12 w-full rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press">
               {t("button")}
             </button>
           </form>

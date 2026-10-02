@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { ProfileAlbum } from "@/components/profile/profile-album";
+import { albumLayout } from "@/core/album";
 import { localizedPath } from "@/core/auth";
 import { userClient } from "@/data/supabase-server";
 import { redirect } from "@/i18n/navigation";
@@ -30,7 +31,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
 
   const { data: me, error } = await db
     .from("profiles")
-    .select("id, username, display_name, bio, avatar_url, created_at, visibility, time_zone")
+    .select("id, username, display_name, bio, avatar_url, created_at, visibility, time_zone, album_order, album_hidden, shelf_pins")
     .eq("id", userId)
     .single();
   if (error) throw new Error(`profile read failed: ${error.message}`);
@@ -42,6 +43,7 @@ export default async function MePage({ params }: PageProps<"/[locale]/me">) {
       timeZone={me.time_zone}
       privateToOthers={me.visibility === "private"}
       me
+      layout={albumLayout(me.album_order, me.album_hidden, me.shelf_pins)}
       profile={{ id: me.id, username: me.username, displayName: me.display_name, bio: me.bio, avatarUrl: me.avatar_url, joinedAt: me.created_at }}
     />
   );

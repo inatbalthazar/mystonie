@@ -185,7 +185,7 @@ export function SceneWarningList({
               setNote(null);
               setAdding(true);
             }}
-            className="inline-flex h-11 items-center gap-2 self-start rounded-xl px-4 font-semibold ring-1 ring-border hover:bg-muted"
+            className="inline-flex h-11 items-center gap-2 self-start rounded-full px-4 font-semibold ring-1 ring-border hover:bg-muted press"
           >
             <PlusIcon aria-hidden="true" className="size-4" />
             {t("add")}

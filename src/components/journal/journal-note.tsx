@@ -16,7 +16,7 @@ export function JournalNote({ slug, title, written }: { slug: string; title: str
           {title}
         </span>
       </span>
-      <span className="inline-flex h-11 shrink-0 items-center rounded-xl bg-brand px-4 font-semibold text-brand-foreground group-hover:bg-brand/90">{t("readMore")}</span>
+      <span className="inline-flex h-11 shrink-0 items-center rounded-full bg-brand px-4 font-semibold text-brand-foreground group-hover:bg-brand/90 press">{t("readMore")}</span>
     </Link>
   );
 }

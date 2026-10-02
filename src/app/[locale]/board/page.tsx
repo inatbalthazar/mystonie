@@ -96,7 +96,7 @@ export default async function BoardPage({ params, searchParams }: PageProps<"/[l
           <p className="font-hand text-2xl text-muted-foreground">{t("empty")}</p>
           <Link
             href="/people"
-            className="flex h-12 items-center gap-2 rounded-2xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90"
+            className="flex h-12 items-center gap-2 rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press"
           >
             <UsersIcon className="size-5" aria-hidden="true" />
             {t("findPeople")}

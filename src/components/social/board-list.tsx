@@ -25,7 +25,7 @@ export function BoardList({ rows, compact = false }: { rows: BoardRow[]; compact
   const time = useBoardTime();
 
   return (
-    <ol className="flex flex-col">
+    <ol className="stagger flex flex-col">
       {rows.map((row) => {
         const name = row.me ? t("you") : row.displayName || row.username;
         const medal = row.rank !== null && row.rank <= 3 ? MEDALS[row.rank - 1] : null;

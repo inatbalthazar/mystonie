@@ -122,7 +122,7 @@ export function AvatarPicker({ hasPhoto, onSaved }: { hasPhoto: boolean; onSaved
       <button
         type="button"
         onClick={() => input.current?.click()}
-        className="inline-flex h-11 items-center gap-2 self-start rounded-xl px-4 text-sm font-semibold ring-1 ring-border hover:bg-muted"
+        className="inline-flex h-11 items-center gap-2 self-start rounded-full px-4 text-sm font-semibold ring-1 ring-border hover:bg-muted press"
       >
         <CameraIcon className="size-4" aria-hidden="true" />
         {hasPhoto ? t("changePhoto") : t("addPhoto")}
@@ -188,7 +188,7 @@ export function AvatarPicker({ hasPhoto, onSaved }: { hasPhoto: boolean; onSaved
                 type="button"
                 onClick={save}
                 disabled={status === "saving"}
-                className="h-12 w-full rounded-xl bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60"
+                className="h-12 w-full rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60 press"
               >
                 {status === "saving" ? t("saving") : t("photoUse")}
               </button>

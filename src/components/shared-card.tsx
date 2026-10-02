@@ -18,6 +18,7 @@ export function SharedCardImage({
   size,
   data,
   host,
+  lazy = false,
 }: {
   imageUrl: string | null;
   alt: string;
@@ -25,6 +26,8 @@ export function SharedCardImage({
   size: CardSize;
   data: CardData;
   host: string;
+  /** In a list (the album's gallery): load the PNG only when it scrolls near, or is shown at all. */
+  lazy?: boolean;
 }) {
   const [broken, setBroken] = useState(false);
   const palette = usePosterPalette(data.posterUrl);
@@ -36,6 +39,7 @@ export function SharedCardImage({
         alt={alt}
         width={1080}
         height={size === "story" ? 1920 : 1350}
+        loading={lazy ? "lazy" : undefined}
         onError={() => setBroken(true)}
         className="h-auto w-full rounded-xl"
       />

@@ -26,7 +26,7 @@ export function ReelNote({ number, play }: { number: number; play: { guesses: nu
         <span className="text-sm text-muted-foreground">{line}</span>
       </span>
       {!play?.finished && (
-        <span className="inline-flex h-11 shrink-0 items-center rounded-xl bg-brand px-4 font-semibold text-brand-foreground group-hover:bg-brand/90">{t("homeCta")}</span>
+        <span className="inline-flex h-11 shrink-0 items-center rounded-full bg-brand px-4 font-semibold text-brand-foreground group-hover:bg-brand/90 press">{t("homeCta")}</span>
       )}
     </Link>
   );

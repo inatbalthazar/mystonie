@@ -145,7 +145,7 @@ function PickedTitle({ picked, host, onClear }: { picked: Picked; host: string; 
         </button>
       </div>
       {loading ? (
-        <div className="mx-auto aspect-[9/16] w-full max-w-sm animate-pulse rounded-xl bg-muted" />
+        <div className="mx-auto aspect-[9/16] w-full max-w-sm skeleton rounded-xl" />
       ) : (
         <CardStudio key={`${result.kind}-${result.externalId}`} data={cardData(result, title)} paletteSource={result.imageUrl} host={host} />
       )}

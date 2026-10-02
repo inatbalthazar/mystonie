@@ -111,7 +111,7 @@ export async function WhereToWatchSkeleton() {
       <h2 className="font-display text-lg font-bold">{t("title")}</h2>
       <div aria-hidden="true" className="flex gap-2">
         {[0, 1, 2].map((i) => (
-          <span key={i} className="size-12 animate-pulse rounded-xl bg-muted" />
+          <span key={i} className="size-12 skeleton rounded-xl" />
         ))}
       </div>
     </PaperCard>

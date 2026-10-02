@@ -485,7 +485,7 @@ function Progress(props: { label: string; done: number; total: number; waiting: 
         <div role="alert" className="mt-4 flex flex-col items-start gap-3">
           <p className="text-sm font-medium text-destructive">{t(`problem.${props.problem}`)}</p>
           {props.problem !== "signedOut" && (
-            <button type="button" onClick={props.onRetry} className="h-11 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted">
+            <button type="button" onClick={props.onRetry} className="h-11 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press">
               {t("retry")}
             </button>
           )}
@@ -598,7 +598,7 @@ function Preview(props: {
             type="button"
             disabled={props.count === 0}
             onClick={props.onImport}
-            className="h-12 w-full rounded-2xl bg-brand px-6 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50 sm:w-auto"
+            className="h-12 w-full rounded-full bg-brand px-6 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50 sm:w-auto press"
           >
             {props.count === 0 ? t("importNone") : t("importButton", { things: props.things(props.count) })}
           </button>
@@ -694,7 +694,7 @@ function ItemRow({
         </div>
         {!matched && (
           <div className="flex shrink-0 flex-col items-end gap-1">
-            <button type="button" onClick={onFind} className="inline-flex h-11 items-center gap-1.5 rounded-xl px-3 text-sm font-semibold ring-1 ring-border hover:bg-muted">
+            <button type="button" onClick={onFind} className="inline-flex h-11 items-center gap-1.5 rounded-full px-3 text-sm font-semibold ring-1 ring-border hover:bg-muted press">
               <SearchIcon className="size-4" aria-hidden="true" />
               {t("findIt")}
             </button>
@@ -772,11 +772,11 @@ function Done(props: { counts: Counts; things: (count: number) => string; canCel
         {counts.reading > 0 && <li className="font-hand text-2xl">{t("done.reading", { count: counts.reading })}</li>}
       </ul>
       <div className="mt-6 flex flex-wrap gap-3">
-        <Link href="/collection" className="inline-flex h-12 items-center rounded-2xl bg-brand px-6 font-bold text-brand-foreground shadow-sm hover:bg-brand/90">
+        <Link href="/collection" className="inline-flex h-12 items-center rounded-full bg-brand px-6 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press">
           {t("seeCollection")}
         </Link>
         {props.canCelebrate && (
-          <button type="button" onClick={props.onCelebrate} className="h-12 rounded-2xl px-5 font-semibold ring-1 ring-border hover:bg-muted">
+          <button type="button" onClick={props.onCelebrate} className="h-12 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press">
             {t("makeCard")}
           </button>
         )}

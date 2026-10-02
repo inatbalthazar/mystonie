@@ -20,7 +20,7 @@ export function SupportLink({ place }: { place: "footer" | "settings" }) {
         "inline-flex items-center gap-1.5",
         place === "footer"
           ? "text-sm text-muted-foreground underline-offset-4 hover:underline"
-          : "mt-4 h-11 self-start rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted",
+          : "mt-4 h-11 self-start rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press",
       )}
     >
       <CoffeeIcon className="size-4" aria-hidden="true" />

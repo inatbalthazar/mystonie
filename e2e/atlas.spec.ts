@@ -207,7 +207,11 @@ test("a country's regions: mark them on its map or in its list, undo, share them
   await signUp(page, request, "regions", "/collection/atlas");
 
   // From a country's sheet to its page: Japan isn't on the Atlas yet.
-  await page.getByRole("combobox", { name: "Find a country" }).fill("japan");
+  // (Typed before the streamed page has hydrated, the field starts over: type again until it's listening.)
+  await expect(async () => {
+    await page.getByRole("combobox", { name: "Find a country" }).fill("japan");
+    await expect(page.getByRole("option", { name: "Japan" })).toBeVisible({ timeout: 1000 });
+  }).toPass();
   await page.getByRole("option", { name: "Japan" }).click();
   await page
     .getByRole("dialog", { name: "Japan" })

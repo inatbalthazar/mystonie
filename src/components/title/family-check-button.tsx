@@ -44,7 +44,7 @@ export function FamilyCheckButton() {
         type="button"
         onClick={choose}
         disabled={busy || !ready}
-        className="inline-flex h-11 items-center rounded-xl bg-brand px-5 font-semibold text-brand-foreground hover:bg-brand/90 disabled:opacity-60"
+        className="inline-flex h-11 items-center rounded-full bg-brand px-5 font-semibold text-brand-foreground hover:bg-brand/90 disabled:opacity-60 press"
       >
         {busy ? t("checking") : t("family")}
       </button>

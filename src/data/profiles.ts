@@ -1,5 +1,6 @@
 // Public profiles and account data export (S1 profile & privacy, ADR 0027). Server only.
 import { collectPages } from "@/core/account";
+import { albumLayout, type AlbumLayout } from "@/core/album";
 import { posterUrl } from "@/core/catalog/images";
 import type { UserClient } from "./supabase-server";
 
@@ -14,6 +15,8 @@ export type PublicProfile =
       bio: string | null;
       avatarUrl: string | null;
       joinedAt: string;
+      /** How its owner arranged the album (ADR 0069). */
+      layout: AlbumLayout;
     };
 
 /** The safe subset of a profile by username (`public_profile()`), or null when nobody has that name. */
@@ -31,6 +34,9 @@ export async function publicProfile(db: UserClient, username: string): Promise<P
         created_at: string | null;
         blocked_by_me: boolean;
         bio: string | null;
+        album_order: string[] | null;
+        album_hidden: string[] | null;
+        shelf_pins: string[] | null;
       }
     | undefined;
   if (!row) return null;
@@ -44,6 +50,7 @@ export async function publicProfile(db: UserClient, username: string): Promise<P
     bio: row.bio,
     avatarUrl: row.avatar_url,
     joinedAt: row.created_at,
+    layout: albumLayout(row.album_order, row.album_hidden, row.shelf_pins),
   };
 }
 
@@ -103,7 +110,7 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
   ] = await Promise.all([
     db
       .from("profiles")
-      .select("username, display_name, bio, avatar_url, locale, time_zone, country, visibility, theme, email_recaps, reel_reminders, created_at, updated_at")
+      .select("username, display_name, bio, avatar_url, locale, time_zone, country, visibility, theme, email_recaps, reel_reminders, album_order, album_hidden, shelf_pins, created_at, updated_at")
       .eq("id", user.id)
       .single()
       .then(({ data, error }) => {

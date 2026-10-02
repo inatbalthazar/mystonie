@@ -76,7 +76,7 @@ export function WaitlistForm({ placement, className }: { placement: "after_card"
         <button
           type="submit"
           disabled={status === "sending"}
-          className="h-12 shrink-0 rounded-xl bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60"
+          className="h-12 shrink-0 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60 press"
         >
           {t("join")}
         </button>

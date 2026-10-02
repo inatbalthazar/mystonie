@@ -186,7 +186,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
           <span className="font-display text-5xl leading-none font-extrabold tracking-[-0.04em] tabular-nums">{reviewYear}</span>
           <span className="font-hand text-2xl leading-tight">{t("reviewTitle", { year: reviewYear })}</span>
           <span className="text-sm text-muted-foreground">{t("reviewBody")}</span>
-          <span className="mt-2 inline-flex h-11 items-center self-start rounded-xl bg-brand px-4 font-semibold text-brand-foreground group-hover:bg-brand/90">
+          <span className="mt-2 inline-flex h-11 items-center self-start rounded-full bg-brand px-4 font-semibold text-brand-foreground group-hover:bg-brand/90 press">
             {t("reviewCta")}
           </span>
         </Link>
@@ -220,7 +220,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
             <p className="font-hand text-2xl text-muted-foreground">{t("recentCardsEmpty")}</p>
             <Link
               href={{ pathname: "/collection", query: { add: "1" } }}
-              className="flex h-12 items-center rounded-2xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90"
+              className="flex h-12 items-center rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press"
             >
               {t("addFirst")}
             </Link>

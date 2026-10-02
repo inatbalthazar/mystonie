@@ -76,7 +76,7 @@ export function TitleDetails({ result, warning }: { result: Pick<SearchResult, "
         {state.status === "loading" && (
           <div aria-hidden="true" className="flex flex-col gap-2 px-1">
             {[0, 1, 2].map((i) => (
-              <span key={i} className="h-4 animate-pulse rounded-md bg-muted" style={{ width: `${90 - i * 20}%` }} />
+              <span key={i} className="h-4 skeleton rounded-md" style={{ width: `${90 - i * 20}%` }} />
             ))}
           </div>
         )}

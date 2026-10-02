@@ -108,7 +108,7 @@ export async function SceneWarningsSkeleton() {
   return (
     <PaperCard className="flex flex-col gap-3 pt-6">
       <h2 className="font-display text-lg font-bold">{t("title")}</h2>
-      <span aria-hidden="true" className="h-5 w-2/3 animate-pulse rounded-md bg-muted" />
+      <span aria-hidden="true" className="h-5 w-2/3 skeleton rounded-md" />
     </PaperCard>
   );
 }

@@ -7,6 +7,7 @@ import { backPage, backParent, backTitle, hasBack, parseBackStack, previousEntry
 import { countryName } from "@/core/countries";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { backWithTransition, markBack } from "./motion/nav-motion";
 import { isStandalone } from "./pwa/browser";
 
 // The pages visited in this tab (ADR 0061), kept in sessionStorage so a reload keeps them. Best effort: without
@@ -113,7 +114,9 @@ export function BackButton({ children }: { children: ReactNode }) {
           : target.title;
 
   function go() {
-    if (previous) return router.back(); // the very page, with its query and scroll
+    // The page slides back the way it came (ADR 0070).
+    if (previous) return backWithTransition(() => router.back()); // the very page, with its query and scroll
+    markBack();
     // Up a level takes this page's place, as on iOS: back from the parent doesn't come down here again.
     if (stack?.at(-1)?.path === path) stack = stack.slice(0, -1);
     router.replace(target.path);
@@ -132,6 +135,7 @@ export function BackButton({ children }: { children: ReactNode }) {
       <Link
         href={target.path}
         onClick={back}
+        data-nav-back
         aria-label={name ? t("backTo", { page: name }) : t("back")}
         className={cn(
           "-ml-2 inline-flex h-11 max-w-[min(14rem,55vw)] items-center gap-0.5 rounded-full pr-3 pl-0.5 text-[17px] font-semibold text-brand transition-opacity outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring active:opacity-50",

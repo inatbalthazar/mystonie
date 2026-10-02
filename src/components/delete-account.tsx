@@ -43,7 +43,7 @@ export function DeleteAccount() {
         <button
           type="button"
           onClick={() => setStatus("confirm")}
-          className="h-11 self-start rounded-xl px-5 font-semibold text-destructive ring-1 ring-destructive/40 hover:bg-destructive/10"
+          className="h-11 self-start rounded-full px-5 font-semibold text-destructive ring-1 ring-destructive/40 hover:bg-destructive/10 press"
         >
           {t("deleteButton")}
         </button>
@@ -61,7 +61,7 @@ export function DeleteAccount() {
             type="button"
             onClick={() => setStatus("idle")}
             disabled={status === "deleting"}
-            className="h-11 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
+            className="h-11 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press"
           >
             {t("cancel")}
           </button>

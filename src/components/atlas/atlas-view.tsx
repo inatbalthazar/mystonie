@@ -4,6 +4,7 @@ import { GlobeIcon, MapPinIcon, Share2Icon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Celebration } from "@/components/celebration";
+import { StonieHop } from "@/components/motion/stonie-hop";
 import { PaperCard } from "@/components/paper-card";
 import { SettingSwitch } from "@/components/settings/setting-switch";
 import {
@@ -179,7 +180,12 @@ export function AtlasView({
             label={layer === "been" ? t("mapBeenAlt", { count: summary.been }) : t("mapStoriesAlt", { count: summary.stories })}
             className="text-foreground"
           />
-          {!map && <p className="absolute inset-0 flex items-center justify-center text-sm text-muted-foreground">{t("loadingMap")}</p>}
+          {!map && (
+            <p className="absolute inset-0 flex flex-col items-center justify-center gap-2 text-sm text-muted-foreground">
+              <StonieHop />
+              {t("loadingMap")}
+            </p>
+          )}
         </div>
         <Legend layer={layer} />
       </section>

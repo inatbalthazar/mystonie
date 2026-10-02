@@ -99,5 +99,5 @@ export default async function ProfilePage({ params }: PageProps<"/[locale]/u/[us
     );
   }
 
-  return <ProfileAlbum db={db} profile={profile} viewerId={viewerId} locale={locale} />;
+  return <ProfileAlbum db={db} profile={profile} layout={profile.layout} viewerId={viewerId} locale={locale} />;
 }

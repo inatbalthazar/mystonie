@@ -3,7 +3,7 @@
 import { ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { useEffect, useId, useMemo, useState, useSyncExternalStore } from "react";
+import { startTransition, useEffect, useId, useMemo, useState, useSyncExternalStore } from "react";
 import { isReadingKind, type SearchResult } from "@/core/catalog/types";
 import {
   finishedAtForDate,
@@ -16,6 +16,7 @@ import {
   type EntryStatus,
 } from "@/core/collection/entries";
 import {
+  COLLECTION_SHELVES,
   collectionRows,
   collectionYears,
   isCollectionLayout,
@@ -38,12 +39,15 @@ import type { OpTitle } from "@/core/sync/ops";
 import { overlayCollection, overlayReadLogs, overlayWatchLogs, type Synced } from "@/core/sync/overlay";
 import { localDateKey } from "@/core/stats/period";
 import type { BadgeTopic } from "@/core/warnings";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { CardData } from "@/core/cards/types";
 import { Celebration } from "../celebration";
 import { QUICK_ADD_EVENT, takePendingQuickAdd } from "../nav-island";
 import { useMilestones } from "../milestone-celebration";
+import { setNavDirection } from "../motion/nav-motion";
+import { PageTransition } from "../motion/page-transition";
+import { SwipeArea } from "../motion/swipe-area";
 import { send, useOverlayOps } from "../offline/outbox";
 import { Sheet } from "../sheet";
 import { ClearBadge, useWarningLabel, WarningBadge } from "../warnings/warning-badge";
@@ -179,6 +183,7 @@ export function CollectionView({
     return shelves.size === 1 ? [...shelves][0]! : "watch";
   });
   const [sort, setSort] = useState<CollectionSort>("finished");
+  const router = useRouter();
   const layout = useSyncExternalStore(subscribeLayout, readLayout, () => "list" as const);
   const [adding, setAdding] = useState(startAdding);
   const [editing, setEditing] = useState<Row | null>(null);
@@ -274,6 +279,21 @@ export function CollectionView({
     if (notes && celebrated) void saveNotes(celebrated, notes);
   }
 
+  /** A tab tapped: the shelf slides in from its side (ADR 0070; the tap set which side). */
+  function openShelf(next: CollectionShelf) {
+    startTransition(() => setShelf(next));
+  }
+
+  /** A swipe: the shelf next to this one, and past Play, the Atlas (its own page). */
+  function swipeShelf(side: "prev" | "next"): boolean {
+    const to = COLLECTION_SHELVES[COLLECTION_SHELVES.indexOf(shelf) + (side === "next" ? 1 : -1)];
+    if (!to && side === "prev") return false;
+    setNavDirection(side === "next" ? "tab-next" : "tab-prev");
+    if (to) openShelf(to);
+    else router.push("/collection/atlas");
+    return true;
+  }
+
   const shelfItems = items.filter((i) => shelfOf(i) === shelf);
   const years = collectionYears(shelfItems, watchLogs, timeZone, readingLogs);
   // A year with nothing left in it (its last finish date was moved) falls back to all time.
@@ -283,98 +303,109 @@ export function CollectionView({
   return (
     <>
       {/* Always there, so the Atlas tab is too before anything is collected. */}
-      <ShelfTabs shelf={shelf} onShelf={setShelf} />
-      {items.length > 0 && (
-        <div className="mt-2 flex flex-col gap-4">
-          {shelf === "read" ? (
-            <ReadSummary totals={summarizeReadRows(rows)} year={activeFilter.year} />
-          ) : shelf === "play" ? (
-            <PlaySummary totals={summarizePlayRows(rows)} year={activeFilter.year} />
-          ) : (
-            <CollectionSummary totals={summarizeRows(rows)} year={activeFilter.year} />
-          )}
-          <ShareCollection cards={shareCards} area={shelf} username={username || null} host={host} />
-          <CollectionControls
-            years={years}
-            filter={activeFilter}
-            sort={sort}
-            layout={layout}
-            count={rows.length}
-            onFilter={setFilter}
-            onSort={setSort}
-            onLayout={writeLayout}
-          />
-        </div>
-      )}
-      <p role="status" className="min-h-5 text-sm text-muted-foreground">
-        {notice}
-      </p>
-      {items.length === 0 ? (
-        <div className="flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed border-border px-6 py-12 text-center">
-          <p className="font-hand text-3xl text-muted-foreground">{t("emptyTitle")}</p>
-          <p className="max-w-xs text-sm text-muted-foreground">{t("emptyBody")}</p>
-          <button
-            type="button"
-            onClick={() => setAdding(true)}
-            className="h-12 rounded-2xl bg-brand px-6 font-bold text-brand-foreground shadow-sm hover:bg-brand/90"
-          >
-            {t("addFirst")}
-          </button>
-          <Link href="/settings/import" className="text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground">
-            {t("importLink")}
-          </Link>
-        </div>
-      ) : shelfItems.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-10 text-center">
-          <p className="font-hand text-2xl text-muted-foreground">{t("emptyShelf", { shelf })}</p>
-          <button
-            type="button"
-            onClick={() => setAdding(true)}
-            className="h-11 rounded-xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90"
-          >
-            {t("addToShelf", { shelf })}
-          </button>
-        </div>
-      ) : rows.length === 0 ? (
-        <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-10 text-center">
-          <p className="font-hand text-2xl text-muted-foreground">{t("noMatches")}</p>
-          <button
-            type="button"
-            onClick={() => setFilter({ year: null, status: null })}
-            className="h-11 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
-          >
-            {t("clearFilters")}
-          </button>
-        </div>
-      ) : layout === "tiles" ? (
-        <ul className="grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4">
-          {rows.map((row, i) => (
-            <li key={row.item.id}>
-              <EntryTile
-                row={row}
-                tilt={i}
-                warning={warnings[row.item.title.id ?? ""]}
-                clear={isCleared(row.item)}
-                onEdit={() => setEditing(row.item)}
-              />
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <ul className="flex flex-col gap-3">
-          {rows.map((row) => (
-            <li key={row.item.id}>
-              <EntryRow
-                row={row}
-                timeZone={timeZone}
-                warning={warnings[row.item.title.id ?? ""]}
-                clear={isCleared(row.item)}
-                onEdit={() => setEditing(row.item)}
-              />
-            </li>
-          ))}
-        </ul>
-      )}
+      <ShelfTabs shelf={shelf} onShelf={openShelf} />
+      {/* Swipe sideways for the shelf next to this one (ADR 0070). */}
+      <SwipeArea
+        onSwipe={swipeShelf}
+        canSwipe={(side) => side === "next" || COLLECTION_SHELVES.indexOf(shelf) > 0}
+        className="flex flex-col gap-2"
+      >
+        {items.length > 0 && (
+          <div className="mt-2 flex flex-col gap-4">
+            {shelf === "read" ? (
+              <ReadSummary totals={summarizeReadRows(rows)} year={activeFilter.year} />
+            ) : shelf === "play" ? (
+              <PlaySummary totals={summarizePlayRows(rows)} year={activeFilter.year} />
+            ) : (
+              <CollectionSummary totals={summarizeRows(rows)} year={activeFilter.year} />
+            )}
+            <ShareCollection cards={shareCards} area={shelf} username={username || null} host={host} />
+            <CollectionControls
+              years={years}
+              filter={activeFilter}
+              sort={sort}
+              layout={layout}
+              count={rows.length}
+              onFilter={setFilter}
+              onSort={setSort}
+              onLayout={writeLayout}
+            />
+          </div>
+        )}
+        <p role="status" className="min-h-5 text-sm text-muted-foreground">
+          {notice}
+        </p>
+        <PageTransition key={shelf}>
+          <div>
+            {items.length === 0 ? (
+              <div className="flex flex-col items-center gap-4 rounded-3xl border-2 border-dashed border-border px-6 py-12 text-center">
+                <p className="font-hand text-3xl text-muted-foreground">{t("emptyTitle")}</p>
+                <p className="max-w-xs text-sm text-muted-foreground">{t("emptyBody")}</p>
+                <button
+                  type="button"
+                  onClick={() => setAdding(true)}
+                  className="h-12 rounded-full bg-brand px-6 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press"
+                >
+                  {t("addFirst")}
+                </button>
+                <Link href="/settings/import" className="text-sm font-medium text-muted-foreground underline underline-offset-4 hover:text-foreground">
+                  {t("importLink")}
+                </Link>
+              </div>
+            ) : shelfItems.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-10 text-center">
+                <p className="font-hand text-2xl text-muted-foreground">{t("emptyShelf", { shelf })}</p>
+                <button
+                  type="button"
+                  onClick={() => setAdding(true)}
+                  className="h-11 rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press"
+                >
+                  {t("addToShelf", { shelf })}
+                </button>
+              </div>
+            ) : rows.length === 0 ? (
+              <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-10 text-center">
+                <p className="font-hand text-2xl text-muted-foreground">{t("noMatches")}</p>
+                <button
+                  type="button"
+                  onClick={() => setFilter({ year: null, status: null })}
+                  className="h-11 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press"
+                >
+                  {t("clearFilters")}
+                </button>
+              </div>
+            ) : layout === "tiles" ? (
+              <ul className="stagger grid grid-cols-3 gap-x-3 gap-y-5 sm:grid-cols-4">
+                {rows.map((row, i) => (
+                  <li key={row.item.id}>
+                    <EntryTile
+                      row={row}
+                      tilt={i}
+                      warning={warnings[row.item.title.id ?? ""]}
+                      clear={isCleared(row.item)}
+                      onEdit={() => setEditing(row.item)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <ul className="stagger flex flex-col gap-3">
+                {rows.map((row) => (
+                  <li key={row.item.id}>
+                    <EntryRow
+                      row={row}
+                      timeZone={timeZone}
+                      warning={warnings[row.item.title.id ?? ""]}
+                      clear={isCleared(row.item)}
+                      onEdit={() => setEditing(row.item)}
+                    />
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        </PageTransition>
+      </SwipeArea>
 
       <QuickAdd open={adding || addInUrl} onClose={closeAdd} onAdd={add} timeZone={timeZone} initialPick={startWith} />
       <Sheet open={!!editing} onClose={() => setEditing(null)} title={editing?.title.name ?? ""} closeLabel={t("close")}>
@@ -727,7 +758,7 @@ function EntryEditor({
 
       <Link
         href={`/title/${item.title.kind}/${item.title.externalId}`}
-        className="flex h-12 items-center justify-center rounded-2xl font-semibold ring-1 ring-border hover:bg-muted"
+        className="flex h-12 items-center justify-center rounded-full font-semibold ring-1 ring-border hover:bg-muted press"
       >
         {item.title.kind === "series"
           ? t("episodes")
@@ -742,7 +773,7 @@ function EntryEditor({
         type="button"
         disabled={!valid}
         onClick={() => onSave({ status, finishedAt })}
-        className="h-12 rounded-2xl bg-brand font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50"
+        className="h-12 rounded-full bg-brand font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50 press"
       >
         {t("save")}
       </button>

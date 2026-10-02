@@ -30,7 +30,7 @@ function noticeFor(error: AuthError, fallback: Notice): Notice {
 
 const input =
   "h-12 w-full rounded-xl border border-input bg-background px-4 text-base outline-none focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-ring/20 aria-invalid:border-destructive";
-const primary = "h-12 w-full rounded-xl bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60";
+const primary = "h-12 w-full rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60 press";
 
 /**
  * Passwordless sign-in (ADR 0020): Google or Facebook (ADR 0064) when switched on, or an emailed code. The code is typed here, which also works in an
@@ -180,7 +180,7 @@ export function AuthForm({ next, providers, initialError }: { next: string; prov
               type="button"
               onClick={() => withProvider("google")}
               disabled={busy !== null}
-              className="flex h-12 w-full items-center justify-center gap-3 rounded-xl bg-background font-semibold ring-1 ring-input hover:bg-muted disabled:opacity-60"
+              className="flex h-12 w-full items-center justify-center gap-3 rounded-full bg-background font-semibold ring-1 ring-input hover:bg-muted disabled:opacity-60 press"
             >
               <GoogleMark />
               {t("google")}

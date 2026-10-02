@@ -2,7 +2,9 @@
 // mirrors a signed-in user's saved language and theme. The database stays the authority: it re-checks the
 // username format, the name blocklist and the time zone.
 
+import { HIDEABLE_SECTIONS, parseAlbumSections, type AlbumSection } from "./album";
 import { isCountryCode, type CountryCode } from "./countries";
+import { parseShelfPins } from "./shelf";
 
 export const THEMES = ["system", "light", "dark"] as const;
 export type Theme = (typeof THEMES)[number];
@@ -59,12 +61,16 @@ export type AccountPatch = {
   email_recaps?: boolean;
   reel_reminders?: boolean;
   atlas_public?: boolean;
+  album_order?: AlbumSection[];
+  album_hidden?: AlbumSection[];
+  shelf_pins?: string[];
 };
 
 /**
  * Validates a PATCH /api/account body: any of `username`, `displayName` (empty or null clears it), `bio` (the same),
  * `avatarUrl` (only null: remove the photo), `locale`, `timeZone`, `country` (ISO 3166-1, for where to watch), `theme`, `visibility`, `emailRecaps`,
- * `reelReminders` (ADR 0054), `atlasPublic` (the Atlas on the album, ADR 0059).
+ * `reelReminders` (ADR 0054), `atlasPublic` (the Atlas on the album, ADR 0059), `albumOrder`, `albumHidden` and
+ * `shelfPins` (the album as arranged, ADR 0069).
  * Null when anything sent is invalid or nothing is.
  */
 export function parseAccountPatch(body: unknown, locales: readonly string[]): AccountPatch | null {
@@ -131,6 +137,21 @@ export function parseAccountPatch(body: unknown, locales: readonly string[]): Ac
   if ("atlasPublic" in b) {
     if (typeof b.atlasPublic !== "boolean") return null;
     patch.atlas_public = b.atlasPublic;
+  }
+  if ("albumOrder" in b) {
+    const order = parseAlbumSections(b.albumOrder);
+    if (!order) return null;
+    patch.album_order = order;
+  }
+  if ("albumHidden" in b) {
+    const hidden = parseAlbumSections(b.albumHidden, HIDEABLE_SECTIONS);
+    if (!hidden) return null;
+    patch.album_hidden = hidden;
+  }
+  if ("shelfPins" in b) {
+    const pins = parseShelfPins(b.shelfPins);
+    if (!pins) return null;
+    patch.shelf_pins = pins;
   }
   return Object.keys(patch).length > 0 ? patch : null;
 }

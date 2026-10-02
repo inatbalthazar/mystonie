@@ -121,7 +121,7 @@ function QuickAddSteps({
       </div>
       <SearchStatus query={query} search={search} />
       {query.trim().length >= MIN_SEARCH_CHARS && search.status === "done" && (
-        <ul className="grid grid-cols-3 gap-3">
+        <ul className="stagger grid grid-cols-3 gap-3">
           {search.results.map((r) => (
             <li key={`${r.source}-${r.kind}-${r.externalId}`}>
               <PosterButton result={r} onPick={pick} warning={warningLabel(badges[`${r.kind}:${r.externalId}`])} />
@@ -149,7 +149,7 @@ function OfflinePicks({ onPick }: { onPick: (r: SearchResult) => void }) {
           <h3 id="recent-titles" className="font-hand text-2xl leading-none">
             {t("recentTitles")}
           </h3>
-          <ul className="grid grid-cols-3 gap-3">
+          <ul className="stagger grid grid-cols-3 gap-3">
             {recent.map((r) => (
               <li key={`${r.kind}-${r.externalId}`}>
                 <PosterButton result={r} onPick={onPick} />
@@ -221,7 +221,7 @@ function PickStatus({
           type="button"
           disabled={!finishedAt}
           onClick={() => onAdd(result, "finished", finishedAt)}
-          className="h-14 rounded-2xl bg-brand text-lg font-extrabold tracking-wide text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50"
+          className="h-14 rounded-full bg-brand text-lg font-extrabold tracking-wide text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50 press"
         >
           {t("statusLabel", { status: "finished", shelf })}
         </button>
@@ -246,7 +246,7 @@ function PickStatus({
             key={status}
             type="button"
             onClick={() => onAdd(result, status, null)}
-            className="h-12 rounded-2xl font-semibold ring-1 ring-border hover:bg-muted"
+            className="h-12 rounded-full font-semibold ring-1 ring-border hover:bg-muted press"
           >
             {t("statusLabel", { status, shelf })}
           </button>

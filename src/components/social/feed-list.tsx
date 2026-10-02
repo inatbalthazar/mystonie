@@ -50,7 +50,7 @@ export function FeedList({
 
   return (
     <div className="flex flex-col gap-6">
-      <ul className="flex flex-col gap-6">
+      <ul className="stagger flex flex-col gap-6">
         {interleaveArticles(items, articles, next === null).map((slot, i) =>
           slot.type === "entry" ? (
             <li key={slot.item.entryId}>
@@ -68,7 +68,7 @@ export function FeedList({
           type="button"
           onClick={loadMore}
           disabled={loading}
-          className="h-12 self-center rounded-2xl px-6 font-semibold ring-1 ring-border hover:bg-muted disabled:opacity-60"
+          className="h-12 self-center rounded-full px-6 font-semibold ring-1 ring-border hover:bg-muted disabled:opacity-60 press"
         >
           {loading ? t("loading") : t("loadMore")}
         </button>

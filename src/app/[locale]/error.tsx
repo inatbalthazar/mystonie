@@ -20,7 +20,7 @@ export default function PageError({ error, retry }: { error: Error & { digest?: 
       <h1 className="font-display text-3xl font-extrabold tracking-[-0.03em]">{t("errorTitle")}</h1>
       <p className="text-muted-foreground">{t("errorBody")}</p>
       <div className="flex flex-wrap justify-center gap-3">
-        <button type="button" onClick={() => retry()} className="h-11 rounded-xl bg-brand px-5 font-bold text-brand-foreground hover:bg-brand/90">
+        <button type="button" onClick={() => retry()} className="h-11 rounded-full bg-brand px-5 font-bold text-brand-foreground hover:bg-brand/90 press">
           {t("retry")}
         </button>
         <FeedbackLink place="button" kind="bug" errorRef={error.digest} />

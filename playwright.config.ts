@@ -14,6 +14,9 @@ export default defineConfig({
     // The app registers a service worker on every page (S3 offline). Tests run without it, as before, except
     // e2e/offline.spec.ts, which is about it.
     serviceWorkers: "block",
+    // Motion (ADR 0070) off, as with "Reduce motion": pages, sheets and lists appear at once, so nothing waits on an
+    // animation. e2e/motion.spec.ts turns it back on.
+    reducedMotion: "reduce",
   },
   webServer: {
     command: "pnpm dev",

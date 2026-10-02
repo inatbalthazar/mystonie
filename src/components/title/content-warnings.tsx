@@ -54,7 +54,7 @@ export async function ContentWarnings({ titleId, title, avoid, path, check }: Pr
         {heading}
         <p className="text-sm text-muted-foreground">{t("setupBody")}</p>
         <div className="flex flex-wrap items-center gap-x-5 gap-y-2">
-          <Link href="/settings/warnings" className="inline-flex h-11 items-center rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted">
+          <Link href="/settings/warnings" className="inline-flex h-11 items-center rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press">
             {t("setupLink")}
           </Link>
           <Link href={{ pathname: path, query: { warnings: "1" } }} scroll={false} className={cn(linkClass, "text-sm")}>
@@ -204,7 +204,7 @@ export async function ContentWarningsSkeleton() {
       <h2 className="font-display text-lg font-bold">{t("title")}</h2>
       <div aria-hidden="true" className="flex flex-col gap-2">
         {[0, 1].map((i) => (
-          <span key={i} className="h-5 w-3/4 animate-pulse rounded-md bg-muted" />
+          <span key={i} className="h-5 w-3/4 skeleton rounded-md" />
         ))}
       </div>
     </PaperCard>

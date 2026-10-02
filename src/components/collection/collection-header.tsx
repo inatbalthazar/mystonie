@@ -19,6 +19,7 @@ import type { ReadTotals } from "@/core/stats/reading";
 import type { WatchTotals } from "@/core/stats/summary";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { CountUp } from "../motion/count-up";
 
 /**
  * The summary header (S1 collection → Collection view): a pasted-in ticket with watch time, titles finished
@@ -117,7 +118,9 @@ function SummaryTicket({ stats, year, hint }: { stats: { label: string; value: s
         {stats.map((s) => (
           <div key={s.label} className="flex min-w-0 flex-col gap-1 px-2 first:pl-0 last:pr-0">
             <dt className="text-[11px] leading-tight font-semibold tracking-wide text-muted-foreground uppercase">{s.label}</dt>
-            <dd className="font-display text-xl leading-tight font-extrabold tabular-nums break-words sm:text-2xl">{s.value}</dd>
+            <dd className="font-display text-xl leading-tight font-extrabold tabular-nums break-words sm:text-2xl">
+              <CountUp value={s.value} />
+            </dd>
             {s.note && <dd className="text-xs text-muted-foreground">{s.note}</dd>}
           </div>
         ))}
@@ -144,19 +147,19 @@ export function ShelfTabs({ shelf, onShelf }: { shelf: CollectionShelf | "atlas"
     );
   return (
     <div role="group" aria-label={t("shelves")} className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none]">
-      <div className="flex min-w-max gap-1.5 border-b-2 border-border min-[400px]:gap-2">
+      <div data-tabs className="flex min-w-max gap-1.5 border-b-2 border-border min-[400px]:gap-2">
         {COLLECTION_SHELVES.map((value) =>
           onShelf ? (
-            <button key={value} type="button" aria-pressed={shelf === value} onClick={() => onShelf(value)} className={tab(shelf === value)}>
+            <button key={value} type="button" data-tab aria-pressed={shelf === value} onClick={() => onShelf(value)} className={tab(shelf === value)}>
               {t("shelf", { shelf: value })}
             </button>
           ) : (
-            <Link key={value} href={{ pathname: "/collection", query: { shelf: value } }} className={tab(false)}>
+            <Link key={value} href={{ pathname: "/collection", query: { shelf: value } }} data-tab className={tab(false)}>
               {t("shelf", { shelf: value })}
             </Link>
           ),
         )}
-        <Link href="/collection/atlas" aria-current={shelf === "atlas" ? "page" : undefined} className={tab(shelf === "atlas")}>
+        <Link href="/collection/atlas" data-tab aria-current={shelf === "atlas" ? "page" : undefined} className={tab(shelf === "atlas")}>
           {t("shelfAtlas")}
         </Link>
       </div>

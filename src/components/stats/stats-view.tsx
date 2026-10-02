@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import type { ReactNode } from "react";
+import { CountUp } from "@/components/motion/count-up";
 import { PaperCard } from "@/components/paper-card";
 import type { StatsPeriod } from "@/core/cards/types";
 import { CREDIT_ROLES } from "@/core/catalog/credits";
@@ -32,11 +33,12 @@ function SectionTitle({ children }: { children: ReactNode }) {
 export function PeriodTabs({ period }: { period: StatsPeriod }) {
   const t = useTranslations("Stats");
   return (
-    <nav aria-label={t("periodsLabel")} className="flex gap-1 rounded-xl bg-muted p-1">
+    <nav aria-label={t("periodsLabel")} data-tabs className="flex gap-1 rounded-xl bg-muted p-1">
       {(["week", "month", "year", "all"] as const).map((p) => (
         <Link
           key={p}
           href={{ pathname: "/stats", query: { period: p } }}
+          data-tab
           aria-current={p === period ? "page" : undefined}
           className={cn(
             "flex h-11 flex-auto items-center justify-center rounded-lg px-1 text-center text-sm leading-tight font-semibold text-muted-foreground transition-colors hover:text-foreground",
@@ -107,7 +109,9 @@ function Figures({ stats }: { stats: { label: string; value: string }[] }) {
       {stats.map((s) => (
         <div key={s.label} className="flex min-w-0 flex-col gap-1 px-2 first:pl-0 last:pr-0">
           <dt className="text-[11px] leading-tight font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">{s.label}</dt>
-          <dd className="font-display text-2xl leading-tight font-extrabold tabular-nums break-words sm:text-4xl">{s.value}</dd>
+          <dd className="font-display text-2xl leading-tight font-extrabold tabular-nums break-words sm:text-4xl">
+            <CountUp value={s.value} />
+          </dd>
         </div>
       ))}
     </dl>

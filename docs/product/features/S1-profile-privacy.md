@@ -4,6 +4,13 @@
 
 ## Profile
 `/u/[username]` shows a **card gallery** (the user's shared cards, newest first, up to 30), headline stats (the all-time collection summary) and what they're watching now (up to 6 posters). It's the "collection book" others can visit.
+- **The album's order** ([ADR 0069](../../decisions/0069-arrange-the-album.md)):
+  - The cover and the all-time numbers stay on top.
+  - The other sections follow in the owner's order, minus the ones they hid. The default order: Card gallery, Right now, The shelf, Stickers, Atlas, Challenge patches, Clubs, Saved to read (owner only).
+  - Long sections show two rows and "Show all (N)": 4 cards on phones (6 from 640 px), two shelves. Right now scrolls sideways on phones.
+  - On Me, "Arrange" opens a sheet where the owner moves sections by a drag handle or arrows and hides them with an eye. The Atlas's eye is "Show my Atlas on my profile".
+  - Hiding takes a section off the album; it doesn't make anything private.
+  - Visitors see the album as arranged.
 - The page reads a safe subset of the profile through `public_profile()` (name, photo, join date, never locale or time zone). Everything else is read with the visitor's own client, so RLS decides.
 - Signed-out visitors also get a "Start your own collection" call to action. The owner doesn't see the Report button on their own page.
 - Not indexed by search engines (`noindex, follow`), like card pages.

@@ -10,6 +10,7 @@ import { FeedbackLink } from "@/components/beta/feedback-link";
 import { GettingStartedButton } from "@/components/getting-started";
 import { LocaleSwitcher } from "@/components/locale-switcher";
 import { Logo } from "@/components/logo";
+import { NavMotion } from "@/components/motion/nav-motion";
 import { NavIsland } from "@/components/nav-island";
 import { SyncProvider } from "@/components/offline/sync-provider";
 import { SyncStatus } from "@/components/offline/sync-status";
@@ -81,6 +82,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
       <body className="min-h-full flex flex-col">
         <PrepaintScript />
         <PwaListener />
+        {/* Which way the next page slides (ADR 0070). */}
+        <NavMotion />
         <NextIntlClientProvider>
           <header className="mx-auto flex w-full max-w-2xl items-center justify-between gap-3 px-4 pt-4">
             <div className="flex min-w-0 items-center gap-2">

@@ -68,7 +68,7 @@ export function PeopleSearch() {
           <p className="py-2 font-hand text-xl text-muted-foreground">{t("noPeople", { query: raw.trim() })}</p>
         )}
         {shown.status === "done" && shown.people.length > 0 && (
-          <ul className="flex flex-col divide-y divide-dashed divide-border">
+          <ul className="stagger flex flex-col divide-y divide-dashed divide-border">
             {shown.people.map((p) => (
               <li key={p.id}>
                 <PersonRow

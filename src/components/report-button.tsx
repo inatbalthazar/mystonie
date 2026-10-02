@@ -100,7 +100,7 @@ export function ReportButton({ targetKind, targetId, className }: { targetKind: 
             <button
               type="submit"
               disabled={!reason || status === "sending"}
-              className="h-12 rounded-2xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50"
+              className="h-12 rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50 press"
             >
               {status === "sending" ? t("sending") : t("submit")}
             </button>

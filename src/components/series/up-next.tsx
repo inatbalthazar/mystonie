@@ -75,7 +75,7 @@ export function UpNext({ userId, series, timeZone }: { userId: string; series: U
               type="button"
               onClick={() => log(s, next)}
               aria-label={t("logNamed", { name: s.name, season: next.season, episode: next.episode })}
-              className="h-11 shrink-0 rounded-xl bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90"
+              className="h-11 shrink-0 rounded-full bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90 press"
             >
               {t("logEpisode", { episode: next.episode })}
             </button>

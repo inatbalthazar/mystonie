@@ -7,6 +7,8 @@ import { ArticleRow } from "@/components/journal/article-row";
 import { Avatar } from "@/components/social/avatar";
 import { FeedList } from "@/components/social/feed-list";
 import { FeedNewsSeen } from "@/components/social/feed-news";
+import { PageTransition } from "@/components/motion/page-transition";
+import { SwipeArea } from "@/components/motion/swipe-area";
 import { FollowButton } from "@/components/social/follow-button";
 import { localizedPath } from "@/core/auth";
 import { FEED_ARTICLES, feedTabs, pickFeedTab, type FeedArticle, type FeedTab } from "@/core/journal-feed";
@@ -73,6 +75,9 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
   const now = Date.now();
   const friends = items.some((i) => !i.mine);
   const href = (value: FeedTab) => (value === tabs[0] ? "/feed" : { pathname: "/feed", query: { tab: value } });
+  // Swiping sideways opens the tab next to this one (ADR 0070).
+  const at = tabs.indexOf(tab);
+  const swipeTo = (value: FeedTab | undefined) => (value === undefined ? null : value === tabs[0] ? "/feed" : `/feed?tab=${value}`);
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
@@ -107,7 +112,7 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
       ) : (
         <Link
           href={{ pathname: "/auth", query: { next: self } }}
-          className="-mt-4 flex h-12 items-center gap-2 self-start rounded-2xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90"
+          className="-mt-4 flex h-12 items-center gap-2 self-start rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press"
         >
           <LogInIcon className="size-5" aria-hidden="true" />
           {t("feedSignIn")}
@@ -123,57 +128,64 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
           />
         )}
 
-        {tab === "following" ? (
-          <>
-            {activity.length > 0 && (
-              <section aria-labelledby="activity" className="flex flex-col gap-2 rounded-2xl bg-brand-soft/60 p-4 dark:bg-brand/10">
-                <h2 id="activity" className="font-display text-lg font-extrabold">
-                  {t("activityTitle")}
-                </h2>
-                <ul className="flex flex-col divide-y divide-dashed divide-brand/20">
-                  {activity.map((a) => {
-                    const name = a.user.displayName || a.user.username;
-                    return (
-                      <li key={`${a.kind}-${a.user.id}-${a.at}`} className="flex items-center gap-3 py-2">
-                        <Link href={`/u/${a.user.username}`} className="shrink-0">
-                          <Avatar name={name} url={a.user.avatarUrl} className="size-9" />
-                        </Link>
-                        <p className="min-w-0 flex-1 text-sm">
-                          {t.rich(a.kind === "stamp" ? "activityStamp" : "activityFollow", {
-                            name,
-                            title: a.titleName ?? "",
-                            b: (chunks) => <strong className="font-semibold">{chunks}</strong>,
-                          })}
-                          <span className="block text-xs text-muted-foreground">{format.relativeTime(new Date(a.at), now)}</span>
-                        </p>
-                        {a.kind === "follow" && !a.iFollow && <FollowButton userId={a.user.id} following={false} via="activity" />}
-                      </li>
-                    );
-                  })}
-                </ul>
-              </section>
-            )}
+        <SwipeArea prev={swipeTo(tabs[at - 1])} next={swipeTo(tabs[at + 1])}>
+          {/* A tab's content slides in from its side (ADR 0070). */}
+          <PageTransition key={tab}>
+            <div className="flex flex-col gap-6">
+              {tab === "following" ? (
+                <>
+                  {activity.length > 0 && (
+                    <section aria-labelledby="activity" className="flex flex-col gap-2 rounded-2xl bg-brand-soft/60 p-4 dark:bg-brand/10">
+                      <h2 id="activity" className="font-display text-lg font-extrabold">
+                        {t("activityTitle")}
+                      </h2>
+                      <ul className="flex flex-col divide-y divide-dashed divide-brand/20">
+                        {activity.map((a) => {
+                          const name = a.user.displayName || a.user.username;
+                          return (
+                            <li key={`${a.kind}-${a.user.id}-${a.at}`} className="flex items-center gap-3 py-2">
+                              <Link href={`/u/${a.user.username}`} className="shrink-0">
+                                <Avatar name={name} url={a.user.avatarUrl} className="size-9" />
+                              </Link>
+                              <p className="min-w-0 flex-1 text-sm">
+                                {t.rich(a.kind === "stamp" ? "activityStamp" : "activityFollow", {
+                                  name,
+                                  title: a.titleName ?? "",
+                                  b: (chunks) => <strong className="font-semibold">{chunks}</strong>,
+                                })}
+                                <span className="block text-xs text-muted-foreground">{format.relativeTime(new Date(a.at), now)}</span>
+                              </p>
+                              {a.kind === "follow" && !a.iFollow && <FollowButton userId={a.user.id} following={false} via="activity" />}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </section>
+                  )}
 
-            {!friends && (
-              <section className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-8 text-center">
-                <p className="font-hand text-2xl text-muted-foreground">{t("feedEmpty")}</p>
-                <Link
-                  href="/people"
-                  className="flex h-12 items-center gap-2 rounded-2xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90"
-                >
-                  <UsersIcon className="size-5" aria-hidden="true" />
-                  {t("findPeople")}
-                </Link>
-              </section>
-            )}
+                  {!friends && (
+                    <section className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-8 text-center">
+                      <p className="font-hand text-2xl text-muted-foreground">{t("feedEmpty")}</p>
+                      <Link
+                        href="/people"
+                        className="flex h-12 items-center gap-2 rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press"
+                      >
+                        <UsersIcon className="size-5" aria-hidden="true" />
+                        {t("findPeople")}
+                      </Link>
+                    </section>
+                  )}
 
-            {(items.length > 0 || (journal?.articles.length ?? 0) > 0) && (
-              <FeedList items={items} next={nextFeedCursor(items)} now={now} articles={journal?.articles} />
-            )}
-          </>
-        ) : (
-          journal && <Articles tab={tab} feed={journal} now={now} signInNext={userId ? undefined : self} />
-        )}
+                  {(items.length > 0 || (journal?.articles.length ?? 0) > 0) && (
+                    <FeedList items={items} next={nextFeedCursor(items)} now={now} articles={journal?.articles} />
+                  )}
+                </>
+              ) : (
+                journal && <Articles tab={tab} feed={journal} now={now} signInNext={userId ? undefined : self} />
+              )}
+            </div>
+          </PageTransition>
+        </SwipeArea>
       </div>
     </main>
   );
@@ -204,7 +216,7 @@ async function Articles({
       {rows.length === 0 ? (
         <p className="rounded-2xl border-2 border-dashed border-border p-6 text-center font-hand text-2xl text-muted-foreground">{t("empty")}</p>
       ) : (
-        <ol className="-mt-4 flex flex-col divide-y-2 divide-dashed divide-border">
+        <ol className="stagger -mt-4 flex flex-col divide-y-2 divide-dashed divide-border">
           {rows.map((a, i) => (
             <li key={a.slug}>
               <ArticleRow article={a} place="feed" now={now} index={i} signInNext={signInNext} />

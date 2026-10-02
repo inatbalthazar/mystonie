@@ -36,6 +36,8 @@ The album gets stickers: **badges** earned from what you finish ("Rookie Bookwor
 - **Profile** (`/u/[username]`):
   - **Stickers**: the awarded ones, compact, with "8 of 22"; tap for details.
   - **The shelf**: the newest 48 finishes as cases, spines and game cases (the art under a platform band) on wooden shelves, then "+ N more finished".
+    - Two shelves show until "Show all" ([ADR 0069](../../decisions/0069-arrange-the-album.md)).
+    - Up to 4 favourites the owner pinned ("Pick favourites" on Me) stand first, each with a star.
   - Both are hidden on private and blocked profiles (RLS).
 - **Following feed:** a finish that earned a sticker has it stuck on the card's corner, with "Earned the … sticker".
 - The data export includes the awarded badges. Analytics: `badge_earned` (`badge`: slug) when the toast shows.

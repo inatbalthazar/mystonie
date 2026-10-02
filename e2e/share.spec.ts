@@ -50,6 +50,9 @@ test("finish → celebration → publish the card → /c/[id] with its preview",
   await celebration.getByRole("button", { name: "Done" }).click();
   expect((await notes).ok()).toBe(true);
 
+  // The first finish's sticker waits at the bottom until closed (ADR 0038).
+  await page.getByRole("status").filter({ hasText: "for finishing Parasite" }).getByRole("button", { name: "Close" }).click();
+
   // The Sticker, from "Make a card" on the finished entry: a download, no publish.
   await page.getByRole("button", { name: "Edit Parasite" }).click();
   await page.getByRole("button", { name: "Make a card" }).click();

@@ -121,7 +121,7 @@ export function AvoidTopics({ topics, initial }: { topics: WarningTopic[]; initi
         {picked.length === 0 && (
           <div className="flex flex-col items-start gap-2 rounded-xl border-2 border-dashed border-border p-4">
             <p className="text-sm text-muted-foreground">{t("familyBody")}</p>
-            <button type="button" onClick={chooseFamilySet} className="inline-flex h-11 items-center rounded-xl bg-brand px-5 font-semibold text-brand-foreground hover:bg-brand/90">
+            <button type="button" onClick={chooseFamilySet} className="inline-flex h-11 items-center rounded-full bg-brand px-5 font-semibold text-brand-foreground hover:bg-brand/90 press">
               {t("familyButton")}
             </button>
           </div>

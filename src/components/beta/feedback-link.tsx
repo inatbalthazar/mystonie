@@ -34,7 +34,7 @@ export function FeedbackLink({
       className={cn(
         place === "footer"
           ? "font-medium text-foreground underline underline-offset-4 hover:text-brand"
-          : "inline-flex h-11 items-center gap-2 self-start rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted",
+          : "inline-flex h-11 items-center gap-2 self-start rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press",
         className,
       )}
     >

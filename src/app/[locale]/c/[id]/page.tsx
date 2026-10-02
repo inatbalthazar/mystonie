@@ -142,11 +142,11 @@ export default async function SharedCardPage({ params }: PageProps<"/[locale]/c/
         <p className="text-sm text-muted-foreground">{t("ctaBody")}</p>
         <Link
           href={{ pathname: "/", query: { ref: "card", tpl: card.templateId } }}
-          className="flex h-12 items-center justify-center rounded-2xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90"
+          className="flex h-12 items-center justify-center rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press"
         >
           {t("makeYourOwn")}
         </Link>
-        <Link href="/auth" className="flex h-11 items-center justify-center rounded-xl font-semibold ring-1 ring-border hover:bg-muted">
+        <Link href="/auth" className="flex h-11 items-center justify-center rounded-full font-semibold ring-1 ring-border hover:bg-muted press">
           {t("startCollection")}
         </Link>
       </section>

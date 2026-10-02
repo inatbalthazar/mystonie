@@ -6,6 +6,7 @@ import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
 import { BadgeToast } from "@/components/badges/badge-toast";
 import { Celebration } from "@/components/celebration";
+import { StonieHop } from "@/components/motion/stonie-hop";
 import { PaperCard } from "@/components/paper-card";
 import { MIN_SEARCH_CHARS, useTitleSearch } from "@/components/title-search";
 import type { BadgeNews } from "@/core/badges";
@@ -144,7 +145,8 @@ export function ReelGame({
   if (!data) {
     return (
       <PaperCard className="flex flex-col items-start gap-3">
-        <p aria-live="polite" className="text-muted-foreground">
+        <p aria-live="polite" className="flex items-center gap-3 text-muted-foreground">
+          {status !== "error" && <StonieHop size={28} />}
           {status === "error" ? t("loadError") : t("loading")}
         </p>
         {status === "error" && (

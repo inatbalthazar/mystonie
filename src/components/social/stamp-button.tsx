@@ -6,6 +6,7 @@ import { useState } from "react";
 import type { AnalyticsEvents } from "@/core/analytics";
 import { Link } from "@/i18n/navigation";
 import { track } from "@/lib/analytics";
+import { haptic } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 
 const face =
@@ -57,6 +58,7 @@ export function StampButton({
     setStamped(want);
     setCount((c) => c + (want ? 1 : -1));
     setJustStamped(want);
+    if (want) haptic(12);
     setBusy(true);
     setProblem(false);
     try {

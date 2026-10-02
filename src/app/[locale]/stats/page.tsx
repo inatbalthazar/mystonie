@@ -2,6 +2,8 @@ import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { StickerAlbum } from "@/components/badges/sticker-album";
+import { PageTransition } from "@/components/motion/page-transition";
+import { SwipeArea } from "@/components/motion/swipe-area";
 import { PaperCard } from "@/components/paper-card";
 import { AlbumCover } from "@/components/profile/album-cover";
 import { MeTabs } from "@/components/profile/me-tabs";
@@ -113,34 +115,42 @@ export default async function StatsPage({ params, searchParams }: PageProps<"/[l
         counts={counts}
       />
       <MeTabs current="stats" />
-      {empty ? (
-        <>
-          <StatsEmpty />
-          {album}
-        </>
-      ) : (
-        <>
-          <PeriodTabs period={period} />
-          <Headline report={report} period={period}>
-            {report.card && <ShareStats card={report.card} username={profile.username} host={host} />}
-          </Headline>
-          {period === "year" && (
-            <Link
-              href={`/review/${year}`}
-              className="flex min-h-11 items-center justify-center rounded-2xl border-2 border-dashed border-brand/50 px-4 font-hand text-2xl text-brand hover:bg-brand-soft/50"
-            >
-              {t("yearReviewLink", { year })}
-            </Link>
-          )}
-          <Heatmap report={report} />
-          <MonthBars months={report.months} />
-          <Taste report={report} />
-          <Favourites report={report} />
-          <Records report={report} />
-          <MilestoneShelf milestones={milestones} username={profile.username} host={host} />
-          {album}
-        </>
-      )}
+      {/* Swiping right goes back to the Album, the tab before (ADR 0070). */}
+      <SwipeArea prev="/me" className="flex flex-col gap-8">
+        {empty ? (
+          <>
+            <StatsEmpty />
+            {album}
+          </>
+        ) : (
+          <>
+            <PeriodTabs period={period} />
+            {/* Another period slides in from its side (ADR 0070). */}
+            <PageTransition key={period}>
+              <div className="flex flex-col gap-8">
+                <Headline report={report} period={period}>
+                  {report.card && <ShareStats card={report.card} username={profile.username} host={host} />}
+                </Headline>
+                {period === "year" && (
+                  <Link
+                    href={`/review/${year}`}
+                    className="flex min-h-11 items-center justify-center rounded-2xl border-2 border-dashed border-brand/50 px-4 font-hand text-2xl text-brand hover:bg-brand-soft/50"
+                  >
+                    {t("yearReviewLink", { year })}
+                  </Link>
+                )}
+                <Heatmap report={report} />
+                <MonthBars months={report.months} />
+                <Taste report={report} />
+                <Favourites report={report} />
+                <Records report={report} />
+                <MilestoneShelf milestones={milestones} username={profile.username} host={host} />
+                {album}
+              </div>
+            </PageTransition>
+          </>
+        )}
+      </SwipeArea>
     </main>
   );
 }

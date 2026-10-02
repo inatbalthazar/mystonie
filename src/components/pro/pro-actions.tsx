@@ -83,7 +83,7 @@ export function ProActions({ state, prices, signedIn, checkout }: { state: ProSt
           type="button"
           onClick={() => go("portal")}
           disabled={busy !== null}
-          className="h-11 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted disabled:opacity-60"
+          className="h-11 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted disabled:opacity-60 press"
         >
           {busy === "portal" ? t("opening") : t("manage")}
         </button>
@@ -138,14 +138,14 @@ export function ProActions({ state, prices, signedIn, checkout }: { state: ProSt
                   type="button"
                   onClick={() => go(p.plan)}
                   disabled={busy !== null}
-                  className="mt-auto h-12 rounded-2xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60"
+                  className="mt-auto h-12 rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60 press"
                 >
                   {busy === p.plan ? t("opening") : t("choose", { plan: p.plan })}
                 </button>
               ) : (
                 <Link
                   href={{ pathname: "/auth", query: { next: "/pro" } }}
-                  className="mt-auto inline-flex h-12 items-center justify-center rounded-2xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90"
+                  className="mt-auto inline-flex h-12 items-center justify-center rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press"
                 >
                   {t("signInFirst")}
                 </Link>

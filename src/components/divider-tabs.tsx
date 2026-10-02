@@ -24,11 +24,12 @@ export function DividerTabs<T extends string>({
 }) {
   return (
     <nav aria-label={label} className={cn("-mx-4 overflow-x-auto px-4 [scrollbar-width:none]", className)}>
-      <ul className={cn("flex min-w-max border-b-2 border-border", compact ? "gap-1" : "gap-2")}>
+      <ul data-tabs className={cn("flex min-w-max border-b-2 border-border", compact ? "gap-1" : "gap-2")}>
         {tabs.map((tab) => (
           <li key={tab.value}>
             <Link
               href={tab.href}
+              data-tab
               aria-current={tab.value === current ? "page" : undefined}
               className={cn(
                 "-mb-0.5 flex min-h-11 items-center rounded-t-xl border-2 border-b-0 font-display font-extrabold whitespace-nowrap transition-colors",

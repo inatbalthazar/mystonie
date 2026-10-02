@@ -86,7 +86,7 @@ export function WarningsQuiz({ titleId }: { titleId: string | null }) {
   }
 
   if (state.kind === "loading") {
-    return <div aria-hidden="true" className="h-72 animate-pulse rounded-3xl bg-muted" />;
+    return <div aria-hidden="true" className="h-72 skeleton rounded-3xl" />;
   }
   if (state.kind === "error") {
     return (
@@ -100,7 +100,7 @@ export function WarningsQuiz({ titleId }: { titleId: string | null }) {
             setState({ kind: "loading" });
             void next();
           }}
-          className="inline-flex h-11 items-center rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
+          className="inline-flex h-11 items-center rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press"
         >
           {t("retry")}
         </button>
@@ -224,7 +224,7 @@ function EmptyCard({ title, body, cta }: { title: string; body: string; cta?: { 
       <h2 className="font-display text-2xl font-extrabold tracking-[-0.02em]">{title}</h2>
       <p className="text-sm text-muted-foreground">{body}</p>
       {cta && (
-        <Link href={cta.href} className="mt-1 flex h-12 items-center rounded-2xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90">
+        <Link href={cta.href} className="mt-1 flex h-12 items-center rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press">
           {cta.label}
         </Link>
       )}

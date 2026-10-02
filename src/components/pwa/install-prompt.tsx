@@ -56,7 +56,7 @@ export function InstallPrompt() {
             onClick={async () => {
               if (await promptInstall()) setHidden(true);
             }}
-            className="h-11 rounded-xl bg-brand px-4 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90"
+            className="h-11 rounded-full bg-brand px-4 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
           >
             {t("install")}
           </button>
@@ -67,7 +67,7 @@ export function InstallPrompt() {
             rememberDismissed(DISMISSED);
             setHidden(true);
           }}
-          className="h-11 rounded-xl px-4 font-semibold ring-1 ring-border hover:bg-muted"
+          className="h-11 rounded-full px-4 font-semibold ring-1 ring-border hover:bg-muted press"
         >
           {t("notNow")}
         </button>

@@ -222,3 +222,272 @@
     to { opacity: 1; transform: none; }
   }
 }
+
+/* Motion (ADR 0070): one set of curves and speeds for the whole app, Threads-like: quick, springy and small. Pages
+   slide in the direction you went, tabs slide sideways, sheets rise, buttons give under the finger, lists settle in,
+   and skeletons hold a page's shape while it loads. All of it stops for prefers-reduced-motion (the last rule). */
+@theme {
+  --ease-spring: cubic-bezier(0.34, 1.45, 0.64, 1);
+  --ease-out-soft: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-sheet: cubic-bezier(0.32, 0.72, 0, 1);
+  --animate-pop: pop 420ms var(--ease-out-soft) both;
+  --animate-enter: enter 360ms var(--ease-out-soft) both;
+  --animate-fade: fade 240ms ease-out both;
+  --animate-hop: hop 1s var(--ease-out-soft) infinite;
+
+  @keyframes pop {
+    0% { scale: 1; }
+    35% { scale: 1.32; }
+    65% { scale: 0.92; }
+    100% { scale: 1; }
+  }
+  @keyframes enter {
+    from { opacity: 0; translate: 0 10px; }
+  }
+  @keyframes fade {
+    from { opacity: 0; }
+  }
+  /* Stonie hopping on the spot while something takes a moment (src/components/motion/stonie-hop.tsx). */
+  @keyframes hop {
+    0%, 100% { translate: 0 0; scale: 1 1; }
+    12% { translate: 0 0; scale: 1.1 0.9; }
+    40% { translate: 0 -35%; scale: 0.94 1.06; }
+    62% { translate: 0 0; scale: 1.08 0.92; }
+    76% { scale: 1 1; }
+  }
+  @keyframes shimmer {
+    from { background-position: 150% 0; }
+    to { background-position: -50% 0; }
+  }
+}
+
+/* A press: the button gives a little under the finger and springs back. Buttons get it here; links that look like
+   buttons add `press`. */
+@layer base {
+  @media (prefers-reduced-motion: no-preference) {
+    :where(button, [role="button"], summary) {
+      transition: scale 180ms var(--ease-spring);
+    }
+    :where(button, [role="button"], summary):not(:disabled):active {
+      scale: 0.96;
+      transition-duration: 80ms;
+    }
+  }
+}
+@utility press {
+  @media (prefers-reduced-motion: no-preference) {
+    transition: scale 180ms var(--ease-spring);
+    &:active {
+      scale: 0.96;
+      transition-duration: 80ms;
+    }
+  }
+}
+
+/* A list that settles in, item after item (the first ten; the rest come with the tenth), once the app is running
+   (`<html data-app>`, src/components/motion/nav-motion.tsx): the lists of the first HTML show at once, for a quick first paint. */
+@utility stagger {
+  :root[data-app] & > * {
+    animation: var(--animate-enter);
+  }
+  :root[data-app] & > :nth-child(2) {
+    animation-delay: 35ms;
+  }
+  :root[data-app] & > :nth-child(3) {
+    animation-delay: 70ms;
+  }
+  :root[data-app] & > :nth-child(4) {
+    animation-delay: 105ms;
+  }
+  :root[data-app] & > :nth-child(5) {
+    animation-delay: 140ms;
+  }
+  :root[data-app] & > :nth-child(6) {
+    animation-delay: 175ms;
+  }
+  :root[data-app] & > :nth-child(7) {
+    animation-delay: 210ms;
+  }
+  :root[data-app] & > :nth-child(8) {
+    animation-delay: 245ms;
+  }
+  :root[data-app] & > :nth-child(9) {
+    animation-delay: 280ms;
+  }
+  :root[data-app] & > :nth-child(n + 10) {
+    animation-delay: 315ms;
+  }
+}
+
+/* A skeleton block: the page's shape in muted paper, with a slow sheen passing over it. */
+@utility skeleton {
+  background-color: color-mix(in oklch, var(--muted), var(--foreground) 4%);
+  background-image: linear-gradient(100deg, transparent 30%, color-mix(in oklch, var(--card) 65%, transparent) 50%, transparent 70%);
+  background-size: 200% 100%;
+  animation: shimmer 1.6s linear infinite;
+}
+
+/* Every page settles in as it arrives in the running app (after a navigation, or when it replaces its skeleton); the
+   page of the first HTML shows at once (NavMotion ends its entrance), for a quick first paint. A skeleton waits 150ms before it fades
+   in, so a page that comes quickly never flashes one. */
+:root[data-app] body > main:not([data-skeleton]) {
+  animation: var(--animate-enter);
+  animation-duration: 300ms;
+}
+body > main[data-skeleton] {
+  animation: fade 260ms ease-out 150ms both;
+}
+
+/* Page transitions (React <ViewTransition>, src/components/motion/page-transition.tsx). Only the page moves: the
+   header and the nav island stay put. `<html data-nav>` (src/components/motion/nav-motion.tsx) says which way you
+   went: forward slides left, back slides right, a page's own tabs slide sideways like a carousel (the old tab off one
+   side as the new one comes in from the other, also after a swipe), the island's tabs crossfade, and the browser's
+   own back (which animates by itself on phones) doesn't move. Percentages are of the page's width. */
+::view-transition {
+  pointer-events: none;
+}
+:root {
+  view-transition-name: none;
+  --vt-out-x: 0px;
+  --vt-in-x: 0px;
+  --vt-in-y: 8px;
+}
+:root[data-nav="forward"] {
+  --vt-out-x: -30%;
+  --vt-in-x: 45%;
+  --vt-in-y: 0px;
+}
+:root[data-nav="back"] {
+  --vt-out-x: 45%;
+  --vt-in-x: -30%;
+  --vt-in-y: 0px;
+}
+:root[data-nav="tab-next"] {
+  --vt-out-x: -60%;
+  --vt-in-x: 70%;
+  --vt-in-y: 0px;
+}
+:root[data-nav="tab-prev"] {
+  --vt-out-x: 60%;
+  --vt-in-x: -70%;
+  --vt-in-y: 0px;
+}
+:root[data-nav="tab"] {
+  --vt-in-y: 0px;
+}
+::view-transition-old(.page) {
+  animation: vt-out 260ms var(--ease-out-soft) both;
+}
+::view-transition-new(.page) {
+  animation: vt-in 380ms var(--ease-out-soft) 30ms both;
+}
+:root[data-nav="tab"]::view-transition-old(.page) {
+  animation-duration: 120ms;
+}
+:root[data-nav="tab"]::view-transition-new(.page) {
+  animation-duration: 200ms;
+  animation-delay: 0ms;
+}
+:root[data-nav="none"]::view-transition-old(.page),
+:root[data-nav="none"]::view-transition-new(.page) {
+  animation: none;
+}
+/* The old page has faded out before it's all the way off, so the two never blur into each other. */
+@keyframes vt-out {
+  70% { opacity: 0; }
+  to { opacity: 0; translate: var(--vt-out-x) 0; }
+}
+@keyframes vt-in {
+  from { opacity: 0; translate: var(--vt-in-x) var(--vt-in-y); }
+}
+/* Back through history (the app's back button): React doesn't animate a popstate, so the app starts that transition
+   itself and names the page for it. */
+:root[data-nav-manual] body > main {
+  view-transition-name: page-back;
+  view-transition-class: page;
+}
+/* The island and the getting-started button float over the page: they stay above it, still, while it moves. */
+[data-nav-island] {
+  view-transition-name: nav-island;
+}
+[data-getting-started] {
+  view-transition-name: getting-started;
+}
+::view-transition-group(nav-island),
+::view-transition-group(getting-started) {
+  animation: none;
+  z-index: 10;
+}
+::view-transition-old(nav-island),
+::view-transition-old(getting-started) {
+  display: none;
+}
+::view-transition-new(nav-island),
+::view-transition-new(getting-started) {
+  animation: none;
+}
+
+/* Sheets (src/components/sheet.tsx) rise from the bottom on phones and settle in the middle on wider screens, and go
+   back the way they came. The backdrop fades with them. */
+dialog[data-sheet] {
+  transition:
+    translate 420ms var(--ease-sheet),
+    scale 300ms var(--ease-sheet),
+    opacity 200ms ease-out,
+    display 420ms allow-discrete,
+    overlay 420ms allow-discrete;
+}
+dialog[data-sheet]:not([open]) {
+  translate: 0 100%;
+}
+dialog[data-sheet]::backdrop {
+  transition:
+    opacity 300ms ease-out,
+    display 420ms allow-discrete,
+    overlay 420ms allow-discrete;
+}
+dialog[data-sheet]:not([open])::backdrop {
+  opacity: 0;
+}
+@starting-style {
+  dialog[data-sheet][open] {
+    translate: 0 100%;
+  }
+  dialog[data-sheet][open]::backdrop {
+    opacity: 0;
+  }
+}
+@media (min-width: 640px) {
+  dialog[data-sheet]:not([open]) {
+    translate: 0 16px;
+    scale: 0.97;
+    opacity: 0;
+  }
+  @starting-style {
+    dialog[data-sheet][open] {
+      translate: 0 16px;
+      scale: 0.97;
+      opacity: 0;
+    }
+  }
+}
+
+/* prefers-reduced-motion: nothing moves. Things still appear and change, at once (end states, no slides). */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after,
+  ::backdrop {
+    animation-duration: 1ms !important;
+    animation-delay: 0s !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 1ms !important;
+    transition-delay: 0s !important;
+    scroll-behavior: auto !important;
+  }
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}

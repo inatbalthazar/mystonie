@@ -1,5 +1,6 @@
 import { CircleCheckIcon, CircleHelpIcon, TriangleAlertIcon } from "lucide-react";
 import { getFormatter, getTranslations } from "next-intl/server";
+import { StonieHop } from "@/components/motion/stonie-hop";
 import type { TitleWarnings } from "@/core/catalog/dtdd";
 import type { TitleKind } from "@/core/catalog/types";
 import { sceneTopicForDtdd } from "@/core/scene-warnings";
@@ -130,7 +131,10 @@ export async function TitleCheckSkeleton({ kind }: { kind: TitleKind }) {
   return (
     <PaperCard className="flex flex-col gap-3 pt-6">
       <h2 className="font-display text-lg font-bold">{t("title", { kind })}</h2>
-      <p className="text-sm text-muted-foreground">{t("checking")}</p>
+      <p className="flex items-center gap-2.5 text-sm text-muted-foreground">
+        <StonieHop size={24} />
+        {t("checking")}
+      </p>
     </PaperCard>
   );
 }

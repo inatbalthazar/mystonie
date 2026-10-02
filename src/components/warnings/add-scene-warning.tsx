@@ -273,7 +273,7 @@ export function AddSceneWarning({
       <button
         type="submit"
         disabled={!topic || status === "saving"}
-        className="flex h-12 items-center justify-center rounded-2xl bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60"
+        className="flex h-12 items-center justify-center rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60 press"
       >
         {status === "saving" ? t("saving") : t("save")}
       </button>

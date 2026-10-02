@@ -8,6 +8,7 @@ import { localizedPath } from "@/core/auth";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { track } from "@/lib/analytics";
+import { haptic } from "@/lib/haptics";
 import { cn } from "@/lib/utils";
 
 const button = "inline-flex h-11 min-w-11 items-center justify-center gap-1.5 rounded-xl text-sm font-semibold transition-colors outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-95";
@@ -33,6 +34,7 @@ export function SaveButton({
   const t = useTranslations("Journal");
   const ts = useTranslations("Social");
   const [saved, setSaved] = useState(initial);
+  const [justSaved, setJustSaved] = useState(false);
   const [busy, setBusy] = useState(false);
   const [problem, setProblem] = useState(false);
   const look = cn(button, compact ? "rounded-full" : "px-3 ring-1 ring-border", saved ? "text-brand" : "text-muted-foreground hover:bg-muted hover:text-foreground");
@@ -49,6 +51,8 @@ export function SaveButton({
   async function toggle() {
     const want = !saved;
     setSaved(want);
+    setJustSaved(want);
+    if (want) haptic();
     setBusy(true);
     setProblem(false);
     try {
@@ -61,6 +65,7 @@ export function SaveButton({
       if (want) track("article_saved", { place });
     } catch {
       setSaved(!want);
+      setJustSaved(false);
       setProblem(true);
     } finally {
       setBusy(false);
@@ -70,7 +75,7 @@ export function SaveButton({
   return (
     <span className="relative inline-flex">
       <button type="button" onClick={toggle} disabled={busy} aria-pressed={saved} aria-label={saved ? t("unsave") : t("save")} className={look}>
-        <BookmarkIcon className={cn("size-5", saved && "fill-current")} aria-hidden="true" />
+        <BookmarkIcon className={cn("size-5", saved && "fill-current", justSaved && "animate-pop")} aria-hidden="true" />
         {!compact && (saved ? t("saved") : t("save"))}
       </button>
       <Bubble tone="problem">{problem ? ts("problem", { problem: "error" }) : ""}</Bubble>

@@ -103,7 +103,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
             <p className="mt-3 text-sm font-semibold">{tw("settingsCount", { count: avoid.length })}</p>
             <Link
               href="/settings/warnings"
-              className="mt-4 inline-flex h-11 items-center gap-2 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
+              className="mt-4 inline-flex h-11 items-center gap-2 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press"
             >
               <TriangleAlertIcon className="size-4" aria-hidden="true" />
               {tw("settingsLink")}
@@ -150,7 +150,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
       <PaperCard stamp={pro?.pro ? t("proStamp") : undefined}>
         <h2 className="font-display text-lg font-bold">{t("proTitle")}</h2>
         <p className="mt-1 text-sm text-muted-foreground">{!pro?.available ? t("proSoon") : pro.pro ? t("proActive") : t("proBody")}</p>
-        <Link href="/pro" className="mt-4 inline-flex h-11 items-center rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted">
+        <Link href="/pro" className="mt-4 inline-flex h-11 items-center rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press">
           {pro?.pro ? t("proManage") : t("proLink")}
         </Link>
       </PaperCard>
@@ -185,7 +185,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
         <p className="mt-1 text-sm text-muted-foreground">{t("importBody")}</p>
         <Link
           href="/settings/import"
-          className="mt-4 inline-flex h-11 items-center gap-2 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
+          className="mt-4 inline-flex h-11 items-center gap-2 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press"
         >
           <UploadIcon className="size-4" aria-hidden="true" />
           {t("importLink")}
@@ -199,7 +199,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
           <a
             href="/api/account/export"
             download
-            className="inline-flex h-11 items-center gap-2 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
+            className="inline-flex h-11 items-center gap-2 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press"
           >
             <DownloadIcon className="size-4" aria-hidden="true" />
             {t("exportButton")}
@@ -208,7 +208,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
           <a
             href="/api/account/export/csv"
             download
-            className="inline-flex h-11 items-center gap-2 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted"
+            className="inline-flex h-11 items-center gap-2 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press"
           >
             <FileSpreadsheetIcon className="size-4" aria-hidden="true" />
             {t("exportCsvButton")}

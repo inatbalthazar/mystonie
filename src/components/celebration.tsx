@@ -379,7 +379,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
             <p className="flex-1 text-sm">{t("proLocked", { style: tc(`templates.${template}`) })}</p>
             <Link
               href="/pro"
-              className="inline-flex h-11 shrink-0 items-center rounded-xl bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90"
+              className="inline-flex h-11 shrink-0 items-center rounded-full bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90 press"
             >
               {t("proUnlock")}
             </Link>
@@ -390,7 +390,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
           type="button"
           onClick={share}
           disabled={!ready}
-          className="flex h-14 items-center justify-center gap-2 rounded-2xl bg-brand px-4 text-lg font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60"
+          className="flex h-14 items-center justify-center gap-2 rounded-full bg-brand px-4 text-lg font-bold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60 press"
         >
           {canShare ? <Share2Icon className="size-5" aria-hidden="true" /> : <LinkIcon className="size-5" aria-hidden="true" />}
           {!ready && !locked ? (online ? t("preparing") : t("shareOffline")) : canShare ? t("share") : t("shareLink")}

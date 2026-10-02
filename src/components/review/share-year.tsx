@@ -16,7 +16,7 @@ export function ShareYear({ card, username, host }: { card: CardRecap; username:
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="inline-flex h-12 items-center justify-center gap-2 rounded-2xl bg-brand px-5 text-lg font-bold text-brand-foreground shadow-sm hover:bg-brand/90"
+        className="inline-flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-5 text-lg font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press"
       >
         <Share2Icon className="size-5" aria-hidden="true" />
         {t("share")}

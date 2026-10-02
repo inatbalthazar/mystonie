@@ -194,7 +194,7 @@ export function ProfileForm({
         <button
           type="submit"
           disabled={status.kind === "saving"}
-          className="h-11 rounded-xl bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60"
+          className="h-11 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-60 press"
         >
           {status.kind === "saving" ? t("saving") : t("save")}
         </button>

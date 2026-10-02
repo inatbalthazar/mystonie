@@ -37,7 +37,7 @@ export function SignOutForm({ next }: { next: string }) {
           {offline("signOutWaiting", { count: unsynced })}
         </p>
       )}
-      <button type="submit" className="h-11 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted">
+      <button type="submit" className="h-11 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press">
         {confirming ? offline("signOutAnyway") : t("signOut")}
       </button>
     </form>

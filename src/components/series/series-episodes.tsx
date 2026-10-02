@@ -245,7 +245,7 @@ export function SeriesEpisodes({
               setAnimate(false);
               setCelebrating("progress");
             }}
-            className="flex h-11 shrink-0 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90"
+            className="flex h-11 shrink-0 items-center gap-2 rounded-full bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90 press"
           >
             <ImageIcon className="size-4" aria-hidden="true" />
             {t("makeProgressCard")}
@@ -296,10 +296,10 @@ export function SeriesEpisodes({
             {t("askFinish")}
           </p>
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={finish} className="h-11 rounded-xl bg-brand px-5 font-bold text-brand-foreground hover:bg-brand/90">
+            <button type="button" onClick={finish} className="h-11 rounded-full bg-brand px-5 font-bold text-brand-foreground hover:bg-brand/90 press">
               {t("markFinished")}
             </button>
-            <button type="button" onClick={() => setAskFinish(false)} className="h-11 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted">
+            <button type="button" onClick={() => setAskFinish(false)} className="h-11 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press">
               {t("notYet")}
             </button>
           </div>

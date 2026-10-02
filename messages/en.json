@@ -291,6 +291,9 @@
     "showAll": "Show all ({count})",
     "showLess": "Show less"
   },
+  "Loading": {
+    "page": "Loading…"
+  },
   "Back": {
     "back": "Back",
     "backTo": "Back to {page}",
@@ -801,7 +804,34 @@
     "tabAlbum": "Album",
     "tabStats": "Stats",
     "atlasCard": "Atlas of {count, plural, one {# country} other {# countries}}",
-    "atlasRegionsCard": "Atlas of {country}"
+    "atlasRegionsCard": "Atlas of {country}",
+    "shelfHintPinned": "Favourites first, then newest.",
+    "shelfFavourite": "Favourite"
+  },
+  "Album": {
+    "arrange": "Arrange",
+    "arrangeTitle": "Arrange your album",
+    "arrangeHint": "Drag a section by its handle or use the arrows. Your cover and numbers stay on top.",
+    "drag": "Move {section} (drag, or arrow keys)",
+    "moveUp": "Move {section} up",
+    "moveDown": "Move {section} down",
+    "hide": "Hide {section}",
+    "show": "Show {section}",
+    "moved": "{section}: {position} of {total}",
+    "onlyYou": "Only you see this",
+    "hiddenNote": "Hiding takes a section off your album. To keep your collection to yourself, make your profile private in Settings. Empty sections don't show.",
+    "reset": "Default order",
+    "resetDone": "Back to the default order",
+    "favourites": "Pick favourites",
+    "favouritesTitle": "Favourites on your shelf",
+    "favouritesHint": "Pin up to {max}. They stand first on your shelf, with a star.",
+    "favouritesFull": "That's {max}. Unpin one to pick another.",
+    "favouritesSearch": "Search your finishes",
+    "favouritesNone": "Nothing matches.",
+    "save": "Save",
+    "saving": "Saving…",
+    "failed": "Couldn't save. Try again.",
+    "close": "Close"
   },
   "Social": {
     "follow": "Follow",

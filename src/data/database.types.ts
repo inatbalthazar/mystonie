@@ -608,6 +608,8 @@ export type Database = {
       }
       profiles: {
         Row: {
+          album_hidden: string[]
+          album_order: string[]
           atlas_public: boolean
           avatar_url: string | null
           bio: string | null
@@ -620,6 +622,7 @@ export type Database = {
           milestones_seen: Json
           reel_reminded_on: string | null
           reel_reminders: boolean
+          shelf_pins: string[]
           theme: string
           time_zone: string
           updated_at: string
@@ -627,6 +630,8 @@ export type Database = {
           visibility: string
         }
         Insert: {
+          album_hidden?: string[]
+          album_order?: string[]
           atlas_public?: boolean
           avatar_url?: string | null
           bio?: string | null
@@ -639,6 +644,7 @@ export type Database = {
           milestones_seen?: Json
           reel_reminded_on?: string | null
           reel_reminders?: boolean
+          shelf_pins?: string[]
           theme?: string
           time_zone?: string
           updated_at?: string
@@ -646,6 +652,8 @@ export type Database = {
           visibility?: string
         }
         Update: {
+          album_hidden?: string[]
+          album_order?: string[]
           atlas_public?: boolean
           avatar_url?: string | null
           bio?: string | null
@@ -658,6 +666,7 @@ export type Database = {
           milestones_seen?: Json
           reel_reminded_on?: string | null
           reel_reminders?: boolean
+          shelf_pins?: string[]
           theme?: string
           time_zone?: string
           updated_at?: string
@@ -1997,6 +2006,8 @@ export type Database = {
       public_profile: {
         Args: { p_username: string }
         Returns: {
+          album_hidden: string[]
+          album_order: string[]
           avatar_url: string
           bio: string
           blocked_by_me: boolean
@@ -2004,6 +2015,7 @@ export type Database = {
           display_name: string
           id: string
           is_private: boolean
+          shelf_pins: string[]
           username: string
         }[]
       }

@@ -225,7 +225,7 @@ export function ReadingProgress({
           type="button"
           disabled={!canNext}
           onClick={() => log(next)}
-          className="h-14 rounded-2xl bg-brand text-lg font-extrabold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50"
+          className="h-14 rounded-full bg-brand text-lg font-extrabold text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50 press"
         >
           {t("logNext", { unit, n: n(next) })}
         </button>
@@ -253,7 +253,7 @@ export function ReadingProgress({
               className="h-12 w-full rounded-xl border border-input bg-background px-3 text-base tabular-nums"
             />
           </div>
-          <button type="submit" className="h-12 shrink-0 rounded-xl px-5 font-bold ring-1 ring-border hover:bg-muted">
+          <button type="submit" className="h-12 shrink-0 rounded-full px-5 font-bold ring-1 ring-border hover:bg-muted press">
             {t("logIt")}
           </button>
         </form>
@@ -281,7 +281,7 @@ export function ReadingProgress({
               setAnimate(false);
               setCelebrating("progress");
             }}
-            className="flex h-11 shrink-0 items-center gap-2 rounded-xl bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90"
+            className="flex h-11 shrink-0 items-center gap-2 rounded-full bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90 press"
           >
             <ImageIcon className="size-4" aria-hidden="true" />
             {t("makeProgressCard")}
@@ -296,10 +296,10 @@ export function ReadingProgress({
             {t("askFinish")}
           </p>
           <div className="flex flex-wrap gap-2">
-            <button type="button" onClick={finish} className="h-11 rounded-xl bg-brand px-5 font-bold text-brand-foreground hover:bg-brand/90">
+            <button type="button" onClick={finish} className="h-11 rounded-full bg-brand px-5 font-bold text-brand-foreground hover:bg-brand/90 press">
               {t("markFinished")}
             </button>
-            <button type="button" onClick={() => setAskFinish(false)} className="h-11 rounded-xl px-5 font-semibold ring-1 ring-border hover:bg-muted">
+            <button type="button" onClick={() => setAskFinish(false)} className="h-11 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press">
               {t("notYet")}
             </button>
           </div>
@@ -321,7 +321,7 @@ export function ReadingProgress({
       )}
 
       {status !== "finished" && !askFinish && (logs.length > 0 || status) && (
-        <button type="button" onClick={finish} className="h-11 self-start rounded-xl px-4 text-sm font-semibold ring-1 ring-border hover:bg-muted">
+        <button type="button" onClick={finish} className="h-11 self-start rounded-full px-4 text-sm font-semibold ring-1 ring-border hover:bg-muted press">
           {t("markFinished")}
         </button>
       )}

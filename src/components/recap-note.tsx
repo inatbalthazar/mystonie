@@ -37,7 +37,7 @@ export async function RecapNote({ recap: { id, recap } }: { recap: UserRecap }) 
       <p className="mt-1 text-sm text-muted-foreground">{summary}</p>
       <Link
         href={`/recap/${id}`}
-        className="mt-3 inline-flex h-11 items-center rounded-xl bg-brand px-4 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90"
+        className="mt-3 inline-flex h-11 items-center rounded-full bg-brand px-4 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
       >
         {t("noteCta")}
       </Link>
