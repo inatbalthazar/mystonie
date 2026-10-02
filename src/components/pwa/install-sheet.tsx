@@ -1,6 +1,6 @@
 "use client";
 
-import { AppWindowMacIcon, CheckIcon, EllipsisVerticalIcon, ExternalLinkIcon, LinkIcon, MonitorDownIcon, ShareIcon, SmartphoneIcon, SquarePlusIcon } from "lucide-react";
+import { AppWindowMacIcon, CheckIcon, DownloadIcon, EllipsisVerticalIcon, ExternalLinkIcon, LinkIcon, MonitorDownIcon, ShareIcon, SmartphoneIcon, SquarePlusIcon } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
@@ -10,6 +10,7 @@ import { routing } from "@/i18n/routing";
 import { track } from "@/lib/analytics";
 import { Sheet } from "../sheet";
 import {
+  askToInstall,
   dismissedRecently,
   INSTALL_DISMISSED,
   INSTALL_QUIET_DAYS,
@@ -50,6 +51,49 @@ function rememberAsked() {
 
 const signedIn = () => document.documentElement.hasAttribute("data-auth");
 
+// "Not now" shrinks the sheet into a floating Install button (the owner, 2026-10-03, ADR 0088), for anyone who
+// tapped it by mistake: there while "Not now" quiets the sheet (24 hours), or for the rest of the visit after a
+// "Not now" on a sheet they asked for.
+const MINI = "mystonie.install.mini";
+const miniListeners = new Set<() => void>();
+
+function subscribeMini(listener: () => void) {
+  const unsubscribe = subscribeInstall(listener);
+  miniListeners.add(listener);
+  return () => {
+    unsubscribe();
+    miniListeners.delete(listener);
+  };
+}
+
+function setMini(on: boolean) {
+  try {
+    if (on) window.sessionStorage.setItem(MINI, "1");
+    else window.sessionStorage.removeItem(MINI);
+  } catch {
+    // Storage blocked: the 24-hour "Not now" still shows it.
+  }
+  miniListeners.forEach((listener) => listener());
+}
+
+/** The floating button shows: shrunk, and this browser can still install (its dialog, or a phone's steps). */
+function miniShown(): boolean {
+  let shrunk = dismissedRecently(INSTALL_DISMISSED, INSTALL_QUIET_DAYS);
+  try {
+    shrunk ||= window.sessionStorage.getItem(MINI) === "1";
+  } catch {
+    // Storage blocked: only the 24-hour "Not now" counts.
+  }
+  if (!shrunk || isStandalone() || wasInstalled()) return false;
+  if (installPromptReady()) return true;
+  const way = askedInstallWay({ ua: navigator.userAgent, platform: navigator.platform, maxTouchPoints: navigator.maxTouchPoints, standalone: false, promptReady: false });
+  return window.matchMedia("(pointer: coarse)").matches && (way === "ios" || way === "menu" || way === "in_app");
+}
+
+/** Chrome on Android offers its install dialog a moment after the page loads: the sheet waits for it a little. */
+const CHROME_WAITS = 2;
+const CHROME_WAIT_MS = 2000;
+
 /**
  * The sheet is about to ask on its own, this visit: a phone's browser, not installed, not quieted, not on a quiet page.
  * The getting-started welcome waits for it (ADR 0088), so installing comes first.
@@ -81,7 +125,9 @@ function deviceWay(): InstallWay {
  * opens full screen like an app. Visitors a few seconds into their visit, before any sign-up; signed-in people almost
  * at once, before the getting-started welcome. Chromium gets an Install button (its own dialog), iOS the Share → Add to
  * Home Screen → Open as Web App steps, other Android browsers their menu, and an app's own browser (Instagram, LINE…)
- * how to open the page in the real one. Once a visit; one "Not now" quiets it and Home's install card for 24 hours.
+ * how to open the page in the real one. Once a visit; one "Not now" quiets it and Home's install card for 24 hours and
+ * shrinks it into a floating Install button meanwhile. In Chrome it waits a moment for the browser's offer, so it opens
+ * with the Install button.
  *
  * Anyone can also ask for it (`askToInstall()`, the getting-started checklist's step, ADR 0088): the browser's dialog
  * at once when it's ready, otherwise this sheet with this browser's steps (a computer's too) and "It's on my home
@@ -94,12 +140,14 @@ export function InstallSheet() {
   const [asked, setAsked] = useState<Asked | null>(null);
   const [requested, setRequested] = useState(false);
   const [copied, setCopied] = useState(false);
+  const shrunk = useSyncExternalStore(subscribeMini, miniShown, () => false);
   // Chrome may offer its dialog only after the sheet opened: then the steps become the Install button.
   const way: Asked | null = asked && ready ? "prompt" : asked;
 
   useEffect(() => {
     if (asked) return;
     let timer: ReturnType<typeof setTimeout>;
+    let waits = 0;
     const check = () => {
       if (!installAskComing(pathname)) return;
       // Never on top of another sheet (the card maker's, a title's details): wait for it to close.
@@ -109,6 +157,12 @@ export function InstallSheet() {
       }
       const found = deviceWay();
       if (found === "none") return;
+      // Chrome without its offer yet: wait a little, so the sheet opens with the Install button, not the menu's steps.
+      if (found === "menu" && /Chrome\//.test(navigator.userAgent) && waits < CHROME_WAITS) {
+        waits += 1;
+        timer = setTimeout(check, CHROME_WAIT_MS);
+        return;
+      }
       rememberAsked();
       setAsked(found);
       track("install_prompt", { action: "shown", way: found });
@@ -135,6 +189,7 @@ export function InstallSheet() {
         if (found === "prompt") {
           void promptInstall().then((accepted) => {
             if (accepted) markInstalled();
+            setMini(!accepted);
             track("install_prompt", { action: accepted ? "installed" : "dismissed", way: found, requested: true });
           });
           return;
@@ -150,6 +205,7 @@ export function InstallSheet() {
     if (!way) return;
     if (action === "installed") markInstalled();
     else if (!requested) rememberDismissed(INSTALL_DISMISSED);
+    setMini(action === "dismissed");
     track("install_prompt", requested ? { action, way, requested } : { action, way });
     setAsked(null);
     setRequested(false);
@@ -158,97 +214,114 @@ export function InstallSheet() {
   // After the steps they say when it's done (iOS's home-screen app keeps its own storage, so Safari can't see it), which
   // ticks the checklist and hides Home's card; an app's browser can't install, so there it's only "Got it".
   const confirm = way === "ios" || way === "menu" || way === "desktop";
+  const floating = shrunk && way === null && !quietForInstall(pathname, routing.locales) && !/\/import(\/|$)/.test(pathname);
 
   return (
-    <Sheet open={way !== null} onClose={() => close("dismissed")} title={way === "desktop" ? t("desktopTitle") : t("title")} closeLabel={t("close")}>
-      <div className="flex flex-col gap-5">
-        {/* A home screen with Mystonie on it: what they'll get. */}
-        <div aria-hidden="true" className="mx-auto grid grid-cols-4 gap-x-4 gap-y-3 rounded-[28px] bg-brand-soft/70 p-4 dark:bg-brand/15">
-          {Array.from({ length: 3 }, (_, i) => (
-            <span key={i} className="size-12 rounded-[14px] bg-foreground/8" />
-          ))}
-          <span className="flex flex-col items-center gap-1">
-            <Image src="/icon.svg" alt="" width={48} height={48} unoptimized className="size-12 -rotate-6 rounded-[14px] shadow-md ring-2 ring-brand" />
-            <span className="text-[11px] font-semibold">{t("appName")}</span>
-          </span>
-        </div>
-        <p className="text-muted-foreground">
-          {way === "in_app" ? t("inAppBody") : way === "desktop" ? t("desktopBody", { site: window.location.host }) : t("body")}
-        </p>
+    <>
+      {floating && (
+        <button
+          type="button"
+          data-install-fab
+          onClick={askToInstall}
+          aria-label={t("fabLabel")}
+          className="fixed bottom-[max(calc(var(--island-space)+0.25rem),calc(env(safe-area-inset-bottom)+1rem))] left-4 z-30 flex h-14 origin-bottom-left animate-in items-center gap-2 rounded-full bg-brand pr-5 pl-1.5 font-semibold text-brand-foreground shadow-[0_1px_3px_rgb(0_0_0/0.1),0_10px_24px_-10px_rgb(0_0_0/0.55)] duration-500 fade-in zoom-in-50 slide-in-from-bottom-6 outline-none hover:bg-brand/90 focus-visible:ring-2 focus-visible:ring-ring active:scale-95 motion-reduce:animate-none sm:left-6 print:hidden"
+        >
+          <Image src="/icon.svg" alt="" width={44} height={44} unoptimized className="size-11 rounded-full bg-background ring-2 ring-brand-foreground/30" />
+          <DownloadIcon className="size-4" strokeWidth={2.5} aria-hidden="true" />
+          {t("fab")}
+        </button>
+      )}
+      <Sheet open={way !== null} onClose={() => close("dismissed")} title={way === "desktop" ? t("desktopTitle") : t("title")} closeLabel={t("close")}>
+        <div className="flex flex-col gap-5">
+          {/* A home screen with Mystonie on it: what they'll get. */}
+          <div aria-hidden="true" className="mx-auto grid grid-cols-4 gap-x-4 gap-y-3 rounded-[28px] bg-brand-soft/70 p-4 dark:bg-brand/15">
+            {Array.from({ length: 3 }, (_, i) => (
+              <span key={i} className="size-12 rounded-[14px] bg-foreground/8" />
+            ))}
+            <span className="flex flex-col items-center gap-1">
+              <Image src="/icon.svg" alt="" width={48} height={48} unoptimized className="size-12 -rotate-6 rounded-[14px] shadow-md ring-2 ring-brand" />
+              <span className="text-[11px] font-semibold">{t("appName")}</span>
+            </span>
+          </div>
+          <p className="text-muted-foreground">
+            {way === "in_app" ? t("inAppBody") : way === "desktop" ? t("desktopBody", { site: window.location.host }) : t("body")}
+          </p>
 
-        {way === "ios" && (
-          <Steps>
-            <Step icon={<ShareIcon />}>{t("iosShare")}</Step>
-            <Step icon={<SquarePlusIcon />}>{t("iosAdd")}</Step>
-            <Step icon={<SmartphoneIcon />}>{t("iosWebApp")}</Step>
-          </Steps>
-        )}
-        {/* iOS gives the home-screen app its own storage: someone signed in here signs in there once more. */}
-        {way === "ios" && signedIn() && <p className="text-sm text-muted-foreground">{t("iosSignIn")}</p>}
-        {way === "menu" && (
-          <Steps>
-            <Step icon={<EllipsisVerticalIcon />}>{t("menuOpen")}</Step>
-            <Step icon={<SquarePlusIcon />}>{t("menuAdd")}</Step>
-          </Steps>
-        )}
-        {way === "desktop" && (
-          <Steps>
-            <Step icon={<MonitorDownIcon />}>{t("desktopChrome")}</Step>
-            <Step icon={<AppWindowMacIcon />}>{t("desktopSafari")}</Step>
-          </Steps>
-        )}
-        {way === "in_app" && (
-          <Steps>
-            <Step icon={<EllipsisVerticalIcon />}>{t("inAppMenu")}</Step>
-            <Step icon={<ExternalLinkIcon />}>{t("inAppOpen")}</Step>
-          </Steps>
-        )}
-
-        <div className="flex flex-col gap-2">
-          {way === "prompt" && (
-            <button
-              type="button"
-              onClick={async () => {
-                if (await promptInstall()) close("installed");
-              }}
-              className="h-12 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
-            >
-              {t("install")}
-            </button>
+          {way === "ios" && (
+            <Steps>
+              <Step icon={<ShareIcon />}>{t("iosShare")}</Step>
+              <Step icon={<SquarePlusIcon />}>{t("iosAdd")}</Step>
+              <Step icon={<SmartphoneIcon />}>{t("iosWebApp")}</Step>
+            </Steps>
+          )}
+          {/* iOS gives the home-screen app its own storage: someone signed in here signs in there once more. */}
+          {way === "ios" && signedIn() && <p className="text-sm text-muted-foreground">{t("iosSignIn")}</p>}
+          {way === "menu" && (
+            <Steps>
+              <Step icon={<EllipsisVerticalIcon />}>{t("menuOpen")}</Step>
+              <Step icon={<SquarePlusIcon />}>{t("menuAdd")}</Step>
+            </Steps>
+          )}
+          {way === "desktop" && (
+            <Steps>
+              <Step icon={<MonitorDownIcon />}>{t("desktopChrome")}</Step>
+              <Step icon={<AppWindowMacIcon />}>{t("desktopSafari")}</Step>
+            </Steps>
           )}
           {way === "in_app" && (
-            <button
-              type="button"
-              onClick={async () => {
-                try {
-                  await navigator.clipboard.writeText(window.location.href);
-                  setCopied(true);
-                } catch {
-                  // No clipboard here: the steps above still work.
-                }
-              }}
-              className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
-            >
-              {copied ? <CheckIcon className="size-5" aria-hidden="true" /> : <LinkIcon className="size-5" aria-hidden="true" />}
-              {copied ? t("copied") : t("copyLink")}
-            </button>
+            <Steps>
+              <Step icon={<EllipsisVerticalIcon />}>{t("inAppMenu")}</Step>
+              <Step icon={<ExternalLinkIcon />}>{t("inAppOpen")}</Step>
+            </Steps>
           )}
-          {confirm && (
-            <button
-              type="button"
-              onClick={() => close("installed")}
-              className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
-            >
-              <CheckIcon className="size-5" aria-hidden="true" />
-              {way === "desktop" ? t("installedDesktop") : t("installed")}
+
+          <div className="flex flex-col gap-2">
+            {way === "prompt" && (
+              <button
+                type="button"
+                onClick={async () => {
+                  // Turned down in Chrome's own dialog: the sheet shrinks to the floating button, as with "Not now".
+                  close((await promptInstall()) ? "installed" : "dismissed");
+                }}
+                className="h-12 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
+              >
+                {t("install")}
+              </button>
+            )}
+            {way === "in_app" && (
+              <button
+                type="button"
+                onClick={async () => {
+                  try {
+                    await navigator.clipboard.writeText(window.location.href);
+                    setCopied(true);
+                  } catch {
+                    // No clipboard here: the steps above still work.
+                  }
+                }}
+                className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
+              >
+                {copied ? <CheckIcon className="size-5" aria-hidden="true" /> : <LinkIcon className="size-5" aria-hidden="true" />}
+                {copied ? t("copied") : t("copyLink")}
+              </button>
+            )}
+            {confirm && (
+              <button
+                type="button"
+                onClick={() => close("installed")}
+                className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
+              >
+                <CheckIcon className="size-5" aria-hidden="true" />
+                {way === "desktop" ? t("installedDesktop") : t("installed")}
+              </button>
+            )}
+            <button type="button" onClick={() => close("dismissed")} className="h-12 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press">
+              {way === "prompt" || confirm ? t("notNow") : t("done")}
             </button>
-          )}
-          <button type="button" onClick={() => close("dismissed")} className="h-12 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press">
-            {way === "prompt" || confirm ? t("notNow") : t("done")}
-          </button>
+          </div>
         </div>
-      </div>
-    </Sheet>
+      </Sheet>
+    </>
   );
 }
 

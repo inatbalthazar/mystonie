@@ -83,6 +83,8 @@
     "installed": "It's on my home screen",
     "installedDesktop": "It's installed",
     "notNow": "Not now",
+    "fab": "Install",
+    "fabLabel": "Install Mystonie",
     "done": "Got it",
     "close": "Close"
   },

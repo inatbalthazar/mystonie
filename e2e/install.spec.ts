@@ -8,7 +8,7 @@ async function asPerson(page: Page) {
 
 const sheet = (page: Page) => page.getByRole("dialog", { name: "Put Mystonie on your home screen" });
 
-test("an Android visitor is shown the browser menu's steps, and Not now holds", async ({ page }) => {
+test("an Android visitor is shown the browser menu's steps, and Not now holds as a floating button", async ({ page }) => {
   await asPerson(page);
   await page.goto("/");
   await expect(sheet(page)).toBeVisible({ timeout: 15_000 });
@@ -19,6 +19,9 @@ test("an Android visitor is shown the browser menu's steps, and Not now holds", 
   await page.reload();
   await page.waitForTimeout(8000);
   await expect(sheet(page)).toBeHidden();
+  // …shrunk into a floating button, for a change of mind.
+  await page.getByRole("button", { name: "Install Mystonie" }).click();
+  await expect(sheet(page)).toContainText("Install app");
 });
 
 test.describe("on an iPhone", () => {

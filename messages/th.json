@@ -82,6 +82,8 @@
     "installed": "เพิ่มไว้บนหน้าจอโฮมแล้ว",
     "installedDesktop": "ติดตั้งแล้ว",
     "notNow": "ไว้ทีหลัง",
+    "fab": "ติดตั้ง",
+    "fabLabel": "ติดตั้ง Mystonie",
     "done": "เข้าใจแล้ว",
     "close": "ปิด"
   },
