@@ -28,40 +28,21 @@ const SWIPE_PX = 40;
 const DRAG_PX = 8;
 const OUT_MS = 170;
 const IN_MS = 380;
-/** Set once someone swiped a card: the nudge stops showing them how (ADR 0079). */
-const SWIPED_KEY = "mystonie.styleSwiped";
-
-/** Nobody has swiped a card here yet. No storage (a private window): nudge anyway, it's only a hint. */
-function unswiped(): boolean {
-  try {
-    return !localStorage.getItem(SWIPED_KEY);
-  } catch {
-    return true;
-  }
-}
-
 const still = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 /**
  * A card you swipe for another style (ADR 0079). The card follows the finger and leans with it; let go past 40px
  * and it slides off that side while the next style comes in from the other, springing into place. Behind it, a
- * second card of the stack shows there are more. Until someone has swiped once, the card nudges aside on its own
- * twice, a moment after it lands, to show it moves. Reduced motion: no drag, no slides, no nudge; the style changes
+ * second card of the stack shows there are more. Every time a card is made, it nudges aside on its own twice, a moment
+ * after it lands, to show it moves (until it's touched). Reduced motion: no drag, no slides, no nudge; the style changes
  * at once.
  */
 export function StyleSwipe({ ref, onStep, canSwipe, dots, label, className, children }: Props) {
   const card = useRef<HTMLDivElement>(null);
   const start = useRef<{ x: number; y: number; dragging: boolean } | null>(null);
   const busy = useRef(false);
-  // Only ever mounted after a tap (the celebration, a picked title), so the browser's storage is there to read.
-  const [nudge, setNudge] = useState(unswiped);
-
-  function swiped() {
-    setNudge(false);
-    try {
-      localStorage.setItem(SWIPED_KEY, "1");
-    } catch {}
-  }
+  // Each card made shows the nudge (the owner, 2026-10-02): mounted per card, it plays again every time.
+  const [nudge, setNudge] = useState(true);
 
   function place(transform: string, transition = "none", opacity = "") {
     const el = card.current;
@@ -126,7 +107,7 @@ export function StyleSwipe({ ref, onStep, canSwipe, dots, label, className, chil
     if (!s) return;
     const dx = e.clientX - s.x;
     if (canSwipe && Math.abs(dx) >= SWIPE_PX && Math.abs(dx) > Math.abs(e.clientY - s.y)) {
-      swiped();
+      setNudge(false);
       go(dx < 0 ? 1 : -1, "swipe");
     } else if (s.dragging) {
       place("", still() ? "none" : `transform 320ms var(--ease-spring)`);

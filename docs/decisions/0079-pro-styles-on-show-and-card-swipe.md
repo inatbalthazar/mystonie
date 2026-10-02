@@ -20,7 +20,7 @@ The owner (2026-10-02) asked for two things in the card's celebration:
 **The card shows it moves** (`src/cards/style-swipe.tsx`, used by the celebration and the card maker):
 - **A stack:** a second card peeks out behind, tilted, so there is clearly more than one.
 - **A nudge:** a moment after the card lands, it slides aside twice on its own, showing the card under it.
-  - It shows until someone swipes once (`mystonie.styleSwiped` in the browser's storage), then never again.
+  - It shows every time a card is made, until the card is touched (the owner, 2026-10-02; at first it showed only until someone swiped once, kept in the browser's storage).
 - **Dots** under the card, one per style, the current one long; a Pro style's dot is a small lock.
   - The celebration only: the card maker lists its styles as buttons already.
 
