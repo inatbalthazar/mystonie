@@ -1,6 +1,6 @@
 # ADR 0054: A dot on the Feed tab, and Reel of the Day reminders by push
 
-**Status:** Accepted · **Date:** 2026-10-01
+**Status:** Accepted, the dot changed by [ADR 0074](0074-more-feed-dots.md) (more news, asked from `/api/feed/news`) · **Date:** 2026-10-01
 
 ## Context
 The owner (2026-10-01) asked whether the empty top-right corner (where the Next.js development badge shows on `pnpm dev`) should get a notification bell, for example to remind people to play the daily reel, or whether the nav island's tabs should get Instagram-style red dots. We compared four options:

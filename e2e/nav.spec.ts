@@ -86,8 +86,8 @@ test("the nav island: the lit tab, ➕ from anywhere and in place on the collect
   await page.keyboard.press("Escape");
   await expect(sheet).toBeHidden();
 
-  // Feed (ADR 0053), lit on the community pages too.
-  await island.getByRole("link", { name: "Feed", exact: true }).click();
+  // Feed (ADR 0053), lit on the community pages too. A new account has today's reel to play, so it has a dot (ADR 0074).
+  await island.getByRole("link", { name: /^Feed/ }).click();
   await expect(page).toHaveURL(/\/feed$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Feed");
   await expect(island.getByRole("link", { name: "Feed", exact: true })).toHaveAttribute("aria-current", "page");

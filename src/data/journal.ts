@@ -3,6 +3,7 @@
 import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import type { TitleKind } from "@/core/catalog/types";
+import { articleKey } from "@/core/feed-news";
 import {
   isJournalSlug,
   journalIndex,
@@ -65,6 +66,12 @@ function all(): Promise<Loaded[]> {
 /** The articles to list in `locale` (its own version, else English), newest first. */
 export async function journalList(locale: string): Promise<JournalListItem[]> {
   return journalIndex(await all(), locale, routing.defaultLocale, showDrafts());
+}
+
+/** The newest article as `articleKey` (the same in every language), for the Articles tab's dot (ADR 0074). */
+export async function newestArticleKey(): Promise<string | null> {
+  const newest = (await journalList(routing.defaultLocale))[0];
+  return newest ? articleKey(newest.meta.date, newest.slug) : null;
 }
 
 /**

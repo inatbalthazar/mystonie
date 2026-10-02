@@ -6,13 +6,14 @@ import { DividerTabs } from "@/components/divider-tabs";
 import { ArticleRow } from "@/components/journal/article-row";
 import { Avatar } from "@/components/social/avatar";
 import { FeedList } from "@/components/social/feed-list";
-import { FeedNewsSeen } from "@/components/social/feed-news";
+import { ArticlesSeen, FeedDot, FollowingSeen } from "@/components/social/feed-news";
 import { PageTransition } from "@/components/motion/page-transition";
 import { SwipeArea } from "@/components/motion/swipe-area";
 import { FollowButton } from "@/components/social/follow-button";
 import { localizedPath } from "@/core/auth";
 import { FEED_ARTICLES, feedTabs, pickFeedTab, type FeedArticle, type FeedTab } from "@/core/journal-feed";
 import { nextFeedCursor } from "@/core/social";
+import { newestArticleKey } from "@/data/journal";
 import { journalFeed } from "@/data/journal-feed";
 import { followingFeed, myActivity } from "@/data/social";
 import { userClient } from "@/data/supabase-server";
@@ -34,7 +35,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * Stamp, with the Journal's newest articles among them by date (ADR 0052), under the latest Stamps on your finishes
  * and new followers ("Follow back"); **Articles** is every article, For you first (articles about the titles in your
  * collection, saying why); **Saved** shows once you saved one. Above them, the community pages. Visitors get the
- * articles, newest first, and a way to sign in. Opening it clears the Feed tab's dot (ADR 0054).
+ * articles, newest first, and a way to sign in. Following and Articles carry dots for what's new on them, and the Reel
+ * chip one while today's reel waits; opening a tab clears its dot (ADR 0054, ADR 0074).
  */
 export default async function FeedPage({ params, searchParams }: PageProps<"/[locale]/feed">) {
   const locale = (await params).locale as Locale;
@@ -49,7 +51,7 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
   const wanted: FeedTab = !userId ? "articles" : asked === "articles" || asked === "saved" ? asked : "following";
   const following = !!supabase && !!userId && wanted === "following";
 
-  const [items, activity, journal, t, format] = await Promise.all([
+  const [items, activity, journal, newestArticle, t, format] = await Promise.all([
     following ? followingFeed(supabase, userId, null) : [],
     following
       ? myActivity(supabase, ACTIVITY).catch((error: unknown) => {
@@ -63,6 +65,7 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
           return null;
         })
       : journalFeed(locale, { db: supabase, viewerId: userId, forYou: wanted === "articles" && userId ? "rank" : false }),
+    userId && wanted === "articles" ? newestArticleKey() : null,
     getTranslations("Social"),
     getFormatter(),
   ]);
@@ -81,8 +84,9 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
-      {/* Opening the feed clears the Feed tab's dot (ADR 0054). */}
-      {userId && <FeedNewsSeen user={userId} now={new Date(now).toISOString()} />}
+      {/* Opening a tab clears its dot (ADR 0054, ADR 0074). */}
+      {userId && tab === "following" && <FollowingSeen user={userId} now={new Date(now).toISOString()} />}
+      {userId && tab === "articles" && <ArticlesSeen user={userId} now={new Date(now).toISOString()} article={newestArticle} />}
       <header className="flex flex-col gap-1">
         <p className="font-hand text-2xl leading-none text-muted-foreground">{userId ? t("feedKicker") : t("feedVisitorKicker")}</p>
         <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("feedTitle")}</h1>
@@ -106,6 +110,7 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
             >
               <Icon className="size-4" aria-hidden="true" />
               {label}
+              {href === "/reel" && <FeedDot kind="reel" />}
             </Link>
           ))}
         </nav>
@@ -123,7 +128,12 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
         {tabs.length > 1 && (
           <DividerTabs
             label={t("feedTabsLabel")}
-            tabs={tabs.map((value) => ({ value, href: href(value), name: t(TAB_NAMES[value]) }))}
+            tabs={tabs.map((value) => ({
+              value,
+              href: href(value),
+              name: t(TAB_NAMES[value]),
+              dot: value !== "saved" && value !== tab ? <FeedDot kind={value} /> : undefined,
+            }))}
             current={tab}
           />
         )}

@@ -77,18 +77,42 @@ test("follow, the Following feed, Stamps and blocks", async ({ page, request, br
   await expect(finish.getByText("1 Stamp", { exact: true })).toBeVisible();
   await expect.poll(events).toContain("stamped");
 
-  // Kim's Home lights a dot on the island's Feed tab (ADR 0054); opening the feed clears it.
+  // Kim's Feed tab gets a dot (ADR 0054, ADR 0074): Sam's Stamp and follow came after Kim's device first asked. Kim
+  // hasn't played today's Reel of the Day either, so its chip on the feed and its note on Home have one too.
   const kimIsland = navIsland(kimPage);
+  await askAgain(kimPage);
   await kimPage.goto("/home");
+  await expect(kimPage.getByRole("main").locator('a[href$="/reel"] [data-feed-dot="reel"]')).toBeVisible();
   await expect(kimIsland.getByRole("link", { name: "Feed, new activity" })).toBeVisible();
   await kimIsland.getByRole("link", { name: "Feed, new activity" }).click();
   await expect(kimPage).toHaveURL(/\/feed$/);
   await expect(kimIsland.getByRole("link", { name: "Feed", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(kimPage.getByRole("main").locator('a[href$="/reel"] [data-feed-dot="reel"]')).toBeVisible();
+  // Opening Following cleared its news; the reel still waits, so the dot stays until it's finished.
   await kimPage.goto("/home");
+  await expect(kimPage.getByRole("heading", { level: 1 })).toBeVisible();
+  await expect(kimIsland.getByRole("link", { name: "Feed, new activity" })).toBeVisible();
+  await kimPage.evaluate(() => {
+    const news = JSON.parse(localStorage.getItem("mystonie.feedNews") ?? "{}") as Record<string, unknown>;
+    localStorage.setItem("mystonie.feedNews", JSON.stringify({ ...news, reelDoneOn: new Date().toISOString().slice(0, 10) }));
+  });
+  await kimPage.reload();
   await expect(kimPage.getByRole("heading", { level: 1 })).toBeVisible();
   await kimPage.waitForTimeout(1000); // the dot would show once the page is hydrated
   await expect(kimIsland.getByRole("link", { name: "Feed", exact: true })).toBeVisible();
   await expect(kimIsland.getByRole("link", { name: "Feed, new activity" })).toHaveCount(0);
+
+  // Kim finishes something: Sam, who follows Kim, gets a dot on Feed and on its Following tab.
+  await page.goto("/feed?tab=articles");
+  await expect(main.getByRole("link", { name: "Following", exact: true })).toBeVisible();
+  const logged = await kimPage.request.post("/api/entries", {
+    data: { id: uuidv7(), title: { source: "tmdb", kind: ARRIVAL.kind, externalId: ARRIVAL.externalId }, status: "finished" },
+  });
+  expect(logged.ok(), await logged.text()).toBe(true);
+  await askAgain(page);
+  await page.reload();
+  await expect(main.getByRole("link", { name: "Following", exact: true }).locator('[data-feed-dot="following"]')).toBeVisible();
+  await expect(main.getByRole("link", { name: "Articles", exact: true }).locator("[data-feed-dot]")).toHaveCount(0);
 
   // Kim sees the Stamp and the new follower, and Sam's profile shows Kim's follow counts.
   const kimMain = kimPage.getByRole("main");
@@ -122,6 +146,14 @@ test("follow, the Following feed, Stamps and blocks", async ({ page, request, br
   await expect(main.getByRole("button", { name: "Follow", exact: true })).toBeVisible();
   await kimContext.close();
 });
+
+/** The feed's dots ask the server at most once a minute (ADR 0074): the next page asks again. */
+async function askAgain(page: Page) {
+  await page.evaluate(() => {
+    const raw = localStorage.getItem("mystonie.feedNews");
+    if (raw) localStorage.setItem("mystonie.feedNews", JSON.stringify({ ...(JSON.parse(raw) as object), checkedAt: 0 }));
+  });
+}
 
 /** The signed-in account's id, from the data export. */
 async function kimId(page: Page): Promise<string> {

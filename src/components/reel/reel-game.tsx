@@ -4,6 +4,7 @@ import { CheckIcon, LockIcon, Share2Icon, SparklesIcon, XIcon } from "lucide-rea
 import Image from "next/image";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
+import { markReelDone } from "@/components/social/feed-news";
 import { BadgeToast } from "@/components/badges/badge-toast";
 import { Celebration } from "@/components/celebration";
 import { StonieHop } from "@/components/motion/stonie-hop";
@@ -101,6 +102,8 @@ export function ReelGame({
       return body;
     });
     if (!signedIn) writeLocal(day, body.state.guesses);
+    // Finished: the Reel's dot on the feed goes (ADR 0074).
+    else if (body.state.done) markReelDone(day);
     setNow(Date.now());
     return true;
   }

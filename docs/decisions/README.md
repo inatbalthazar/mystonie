@@ -76,6 +76,7 @@ One file per decision: `NNNN-short-slug.md`, numbered in order. Write one whenev
 | [0071](0071-sign-up-and-more-providers.md) | The landing page leads to sign-up (a hero button and a sign-up box in place of the waitlist form), and sign-in with Google, Apple, Facebook, X or Discord, each when switched on in Supabase | **Accepted** |
 | [0072](0072-getting-started-welcome.md) | The getting-started checklist opens by itself on a new account's first page, once per device; then it waits behind its button | **Accepted** |
 | [0073](0073-google-own-button.md) | Google's own sign-in button (Google Identity Services, ID token + nonce) on /auth, so the chooser names mystonie.vercel.app instead of the Supabase project | **Accepted** |
+| [0074](0074-more-feed-dots.md) | Dots on Feed, its Following and Articles tabs and the Reel chip: friends' finishes, new articles and today's reel, from `GET /api/feed/news` | **Accepted** |
 | [0021](0021-collection-tables-rules-in-the-database.md) | Collection tables enforce the day-one rules in the DB: UUID v7 check, no client DELETE, column grants, composite FKs for card ownership, public-profile reads via `private.is_public_profile` | **Accepted** |
 
 ## Template

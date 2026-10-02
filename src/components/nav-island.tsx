@@ -6,7 +6,7 @@ import type { MouseEvent } from "react";
 import { NAV_TAB_PATHS, navTab, type NavTab } from "@/core/nav";
 import { Link, usePathname } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { useFeedNews } from "./social/feed-news";
+import { useFeedDots, useFeedNewsCheck } from "./social/feed-news";
 
 /**
  * Sent on `window` by the island's ➕ (cancelable). A page that opens quick add in place (the collection) cancels it
@@ -38,12 +38,17 @@ const ICONS: Record<NavTab, LucideIcon> = {
  * reach, Home · Collection · ➕ · Feed · Me (Stats is a tab of Me, ADR 0053). In every page's HTML and shown by CSS
  * once signed in (`signed-in:`), so public pages stay static and it's there from the first paint. Icons only on
  * phones (the names are for screen readers), names under them from 640px. The coral ➕ is quick add, one tap from
- * anywhere. A coral dot on Feed says something about you happened since you last opened it (ADR 0054).
+ * anywhere. A coral dot on Feed says something waits there (ADR 0054, ADR 0074): a finish by someone you follow, a
+ * Stamp or follower, a new article, or today's Reel of the Day still to play. The island asks for it on each page.
  */
 export function NavIsland() {
   const t = useTranslations("Account");
-  const current = navTab(usePathname());
-  const feedNews = useFeedNews() && current !== "feed";
+  const path = usePathname();
+  const current = navTab(path);
+  useFeedNewsCheck(path);
+  const dots = useFeedDots();
+  // On the feed's pages, the tabs and the Reel chip carry the dots instead.
+  const feedNews = (dots.following || dots.articles || dots.reel) && current !== "feed";
 
   function add(event: MouseEvent<HTMLAnchorElement>) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; // a new tab
@@ -69,7 +74,7 @@ export function NavIsland() {
       >
         <span className="relative">
           <Icon className="size-6" strokeWidth={active ? 2.3 : 1.8} aria-hidden="true" />
-          {/* Something new about you: a coral dot, no count. */}
+          {/* Something waits on the feed: a coral dot, no count. */}
           {dot && <span aria-hidden="true" className="absolute -top-0.5 -right-1 size-2.5 rounded-full bg-brand ring-2 ring-card dark:ring-muted" />}
         </span>
         <span className="sr-only text-[11px] leading-none font-semibold sm:not-sr-only">{t(id)}</span>

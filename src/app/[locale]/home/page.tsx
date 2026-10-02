@@ -13,7 +13,6 @@ import { ChallengeNote, type NoteChallenge } from "@/components/challenges/chall
 import { JOURNAL_NOTE_DAYS, JournalNote } from "@/components/journal/journal-note";
 import { ReelNote } from "@/components/reel/reel-note";
 import { BoardNote } from "@/components/social/board-note";
-import { FeedNewsFromHome } from "@/components/social/feed-news";
 import { FriendsFinished } from "@/components/social/friends-finished";
 import { QuizNote } from "@/components/warnings/quiz-note";
 import { localizedPath } from "@/core/auth";
@@ -25,7 +24,7 @@ import { blendTrending, type TrendingTitle } from "@/core/trending";
 import { friendBoard } from "@/data/board";
 import { recentCards } from "@/data/cards";
 import { userJoins, type ChallengeJoin } from "@/data/challenges";
-import { followingFeed, myActivity } from "@/data/social";
+import { followingFeed } from "@/data/social";
 import { listCollection } from "@/data/entries";
 import { cachedEpisodes, episodeLogs } from "@/data/episodes";
 import { pushConfig } from "@/data/push";
@@ -115,7 +114,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
   const viewer = { id: userId, username: profile?.username ?? "", displayName: profile?.display_name ?? null, avatarUrl: profile?.avatar_url ?? null };
   const month = currentMonth(now, timeZone);
   const today = reelDay(now);
-  const [episodes, logs, board, joins, reel, articles, activity] = await Promise.all([
+  const [episodes, logs, board, joins, reel, articles] = await Promise.all([
     cachedEpisodes(supabase, ids),
     episodeLogs(supabase, userId, ids),
     friendBoard(supabase, viewer, "week", timeZone, now).catch((error: unknown) => {
@@ -132,11 +131,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
       return null;
     }),
     journalList(locale),
-    // The Feed tab's dot (ADR 0054): the newest Stamp on your finishes or new follower.
-    myActivity(supabase, 1).catch((error: unknown) => {
-      console.error(error);
-      return null;
-    }),
   ]);
   // This month's challenges: progress as the last save recorded it (S3 challenges & clubs).
   const challenges: NoteChallenge[] = monthChallenges(month).flatMap(({ slug, rule }) => {
@@ -165,7 +159,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
       <SignupFromCard newAccount={newAccount} />
-      {activity && <FeedNewsFromHome user={userId} latest={activity[0]?.at ?? null} now={new Date(now).toISOString()} />}
       <header className="flex flex-col gap-1">
         <p className="font-hand text-2xl leading-none text-muted-foreground">
           {format.dateTime(now, { weekday: "long", month: "long", day: "numeric", timeZone })}
