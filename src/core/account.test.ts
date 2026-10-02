@@ -39,9 +39,9 @@ describe("parseAccountPatch", () => {
 
   it("takes the album as arranged: its order, hidden sections and shelf favourites (ADR 0069)", () => {
     const pin = "00000000-0000-4000-8000-000000000001";
-    expect(parseAccountPatch({ albumOrder: ["shelf", "clubs"], albumHidden: ["saved"], shelfPins: [pin, pin] }, locales)).toEqual({
+    expect(parseAccountPatch({ albumOrder: ["shelf", "clubs"], albumHidden: ["stickers"], shelfPins: [pin, pin] }, locales)).toEqual({
       album_order: ["shelf", "clubs"],
-      album_hidden: ["saved"],
+      album_hidden: ["stickers"],
       shelf_pins: [pin],
     });
     expect(parseAccountPatch({ albumOrder: ["feed"] }, locales)).toBeNull();

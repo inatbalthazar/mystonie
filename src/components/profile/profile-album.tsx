@@ -1,4 +1,4 @@
-import { BookmarkIcon, LockIcon } from "lucide-react";
+import { LockIcon } from "lucide-react";
 import Image from "next/image";
 import type { Locale } from "next-intl";
 import { getTranslations } from "next-intl/server";
@@ -25,7 +25,6 @@ import { userBadges } from "@/data/badges";
 import { userPatches } from "@/data/challenges";
 import { userClubs } from "@/data/clubs";
 import { currentlyWatching } from "@/data/profiles";
-import { savedArticles } from "@/data/journal-feed";
 import { followCounts } from "@/data/social";
 import { statsRows } from "@/data/stats";
 import type { UserClient } from "@/data/supabase-server";
@@ -40,14 +39,13 @@ import { ShelfFavourites } from "./shelf-favourites";
 
 const WATCHING_MAX = 6;
 const SHELF_MAX = 48;
-const SAVED_MAX = 3;
 
 export type { AlbumProfile } from "./album-cover";
 
 /**
  * A collector's album (S1 profile & privacy): under the cover, the pinned all-time numbers, then its sections in the
  * order its owner arranged, minus the hidden ones (`layout`, ADR 0069): what they're watching now, the Shelf with its favourites and their stickers (S3 badges & shelf), their Atlas when shown (stage 4,
- * ADR 0059), their challenge patches and clubs (S3 challenges & clubs), and the owner's saved articles. Long ones show
+ * ADR 0059), their challenge patches and clubs (S3 challenges & clubs), Long ones show
  * two rows and "Show all". Visitors see it at /u/<username>; the owner also at /me, the nav island's Me (ADR 0050), even
  * while it's private to everyone else (`privateToOthers`), as the Album tab next to Stats (`me`, ADR 0053). The
  * owner gets Share my collection and Settings, and on Me "Arrange" and "Pick favourites". No cards: they're the owner's,
@@ -79,7 +77,7 @@ export async function ProfileAlbum({
   statsTab?: boolean;
 }) {
   const isOwner = viewerId === profile.id;
-  const [rows, watching, counts, awarded, patches, clubs, saved, places, atlasPublic, t, tb, tc, tl, tj] = await Promise.all([
+  const [rows, watching, counts, awarded, patches, clubs, places, atlasPublic, t, tb, tc, tl] = await Promise.all([
     statsRows(db, profile.id),
     currentlyWatching(db, profile.id, WATCHING_MAX),
     me
@@ -100,13 +98,6 @@ export async function ProfileAlbum({
       console.error(error);
       return [];
     }),
-    // The Journal articles you saved to read (ADR 0052): only on your own page.
-    isOwner && viewerId
-      ? savedArticles(db, viewerId, locale).catch((error: unknown) => {
-          console.error(error);
-          return [];
-        })
-      : [],
     // RLS returns a visitor the places only when the Atlas is shown; the owner always gets them.
     userPlaces(db, profile.id).catch((error: unknown): Place[] => {
       console.error(error);
@@ -117,7 +108,6 @@ export async function ProfileAlbum({
     getTranslations("Badges"),
     getTranslations("Challenges"),
     getTranslations("Clubs"),
-    getTranslations("Journal"),
   ]);
   // Pinned all-time numbers, watched, read and played apart (stage 4).
   const totals = collectionAreaTotals(rows.titles, rows.entries, rows.logs, rows.reads);
@@ -210,34 +200,6 @@ export async function ProfileAlbum({
             ))}
           </ul>
         )}
-      </section>
-    ),
-
-    saved: saved.length > 0 && (
-      <section aria-labelledby="saved-articles" className="flex flex-col gap-3">
-        <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-          <h2 id="saved-articles" className="font-display text-xl font-extrabold">
-            {tj("savedTitle")}
-          </h2>
-          {saved.length > SAVED_MAX && (
-            <Link href={{ pathname: "/feed", query: { tab: "saved" } }} className="flex min-h-11 items-center text-sm font-semibold text-brand">
-              {tj("seeAllSaved", { count: saved.length })}
-            </Link>
-          )}
-        </div>
-        <ul className="flex flex-col gap-2">
-          {saved.slice(0, SAVED_MAX).map((a) => (
-            <li key={a.slug}>
-              <Link href={`/journal/${a.slug}`} className="flex min-h-11 items-center gap-3 rounded-xl bg-card px-4 py-3 ring-1 ring-border hover:ring-brand/50">
-                <BookmarkIcon className="size-5 shrink-0 fill-current text-brand" aria-hidden="true" />
-                <span lang={a.locale === locale ? undefined : a.locale} className="min-w-0 flex-1 font-semibold">
-                  {a.title}
-                </span>
-                <span className="shrink-0 text-xs text-muted-foreground">{tj("readTime", { minutes: a.minutes })}</span>
-              </Link>
-            </li>
-          ))}
-        </ul>
       </section>
     ),
   };

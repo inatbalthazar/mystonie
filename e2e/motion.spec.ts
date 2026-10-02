@@ -63,14 +63,14 @@ test("pages slide the way you go, tabs swipe and sheets drag away (ADR 0070)", a
   // (While a page slides, touches go past it: wait for the slide to end.)
   await expect(page.locator("html")).not.toHaveAttribute("data-nav-manual");
 
-  // A swipe left opens the next tab (Articles), sliding in from the right; a swipe right comes back.
+  // A swipe left opens the next tab (Journal), sliding in from the right; a swipe right comes back.
   const cdp = await page.context().newCDPSession(page);
   const area = page.locator("[data-swipe-area]");
   await expect(area).toBeVisible();
   let box = (await area.boundingBox())!;
   await drag(cdp, box.x + box.width / 2, box.y + 40, -160, 6);
   await expect(page).toHaveURL(/\/feed\?tab=articles$/);
-  await expect(page.getByRole("link", { name: "Articles", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(page.getByRole("link", { name: "Journal", exact: true })).toHaveAttribute("aria-current", "page");
   await expect.poll(() => transitions(page)).toContain("tab-next");
   await settled(page);
   box = (await area.boundingBox())!;

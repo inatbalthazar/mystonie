@@ -113,7 +113,7 @@ test("follow, the Following feed, Stamps and blocks", async ({ page, request, br
   await askAgain(page);
   await page.reload();
   await expect(main.getByRole("link", { name: "Following", exact: true }).locator('[data-feed-dot="following"]')).toBeVisible();
-  await expect(main.getByRole("link", { name: "Articles", exact: true }).locator("[data-feed-dot]")).toHaveCount(0);
+  await expect(main.getByRole("link", { name: "Journal", exact: true }).locator("[data-feed-dot]")).toHaveCount(0);
 
   // Kim sees the Stamp and the new follower, and Sam's profile shows Kim's follow counts.
   const kimMain = kimPage.getByRole("main");

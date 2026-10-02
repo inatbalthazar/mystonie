@@ -84,6 +84,7 @@ One file per decision: `NNNN-short-slug.md`, numbered in order. Write one whenev
 | [0079](0079-pro-styles-on-show-and-card-swipe.md) | Pro card styles on the swipe for everyone, locked without Pro even before it's on sale; the card follows the finger, slides between styles, nudges until the first swipe, with a stack behind and dots | **Accepted** |
 | [0080](0080-numbers-and-bars-every-time.md) | Stat numbers count up, bars, charts and progress grow, and cards are dealt or rise in, every time they come into view (not once per page), with nothing moving under reduced motion | **Accepted** |
 | [0081](0081-tabs-that-stay-put.md) | Me's cover and tabs in a layout that stays, so a tab changes only its page; Cards counts as a tab (the logo stays); the collection's title and tabs stay put while the Atlas and the shelves trade places | **Accepted** |
+| [0082](0082-one-journal.md) | One name for the Journal (the feed's tab is Journal, not Articles) and saved articles only on the feed's Saved tab, not on the album | **Accepted** |
 | [0021](0021-collection-tables-rules-in-the-database.md) | Collection tables enforce the day-one rules in the DB: UUID v7 check, no client DELETE, column grants, composite FKs for card ownership, public-profile reads via `private.is_public_profile` | **Accepted** |
 
 ## Template

@@ -143,7 +143,6 @@ export function ArrangeAlbum({ order: savedOrder, hidden: savedHidden, atlasPubl
                 </button>
                 <span className={cn("flex min-w-0 flex-1 flex-col leading-tight", !shown && "text-muted-foreground")}>
                   <span className={cn("font-semibold [overflow-wrap:anywhere]", !shown && "line-through decoration-1")}>{name(section)}</span>
-                  {section === "saved" && <span className="text-xs text-muted-foreground">{t("onlyYou")}</span>}
                 </span>
                 <button type="button" aria-label={t("moveUp", { section: name(section) })} disabled={i === 0} onClick={() => move(section, i - 1)} className={square}>
                   <ArrowUpIcon className={icon} aria-hidden="true" />
@@ -206,7 +205,6 @@ export function useSectionName(): (section: AlbumSection) => string {
   const atlas = useTranslations("Atlas");
   const challenges = useTranslations("Challenges");
   const clubs = useTranslations("Clubs");
-  const journal = useTranslations("Journal");
   return (section) => {
     switch (section) {
       case "watching":
@@ -221,8 +219,6 @@ export function useSectionName(): (section: AlbumSection) => string {
         return challenges("profileTitle");
       case "clubs":
         return clubs("profileTitle");
-      case "saved":
-        return journal("savedTitle");
     }
   };
 }

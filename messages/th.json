@@ -808,7 +808,7 @@
     "feedSignIn": "เข้าสู่ระบบ",
     "feedTabsLabel": "ส่วนของฟีด",
     "tabFollowing": "ที่ติดตาม",
-    "tabArticles": "บทความ",
+    "tabArticles": "Journal",
     "tabSaved": "ที่บันทึกไว้",
     "activityTitle": "ช่วงนี้",
     "activityStamp": "<b>{name}</b> ปั๊มตราให้ <b>{title}</b> ที่คุณดูจบ",
@@ -1897,8 +1897,6 @@
     "share": "แชร์",
     "copied": "คัดลอกลิงก์แล้ว",
     "enjoyed": "ชอบบทความนี้ไหม",
-    "actionsLabel": "ปั๊ม บันทึก หรือแชร์",
-    "savedTitle": "บทความที่บันทึกไว้อ่าน",
-    "seeAllSaved": "ดูทั้งหมด ({count})"
+    "actionsLabel": "ปั๊ม บันทึก หรือแชร์"
   }
 }

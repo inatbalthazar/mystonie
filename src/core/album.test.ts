@@ -8,9 +8,9 @@ describe("albumOrder", () => {
   });
 
   it("follows the saved order and adds what it doesn't name at the end, in the default order", () => {
-    expect(albumOrder(["shelf", "clubs"])).toEqual(["shelf", "clubs", "watching", "stickers", "atlas", "patches", "saved"]);
+    expect(albumOrder(["shelf", "clubs"])).toEqual(["shelf", "clubs", "watching", "stickers", "atlas", "patches"]);
     // The cards left the album (ADR 0076): an old saved order skips them.
-    expect(albumOrder(["cards", "shelf"])).toEqual(["shelf", "watching", "stickers", "atlas", "patches", "clubs", "saved"]);
+    expect(albumOrder(["cards", "saved", "shelf"])).toEqual(["shelf", "watching", "stickers", "atlas", "patches", "clubs"]);
   });
 
   it("skips unknown sections (one removed later) and repeats", () => {
@@ -21,7 +21,7 @@ describe("albumOrder", () => {
 
 describe("albumHidden", () => {
   it("keeps only sections the album's switch hides (the Atlas has its own)", () => {
-    expect(albumHidden(["saved", "atlas", "nope", "stickers"])).toEqual(["stickers", "saved"]);
+    expect(albumHidden(["saved", "atlas", "nope", "stickers"])).toEqual(["stickers"]);
     expect(albumHidden(null)).toEqual([]);
     expect(HIDEABLE_SECTIONS).not.toContain("atlas");
   });

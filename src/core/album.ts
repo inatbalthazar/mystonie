@@ -2,10 +2,10 @@
 // comes in the order its owner arranged (`profiles.album_order`), minus the ones they hid (`profiles.album_hidden`).
 
 /**
- * Every section that can move, in the default order, owner-only last. The cards left the album for Me's Cards tab
- * (ADR 0076): a saved order that still names "cards" just skips it.
+ * Every section that can move, in the default order. The cards left the album for Me's Cards tab (ADR 0076), and the
+ * saved articles for the feed's Saved tab (ADR 0082): a saved order that still names "cards" or "saved" just skips it.
  */
-export const ALBUM_SECTIONS = ["watching", "shelf", "stickers", "atlas", "patches", "clubs", "saved"] as const;
+export const ALBUM_SECTIONS = ["watching", "shelf", "stickers", "atlas", "patches", "clubs"] as const;
 export type AlbumSection = (typeof ALBUM_SECTIONS)[number];
 
 /** The sections hidden with the album's own switch. The Atlas has its own ("Show my Atlas", `atlas_public`). */

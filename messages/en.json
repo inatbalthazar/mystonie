@@ -902,7 +902,7 @@
     "feedSignIn": "Sign in",
     "feedTabsLabel": "Feed sections",
     "tabFollowing": "Following",
-    "tabArticles": "Articles",
+    "tabArticles": "Journal",
     "tabSaved": "Saved",
     "activityTitle": "Lately",
     "activityStamp": "<b>{name}</b> stamped your finish of <b>{title}</b>",
@@ -1991,8 +1991,6 @@
     "share": "Share",
     "copied": "Link copied",
     "enjoyed": "Enjoyed this one?",
-    "actionsLabel": "Stamp, save or share",
-    "savedTitle": "Saved to read",
-    "seeAllSaved": "See all ({count})"
+    "actionsLabel": "Stamp, save or share"
   }
 }

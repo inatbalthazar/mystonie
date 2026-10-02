@@ -76,7 +76,7 @@ test("the Journal: listed in the feed, read, in Thai, and linked from the title'
   await expect(page.getByRole("dialog").getByText("The Matrix").first()).toBeVisible();
 });
 
-test("the Journal in the feed: Articles For you from the collection, Stamp and Save, Saved on Me, articles among Following", async ({
+test("the Journal in the feed: For you from the collection, Stamp and Save, Saved, articles among Following", async ({
   page,
   request,
 }) => {
@@ -93,14 +93,14 @@ test("the Journal in the feed: Articles For you from the collection, Stamp and S
   await page.getByRole("dialog").getByRole("button", { name: "Want to watch" }).click();
   await expect(page.getByRole("dialog")).toBeHidden();
 
-  // The feed's Articles tab puts it first For you, and says why it's there.
+  // The feed's Journal tab puts it first For you, and says why it's there.
   await page.goto("/feed");
   const tabs = page.getByRole("navigation", { name: "Feed sections" });
-  await expect(tabs.getByRole("link")).toHaveText(["Following", "Articles"]);
+  await expect(tabs.getByRole("link")).toHaveText(["Following", "Journal"]);
   await expect(tabs.getByRole("link", { name: "Following" })).toHaveAttribute("aria-current", "page");
-  await tabs.getByRole("link", { name: "Articles" }).click();
+  await tabs.getByRole("link", { name: "Journal" }).click();
   await expect(page).toHaveURL(/\/feed\?tab=articles$/);
-  await expect(tabs.getByRole("link", { name: "Articles" })).toHaveAttribute("aria-current", "page");
+  await expect(tabs.getByRole("link", { name: "Journal" })).toHaveAttribute("aria-current", "page");
   const row = page.getByRole("article").filter({ hasText: "How to write for the Journal" });
   await expect(row.getByText("You want to watch The Matrix")).toBeVisible();
 
@@ -114,7 +114,7 @@ test("the Journal in the feed: Articles For you from the collection, Stamp and S
   expect((await done).ok()).toBe(true);
   await expect(row.getByRole("button", { name: "Remove from saved" })).toHaveAttribute("aria-pressed", "true");
 
-  // Saved: a tab on the feed, and a list on Me. The Journal's old Saved link lands on it too.
+  // Saved: a tab on the feed, and only there (ADR 0082: not on Me). The Journal's old Saved link lands on it too.
   await page.reload();
   await tabs.getByRole("link", { name: "Saved" }).click();
   await expect(page).toHaveURL(/\/feed\?tab=saved$/);
@@ -122,7 +122,7 @@ test("the Journal in the feed: Articles For you from the collection, Stamp and S
   await page.goto("/journal?tab=saved");
   await expect(page).toHaveURL(/\/feed\?tab=saved$/);
   await page.goto("/me");
-  await expect(page.getByRole("region", { name: "Saved to read" }).getByRole("link", { name: /How to write for the Journal/ })).toBeVisible();
+  await expect(page.getByRole("heading", { name: "Saved to read" })).toHaveCount(0);
 
   // The article page is static: its buttons learn the reader's Stamp and Save once it's open.
   await page.goto("/journal/how-to-write");
