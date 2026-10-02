@@ -134,7 +134,9 @@ function SummaryTicket({ stats, year, hint }: { stats: { label: string; value: s
  * Watch · Read · Play · Atlas (S2 books & manga, S3 games, ADR 0059): the album's divider tabs. Movies and series on
  * one, books and manga on the next, games on the third, each with its own header, filters and rows; then the Atlas,
  * the places you've collected (`/collection/atlas`, its own server render). On the collection the shelves are buttons
- * (`onShelf`); on the Atlas they link back to `/collection?shelf=…`.
+ * (`onShelf`); on the Atlas they link back to `/collection?shelf=…`. Between the collection and the Atlas (two pages),
+ * the tabs and the title stay put while the page under them slides (`data-stay`, ADR 0081), and each link has its whole
+ * page prefetched, like Me's tabs (ADR 0075).
  */
 export function ShelfTabs({ shelf, onShelf }: { shelf: CollectionShelf | "atlas"; onShelf?: (shelf: CollectionShelf) => void }) {
   const t = useTranslations("Collection");
@@ -146,7 +148,7 @@ export function ShelfTabs({ shelf, onShelf }: { shelf: CollectionShelf | "atlas"
         : "border-transparent text-muted-foreground hover:text-foreground",
     );
   return (
-    <div role="group" aria-label={t("shelves")} className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none]">
+    <div role="group" aria-label={t("shelves")} data-stay="collection-tabs" className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none]">
       <div data-tabs className="flex min-w-max gap-1.5 border-b-2 border-border min-[400px]:gap-2">
         {COLLECTION_SHELVES.map((value) =>
           onShelf ? (
@@ -154,12 +156,12 @@ export function ShelfTabs({ shelf, onShelf }: { shelf: CollectionShelf | "atlas"
               {t("shelf", { shelf: value })}
             </button>
           ) : (
-            <Link key={value} href={{ pathname: "/collection", query: { shelf: value } }} data-tab className={tab(false)}>
+            <Link key={value} href={{ pathname: "/collection", query: { shelf: value } }} prefetch data-tab className={tab(false)}>
               {t("shelf", { shelf: value })}
             </Link>
           ),
         )}
-        <Link href="/collection/atlas" data-tab aria-current={shelf === "atlas" ? "page" : undefined} className={tab(shelf === "atlas")}>
+        <Link href="/collection/atlas" prefetch data-tab aria-current={shelf === "atlas" ? "page" : undefined} className={tab(shelf === "atlas")}>
           {t("shelfAtlas")}
         </Link>
       </div>

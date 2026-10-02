@@ -11,6 +11,7 @@ export const BACK_PAGE_NAMES = [
   "feed",
   "me",
   "stats",
+  "cards",
   "settings",
   "people",
   "board",
@@ -33,6 +34,7 @@ const NAMED: Record<string, BackPageName> = {
   "/feed": "feed",
   "/me": "me",
   "/stats": "stats",
+  "/me/cards": "cards",
   "/settings": "settings",
   "/people": "people",
   "/board": "board",
@@ -58,7 +60,7 @@ export function backPage(path: string): BackPage {
   return { kind: "page" };
 }
 
-// No button: the four tabs and their own tabs (Atlas is the collection's, Stats is Me's), and pages that are a step of
+// No button: the four tabs and their own tabs (Atlas is the collection's, Stats and Cards are Me's), and pages that are a step of
 // signing in or have nowhere to go back to.
 const NO_BACK = new Set([
   "/",
@@ -68,6 +70,7 @@ const NO_BACK = new Set([
   "/feed",
   "/me",
   "/stats",
+  "/me/cards",
   "/auth",
   "/auth/confirm",
   "/offline",

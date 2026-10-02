@@ -7,8 +7,6 @@ import { StickerAlbum } from "@/components/badges/sticker-album";
 import { PageTransition } from "@/components/motion/page-transition";
 import { SwipeArea } from "@/components/motion/swipe-area";
 import { PaperCard } from "@/components/paper-card";
-import { AlbumCover } from "@/components/profile/album-cover";
-import { MeTabs } from "@/components/profile/me-tabs";
 import { MilestoneShelf } from "@/components/stats/milestone-shelf";
 import { ShareStats } from "@/components/stats/share-stats";
 import { Favourites, Headline, Heatmap, MonthBars, PeriodTabs, Records, StatsEmpty, Taste } from "@/components/stats/stats-view";
@@ -22,7 +20,6 @@ import { weekStartFor } from "@/core/stats/period";
 import { statsReport } from "@/core/stats/report";
 import { currentYear } from "@/core/stats/year-review";
 import { badgeAlbum } from "@/data/badges";
-import { followCounts } from "@/data/social";
 import { statsRows } from "@/data/stats";
 import { userClient } from "@/data/supabase-server";
 import { Link, redirect } from "@/i18n/navigation";
@@ -37,7 +34,8 @@ export async function generateMetadata(): Promise<Metadata> {
 const isPeriod = (value: unknown): value is StatsPeriod => (STATS_PERIODS as readonly unknown[]).includes(value);
 
 /**
- * The signed-in user's stats (S1 stats), Me's Stats tab under the album's cover (ADR 0053): big numbers first, then the
+ * The signed-in user's stats (S1 stats), Me's Stats tab under the album's cover (ADR 0053; the cover and the tabs are
+ * Me's layout, ADR 0081): big numbers first, then the
  * heatmap, months, taste and records for `?period=` (this month by default), in the user's time zone. Everything is
  * computed by `statsReport`. Visitors see them on the profile's Stats tab (ADR 0077); while the profile is public, each
  * part has an eye that keeps it from them.
@@ -54,13 +52,9 @@ export default async function StatsPage({ params, searchParams }: PageProps<"/[l
   const userId = data?.claims.sub;
   if (!supabase || !userId) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
-  const [{ data: profile, error }, rows, counts, t, tb] = await Promise.all([
-    supabase.from("profiles").select("id, username, display_name, bio, avatar_url, created_at, time_zone, visibility, stats_hidden").eq("id", userId).single(),
+  const [{ data: profile, error }, rows, t, tb] = await Promise.all([
+    supabase.from("profiles").select("username, time_zone, visibility, stats_hidden").eq("id", userId).single(),
     statsRows(supabase, userId),
-    followCounts(supabase, userId).catch((error: unknown) => {
-      console.error(error);
-      return null;
-    }),
     getTranslations("Stats"),
     getTranslations("Badges"),
   ]);
@@ -122,21 +116,8 @@ export default async function StatsPage({ params, searchParams }: PageProps<"/[l
   };
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
+    <>
       <FreshPage />
-      <AlbumCover
-        profile={{
-          id: profile.id,
-          username: profile.username,
-          displayName: profile.display_name,
-          bio: profile.bio,
-          avatarUrl: profile.avatar_url,
-          joinedAt: profile.created_at,
-        }}
-        owner
-        counts={counts}
-      />
-      <MeTabs current="stats" />
       {/* Swiping right goes back to the Album, the tab before (ADR 0070). */}
       <SwipeArea prev="/me" next="/me/cards" className="flex flex-col gap-8">
         {empty ? (
@@ -177,7 +158,7 @@ export default async function StatsPage({ params, searchParams }: PageProps<"/[l
           </StatsParts>
         )}
       </SwipeArea>
-    </main>
+    </>
   );
 }
 

@@ -11,7 +11,7 @@ We chose between:
 - **Both, as iOS does:** back to the page you came from in the app, named after it, and up to a parent when there is none.
 
 ## Decision
-**One button, in the header, in place of the logo**, on every page except the four tabs, their own tabs (the collection's Atlas, Me's Stats) and the sign-in steps: a chevron and a name in coral, "‹ Atlas", 44 px tall, which dims when pressed.
+**One button, in the header, in place of the logo**, on every page except the four tabs, their own tabs (the collection's Atlas, Me's Stats and Cards, [ADR 0081](0081-tabs-that-stay-put.md)) and the sign-in steps: a chevron and a name in coral, "‹ Atlas", 44 px tall, which dims when pressed.
 
 **Where it goes:**
 - **You came from a page in the app:** it steps back to it (`router.back()`), so the page's query, shelf and scroll come back. It is named after that page: a fixed short name for the main pages (Home, Collection, Atlas, Feed, Me, Settings, …), a country by its name, a profile by @username, and anything else by the title it had ("‹ Parasite"), or "‹ Back".

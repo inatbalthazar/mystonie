@@ -3,12 +3,9 @@ import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { FreshPage } from "@/components/motion/fresh-page";
 import { SwipeArea } from "@/components/motion/swipe-area";
-import { AlbumCover } from "@/components/profile/album-cover";
-import { MeTabs } from "@/components/profile/me-tabs";
 import { SharedCardImage } from "@/components/shared-card";
 import { localizedPath } from "@/core/auth";
 import { recentCards, type UserCard } from "@/data/cards";
-import { followCounts } from "@/data/social";
 import { userClient } from "@/data/supabase-server";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -29,7 +26,7 @@ export async function generateMetadata({ params }: PageProps<"/[locale]/me/cards
 
 /**
  * Me's Cards tab (ADR 0076): every card you made, shared or only downloaded, newest first, 24 at a time ("Show more",
- * `?steps=`). Only for you: the album (yours and visitors') no longer has a card gallery, and a shared card has its own
+ * `?steps=`), under Me's cover and tabs (Me's layout, ADR 0081). Only for you: the album (yours and visitors') no longer has a card gallery, and a shared card has its own
  * page (/c/<id>).
  */
 export default async function MyCardsPage({ params, searchParams }: PageProps<"/[locale]/me/cards">) {
@@ -44,17 +41,11 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
   const userId = data?.claims.sub;
   if (!db || !userId) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
-  const [{ data: profile, error }, cards, counts, t] = await Promise.all([
-    db.from("profiles").select("id, username, display_name, bio, avatar_url, created_at").eq("id", userId).single(),
+  const [cards, t] = await Promise.all([
     // One more than shown, to know whether there are more.
     recentCards(db, userId, steps * STEP + 1),
-    followCounts(db, userId).catch((error: unknown) => {
-      console.error(error);
-      return null;
-    }),
     getTranslations("Profile"),
   ]);
-  if (error) throw new Error(`profile read failed: ${error.message}`);
   const shown = cards.slice(0, steps * STEP);
   const more = cards.length > shown.length;
   const host = siteUrl().host;
@@ -76,21 +67,8 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
     });
 
   return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
+    <>
       <FreshPage />
-      <AlbumCover
-        profile={{
-          id: profile.id,
-          username: profile.username,
-          displayName: profile.display_name,
-          bio: profile.bio,
-          avatarUrl: profile.avatar_url,
-          joinedAt: profile.created_at,
-        }}
-        owner
-        counts={counts}
-      />
-      <MeTabs current="cards" />
       <SwipeArea prev="/stats" className="flex flex-col gap-6">
         <section aria-labelledby="my-cards" className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
@@ -157,6 +135,6 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
           )}
         </section>
       </SwipeArea>
-    </main>
+    </>
   );
 }

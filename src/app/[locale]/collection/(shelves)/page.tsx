@@ -89,7 +89,10 @@ export default async function CollectionPage({ params, searchParams }: PageProps
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 px-4 pt-10 pb-28">
       <FreshPage />
-      <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("title")}</h1>
+      {/* Stays put while the Atlas and the shelves trade places (ADR 0081). */}
+      <h1 data-stay="collection-title" className="font-display text-4xl font-extrabold tracking-[-0.03em]">
+        {t("title")}
+      </h1>
       {/* No key from `?add=1`: closing quick add drops it from the URL, and the refresh after a save would then remount
           the view and close the celebration. The nav island's ➕ opens quick add in place here (ADR 0050). */}
       <CollectionView

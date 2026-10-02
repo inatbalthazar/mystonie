@@ -337,7 +337,7 @@
   animation: var(--animate-enter);
   animation-duration: 300ms;
 }
-body > main[data-skeleton] {
+[data-skeleton] {
   animation: fade 260ms ease-out 300ms both;
 }
 
@@ -402,6 +402,15 @@ body > main[data-skeleton] {
 }
 @keyframes vt-in {
   from { opacity: 0; translate: var(--vt-in-x) var(--vt-in-y); }
+}
+/* A page's own tabs that are separate pages (the collection's shelves and its Atlas, ADR 0081): the title and the row of
+   tabs stay put while the page under them slides sideways, so it moves like one page. Only for those slides: to
+   anywhere else they leave with their page. */
+:root:is([data-nav="tab-next"], [data-nav="tab-prev"]) [data-stay="collection-title"] {
+  view-transition-name: collection-title;
+}
+:root:is([data-nav="tab-next"], [data-nav="tab-prev"]) [data-stay="collection-tabs"] {
+  view-transition-name: collection-tabs;
 }
 /* Back through history (the app's back button): React doesn't animate a popstate, so the app starts that transition
    itself and names the page for it. */

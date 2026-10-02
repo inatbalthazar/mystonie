@@ -104,6 +104,16 @@ test("profile settings, export, the public page, reports and privacy", async ({ 
     "href",
     `/c/${cardId}`,
   );
+  // Cards is one of Me's tabs: the logo stays, no back button (ADR 0081)...
+  await expect(own.getByRole("banner").getByRole("link", { name: "Mystonie home" })).toBeVisible();
+  await expect(own.getByRole("banner").getByRole("link", { name: /^Back/ })).toHaveCount(0);
+  // ...and another tab changes only the page under the cover: the cover is the very same one (Me's layout).
+  await own.waitForLoadState("networkidle");
+  await own.locator("body > main > header").evaluate((cover) => ((window as unknown as { cover?: Element }).cover = cover));
+  await own.getByRole("link", { name: "Stats", exact: true }).click();
+  await expect(own).toHaveURL(/\/stats$/);
+  await expect(own.getByRole("link", { name: "Stats", exact: true })).toHaveAttribute("aria-current", "page");
+  expect(await own.locator("body > main > header").evaluate((cover) => cover === (window as unknown as { cover?: Element }).cover)).toBe(true);
   await own.close();
 
   // …and can report it.

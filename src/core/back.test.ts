@@ -12,6 +12,7 @@ describe("hasBack", () => {
       "/feed",
       "/me",
       "/stats",
+      "/me/cards",
       "/auth",
       "/auth/confirm",
       "/offline",

@@ -34,7 +34,7 @@ import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
 import { AlbumCover, type AlbumProfile } from "./album-cover";
 import { ArrangeAlbum } from "./arrange-album";
-import { MeTabs, ProfileTabs } from "./me-tabs";
+import { ProfileTabs } from "./me-tabs";
 import { Shelf } from "./shelf";
 import { ShelfFavourites } from "./shelf-favourites";
 
@@ -73,7 +73,7 @@ export async function ProfileAlbum({
   /** The owner's own zone, for their Share my collection cards (visitors' pages don't read it). */
   timeZone?: string;
   privateToOthers?: boolean;
-  /** Shown at /me: Me's tabs (Album · Stats · Cards) under the cover. */
+  /** Shown at /me: only the album itself; Me's layout has the cover and the tabs (Album · Stats · Cards, ADR 0081). */
   me?: boolean;
   /** At /u/<username>: the profile's tabs (Album · Stats, ADR 0077), unless its owner hid every part of the stats. */
   statsTab?: boolean;
@@ -82,10 +82,12 @@ export async function ProfileAlbum({
   const [rows, watching, counts, awarded, patches, clubs, saved, places, atlasPublic, t, tb, tc, tl, tj] = await Promise.all([
     statsRows(db, profile.id),
     currentlyWatching(db, profile.id, WATCHING_MAX),
-    followCounts(db, profile.id).catch((error: unknown) => {
-      console.error(error);
-      return null;
-    }),
+    me
+      ? null
+      : followCounts(db, profile.id).catch((error: unknown) => {
+          console.error(error);
+          return null;
+        }),
     userBadges(db, profile.id).catch((error: unknown) => {
       console.error(error);
       return [];
@@ -240,15 +242,7 @@ export async function ProfileAlbum({
     ),
   };
 
-  return (
-    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
-      <AlbumCover
-        profile={profile}
-        owner={isOwner}
-        counts={counts}
-        follow={isOwner ? undefined : { signedIn: !!viewerId, next: localizedPath(`/u/${profile.username}`, locale, routing.defaultLocale) }}
-      />
-      {me ? <MeTabs current="album" /> : statsTab && <ProfileTabs username={profile.username} current="album" />}
+  const album = (
       <AlbumSwipe next={me ? "/stats" : statsTab ? `/u/${profile.username}/stats` : null} replace={!me}>
         {privateToOthers && (
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl bg-brand-soft px-4 py-2 text-sm">
@@ -300,6 +294,18 @@ export async function ProfileAlbum({
           </>
         )}
       </AlbumSwipe>
+  );
+  if (me) return album;
+  return (
+    <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
+      <AlbumCover
+        profile={profile}
+        owner={isOwner}
+        counts={counts}
+        follow={isOwner ? undefined : { signedIn: !!viewerId, next: localizedPath(`/u/${profile.username}`, locale, routing.defaultLocale) }}
+      />
+      {statsTab && <ProfileTabs username={profile.username} current="album" />}
+      {album}
     </main>
   );
 }

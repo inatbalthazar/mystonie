@@ -35,6 +35,19 @@ export function SkeletonPage({ width = "2xl", className, children }: { width?: "
   );
 }
 
+/** A tab's page under a layout that stays (Me's, ADR 0081): only the part that changes, "Loading…" for screen readers. */
+export function SkeletonPart({ children }: { children: ReactNode }) {
+  const t = useTranslations("Loading");
+  return (
+    <div data-skeleton aria-busy="true" className="flex flex-col gap-8">
+      <span role="status" className="sr-only">
+        {t("page")}
+      </span>
+      {children}
+    </div>
+  );
+}
+
 /** A page heading: the handwritten line above it and the title. */
 export function HeadingBones({ kicker = true }: { kicker?: boolean }) {
   return (
@@ -152,16 +165,25 @@ export function SectionBones({ children }: { children: ReactNode }) {
   );
 }
 
-/** An album (Me, a profile): the cover, its tabs (Me's three, a profile's two), the numbers and the shelf. */
+/** An album (a profile): the cover, its tabs (a profile's two), the numbers and the shelf. */
 export function AlbumBones({ tabs = 0 }: { tabs?: number }) {
   return (
     <SkeletonPage>
       <CoverBones />
       {tabs > 0 && <TabBones count={tabs} />}
+      <AlbumPartBones />
+    </SkeletonPage>
+  );
+}
+
+/** The album under its cover and tabs: the numbers and the shelf (Me's Album tab, ADR 0081). */
+export function AlbumPartBones() {
+  return (
+    <>
       <TicketBones />
       <SectionBones>
         <PosterBones count={6} />
       </SectionBones>
-    </SkeletonPage>
+    </>
   );
 }

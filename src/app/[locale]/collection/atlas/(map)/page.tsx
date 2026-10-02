@@ -63,7 +63,10 @@ export default async function AtlasPage({ params }: PageProps<"/[locale]/collect
   return (
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-2 px-4 pt-10 pb-28">
       <FreshPage />
-      <h1 className="font-display text-4xl font-extrabold tracking-[-0.03em]">{t("title")}</h1>
+      {/* Stays put while the Atlas and the shelves trade places (ADR 0081). */}
+      <h1 data-stay="collection-title" className="font-display text-4xl font-extrabold tracking-[-0.03em]">
+        {t("title")}
+      </h1>
       <div className="flex flex-col gap-6">
         <ShelfTabs shelf="atlas" />
         {/* Swiping right goes back to Play, the shelf before (ADR 0070); the map keeps its own drags. */}
