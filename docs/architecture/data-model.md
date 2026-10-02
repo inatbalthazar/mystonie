@@ -62,6 +62,7 @@ Functions (security definer, `search_path = ''`, signed-in only unless noted):
 - `my_activity(p_limit)`: Stamps on the caller's finishes and new followers (`kind`: `stamp` / `follow`), with whether the caller follows them back.
 - `follow_counts(p_user_id)`: followers, following and whether the caller follows. Also for signed-out visitors; no row for a private or blocked profile.
 - `search_people(p_query)`: public, unblocked profiles by username prefix or display-name substring (2–50 characters, wildcards matched literally), with their finished count; never the caller; up to 20.
+- `suggested_people(p_limit)` (stage 4, [ADR 0083](../decisions/0083-suggested-people.md)): public, unblocked profiles the caller doesn't follow, ranked by titles in common (×3), people the caller follows who follow them (×4), a shared club (+3), a country they lived in on a public Atlas that is the caller's settings country or a place they lived (+2) and their finishes (up to +5); each row carries those counts, one shared title's name, the club and the country; people with nothing in common need at least one finish; up to 20 (default 10), signed-in only.
 - `my_following()` and `my_blocks()`: for the Find people page.
 - `public_profile(username)` also returns `blocked_by_me` (and the id, for the blocker to unblock).
 

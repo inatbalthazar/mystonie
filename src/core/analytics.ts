@@ -22,7 +22,7 @@ export type AnalyticsEvents = {
    * Someone was followed (S3 social): from their profile, a people search, the activity list ("Follow back"), or
    * again from the Following list on /people after unfollowing.
    */
-  followed: { via: "profile" | "search" | "activity" | "people" };
+  followed: { via: "profile" | "search" | "activity" | "people" | "suggested" };
   /** A Stamp on someone's finish in the Following feed. */
   stamped: Record<string, never>;
   /** A badge (sticker) was announced after a save (S3 badges & shelf): its catalogue slug. */

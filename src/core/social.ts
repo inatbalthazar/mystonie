@@ -93,3 +93,42 @@ export function normalizePeopleQuery(raw: string | null): string | null {
   const length = [...q].length;
   return length >= PEOPLE_QUERY_MIN && length <= PEOPLE_QUERY_MAX ? q : null;
 }
+
+/** Someone suggested on Find people (ADR 0083), with what they have in common with the viewer. */
+export type SuggestedPerson = {
+  id: string;
+  username: string;
+  displayName: string | null;
+  avatarUrl: string | null;
+  finished: number;
+  /** Titles both have in their collections, and one of them by name. */
+  shared: number;
+  sharedTitle: string | null;
+  /** People the viewer follows who follow them. */
+  mutuals: number;
+  /** A club both are in (its slug). */
+  club: string | null;
+  /** A country they lived in (public Atlas) that is the viewer's own. */
+  country: string | null;
+};
+
+/** The one line a suggestion shows: why this person. */
+export type SuggestionReason =
+  | { kind: "mutuals"; count: number }
+  | { kind: "shared"; count: number; title: string }
+  | { kind: "club"; club: string }
+  | { kind: "country"; country: string }
+  | { kind: "active"; finished: number };
+
+/**
+ * Why someone is suggested, the strongest reason first: several people you follow follow them, then titles in common,
+ * then a shared club, a country you share, one person you follow, and last, that they finish a lot.
+ */
+export function suggestionReason(p: Pick<SuggestedPerson, "finished" | "shared" | "sharedTitle" | "mutuals" | "club" | "country">): SuggestionReason {
+  if (p.mutuals >= 2) return { kind: "mutuals", count: p.mutuals };
+  if (p.shared > 0 && p.sharedTitle) return { kind: "shared", count: p.shared, title: p.sharedTitle };
+  if (p.club) return { kind: "club", club: p.club };
+  if (p.country) return { kind: "country", country: p.country };
+  if (p.mutuals === 1) return { kind: "mutuals", count: 1 };
+  return { kind: "active", finished: p.finished };
+}

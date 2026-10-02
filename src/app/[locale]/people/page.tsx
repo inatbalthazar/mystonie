@@ -5,8 +5,9 @@ import { BlockButton } from "@/components/social/block-button";
 import { FollowButton } from "@/components/social/follow-button";
 import { PeopleSearch } from "@/components/social/people-search";
 import { PersonRow } from "@/components/social/person-row";
+import { SuggestedPeople } from "@/components/social/suggested-people";
 import { localizedPath } from "@/core/auth";
-import { myBlocks, myFollowing } from "@/data/social";
+import { myBlocks, myFollowing, suggestedPeople } from "@/data/social";
 import { userClient } from "@/data/supabase-server";
 import { redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
@@ -16,7 +17,10 @@ export async function generateMetadata(): Promise<Metadata> {
   return { title: `${t("peopleTitle")} · Mystonie`, robots: { index: false, follow: false } };
 }
 
-/** Find people (S3 social): search by username or name, the people you follow (unfollow here) and the people you blocked. */
+/**
+ * Find people (S3 social): search by username or name, people suggested for you (ADR 0083), the people you follow
+ * (unfollow here) and the people you blocked.
+ */
 export default async function PeoplePage({ params }: PageProps<"/[locale]/people">) {
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
@@ -27,7 +31,12 @@ export default async function PeoplePage({ params }: PageProps<"/[locale]/people
   const userId = data?.claims.sub;
   if (!supabase || !userId) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
-  const [following, blocked, t] = await Promise.all([myFollowing(supabase), myBlocks(supabase), getTranslations("Social")]);
+  const [following, blocked, suggested, t] = await Promise.all([
+    myFollowing(supabase),
+    myBlocks(supabase),
+    suggestedPeople(supabase),
+    getTranslations("Social"),
+  ]);
 
   return (
     <main className="mx-auto flex w-full max-w-xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
@@ -37,6 +46,8 @@ export default async function PeoplePage({ params }: PageProps<"/[locale]/people
       </header>
 
       <PeopleSearch />
+
+      {suggested.length > 0 && <SuggestedPeople people={suggested} />}
 
       <section aria-labelledby="following" className="flex flex-col gap-2">
         <h2 id="following" className="font-display text-xl font-extrabold">

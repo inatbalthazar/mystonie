@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextFeedCursor, normalizePeopleQuery, parseFeedCursor, parseStamp, parseUserToggle } from "./social";
+import { nextFeedCursor, normalizePeopleQuery, parseFeedCursor, parseStamp, parseUserToggle, suggestionReason } from "./social";
 
 const id = "01926000-0000-7000-8000-0000000000A1";
 
@@ -74,5 +74,21 @@ describe("normalizePeopleQuery", () => {
     expect(normalizePeopleQuery(null)).toBeNull();
     expect(normalizePeopleQuery("k".repeat(51))).toBeNull();
     expect(normalizePeopleQuery("김민")).toBe("김민");
+  });
+});
+
+describe("suggestionReason", () => {
+  const none = { finished: 0, shared: 0, sharedTitle: null, mutuals: 0, club: null, country: null };
+  it("picks the strongest reason", () => {
+    expect(suggestionReason({ ...none, mutuals: 3, shared: 5, sharedTitle: "Dune" })).toEqual({ kind: "mutuals", count: 3 });
+    expect(suggestionReason({ ...none, mutuals: 1, shared: 5, sharedTitle: "Dune", club: "horror" })).toEqual({ kind: "shared", count: 5, title: "Dune" });
+    expect(suggestionReason({ ...none, mutuals: 1, club: "horror", country: "TH" })).toEqual({ kind: "club", club: "horror" });
+    expect(suggestionReason({ ...none, mutuals: 1, country: "TH" })).toEqual({ kind: "country", country: "TH" });
+    expect(suggestionReason({ ...none, mutuals: 1 })).toEqual({ kind: "mutuals", count: 1 });
+  });
+  it("falls back to how much they finish", () => {
+    expect(suggestionReason({ ...none, finished: 12 })).toEqual({ kind: "active", finished: 12 });
+    // A shared title without its name (not expected) is not a reason on its own.
+    expect(suggestionReason({ ...none, shared: 2, finished: 4 })).toEqual({ kind: "active", finished: 4 });
   });
 });

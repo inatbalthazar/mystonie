@@ -5,7 +5,7 @@ import { posterUrl } from "@/core/catalog/images";
 import type { TitleKind } from "@/core/catalog/types";
 import { shownShare } from "@/core/finish-share";
 import { uuidv7 } from "@/core/ids";
-import { FEED_PAGE, type ActivityItem, type FeedCursor, type FeedItem, type Person } from "@/core/social";
+import { FEED_PAGE, type ActivityItem, type FeedCursor, type FeedItem, type Person, type SuggestedPerson } from "@/core/social";
 import { publicImageUrl } from "./cards";
 import type { Database, TablesInsert } from "./database.types";
 import type { UserClient } from "./supabase-server";
@@ -119,6 +119,30 @@ export async function searchPeople(db: UserClient, query: string): Promise<Perso
     avatarUrl: r.avatar_url ?? null,
     finished: r.finished,
     iFollow: r.i_follow,
+  }));
+}
+
+/**
+ * People to suggest on Find people (ADR 0083), strongest first. Never fails the page: without the function (a database
+ * not migrated yet) or on an error, there are simply no suggestions.
+ */
+export async function suggestedPeople(db: UserClient, limit = 10): Promise<SuggestedPerson[]> {
+  const { data, error } = await db.rpc("suggested_people", { p_limit: limit });
+  if (error) {
+    console.error(`suggested_people failed: ${error.message}`);
+    return [];
+  }
+  return data.map((r) => ({
+    id: r.id,
+    username: r.username,
+    displayName: r.display_name ?? null,
+    avatarUrl: r.avatar_url ?? null,
+    finished: r.finished,
+    shared: r.shared,
+    sharedTitle: r.shared_title ?? null,
+    mutuals: r.mutuals,
+    club: r.club ?? null,
+    country: r.country ?? null,
   }));
 }
 

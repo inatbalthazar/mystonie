@@ -2086,6 +2086,21 @@ export type Database = {
         | { Args: { "": string }; Returns: string }
         | { Args: { how_many: number; why: string }; Returns: string }
       suggest_username: { Args: { seed: string }; Returns: string }
+      suggested_people: {
+        Args: { p_limit?: number }
+        Returns: {
+          avatar_url: string
+          club: string
+          country: string
+          display_name: string
+          finished: number
+          id: string
+          mutuals: number
+          shared: number
+          shared_title: string
+          username: string
+        }[]
+      }
       throws_ok: { Args: { "": string }; Returns: string }
       title_reviews: {
         Args: { p_limit?: number; p_title_id: string }
