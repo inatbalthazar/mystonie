@@ -2,11 +2,13 @@ import Image from "next/image";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { Stonie } from "./stonie";
 
 /**
  * The way in for visitors (ADR 0071): under the card maker on the landing page, and after a card is shared or
  * downloaded. Shown by CSS while signed out (`signed-out:`), so the page stays static. Sign-up and sign-in are the
- * same step on /auth, with a social account or an emailed code.
+ * same step on /auth, with a social account or an emailed code. At the foot of the landing page it's the last page of
+ * the tour: bigger, with Stonie alive.
  */
 export function SignUpPrompt({
   placement,
@@ -20,20 +22,25 @@ export function SignUpPrompt({
     <section
       className={cn(
         "hidden flex-col gap-4 rounded-3xl bg-brand-soft p-5 signed-out:flex",
+        placement === "home" && "gap-5 p-6 dark:bg-brand/15",
         className,
       )}
     >
-      <div className="flex items-start gap-3">
-        <Image
-          src="/icon.svg"
-          alt=""
-          width={40}
-          height={40}
-          unoptimized
-          className="shrink-0"
-        />
+      <div className={cn("flex items-start gap-3", placement === "home" && "items-center gap-4")}>
+        {placement === "home" ? (
+          <Stonie size={64} className="shrink-0" />
+        ) : (
+          <Image
+            src="/icon.svg"
+            alt=""
+            width={40}
+            height={40}
+            unoptimized
+            className="shrink-0"
+          />
+        )}
         <div className="flex flex-col gap-1">
-          <h2 className="font-display text-lg leading-snug font-bold tracking-[-0.01em]">
+          <h2 className={cn("font-display text-lg leading-snug font-bold tracking-[-0.01em]", placement === "home" && "text-2xl leading-[1.05] font-extrabold tracking-[-0.02em] text-balance")}>
             {t(placement === "after_card" ? "headingAfterCard" : "heading")}
           </h2>
           <p className="text-sm text-muted-foreground">{t("body")}</p>

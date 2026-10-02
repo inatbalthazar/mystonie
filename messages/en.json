@@ -1,10 +1,10 @@
 {
   "Metadata": {
     "title": "Mystonie",
-    "description": "Strava for the shows and movies you finish."
+    "description": "Strava for the shows, movies, books and games you finish."
   },
   "Home": {
-    "intro": "Turn the shows and movies you finish into artwork worth sharing.",
+    "intro": "Log the shows, movies, books, manga and games you finish, and turn each one into artwork worth sharing.",
     "searchLabel": "Search movies and series",
     "searchPlaceholder": "What did you just finish?",
     "searching": "Searching…",
@@ -16,8 +16,47 @@
     "detailsError": "Couldn't load the details.",
     "clearPick": "Clear selection",
     "headline": "Finished it? <mark>Mystonie it.</mark>",
-    "examplesHint": "Search below to make your own.",
-    "byCreator": "by {creator}"
+    "byCreator": "by {creator}",
+    "kindsLabel": "What you can log",
+    "kinds": {
+      "movie": "Movies",
+      "series": "Series",
+      "book": "Books",
+      "manga": "Manga",
+      "game": "Games"
+    },
+    "heroNote": "Free, no ads, and it works on any phone.",
+    "makeYourOwn": "Make your own",
+    "logTitle": "Every episode, chapter and <mark>level</mark>.",
+    "logBody": "Tick off episodes as you watch, keep your page in a book, mark a game cleared. Logging takes three taps, and your history comes along from Letterboxd, Goodreads, MyAnimeList or TV Time.",
+    "logProgress": "{watched} of {total} episodes",
+    "logWant": "Want to watch",
+    "statsTitle": "Your year in <mark>big numbers</mark>.",
+    "statsBody": "Watch time, titles finished, your busiest month and the directors you keep coming back to. A recap lands every week, and your Year in Review is ready to share.",
+    "statsYear": "Your year",
+    "statsHours": "hours watched",
+    "statsFinished": "titles finished",
+    "statsEpisodes": "episodes",
+    "atlasTitle": "See the world <mark>from your couch</mark>.",
+    "atlasBody": "The Atlas colours in every country your stories come from, and the places you've been, region by region.",
+    "atlasMap": "World map with a sample collection's countries coloured in",
+    "atlasCountries": "{count, plural, one {# country} other {# countries}}",
+    "atlasContinents": "{count, plural, one {# continent} other {# continents}}",
+    "stickersTitle": "Stickers for every <mark>milestone</mark>.",
+    "stickersBody": "Your first finish, your 25th movie, a finish so rare only a handful of people have it. Each one gets stuck into your album.",
+    "friendsTitle": "Better with <mark>friends</mark>.",
+    "friendsBody": "Follow friends and stamp their finishes, join clubs and challenges, and guess the Reel of the Day: a new movie every day, six tries.",
+    "friendsPost": "<b>stonie</b> finished {title}",
+    "warningsTitle": "Know before you <mark>press play</mark>.",
+    "warningsBody": "Pick topics you'd rather avoid, like a dog dying or jump scares, and any title that has them is flagged before you start.",
+    "warnDog": "A dog dies",
+    "warnJump": "Jump scares",
+    "warnSpiders": "Spiders",
+    "installTitle": "It lives on your <mark>home screen</mark>.",
+    "installBody": "Add Mystonie to your phone: it opens full screen like an app, works offline and can remind you about the Reel of the Day.",
+    "installButton": "Install the app",
+    "makeTitle": "Make a card <mark>right now</mark>.",
+    "makeBody": "No account needed. Pick something you just finished and download your card."
   },
   "HomeApp": {
     "title": "Home",
