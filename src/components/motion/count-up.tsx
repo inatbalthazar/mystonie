@@ -1,35 +1,62 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { countsUp, countUpText } from "@/core/motion";
 import { appHydrated } from "./nav-motion";
 
+const still = () => matchMedia("(prefers-reduced-motion: reduce)").matches;
+
 /**
- * A big number that counts up from zero when its page opens in the app (ADR 0070): Stats' figures, the collection's
- * and the album's summary. In the server's first HTML it is just the number (no zero flashing before the page
- * hydrates), and with reduced motion too. Counts once: later changes (a filter) show at once.
+ * A number that counts up from zero every time it's shown (ADR 0070, ADR 0080): Stats' figures, the collection's and
+ * the album's summary. It counts when its page opens in the app, each time it scrolls back into view, and when its
+ * value changes (another period). In the server's first HTML, a number already on screen stays as it is (no zero
+ * flashing before the page hydrates); one further down counts once it's scrolled to. Reduced motion: never counts.
  */
-export function CountUp({ value, ms = 700 }: { value: string; ms?: number }) {
-  const [counting] = useState(() => appHydrated && countsUp(value) && !matchMedia("(prefers-reduced-motion: reduce)").matches);
-  const [frame, setFrame] = useState<string | null>(() => (counting ? countUpText(value, 0) : null));
+export function CountUp({ value, ms = 800 }: { value: string; ms?: number }) {
+  const ref = useRef<HTMLSpanElement>(null);
+  // Opened in the app: zero until it's in view, then it counts. The first HTML shows the number itself.
+  const [frame, setFrame] = useState<string | null>(() => (appHydrated && countsUp(value) && !still() ? countUpText(value, 0) : null));
+  const fromHtml = useRef(!appHydrated);
+  // A new value (another period) starts again from zero at once, not after a frame of the new number.
+  const [counted, setCounted] = useState(value);
+  if (counted !== value) {
+    setCounted(value);
+    setFrame(countsUp(value) && !still() ? countUpText(value, 0) : null);
+  }
 
   useEffect(() => {
-    if (!counting) return;
-    let id = 0;
-    const start = performance.now();
-    const tick = (now: number) => {
-      const progress = (now - start) / ms;
-      setFrame(progress >= 1 ? null : countUpText(value, progress));
-      if (progress < 1) id = requestAnimationFrame(tick);
-    };
-    id = requestAnimationFrame(tick);
+    const el = ref.current;
+    if (!el) return;
+    let run = 0;
+    let visible: boolean | null = null;
+    const moves = countsUp(value) && !still();
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        const now = entry!.isIntersecting;
+        if (now === visible) return;
+        visible = now;
+        const onFirstScreen = fromHtml.current && now;
+        fromHtml.current = false;
+        if (!moves || onFirstScreen) return setFrame(null);
+        cancelAnimationFrame(run);
+        // Out of sight: back to zero, ready to count when it's back.
+        if (!now) return setFrame(countUpText(value, 0));
+        const start = performance.now();
+        const tick = (t: number) => {
+          const progress = (t - start) / ms;
+          setFrame(progress >= 1 ? null : countUpText(value, progress));
+          if (progress < 1) run = requestAnimationFrame(tick);
+        };
+        run = requestAnimationFrame(tick);
+      },
+      { rootMargin: "0px 0px -6% 0px" },
+    );
+    io.observe(el);
     return () => {
-      cancelAnimationFrame(id);
-      setFrame(null);
+      io.disconnect();
+      cancelAnimationFrame(run);
     };
-    // Once, on mount: the value it counts to is the one it opened with.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [counting]);
+  }, [value, ms]);
 
-  return <>{frame ?? value}</>;
+  return <span ref={ref}>{frame ?? value}</span>;
 }

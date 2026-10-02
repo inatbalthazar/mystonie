@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { Celebration } from "../celebration";
 import { useMilestones } from "../milestone-celebration";
 import { send, useOverlayOps } from "../offline/outbox";
+import { Reveal } from "@/components/motion/reveal";
 
 export type Logged = EpisodeRef & { id: string };
 
@@ -211,7 +212,7 @@ export function SeriesEpisodes({
           <span className="font-semibold">{t("progress", { watched: progress.watched, total: progress.aired })}</span>
           {status && <span className="text-muted-foreground">{t("status", { status })}</span>}
         </div>
-        <div
+        <Reveal
           role="progressbar"
           aria-label={t("progressLabel")}
           aria-valuemin={0}
@@ -219,8 +220,8 @@ export function SeriesEpisodes({
           aria-valuenow={progress.watched}
           className="h-2.5 overflow-hidden rounded-full bg-muted"
         >
-          <div className="h-full rounded-full bg-brand transition-[width]" style={{ width: `${progress.aired ? (progress.watched / progress.aired) * 100 : 0}%` }} />
-        </div>
+          <div className="grow-w h-full rounded-full bg-brand transition-[width]" style={{ width: `${progress.aired ? (progress.watched / progress.aired) * 100 : 0}%` }} />
+        </Reveal>
       </section>
 
       <p role="status" className="min-h-5 text-sm text-muted-foreground">

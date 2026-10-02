@@ -11,6 +11,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { ChallengePatch } from "./patch";
+import { Reveal } from "@/components/motion/reveal";
 
 type Problem = null | "closed" | "limited" | "error";
 
@@ -123,7 +124,7 @@ export function ChallengePanel({
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <div
+        <Reveal
           role="progressbar"
           aria-valuemin={0}
           aria-valuemax={target}
@@ -131,8 +132,8 @@ export function ChallengePanel({
           aria-label={t("progress", { value: format.number(shown), target: format.number(target), unit })}
           className="h-3 overflow-hidden rounded-full bg-muted ring-1 ring-border"
         >
-          <div className={cn("h-full rounded-full transition-[width]", done ? "bg-brand" : "bg-brand/70")} style={{ width: `${(shown / target) * 100}%` }} />
-        </div>
+          <div className={cn("grow-w h-full rounded-full transition-[width]", done ? "bg-brand" : "bg-brand/70")} style={{ width: `${(shown / target) * 100}%` }} />
+        </Reveal>
         <p className="flex flex-wrap items-baseline justify-between gap-x-3 text-sm">
           <span className="font-semibold tabular-nums">{t("progress", { value: format.number(shown), target: format.number(target), unit })}</span>
           <span className="text-xs text-muted-foreground">{t("counts", counts)}</span>

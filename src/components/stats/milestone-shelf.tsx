@@ -3,6 +3,7 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { useState } from "react";
 import { Celebration } from "@/components/celebration";
+import { CountUp } from "@/components/motion/count-up";
 import { PaperCard } from "@/components/paper-card";
 import type { CardData } from "@/core/cards/types";
 import { previewClass, ShowAll } from "@/components/show-all";
@@ -41,7 +42,9 @@ export function MilestoneShelf({
   function carving(value: number, metric: string, date: string, name: string) {
     return (
       <>
-        <span className="font-display text-3xl leading-none font-extrabold tabular-nums">{format.number(value)}</span>
+        <span className="font-display text-3xl leading-none font-extrabold tabular-nums">
+          <CountUp value={format.number(value)} />
+        </span>
         <span className="text-[11px] leading-tight font-bold tracking-wide uppercase [&:lang(th)]:tracking-normal">{tc("milestoneLabel", { metric })}</span>
         <span className="mt-1 line-clamp-2 text-xs leading-tight [overflow-wrap:anywhere]">{t("milestoneOn", { date, name })}</span>
       </>

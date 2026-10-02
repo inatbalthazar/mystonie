@@ -18,6 +18,7 @@ import { REEL_CLUES, REEL_GUESSES, reelCard, reelShareText, type ReelGuess, type
 import { Link, useRouter } from "@/i18n/navigation";
 import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
+import { Reveal } from "@/components/motion/reveal";
 
 // A guest's guesses live in this browser only (signed-in plays live on the server).
 const STORAGE_KEY = "mystonie.reel";
@@ -380,23 +381,23 @@ export function ReelGame({
               </div>
             ))}
           </dl>
-          <div className="flex flex-col gap-1.5">
+          <Reveal className="flex flex-col gap-1.5">
             <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">{t("distribution")}</h3>
             {stats.distribution.map((count, i) => (
               <div key={i} className="flex items-center gap-2 text-sm tabular-nums">
                 <span className="w-3 shrink-0 text-muted-foreground">{i + 1}</span>
                 <span
                   className={cn(
-                    "flex h-5 min-w-6 items-center justify-end rounded px-1.5 text-xs font-bold",
+                    "grow-w flex h-5 min-w-6 items-center justify-end rounded px-1.5 text-xs font-bold",
                     state.solved && state.guesses.length === i + 1 ? "bg-chart-2 text-white" : "bg-muted",
                   )}
-                  style={{ width: `${Math.max(8, (count / Math.max(1, ...stats.distribution)) * 100)}%` }}
+                  style={{ width: `${Math.max(8, (count / Math.max(1, ...stats.distribution)) * 100)}%`, ["--grow-delay" as string]: `${i * 60}ms` }}
                 >
                   {count}
                 </span>
               </div>
             ))}
-          </div>
+          </Reveal>
         </PaperCard>
       )}
 

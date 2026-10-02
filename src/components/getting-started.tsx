@@ -9,6 +9,7 @@ import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { isStandalone } from "./pwa/browser";
 import { Sheet } from "./sheet";
+import { Reveal } from "@/components/motion/reveal";
 
 // On this device (best effort): "Skip for now", the celebration seen, the welcome done, and having opened the
 // installed app.
@@ -184,7 +185,8 @@ function Ring({ percent }: { percent: number }) {
   const r = 25;
   const length = 2 * Math.PI * r;
   return (
-    <svg aria-hidden="true" viewBox="0 0 56 56" className="absolute inset-0 size-full -rotate-90">
+    <Reveal className="absolute inset-0">
+    <svg aria-hidden="true" viewBox="0 0 56 56" className="size-full -rotate-90">
       <circle cx="28" cy="28" r={r} fill="none" strokeWidth="4" className="stroke-muted dark:stroke-foreground/10" />
       <circle
         cx="28"
@@ -195,16 +197,18 @@ function Ring({ percent }: { percent: number }) {
         strokeLinecap="round"
         strokeDasharray={length}
         strokeDashoffset={length * (1 - percent / 100)}
-        className="stroke-brand transition-[stroke-dashoffset] duration-500"
+        className="grow-ring stroke-brand transition-[stroke-dashoffset] duration-500"
+        style={{ ["--ring-length" as string]: length }}
       />
     </svg>
+    </Reveal>
   );
 }
 
 function Bar({ g }: { g: GettingStarted }) {
   const t = useTranslations("GettingStarted");
   return (
-    <div
+    <Reveal
       role="progressbar"
       aria-label={t("progressLabel")}
       aria-valuemin={0}
@@ -213,8 +217,8 @@ function Bar({ g }: { g: GettingStarted }) {
       aria-valuetext={t("progress", { done: g.done, total: g.total })}
       className="h-3 overflow-hidden rounded-full bg-muted ring-1 ring-border"
     >
-      <div className="h-full rounded-full bg-brand transition-[width] duration-500" style={{ width: `${g.percent}%` }} />
-    </div>
+      <div className="grow-w h-full rounded-full bg-brand transition-[width] duration-500" style={{ width: `${g.percent}%` }} />
+    </Reveal>
   );
 }
 

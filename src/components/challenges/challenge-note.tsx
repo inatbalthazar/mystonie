@@ -2,6 +2,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import type { ChallengeSlug } from "@/core/challenges";
 import { Link } from "@/i18n/navigation";
 import { ChallengePatch } from "./patch";
+import { Reveal } from "@/components/motion/reveal";
 
 export type NoteChallenge = { slug: ChallengeSlug; target: number; value: number; joined: boolean; completed: boolean };
 
@@ -44,9 +45,9 @@ export function ChallengeNote({ month, challenges }: { month: string; challenges
                 )}
               </p>
               {c.joined ? (
-                <div aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-muted ring-1 ring-border">
-                  <div className="h-full rounded-full bg-brand" style={{ width: `${(Math.min(c.value, c.target) / c.target) * 100}%` }} />
-                </div>
+                <Reveal aria-hidden="true" className="h-2 overflow-hidden rounded-full bg-muted ring-1 ring-border">
+                  <div className="grow-w h-full rounded-full bg-brand" style={{ width: `${(Math.min(c.value, c.target) / c.target) * 100}%` }} />
+                </Reveal>
               ) : (
                 <p className="truncate text-xs text-muted-foreground">{t(`items.${c.slug}.how`)}</p>
               )}

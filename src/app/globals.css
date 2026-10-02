@@ -475,6 +475,50 @@ dialog[data-sheet]:not([open])::backdrop {
   }
 }
 
+/* Numbers and bars every time they're shown (ADR 0080): inside a <Reveal> (src/components/motion/reveal.tsx), fills
+   grow from nothing to their size, and heatmap cells pop in, each after its --grow-delay. The animation is on only
+   while the Reveal is in view (data-shown), so it plays again each time it comes back. `backwards`: after it, the
+   inline width or height rules, and a progress bar's own width transition still works. */
+@keyframes grow-w {
+  from { width: 0; }
+}
+@keyframes grow-h {
+  from { height: 0; }
+}
+@keyframes grow-pop {
+  from { opacity: 0; scale: 0.2; }
+}
+@keyframes grow-ring {
+  from { stroke-dashoffset: var(--ring-length); }
+}
+[data-reveal][data-shown] .grow-w {
+  animation: grow-w 900ms var(--ease-out-soft) var(--grow-delay, 0ms) backwards;
+}
+[data-reveal][data-shown] .grow-h {
+  animation: grow-h 800ms var(--ease-out-soft) var(--grow-delay, 0ms) backwards;
+}
+[data-reveal][data-shown] .grow-pop {
+  animation: grow-pop 420ms var(--ease-spring) var(--grow-delay, 0ms) backwards;
+}
+[data-reveal][data-shown] .grow-ring {
+  animation: grow-ring 1s var(--ease-out-soft) var(--grow-delay, 0ms) backwards;
+}
+/* Cards every time they're shown, too: a card (the artwork) is dealt onto the page, tilting into its own slant
+   (`rotate` and `translate` are their own properties, so a card's tilt class is where it lands); a paper card rises
+   into place. */
+@keyframes deal {
+  from { opacity: 0; translate: 0 28px; rotate: -7deg; scale: 0.88; }
+}
+@keyframes rise {
+  from { opacity: 0; translate: 0 18px; }
+}
+[data-reveal][data-shown].deal {
+  animation: deal 620ms var(--ease-spring) var(--grow-delay, 0ms) backwards;
+}
+[data-reveal][data-shown].rise {
+  animation: rise 520ms var(--ease-out-soft) var(--grow-delay, 0ms) backwards;
+}
+
 /* prefers-reduced-motion: nothing moves. Things still appear and change, at once (end states, no slides). */
 @media (prefers-reduced-motion: reduce) {
   *,

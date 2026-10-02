@@ -7,6 +7,7 @@ import { cn } from "@/lib/utils";
 import { Sheet } from "../sheet";
 import { previewClass, ShowAll } from "../show-all";
 import { Sticker } from "./sticker";
+import { Reveal } from "@/components/motion/reveal";
 
 const TILTS = ["-rotate-6", "rotate-3", "-rotate-2", "rotate-6", "rotate-1", "-rotate-4"];
 
@@ -60,9 +61,9 @@ export function StickerAlbum({ badges, compact = false, className }: { badges: A
               </p>
             ) : (
               <div className="flex w-full max-w-xs flex-col gap-1.5">
-                <div className="h-2.5 overflow-hidden rounded-full bg-muted" role="presentation">
-                  <div className="h-full rounded-full bg-brand" style={{ width: `${Math.round((open.progress / open.target) * 100)}%` }} />
-                </div>
+                <Reveal className="h-2.5 overflow-hidden rounded-full bg-muted" role="presentation">
+                  <div className="grow-w h-full rounded-full bg-brand" style={{ width: `${Math.round((open.progress / open.target) * 100)}%` }} />
+                </Reveal>
                 <p className="text-sm text-muted-foreground tabular-nums">{t("notYet", { progress: open.progress, target: open.target })}</p>
               </div>
             )}

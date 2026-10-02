@@ -24,6 +24,7 @@ import { cn } from "@/lib/utils";
 import { CountrySearch } from "./country-search";
 import { CountrySheet, type CountryRegionCount } from "./country-sheet";
 import { useWorldMap, WorldMap, type MapTone, type MapView } from "./world-map";
+import { Reveal } from "@/components/motion/reveal";
 
 /** A country of the Stories layer: how many stories come from it, and the first few for its sheet. */
 export type StoryCountry = { code: CountryCode; count: number; titles: StoryTitle[] };
@@ -392,12 +393,12 @@ function StoryList({
             >
               <span className="min-w-0 flex-1">
                 <span className="block truncate font-semibold">{nameOf(s.code)}</span>
-                <span className="mt-1 block h-1.5 rounded-full bg-muted">
+                <Reveal className="mt-1 h-1.5 rounded-full bg-muted">
                   <span
-                    className="block h-full rounded-full"
+                    className="grow-w block h-full rounded-full"
                     style={{ width: `${Math.max(6, (s.count / top) * 100)}%`, background: `var(--atlas-story-${storyLevel(s.count)})` }}
                   />
-                </span>
+                </Reveal>
               </span>
               <span className="shrink-0 text-sm text-muted-foreground tabular-nums">{t("storyCount", { count: s.count })}</span>
             </button>

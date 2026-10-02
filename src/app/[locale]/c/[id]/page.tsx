@@ -9,6 +9,7 @@ import type { SharedCard } from "@/data/cards";
 import { Link } from "@/i18n/navigation";
 import { siteUrl } from "@/lib/site";
 import { loadCard } from "./load";
+import { Reveal } from "@/components/motion/reveal";
 
 /** "Finished Parasite" / "Stranger Things · Halfway there": the card's line, for the title and alt text. */
 async function cardLine(card: SharedCard, locale: Locale): Promise<string> {
@@ -94,7 +95,7 @@ export default async function SharedCardPage({ params }: PageProps<"/[locale]/c/
       </p>
 
       {/* Pasted into the album: a slight tilt and two strips of tape. */}
-      <div className="relative mx-auto w-full max-w-[20rem] rotate-[-1.5deg]">
+      <Reveal className="deal relative mx-auto w-full max-w-[20rem] rotate-[-1.5deg]">
         <span
           aria-hidden="true"
           className="absolute -top-3 left-6 z-10 h-6 w-20 rotate-[-8deg] rounded-[2px] bg-brand-soft/90 ring-1 ring-brand/15 dark:bg-brand/30"
@@ -119,7 +120,7 @@ export default async function SharedCardPage({ params }: PageProps<"/[locale]/c/
             host={siteUrl().host}
           />
         </div>
-      </div>
+      </Reveal>
 
       <div className="flex flex-col items-center gap-1 text-center">
         <h1 className="font-display text-2xl leading-tight font-extrabold tracking-[-0.02em] text-balance">{line}</h1>

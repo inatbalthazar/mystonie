@@ -1,13 +1,20 @@
 import type { ReactNode } from "react";
+import { Reveal } from "@/components/motion/reveal";
 import { cn } from "@/lib/utils";
 
 /**
  * A page of the scrapbook: a paper sheet "taped" onto the page, optionally with a rubber stamp in the corner.
- * Decoration only (aria-hidden); content keeps normal contrast and layout.
+ * Decoration only (aria-hidden); content keeps normal contrast and layout. It rises into place each time it comes into
+ * view (ADR 0080).
  */
 export function PaperCard({ children, stamp, className, id, labelledBy }: { children: ReactNode; stamp?: string; className?: string; id?: string; labelledBy?: string }) {
   return (
-    <section id={id} aria-labelledby={labelledBy} className={cn("relative rounded-2xl bg-card p-5 pt-7 shadow-[0_1px_2px_rgb(0_0_0/0.06),0_8px_24px_-12px_rgb(0_0_0/0.18)] ring-1 ring-border", className)}>
+    <Reveal
+      as="section"
+      id={id}
+      aria-labelledby={labelledBy}
+      className={cn("rise relative rounded-2xl bg-card p-5 pt-7 shadow-[0_1px_2px_rgb(0_0_0/0.06),0_8px_24px_-12px_rgb(0_0_0/0.18)] ring-1 ring-border", className)}
+    >
       <span aria-hidden="true" className="absolute -top-3 left-1/2 h-6 w-24 -translate-x-1/2 -rotate-2 rounded-[2px] bg-brand-soft/90 shadow-sm ring-1 ring-brand/10" />
       {stamp && (
         <span
@@ -18,6 +25,6 @@ export function PaperCard({ children, stamp, className, id, labelledBy }: { chil
         </span>
       )}
       {children}
-    </section>
+    </Reveal>
   );
 }

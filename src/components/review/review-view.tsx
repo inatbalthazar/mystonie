@@ -6,6 +6,7 @@ import { formatRuntime } from "@/core/format/runtime";
 import type { ReviewTitle, YearReview } from "@/core/stats/year-review";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { Reveal } from "@/components/motion/reveal";
 
 // Year in Review's album pages (S2 milestones & recaps, ADR 0031). Server components: every number comes from
 // `yearInReview`, i.e. `statsReport` for the year, so it matches the stats page's "This year".
@@ -123,16 +124,17 @@ export function ReviewMonths({ review }: { review: YearReview }) {
   return (
     <PaperCard className="flex flex-col gap-3">
       <Title>{t("byMonth")}</Title>
+      <Reveal>
       <ol className="grid h-40 grid-cols-12 items-end gap-1">
-        {months.map((m) => (
+        {months.map((m, i) => (
           <li key={m.month} className="flex h-full min-w-0 flex-col items-center justify-end gap-1">
             <span className="sr-only">
               {ts("monthBar", { month: format.dateTime(monthDate(m.month), { month: "long", timeZone: "UTC" }), time: runtime(m.minutes), count: m.finished })}
             </span>
             <span
               aria-hidden="true"
-              className={cn("w-full rounded-t-[3px]", m.month === busiest ? "bg-brand" : "bg-chart-1")}
-              style={{ height: `${m.minutes > 0 ? Math.max(3, (m.minutes / max) * 100) : 0}%` }}
+              className={cn("grow-h w-full rounded-t-[3px]", m.month === busiest ? "bg-brand" : "bg-chart-1")}
+              style={{ height: `${m.minutes > 0 ? Math.max(3, (m.minutes / max) * 100) : 0}%`, ["--grow-delay" as string]: `${i * 45}ms` }}
             />
             <span aria-hidden="true" className="h-0.5 w-full bg-border" />
             <span aria-hidden="true" className="text-[10px] leading-none font-semibold text-muted-foreground">
@@ -141,6 +143,7 @@ export function ReviewMonths({ review }: { review: YearReview }) {
           </li>
         ))}
       </ol>
+      </Reveal>
     </PaperCard>
   );
 }

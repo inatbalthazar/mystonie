@@ -11,6 +11,7 @@ import type { RegionKind } from "@/core/regions";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { StoryCountry } from "./atlas-view";
+import { Reveal } from "@/components/motion/reveal";
 
 const STATUS_KEY = { been: "statusBeen", lived: "statusLived", want: "statusWant" } as const;
 
@@ -154,9 +155,9 @@ export function CountrySheet({
                   <span className="text-sm text-muted-foreground tabular-nums">{t("regionsDoneOf", { done: marked, total: regions.total })}</span>
                 </span>
                 {marked > 0 ? (
-                  <span className="mt-1.5 block h-1.5 overflow-hidden rounded-full bg-muted">
-                    <span className="block h-full rounded-full bg-brand" style={{ width: `${(marked / regions.total) * 100}%` }} />
-                  </span>
+                  <Reveal className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-muted">
+                    <span className="grow-w block h-full rounded-full bg-brand" style={{ width: `${(marked / regions.total) * 100}%` }} />
+                  </Reveal>
                 ) : (
                   <span className="mt-0.5 block text-sm text-muted-foreground">
                     {t("regionsMark", { many: t("kindMany", { kind: regions.kind }) })}

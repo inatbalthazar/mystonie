@@ -1,7 +1,8 @@
 import Image from "next/image";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { CountUp } from "@/components/motion/count-up";
+import { Reveal } from "@/components/motion/reveal";
 import { PaperCard } from "@/components/paper-card";
 import type { StatsPeriod } from "@/core/cards/types";
 import { CREDIT_ROLES } from "@/core/catalog/credits";
@@ -12,7 +13,11 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 
 // The stats page's sections (S1 stats). Server components: every number comes from `statsReport`, and the
-// charts are plain elements coloured with theme tokens (ADR 0026), so they need no client JavaScript.
+// charts are plain elements coloured with theme tokens (ADR 0026). Numbers count up and the charts grow each time
+// they're shown (`CountUp`, `Reveal`, ADR 0080).
+
+/** A grow animation's delay, for the bars and cells of a chart one after another. */
+const delay = (ms: number) => ({ "--grow-delay": `${Math.round(ms)}ms` }) as CSSProperties;
 
 const monthDate = (month: string) => new Date(`${month}-01T00:00:00Z`);
 const dayDate = (day: string) => new Date(`${day}T00:00:00Z`);
@@ -135,14 +140,24 @@ export function Heatmap({ report }: { report: StatsReport }) {
       <SectionTitle>{t("activity")}</SectionTitle>
       <p className="text-sm text-muted-foreground">{t("activityHint")}</p>
       {/* Fixed-size squares that scroll sideways on phones. The rtl wrapper starts the scroll at the right end (today). */}
-      <div dir="rtl" className="-mx-1 overflow-x-auto px-1 pb-1">
+      <Reveal dir="rtl" className="-mx-1 overflow-x-auto px-1 pb-1">
         <div dir="ltr" className="grid w-max grid-flow-col grid-rows-7 gap-[3px]">
-        {cells.map(({ day, count }) => {
+        {cells.map(({ day, count }, i) => {
           const label = t("dayCell", { date: format.dateTime(dayDate(day), { dateStyle: "medium", timeZone: "UTC" }), count });
-          return <span key={day} title={label} aria-label={count > 0 ? label : undefined} role={count > 0 ? "img" : undefined} className={cn("size-3 rounded-[3px]", HEAT[heatLevel(count)])} />;
+          // Week by week, the oldest first, landing on today.
+          return (
+            <span
+              key={day}
+              title={label}
+              aria-label={count > 0 ? label : undefined}
+              role={count > 0 ? "img" : undefined}
+              className={cn("grow-pop size-3 rounded-[3px]", HEAT[heatLevel(count)])}
+              style={delay(Math.floor(i / 7) * 9)}
+            />
+          );
         })}
         </div>
-      </div>
+      </Reveal>
       <div aria-hidden="true" className="flex items-center justify-end gap-1 text-xs text-muted-foreground">
         {t("less")}
         {HEAT.map((c) => (
@@ -164,13 +179,18 @@ export function MonthBars({ months }: { months: MonthBar[] }) {
     <PaperCard className="flex flex-col gap-3">
       <SectionTitle>{t("perMonth")}</SectionTitle>
       <p className="text-sm text-muted-foreground">{t("perMonthHint")}</p>
+      <Reveal>
       <ol className="grid h-40 grid-cols-12 items-end gap-1">
-        {months.map((m) => (
+        {months.map((m, i) => (
           <li key={m.month} className="flex h-full min-w-0 flex-col items-center justify-end gap-1">
             <span className="sr-only">
               {t("monthBar", { month: format.dateTime(monthDate(m.month), { month: "long", year: "numeric", timeZone: "UTC" }), time: runtime(m.minutes), count: m.finished })}
             </span>
-            <span aria-hidden="true" className="w-full rounded-t-[3px] bg-chart-1" style={{ height: `${m.minutes > 0 ? Math.max(3, (m.minutes / max) * 100) : 0}%` }} />
+            <span
+              aria-hidden="true"
+              className="grow-h w-full rounded-t-[3px] bg-chart-1"
+              style={{ height: `${m.minutes > 0 ? Math.max(3, (m.minutes / max) * 100) : 0}%`, ...delay(i * 45) }}
+            />
             <span aria-hidden="true" className="h-0.5 w-full bg-border" />
             <span aria-hidden="true" className="text-[10px] leading-none font-semibold text-muted-foreground">
               {format.dateTime(monthDate(m.month), { month: "narrow", timeZone: "UTC" })}
@@ -181,6 +201,7 @@ export function MonthBars({ months }: { months: MonthBar[] }) {
           </li>
         ))}
       </ol>
+      </Reveal>
     </PaperCard>
   );
 }
@@ -191,17 +212,21 @@ function RankedList({ title, items, name }: { title: string; items: Ranked[]; na
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <h3 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">{title}</h3>
+      <Reveal>
       <ol className="flex flex-col gap-2">
-        {items.map((i) => (
+        {items.map((i, n) => (
           <li key={i.key} className="flex flex-col gap-1">
             <div className="flex items-baseline justify-between gap-2 text-sm">
               <span className="truncate font-semibold">{name(i.key)}</span>
-              <span className="shrink-0 text-muted-foreground tabular-nums">{t("titleCount", { count: i.count })}</span>
+              <span className="shrink-0 text-muted-foreground tabular-nums">
+                <CountUp value={t("titleCount", { count: i.count })} />
+              </span>
             </div>
-            <span aria-hidden="true" className="h-1.5 rounded-full bg-chart-2" style={{ width: `${(i.count / max) * 100}%` }} />
+            <span aria-hidden="true" className="grow-w h-1.5 rounded-full bg-chart-2" style={{ width: `${(i.count / max) * 100}%`, ...delay(n * 70) }} />
           </li>
         ))}
       </ol>
+      </Reveal>
     </div>
   );
 }
@@ -245,11 +270,11 @@ export function Taste({ report }: { report: StatsReport }) {
       ) : (
         <>
           <div className="flex flex-col gap-2">
-            <div aria-hidden="true" className="flex h-3 overflow-hidden rounded-full bg-muted">
-              {kinds.map(([label, v, dot]) => (
-                <span key={label} className={dot} style={{ width: `${total ? (v.minutes / total) * 100 : 0}%` }} />
+            <Reveal aria-hidden="true" className="flex h-3 overflow-hidden rounded-full bg-muted">
+              {kinds.map(([label, v, dot], i) => (
+                <span key={label} className={cn("grow-w", dot)} style={{ width: `${total ? (v.minutes / total) * 100 : 0}%`, ...delay(i * 120) }} />
               ))}
-            </div>
+            </Reveal>
             <dl className={cn("grid gap-2 text-sm", kinds.length > 2 ? "grid-cols-2 sm:grid-cols-3" : "grid-cols-2")}>
               {kinds.map(([label, v, dot]) => (
                 <div key={label} className="flex min-w-0 flex-col">
@@ -257,7 +282,9 @@ export function Taste({ report }: { report: StatsReport }) {
                     <span aria-hidden="true" className={cn("size-2.5 rounded-full", dot)} />
                     {label}
                   </dt>
-                  <dd className="text-muted-foreground">{t("kindSplit", { count: v.finished, time: runtime(v.minutes) })}</dd>
+                  <dd className="text-muted-foreground tabular-nums">
+                    <CountUp value={t("kindSplit", { count: v.finished, time: runtime(v.minutes) })} />
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -321,7 +348,9 @@ export function Favourites({ report }: { report: StatsReport }) {
                   <PersonImage person={person} logo={role === "studio"} />
                   <div className="flex min-w-0 flex-col">
                     <span className="truncate text-sm font-semibold">{person.name}</span>
-                    <span className="text-xs text-muted-foreground tabular-nums">{t("personDetail", { count: person.titles, time: runtime(person.minutes) })}</span>
+                    <span className="text-xs text-muted-foreground tabular-nums">
+                      <CountUp value={t("personDetail", { count: person.titles, time: runtime(person.minutes) })} />
+                    </span>
                   </div>
                 </li>
               ))}
@@ -340,17 +369,20 @@ export function Records({ report }: { report: StatsReport }) {
   const runtime = useRuntime();
   const { longestMovie, longestSeries, busiestMonth, longestStreak } = report.records;
   const items = [
-    { label: t("longestMovie"), value: longestMovie?.name, detail: longestMovie && runtime(longestMovie.minutes) },
-    { label: t("longestSeries"), value: longestSeries?.name, detail: longestSeries && runtime(longestSeries.minutes) },
+    // `counts`: the line that's a number (a runtime, a streak) counts up; names and dates don't.
+    { label: t("longestMovie"), value: longestMovie?.name, detail: longestMovie && runtime(longestMovie.minutes), counts: "detail" },
+    { label: t("longestSeries"), value: longestSeries?.name, detail: longestSeries && runtime(longestSeries.minutes), counts: "detail" },
     {
       label: t("busiestMonth"),
       value: busiestMonth && format.dateTime(monthDate(busiestMonth.month), { month: "long", year: "numeric", timeZone: "UTC" }),
       detail: busiestMonth && runtime(busiestMonth.minutes),
+      counts: "detail",
     },
     {
       label: t("longestStreak"),
       value: longestStreak && t("streakDays", { count: longestStreak.days }),
       detail: longestStreak && format.dateTimeRange(dayDate(longestStreak.from), dayDate(longestStreak.to), { month: "short", day: "numeric", timeZone: "UTC" }),
+      counts: "value",
     },
   ];
   const tilts = ["-rotate-1", "rotate-1", "rotate-[0.5deg]", "-rotate-[0.5deg]"];
@@ -365,9 +397,9 @@ export function Records({ report }: { report: StatsReport }) {
             <dt className="text-[11px] leading-tight font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">{r.label}</dt>
             <dd className="flex min-w-0 flex-col">
               <span className={cn("line-clamp-2 font-display text-lg leading-tight font-extrabold break-words", !r.value && "text-muted-foreground")}>
-                {r.value ?? t("noRecord")}
+                {r.value && r.counts === "value" ? <CountUp value={r.value} /> : (r.value ?? t("noRecord"))}
               </span>
-              {r.detail && <span className="text-sm text-muted-foreground">{r.detail}</span>}
+              {r.detail && <span className="text-sm text-muted-foreground tabular-nums">{r.counts === "detail" ? <CountUp value={r.detail} /> : r.detail}</span>}
             </dd>
           </div>
         ))}

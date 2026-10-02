@@ -13,6 +13,8 @@ import { userClient } from "@/data/supabase-server";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
+import { Reveal } from "@/components/motion/reveal";
+import { cn } from "@/lib/utils";
 
 /** Cards shown per step; "Show more" adds another step. */
 const STEP = 24;
@@ -102,8 +104,8 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
               <p className="font-hand text-2xl text-muted-foreground">{t("cardsEmpty")}</p>
             </div>
           ) : (
-            // Pasted in slightly crooked, like the rest of the album.
-            <ul className="stagger grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
+            // Pasted in slightly crooked, like the rest of the album, and dealt in each time they're shown (ADR 0080).
+            <ul className="grid grid-cols-2 gap-x-4 gap-y-6 sm:grid-cols-3">
               {shown.map((card, i) => {
                 const image = (
                   <SharedCardImage
@@ -117,7 +119,12 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
                   />
                 );
                 return (
-                  <li key={card.id} className={i % 3 === 1 ? "rotate-[1.2deg]" : i % 3 === 2 ? "rotate-[-0.8deg]" : "rotate-[-1.6deg]"}>
+                  <Reveal
+                    as="li"
+                    key={card.id}
+                    className={cn("deal", i % 3 === 1 ? "rotate-[1.2deg]" : i % 3 === 2 ? "rotate-[-0.8deg]" : "rotate-[-1.6deg]")}
+                    style={{ ["--grow-delay" as string]: `${(i % 3) * 80}ms` }}
+                  >
                     {card.sharedAt ? (
                       <Link
                         href={`/c/${card.id}`}
@@ -133,7 +140,7 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
                         </span>
                       </div>
                     )}
-                  </li>
+                  </Reveal>
                 );
               })}
             </ul>

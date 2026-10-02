@@ -18,6 +18,7 @@ import { Celebration } from "../celebration";
 import { useMilestones } from "../milestone-celebration";
 import { send, useOverlayOps } from "../offline/outbox";
 import { entrySnapshot } from "../series/series-episodes";
+import { Reveal } from "@/components/motion/reveal";
 
 export type ReadLogged = ReadingLogged;
 
@@ -185,7 +186,7 @@ export function ReadingProgress({
         </div>
         {total && (
           <>
-            <div
+            <Reveal
               role="progressbar"
               aria-label={t("progressLabel")}
               aria-valuemin={0}
@@ -194,8 +195,8 @@ export function ReadingProgress({
               aria-valuetext={t("progress", { read: n(Math.min(position, total)), total: t("count", { unit, count: total }) })}
               className="h-2.5 overflow-hidden rounded-full bg-muted"
             >
-              <div className="h-full rounded-full bg-brand transition-[width]" style={{ width: `${Math.min(100, (position / total) * 100)}%` }} />
-            </div>
+              <div className="grow-w h-full rounded-full bg-brand transition-[width]" style={{ width: `${Math.min(100, (position / total) * 100)}%` }} />
+            </Reveal>
             <p className="text-xs text-muted-foreground tabular-nums">{t("progress", { read: n(Math.min(position, total)), total: t("count", { unit, count: total }) })}</p>
           </>
         )}

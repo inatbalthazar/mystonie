@@ -13,6 +13,8 @@ import type { RegionKind } from "@/core/regions";
 import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { RegionMap, regionName, useRegionMap } from "./region-map";
+import { Reveal } from "@/components/motion/reveal";
+import { CountUp } from "@/components/motion/count-up";
 
 /**
  * A country's page of the Atlas (stage 4, ADR 0060): its states, provinces or regions on its own map. A tap on the
@@ -128,14 +130,18 @@ export function RegionsView({
       <section aria-labelledby={`${id}-progress`} className="flex flex-col gap-3">
         <div className="flex items-end justify-between gap-4">
           <p id={`${id}-progress`} className="flex flex-col">
-            <span className="font-display text-5xl leading-none font-extrabold tabular-nums">{t("regionsDone", { done, total })}</span>
+            <span className="font-display text-5xl leading-none font-extrabold tabular-nums">
+              <CountUp value={t("regionsDone", { done, total })} />
+            </span>
             <span className="mt-1 text-sm text-muted-foreground">{t("regionsDoneLabel", { many })}</span>
           </p>
-          <p className="font-hand text-3xl leading-none text-brand">{format.number(share100, { style: "percent" })}</p>
+          <p className="font-hand text-3xl leading-none text-brand">
+            <CountUp value={format.number(share100, { style: "percent" })} />
+          </p>
         </div>
-        <div className="h-2.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
-          <div className="h-full rounded-full bg-brand transition-[width]" style={{ width: `${share100 * 100}%` }} />
-        </div>
+        <Reveal className="h-2.5 overflow-hidden rounded-full bg-muted" aria-hidden="true">
+          <div className="grow-w h-full rounded-full bg-brand transition-[width]" style={{ width: `${share100 * 100}%` }} />
+        </Reveal>
         {(!place || !isVisited(place)) && (
           <p className="text-sm text-muted-foreground">{t(place ? "regionsWantHint" : "regionsJoinHint", { country: name })}</p>
         )}

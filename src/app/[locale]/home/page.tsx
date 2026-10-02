@@ -39,6 +39,7 @@ import { ownTrending } from "@/data/trending";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
+import { Reveal } from "@/components/motion/reveal";
 
 const RECENT_CARDS = 6;
 const TRENDING = 9;
@@ -239,7 +240,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
                 />
               );
               return (
-                <li key={card.id} className={`w-[40%] shrink-0 snap-start sm:w-[30%] ${i % 2 ? "rotate-[1.2deg]" : "rotate-[-1.2deg]"}`}>
+                // Dealt in each time they're shown, sideways too (ADR 0080).
+                <Reveal
+                  as="li"
+                  key={card.id}
+                  className={`deal w-[40%] shrink-0 snap-start sm:w-[30%] ${i % 2 ? "rotate-[1.2deg]" : "rotate-[-1.2deg]"}`}
+                  style={{ ["--grow-delay" as string]: `${Math.min(i, 3) * 80}ms` }}
+                >
                   {card.sharedAt ? (
                     <Link href={`/c/${card.id}`} className="block rounded-lg shadow-md transition-transform hover:-translate-y-0.5">
                       {image}
@@ -247,7 +254,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
                   ) : (
                     <div className="rounded-lg shadow-md">{image}</div>
                   )}
-                </li>
+                </Reveal>
               );
             })}
           </ul>
