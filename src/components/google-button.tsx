@@ -80,7 +80,7 @@ const dark = () => {
 
 /**
  * "Continue with Google" drawn by Google itself (ADR 0073), so its account chooser says "to continue to
- * mystonie.vercel.app", our own domain, instead of the Supabase project's: the ID token it gives is exchanged for a
+ * mystonie.com", our own domain, instead of the Supabase project's: the ID token it gives is exchanged for a
  * session in the browser (`signInWithIdToken`, with a nonce), then `/api/auth/finish` does what the OAuth callback
  * does. While Google's script loads, and if it can't, `fallback` (the redirect button) shows instead.
  */

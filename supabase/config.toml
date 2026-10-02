@@ -240,7 +240,7 @@ otp_expiry = 3600
 # port = 465
 # user = "resend"
 # pass = "env(RESEND_API_KEY)"
-# admin_email = "hello@mystonie.app"
+# admin_email = "hello@mystonie.com"
 # sender_name = "Mystonie"
 
 # Uncomment to customize email template

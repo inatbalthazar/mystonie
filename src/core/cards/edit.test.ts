@@ -36,7 +36,7 @@ describe("review", () => {
 
 describe("cardShareUrl", () => {
   it("replaces the query with ref and tpl", () => {
-    expect(cardShareUrl("https://mystonie.app/th?q=x#top", "boldStats")).toBe("https://mystonie.app/th?ref=card&tpl=boldStats");
+    expect(cardShareUrl("https://mystonie.com/th?q=x#top", "boldStats")).toBe("https://mystonie.com/th?ref=card&tpl=boldStats");
   });
 });
 

@@ -5,10 +5,10 @@ describe("siteUrl", () => {
   it("prefers NEXT_PUBLIC_SITE_URL", () => {
     expect(
       siteUrl({
-        NEXT_PUBLIC_SITE_URL: "https://mystonie.app",
+        NEXT_PUBLIC_SITE_URL: "https://mystonie.com",
         VERCEL_PROJECT_PRODUCTION_URL: "mystonie.vercel.app",
       }).href,
-    ).toBe("https://mystonie.app/");
+    ).toBe("https://mystonie.com/");
   });
 
   it("falls back to the Vercel production domain (host only, no scheme)", () => {

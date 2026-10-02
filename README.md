@@ -6,7 +6,7 @@ Log every movie, series and episode you watch, and get beautiful, shareable artw
 
 *Finished it? Mystonie it.*
 
-**Status:** **Stage 0: Mystonie Card** is built (next: Stage 1, the collection), a card maker with no login: search a title, pick a template, add a rating and review, then share or download the PNG. Live at https://mystonie.vercel.app.
+**Status:** **Stage 0: Mystonie Card** is built (next: Stage 1, the collection), a card maker with no login: search a title, pick a template, add a rating and review, then share or download the PNG. Live at https://mystonie.com.
 
 ## Repo map
 ```

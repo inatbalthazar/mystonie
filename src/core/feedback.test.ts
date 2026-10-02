@@ -59,10 +59,10 @@ describe("feedbackEmail", () => {
     const email = feedbackEmail(
       { id, kind: "bug", message: "Cards won't download on my phone\nSafari, every time", page: "/c/1", errorRef: "d1" },
       { userId: "u1", email: "kim@example.com", device: "iPhone Safari", locale: "th" },
-      "https://mystonie.app/c/1",
+      "https://mystonie.com/c/1",
     );
     expect(email.subject).toBe("Beta bug: Cards won't download on my phone");
-    expect(email.text).toContain("Page: https://mystonie.app/c/1");
+    expect(email.text).toContain("Page: https://mystonie.com/c/1");
     expect(email.text).toContain("Error digest: d1");
     expect(email.text).toContain("From: kim@example.com (u1)");
     expect(email.text).toContain(`where id = '${id}'`);

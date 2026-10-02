@@ -33,13 +33,13 @@ describe("unsubscribe tokens", () => {
   });
 
   it("builds the confirm page per locale and the one-click API link", () => {
-    const site = new URL("https://mystonie.app");
+    const site = new URL("https://mystonie.com");
     expect(unsubscribeLinks(site, "en", "en", ID, "tok")).toEqual({
-      page: `https://mystonie.app/unsubscribe?id=${ID}&t=tok`,
-      oneClick: `https://mystonie.app/api/unsubscribe?id=${ID}&t=tok`,
+      page: `https://mystonie.com/unsubscribe?id=${ID}&t=tok`,
+      oneClick: `https://mystonie.com/api/unsubscribe?id=${ID}&t=tok`,
     });
-    expect(unsubscribeLinks(site, "th", "en", ID, "tok").page).toBe(`https://mystonie.app/th/unsubscribe?id=${ID}&t=tok`);
-    expect(unsubscribeLinks(site, "en", "en", ID, "tok", "recaps").oneClick).toBe(`https://mystonie.app/api/unsubscribe?id=${ID}&t=tok&list=recaps`);
+    expect(unsubscribeLinks(site, "th", "en", ID, "tok").page).toBe(`https://mystonie.com/th/unsubscribe?id=${ID}&t=tok`);
+    expect(unsubscribeLinks(site, "en", "en", ID, "tok", "recaps").oneClick).toBe(`https://mystonie.com/api/unsubscribe?id=${ID}&t=tok&list=recaps`);
   });
 
   it("signs each list separately, and the waitlist as before", async () => {
@@ -65,15 +65,15 @@ describe("recap email", () => {
     unsubscribe: "Turn off weekly recaps",
   };
   const links = {
-    cta: recapCtaUrl(new URL("https://mystonie.app"), "th", "en", ID),
-    unsubscribe: `https://mystonie.app/th/unsubscribe?id=${ID}&t=tok&list=recaps`,
-    logo: "https://mystonie.app/apple-icon",
+    cta: recapCtaUrl(new URL("https://mystonie.com"), "th", "en", ID),
+    unsubscribe: `https://mystonie.com/th/unsubscribe?id=${ID}&t=tok&list=recaps`,
+    logo: "https://mystonie.com/apple-icon",
     sender: "Mystonie · codenat.me",
   };
 
   it("links the recap page with campaign tags, per locale", () => {
-    expect(links.cta).toBe(`https://mystonie.app/th/recap/${ID}?utm_source=recap&utm_medium=email&utm_campaign=weekly_recap`);
-    expect(recapCtaUrl(new URL("https://mystonie.app"), "en", "en", ID)).toMatch(new RegExp(`^https://mystonie.app/recap/${ID}\\?`));
+    expect(links.cta).toBe(`https://mystonie.com/th/recap/${ID}?utm_source=recap&utm_medium=email&utm_campaign=weekly_recap`);
+    expect(recapCtaUrl(new URL("https://mystonie.com"), "en", "en", ID)).toMatch(new RegExp(`^https://mystonie.com/recap/${ID}\\?`));
   });
 
   it("shows the numbers and posters, escapes copy, and links the unsubscribe page", () => {
@@ -108,9 +108,9 @@ describe("launch email", () => {
     unsubscribe: "Unsubscribe",
   };
   const links = {
-    cta: "https://mystonie.app/?utm_source=waitlist&utm_medium=email&utm_campaign=launch",
-    unsubscribe: `https://mystonie.app/unsubscribe?id=${ID}&t=tok`,
-    logo: "https://mystonie.app/apple-icon",
+    cta: "https://mystonie.com/?utm_source=waitlist&utm_medium=email&utm_campaign=launch",
+    unsubscribe: `https://mystonie.com/unsubscribe?id=${ID}&t=tok`,
+    logo: "https://mystonie.com/apple-icon",
     sender: "Mystonie · codenat.me",
   };
 
@@ -134,7 +134,7 @@ describe("launch email", () => {
   });
 
   it("tags the CTA for landing attribution", () => {
-    expect(launchCtaUrl(new URL("https://mystonie.app/th"))).toBe(links.cta);
+    expect(launchCtaUrl(new URL("https://mystonie.com/th"))).toBe(links.cta);
   });
 });
 
@@ -171,15 +171,15 @@ describe("sign-in email", () => {
     expiry: "Works for an hour.",
     ignore: "Didn't ask? Ignore this.",
   };
-  const fallback = new URL("https://mystonie.app/auth/confirm");
+  const fallback = new URL("https://mystonie.com/auth/confirm");
 
   it("links to our confirm page with the token hash", () => {
-    expect(signInLink("https://mystonie.app/th/auth/confirm?next=%2Fth%2Fsettings", fallback, "hash1", "magiclink")).toBe(
-      "https://mystonie.app/th/auth/confirm?next=%2Fth%2Fsettings&token_hash=hash1&type=magiclink",
+    expect(signInLink("https://mystonie.com/th/auth/confirm?next=%2Fth%2Fsettings", fallback, "hash1", "magiclink")).toBe(
+      "https://mystonie.com/th/auth/confirm?next=%2Fth%2Fsettings&token_hash=hash1&type=magiclink",
     );
     // Supabase falls back to the Site URL when a redirect isn't allow-listed: use our page instead.
-    expect(signInLink("https://mystonie.app", fallback, "h", "signup")).toBe("https://mystonie.app/auth/confirm?token_hash=h&type=signup");
-    expect(signInLink("not a url", fallback, "h", "email")).toBe("https://mystonie.app/auth/confirm?token_hash=h&type=email");
+    expect(signInLink("https://mystonie.com", fallback, "h", "signup")).toBe("https://mystonie.com/auth/confirm?token_hash=h&type=signup");
+    expect(signInLink("not a url", fallback, "h", "email")).toBe("https://mystonie.com/auth/confirm?token_hash=h&type=email");
     expect(fallback.search).toBe("");
   });
 
@@ -189,8 +189,8 @@ describe("sign-in email", () => {
   });
 
   it("puts the code in the subject and body, escapes copy and links the button", () => {
-    const link = "https://mystonie.app/auth/confirm?token_hash=h&type=signup";
-    const { subject, html, text } = signInEmail(copy, { code: "123456", link, logo: "https://mystonie.app/apple-icon", sender: "Mystonie" }, "th");
+    const link = "https://mystonie.com/auth/confirm?token_hash=h&type=signup";
+    const { subject, html, text } = signInEmail(copy, { code: "123456", link, logo: "https://mystonie.com/apple-icon", sender: "Mystonie" }, "th");
     expect(subject).toBe("123456 is your Mystonie code");
     expect(html).toContain('<html lang="th">');
     expect(html).toContain(">123456</p>");

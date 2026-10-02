@@ -1,6 +1,6 @@
 # The Journal
 
-Articles for [mystonie.app/journal](../../src/app/[locale]/journal/page.tsx), written by the Mystonie team ([ADR 0051](../../docs/decisions/0051-journal-and-title-reviews.md)). Readers get them as a feed: For you (articles about the titles in their collection first), Latest, Featured and Saved, with Stamps, Saves and Share; the newest six also show in everyone's Following feed on their date ([ADR 0052](../../docs/decisions/0052-journal-feed.md)).
+Articles for [mystonie.com/journal](../../src/app/[locale]/journal/page.tsx), written by the Mystonie team ([ADR 0051](../../docs/decisions/0051-journal-and-title-reviews.md)). Readers get them as a feed: For you (articles about the titles in their collection first), Latest, Featured and Saved, with Stamps, Saves and Share; the newest six also show in everyone's Following feed on their date ([ADR 0052](../../docs/decisions/0052-journal-feed.md)).
 
 ## Add an article
 1. Make a folder named like the URL: `content/journal/ten-shows-for-a-weekend/` (lowercase letters, numbers and dashes).

@@ -37,7 +37,7 @@ describe("reportEmail", () => {
   it("escapes the reporter's note in the HTML part", () => {
     const email = reportEmail(
       { id: "r1", targetKind: "profile", targetId: card, reason: "harassment", note: "<b>mean</b>" },
-      "https://mystonie.app/u/someone",
+      "https://mystonie.com/u/someone",
     );
     expect(email.subject).toBe("Report: profile (harassment)");
     expect(email.text).toContain("Note: <b>mean</b>");

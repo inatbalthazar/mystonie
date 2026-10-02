@@ -144,8 +144,8 @@ describe("streaks, stats and sharing", () => {
   it("shares the squares, never the answer", () => {
     const card = reelCard(reelState(reel, [g("1"), g("2"), g("603", "The Matrix")]), 4)!;
     expect(card).toEqual({ number: 6, day: "2026-10-05", results: [false, false, true], solved: true, streak: 4 });
-    const text = reelShareText(card, "https://mystonie.app/reel", "Reel of the Day");
-    expect(text).toBe("Reel of the Day #6 3/6\n🟥🟥🟩\n🔥 4\nhttps://mystonie.app/reel");
+    const text = reelShareText(card, "https://mystonie.com/reel", "Reel of the Day");
+    expect(text).toBe("Reel of the Day #6 3/6\n🟥🟥🟩\n🔥 4\nhttps://mystonie.com/reel");
     expect(text).not.toContain("Matrix");
     const lost = reelCard(reelState(reel, ["1", "2", "3", "4", "5", "6"].map((id) => g(id))), 0)!;
     expect(reelShareText(lost, "u", "R")).toBe("R #6 X/6\n🟥🟥🟥🟥🟥🟥\nu");
