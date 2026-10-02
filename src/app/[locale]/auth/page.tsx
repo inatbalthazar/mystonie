@@ -37,7 +37,7 @@ export default async function AuthPage({ params, searchParams }: PageProps<"/[lo
       </div>
       <PaperCard stamp={t("stamp")}>
         <div className="pt-8">
-          <AuthForm next={next} providers={providers} initialError={error} />
+          <AuthForm next={next} providers={providers} googleClientId={process.env.GOOGLE_CLIENT_ID || null} initialError={error} />
         </div>
       </PaperCard>
     </main>

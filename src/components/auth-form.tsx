@@ -8,6 +8,7 @@ import { localizedPath } from "@/core/auth";
 import type { OAuthProvider } from "@/core/avatar";
 import { EMAIL_MAX, isValidEmail, normalizeEmail } from "@/core/waitlist";
 import { Link } from "@/i18n/navigation";
+import { GoogleButton } from "./google-button";
 import { routing } from "@/i18n/routing";
 import { browserClient } from "@/lib/supabase-browser";
 import { cn } from "@/lib/utils";
@@ -38,7 +39,18 @@ const primary = "h-12 w-full rounded-full bg-brand px-5 font-semibold text-brand
  * installed PWA (where a tapped email link would open the browser instead); the email's link is for people
  * reading it on the same device. New and returning people take the same path.
  */
-export function AuthForm({ next, providers, initialError }: { next: string; providers: readonly OAuthProvider[]; initialError: "link" | "oauth" | null }) {
+export function AuthForm({
+  next,
+  providers,
+  googleClientId,
+  initialError,
+}: {
+  next: string;
+  providers: readonly OAuthProvider[];
+  /** Google's own button instead of the redirect (ADR 0073), when the web client's id is configured. */
+  googleClientId: string | null;
+  initialError: "link" | "oauth" | null;
+}) {
   const t = useTranslations("Auth");
   const locale = useLocale();
   const id = useId();
@@ -179,7 +191,7 @@ export function AuthForm({ next, providers, initialError }: { next: string; prov
         <>
           {providers.map((provider) => {
             const { Mark, className } = BRAND[provider];
-            return (
+            const button = (
               <button
                 key={provider}
                 type="button"
@@ -190,6 +202,22 @@ export function AuthForm({ next, providers, initialError }: { next: string; prov
                 <Mark />
                 {t(provider)}
               </button>
+            );
+            return provider === "google" && googleClientId ? (
+              <GoogleButton
+                key={provider}
+                clientId={googleClientId}
+                next={next}
+                timeZone={timeZone}
+                fallback={button}
+                onStart={() => setBusy("google")}
+                onError={(limited) => {
+                  setBusy(null);
+                  setNotice(limited ? "rateLimited" : "errorOauth");
+                }}
+              />
+            ) : (
+              button
             );
           })}
           <div className="flex items-center gap-3 text-xs text-muted-foreground" aria-hidden="true">
