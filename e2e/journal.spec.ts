@@ -65,7 +65,7 @@ test("the Journal: listed in the feed, read, in Thai, and linked from the title'
   await page.getByRole("link", { name: /วิธีเขียนบทความใน Journal/ }).click();
   await expect(page.getByRole("article").getByRole("heading", { level: 1 })).toHaveText("วิธีเขียนบทความใน Journal");
 
-  // Signed in: the Journal note on Home is gone after 45 days, so only check the title page and Add.
+  // Signed in: Home has no Journal note (ADR 0082), so only check the title page and Add.
   await signUp(page, request, "journal", "/collection");
   await page.goto("/title/movie/603");
   const about = page.getByRole("region", { name: "In the Journal" });

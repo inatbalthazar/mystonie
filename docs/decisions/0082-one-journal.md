@@ -29,3 +29,7 @@ The owner (2026-10-02) found the Journal and the articles repeating each other. 
 - **Tests:**
   - Unit: `album.test.ts`, `account.test.ts`.
   - e2e: `journal.spec.ts` (the tab's name; no "Saved to read" on Me), `motion.spec.ts`, `social.spec.ts`.
+
+## Update (2026-10-02)
+- **The note on Home is gone:** the owner asked to remove Home's "From the Journal" note. It showed the newest article for 45 days. Articles are now found only through the Feed's Journal tab and a title's "In the Journal".
+- **Code:** `src/components/journal/journal-note.tsx` is deleted, and Home no longer reads the Journal's list.

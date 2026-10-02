@@ -11,7 +11,6 @@ import { RecapNote } from "@/components/recap-note";
 import { UpNext, type UpNextSeries } from "@/components/series/up-next";
 import { SharedCardImage, SignupFromCard } from "@/components/shared-card";
 import { ChallengeNote, type NoteChallenge } from "@/components/challenges/challenge-note";
-import { JOURNAL_NOTE_DAYS, JournalNote } from "@/components/journal/journal-note";
 import { ReelNote } from "@/components/reel/reel-note";
 import { BoardNote } from "@/components/social/board-note";
 import { CommunityLinks } from "@/components/social/community-links";
@@ -30,7 +29,6 @@ import { followingFeed } from "@/data/social";
 import { listCollection } from "@/data/entries";
 import { cachedEpisodes, episodeLogs } from "@/data/episodes";
 import { pushConfig } from "@/data/push";
-import { journalList } from "@/data/journal";
 import { reelPlay } from "@/data/reel";
 import { latestRecap } from "@/data/recaps";
 import { userClient, type UserClient } from "@/data/supabase-server";
@@ -118,7 +116,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
   const viewer = { id: userId, username: profile?.username ?? "", displayName: profile?.display_name ?? null, avatarUrl: profile?.avatar_url ?? null };
   const month = currentMonth(now, timeZone);
   const today = reelDay(now);
-  const [episodes, logs, board, joins, reel, articles] = await Promise.all([
+  const [episodes, logs, board, joins, reel] = await Promise.all([
     cachedEpisodes(supabase, ids),
     episodeLogs(supabase, userId, ids),
     friendBoard(supabase, viewer, "week", timeZone, now).catch((error: unknown) => {
@@ -134,7 +132,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
       console.error(error);
       return null;
     }),
-    journalList(locale),
   ]);
   // This month's challenges: progress as the last save recorded it (S3 challenges & clubs).
   const challenges: NoteChallenge[] = monthChallenges(month).flatMap(({ slug, rule }) => {
@@ -196,10 +193,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
       {board && board.following > 0 && <BoardNote rows={board.rows} />}
       <ChallengeNote month={month} challenges={challenges} />
       <ReelNote number={reelNumber(today)} play={reel && { guesses: reel.guesses.length, solved: reel.solved, finished: reel.finished }} />
-      {/* The newest Journal article while it's new (ADR 0051). */}
-      {articles[0] && now - Date.parse(`${articles[0].meta.date}T00:00:00Z`) < JOURNAL_NOTE_DAYS * 86_400_000 && (
-        <JournalNote slug={articles[0].slug} title={articles[0].meta.title} written={articles[0].locale === locale ? null : articles[0].locale} />
-      )}
       {/* The warnings quiz asks about finished titles (S3 warnings & quiz). */}
       {items.some((i) => i.status === "finished") && <QuizNote />}
 
