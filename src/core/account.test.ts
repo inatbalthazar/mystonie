@@ -50,6 +50,12 @@ describe("parseAccountPatch", () => {
     expect(parseAccountPatch({ shelfPins: ["x"] }, locales)).toBeNull();
   });
 
+  it("takes the stats sections hidden from visitors (ADR 0077)", () => {
+    expect(parseAccountPatch({ statsHidden: ["records", "activity"] }, locales)).toEqual({ stats_hidden: ["activity", "records"] });
+    expect(parseAccountPatch({ statsHidden: [] }, locales)).toEqual({ stats_hidden: [] });
+    expect(parseAccountPatch({ statsHidden: ["shelf"] }, locales)).toBeNull();
+  });
+
   it("keeps only the fields that were sent", () => {
     expect(parseAccountPatch({ theme: "light" }, locales)).toEqual({ theme: "light" });
   });

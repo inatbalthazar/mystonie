@@ -53,7 +53,7 @@ export function backPage(path: string): BackPage {
   if (named) return { kind: "named", page: named };
   const country = /^\/collection\/atlas\/([a-z]{2})$/i.exec(p);
   if (country) return { kind: "country", country: country[1].toUpperCase() };
-  const profile = /^\/u\/([^/]+)$/.exec(p);
+  const profile = /^\/u\/([^/]+)(?:\/stats)?$/.exec(p);
   if (profile) return { kind: "profile", username: decodeURIComponent(profile[1]) };
   return { kind: "page" };
 }
@@ -111,14 +111,20 @@ export function backParent(path: string): BackParent | null {
 export type BackEntry = { path: string; title?: string };
 export const BACK_STACK_MAX = 30;
 
+/** A page with its own tabs counts as one page: someone's profile and its Stats tab (ADR 0077). */
+const pageOf = (path: string) => path.replace(/^(\/u\/[^/]+)\/stats$/, "$1");
+
 /**
  * The stack after landing on `path`. A step back (the button, the browser's back or a swipe: `popped`) to the page
- * before pops; anything else pushes. The same page again (a reload, a new query) changes nothing.
+ * before pops; another tab of the same page takes its place (those tabs replace the history entry too); anything else
+ * pushes. The same page again (a reload, a new query) changes nothing.
  */
 export function stepBack(stack: readonly BackEntry[], path: string, popped: boolean): BackEntry[] {
   const p = clean(path);
-  if (stack.at(-1)?.path === p) return [...stack];
+  const top = stack.at(-1);
+  if (top?.path === p) return [...stack];
   if (popped && stack.at(-2)?.path === p) return stack.slice(0, -1);
+  if (top && pageOf(top.path) === pageOf(p)) return [...stack.slice(0, -1), { path: p }];
   return [...stack, { path: p }].slice(-BACK_STACK_MAX);
 }
 

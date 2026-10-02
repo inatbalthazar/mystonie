@@ -29,15 +29,17 @@ function SectionTitle({ children }: { children: ReactNode }) {
 /**
  * This week / month / year / all time, as links (`?period=`), so each period is a plain server render. Each takes its
  * label's width plus a share of the rest, so "This month" stays on one line at 360px (and wraps only if it must).
+ * `pathname`: Me's Stats, or someone's (`/u/<username>/stats`, ADR 0077), whose periods replace the history entry.
  */
-export function PeriodTabs({ period }: { period: StatsPeriod }) {
+export function PeriodTabs({ period, pathname = "/stats" }: { period: StatsPeriod; pathname?: string }) {
   const t = useTranslations("Stats");
   return (
     <nav aria-label={t("periodsLabel")} data-tabs className="flex gap-1 rounded-xl bg-muted p-1">
       {(["week", "month", "year", "all"] as const).map((p) => (
         <Link
           key={p}
-          href={{ pathname: "/stats", query: { period: p } }}
+          href={{ pathname, query: { period: p } }}
+          replace={pathname !== "/stats"}
           data-tab
           aria-current={p === period ? "page" : undefined}
           className={cn(
@@ -52,8 +54,8 @@ export function PeriodTabs({ period }: { period: StatsPeriod }) {
   );
 }
 
-/** The big numbers, Strava-style, on a ticket pasted into the album. */
-export function Headline({ report, period, children }: { report: StatsReport; period: StatsPeriod; children?: ReactNode }) {
+/** The big numbers, Strava-style, on a ticket pasted into the album. `visitor`: someone else's ("This month"). */
+export function Headline({ report, period, visitor = false, children }: { report: StatsReport; period: StatsPeriod; visitor?: boolean; children?: ReactNode }) {
   const t = useTranslations("Stats");
   const locale = useLocale();
   const runtime = useRuntime();
@@ -79,7 +81,7 @@ export function Headline({ report, period, children }: { report: StatsReport; pe
   ];
   return (
     <PaperCard className="flex flex-col gap-4">
-      <p className="font-hand text-2xl leading-none text-muted-foreground">{t("headline", { period })}</p>
+      <p className="font-hand text-2xl leading-none text-muted-foreground">{t(visitor ? "headlineVisitor" : "headline", { period })}</p>
       <Figures stats={stats} />
       {hasReading && (
         <div className="flex flex-col gap-2 border-t-2 border-dashed border-border pt-4">

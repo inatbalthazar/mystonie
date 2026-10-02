@@ -32,6 +32,10 @@ A Strava-like stats page with big, bold numbers first, then charts.
   - Records: longest movie, longest series finished (by total watch time), busiest month and longest daily streak. Each shows "Not yet" when there is none.
   - Later kinds: reading adds a read row and "Books & manga" in Taste ([S2 books & manga](S2-books-manga.md)); games add a play row and "Games" ([S3 games](S3-games.md)). Play time stays out of hours watched.
 - **Share stats** opens the celebration with the period's card: Bold Stats first, then Collage, plus the Sticker. The card says "My month", "5 titles this month", and the range with its year.
+- **On profiles** ([ADR 0077](../../decisions/0077-public-stats.md)):
+  - Visitors see a public profile's stats on its Stats tab, `/u/[username]/stats`, computed in the viewer's time zone.
+  - On Me's Stats, each part (the numbers, Activity, Per month, Taste, Favourites, Records, Milestones) has an eye that hides it from visitors (`profiles.stats_hidden`). The owner still sees it, marked "Only you".
+  - The eyes show only while the profile is public.
 - **Empty state:** with nothing logged, the page shows "Log your first title", which opens the quick-add sheet. A period with nothing in it says so under the headline.
 - **Tests:**
   - `report.test.ts`: headline = `summarizeCollection` for every period and zone; months, heatmap, taste, records, the card; 1,000 entries + 20,000 logs in under 500 ms.

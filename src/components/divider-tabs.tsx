@@ -7,19 +7,22 @@ type Href = ComponentProps<typeof Link>["href"];
 /**
  * The album's divider tabs as links, so each tab is a plain server render, with `aria-current="page"` on the open one:
  * the feed's tabs and Me's Album · Stats. `compact` fits four at 360px. The collection's Watch · Read · Play are
- * the same tabs as buttons (`ShelfTabs`). A tab's `dot` (the feed's, ADR 0074) sits after its name.
+ * the same tabs as buttons (`ShelfTabs`). A tab's `dot` (the feed's, ADR 0074) sits after its name. `replace`: the tabs
+ * swap the history entry, so back leaves the page (a profile's, ADR 0077).
  */
 export function DividerTabs<T extends string>({
   label,
   tabs,
   current,
   compact = false,
+  replace = false,
   className,
 }: {
   label: string;
   tabs: readonly { value: T; href: Href; name: string; dot?: ReactNode }[];
   current: T;
   compact?: boolean;
+  replace?: boolean;
   className?: string;
 }) {
   return (
@@ -31,6 +34,7 @@ export function DividerTabs<T extends string>({
               href={tab.href}
               // The whole page ahead of the tap, like the nav island's (ADR 0075).
               prefetch
+              replace={replace}
               data-tab
               aria-current={tab.value === current ? "page" : undefined}
               className={cn(

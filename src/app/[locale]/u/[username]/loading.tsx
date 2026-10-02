@@ -1,6 +1,6 @@
 import { AlbumBones } from "@/components/skeleton";
 
-/** A profile's skeleton (ADR 0070): the album's cover, the numbers and the cards. */
+/** A profile's skeleton (ADR 0070): the album's cover, its Album · Stats tabs (ADR 0077), the numbers and the shelf. */
 export default function ProfileLoading() {
-  return <AlbumBones />;
+  return <AlbumBones tabs={2} />;
 }

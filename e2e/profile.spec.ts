@@ -384,3 +384,88 @@ test("the album as its owner arranges it: favourites on the shelf, sections move
   await expect(shelf(guest).first()).toHaveAttribute("title", "Alpha Album Film");
   await visitor.close();
 });
+
+test("a profile's Stats tab: visitors see the stats minus the parts its owner hides, and what they both finished (ADR 0077)", async ({ page, request, browser }) => {
+  test.skip(!(await mailpitUp(request)) || !canSeed(), "local Supabase (Mailpit, service role key) is not available");
+  const films: SeedTitle[] = ["Echo", "Foxtrot"].map((name, i) => ({
+    kind: "movie",
+    externalId: `990695${i}`,
+    name: `${name} Stats Film`,
+    year: 2021 + i,
+    posterPath: null,
+    runtimeMin: 110,
+  }));
+  await seedTitles(request, films);
+  const finish = async (p: Page, film: SeedTitle) => {
+    const res = await p.request.post("/api/entries", {
+      data: { id: uuidv7(), title: { source: "tmdb", kind: "movie", externalId: film.externalId }, status: "finished" },
+    });
+    expect(res.ok(), await res.text()).toBe(true);
+  };
+  await signUp(page, request, "pubstats", "/stats");
+  const username = `pst_${Date.now().toString(36)}`;
+  expect((await page.request.patch("/api/account", { data: { username } })).ok()).toBe(true);
+  for (const film of films) await finish(page, film);
+  await page.reload();
+  const headings = (p: Page) => p.getByRole("main").getByRole("heading", { level: 2 });
+
+  // Me's Stats: every part has an eye; hiding Activity keeps it on Me, marked "Only you".
+  await expect(page.getByRole("main")).toContainText("Visitors see these stats on your profile.");
+  const activitySaved = saved(page);
+  await expect(async () => {
+    // Retried: a tap before hydration is lost.
+    await page.getByRole("button", { name: "Hide Activity from your profile" }).click();
+    await expect(page.getByRole("button", { name: "Show Activity on your profile" })).toBeVisible({ timeout: 2000 });
+  }).toPass();
+  expect((await activitySaved).request().postDataJSON()).toEqual({ statsHidden: ["activity"] });
+  await expect(page.getByRole("button", { name: "Show Activity on your profile" })).toHaveAttribute("aria-pressed", "true");
+  await expect(page.getByRole("button", { name: "Show Activity on your profile" })).toContainText("Only you");
+  await page.reload();
+  await expect(headings(page)).toContainText(["Activity", "Per month", "Taste", "Records"]);
+  await expect(page.getByRole("button", { name: "Show Activity on your profile" })).toBeVisible();
+
+  // A guest: the album has Album · Stats tabs; the Stats tab has no Activity and nothing "in common".
+  const visitor = await browser.newContext();
+  const guest = await visitor.newPage();
+  await guest.goto(`/u/${username}`);
+  const tabs = guest.getByRole("navigation", { name: `@${username}'s album and stats` });
+  await expect(tabs.getByRole("link", { name: "Album" })).toHaveAttribute("aria-current", "page");
+  await tabs.getByRole("link", { name: "Stats" }).click();
+  await expect(guest).toHaveURL(new RegExp(`/u/${username}/stats$`));
+  await expect(tabs.getByRole("link", { name: "Stats" })).toHaveAttribute("aria-current", "page");
+  await expect(guest.getByRole("main")).toContainText("This month");
+  await expect(headings(guest)).toHaveText(["Per month", "Taste", "Records"]);
+  await expect(guest.getByRole("button", { name: /from your profile/ })).toHaveCount(0);
+  // Another period stays on their page.
+  await guest.getByRole("link", { name: "All time" }).click();
+  await expect(guest).toHaveURL((url) => url.pathname === `/u/${username}/stats` && url.search === "?period=all");
+  await visitor.close();
+
+  // Someone signed in who finished one of the same films sees it in common.
+  const friendContext = await browser.newContext();
+  const friend = await friendContext.newPage();
+  await signUp(friend, request, "pubstats-friend", "/home");
+  await finish(friend, films[1]);
+  await friend.goto(`/u/${username}/stats`);
+  const common = friend.getByRole("region", { name: "In common" });
+  await expect(common).toContainText("You've both finished 1 title.");
+  await expect(common.getByRole("listitem")).toHaveText(["Foxtrot Stats Film"]);
+  await friendContext.close();
+
+  // Every part hidden: no Stats tab on the album, and the Stats page says so.
+  expect(
+    (
+      await page.request.patch("/api/account", {
+        data: { statsHidden: ["numbers", "activity", "months", "taste", "favourites", "records", "milestones"] },
+      })
+    ).ok(),
+  ).toBe(true);
+  const later = await browser.newContext();
+  const guest2 = await later.newPage();
+  await guest2.goto(`/u/${username}`);
+  await expect(guest2.getByRole("heading", { name: "The shelf" })).toBeVisible();
+  await expect(guest2.getByRole("navigation", { name: `@${username}'s album and stats` })).toHaveCount(0);
+  await guest2.goto(`/u/${username}/stats`);
+  await expect(guest2.getByRole("main")).toContainText(`@${username} keeps their stats to themselves.`);
+  await later.close();
+});

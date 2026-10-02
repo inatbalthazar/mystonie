@@ -71,6 +71,7 @@ describe("backPage", () => {
   it("names a country by its code and a profile by its username", () => {
     expect(backPage("/collection/atlas/jp")).toEqual({ kind: "country", country: "JP" });
     expect(backPage("/u/mina")).toEqual({ kind: "profile", username: "mina" });
+    expect(backPage("/u/mina/stats")).toEqual({ kind: "profile", username: "mina" });
   });
 
   it("leaves the rest to the page's title", () => {
@@ -95,6 +96,14 @@ describe("stepBack and previousEntry", () => {
 
   it("pushes on a forward step", () => {
     expect(stepBack([{ path: "/feed" }], "/people", true)).toEqual([{ path: "/feed" }, { path: "/people" }]);
+  });
+
+  it("swaps a profile's tabs in place: back from its Stats goes where the profile came from (ADR 0077)", () => {
+    let stack = stepBack([{ path: "/feed" }], "/u/mina", false);
+    stack = stepBack(stack, "/u/mina/stats", false);
+    expect(stack).toEqual([{ path: "/feed" }, { path: "/u/mina/stats" }]);
+    expect(previousEntry(stack, "/u/mina/stats")).toEqual({ path: "/feed" });
+    expect(stepBack(stack, "/u/other", false)).toHaveLength(3);
   });
 
   it("keeps the stack on a reload or a new query", () => {

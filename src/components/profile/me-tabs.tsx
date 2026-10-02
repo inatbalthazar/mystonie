@@ -21,3 +21,23 @@ export function MeTabs({ current }: { current: "album" | "stats" | "cards" }) {
     />
   );
 }
+
+/**
+ * Someone's tabs, under their cover (ADR 0077): Album (`/u/<username>`) and Stats (`/u/<username>/stats`). They swap
+ * the history entry, so back leaves the profile, wherever it was opened from.
+ */
+export function ProfileTabs({ username, current }: { username: string; current: "album" | "stats" }) {
+  const t = useTranslations("Profile");
+  return (
+    <DividerTabs
+      label={t("profileTabsLabel", { username })}
+      tabs={[
+        { value: "album", href: `/u/${username}`, name: t("tabAlbum") },
+        { value: "stats", href: `/u/${username}/stats`, name: t("tabStats") },
+      ]}
+      current={current}
+      replace
+      className="-mt-2 -mb-4"
+    />
+  );
+}

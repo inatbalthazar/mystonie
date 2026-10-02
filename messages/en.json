@@ -736,7 +736,7 @@
     "topLanguages": "Top languages",
     "titleCount": "{count, plural, one {# title} other {# titles}}",
     "favourites": "Favourites",
-    "favouritesHint": "Who made the titles you finished in this period.",
+    "favouritesHint": "Who made the titles finished in this period.",
     "favouriteRole": "{role, select, actor {Actors} director {Directors & creators} studio {Studios} author {Authors} developer {Developers} other {People}}",
     "personDetail": "{count, plural, one {# title} other {# titles}} · {time}",
     "tasteEmpty": "Genres and languages show up once something is watched in this period.",
@@ -761,7 +761,7 @@
     "readingHint": "Reading time is an estimate: 1.5 min a page, 5 min a manga chapter, 45 min a volume.",
     "playTime": "Play time",
     "gamesFinished": "Games finished",
-    "playHint": "Play time is the hours you gave for each game, or its average playtime on RAWG.",
+    "playHint": "Play time is the hours given for each game, or its average playtime on RAWG.",
     "milestones": "Milestones",
     "milestonesHint": "Round numbers you've reached. Tap one to make its card.",
     "milestoneOn": "{date} · {name}",
@@ -769,7 +769,16 @@
     "yearReviewLink": "See your {year} in review",
     "shareCollection": "Share my collection",
     "shareArea": "{area, select, watch {Watched} read {Read} play {Played} other {All}}",
-    "shareAreaAll": "{area, select, watch {Share all I've watched} read {Share all I've read} play {Share all I've played} other {Share my collection}}"
+    "shareAreaAll": "{area, select, watch {Share all I've watched} read {Share all I've read} play {Share all I've played} other {Share my collection}}",
+    "headlineVisitor": "{period, select, week {This week} month {This month} year {This year} other {All time so far}}",
+    "milestonesHintVisitor": "Round numbers reached so far.",
+    "section": "{section, select, numbers {The numbers} activity {Activity} months {Per month} taste {Taste} favourites {Favourites} records {Records} milestones {Milestones} other {This part}}",
+    "hideSection": "Hide {section} from your profile",
+    "showSection": "Show {section} on your profile",
+    "onlyYou": "Only you",
+    "visibilityHint": "Visitors see these stats on your profile. Tap an eye to keep a part to yourself.",
+    "visibilitySee": "See them as visitors do",
+    "visibilityFailed": "Couldn't save. Try again."
   },
   "Profile": {
     "metaTitle": "{name} (@{username})",
@@ -813,7 +822,15 @@
     "atlasCard": "Atlas of {count, plural, one {# country} other {# countries}}",
     "atlasRegionsCard": "Atlas of {country}",
     "shelfHintPinned": "Favourites first, then newest.",
-    "shelfFavourite": "Favourite"
+    "shelfFavourite": "Favourite",
+    "profileTabsLabel": "@{username}'s album and stats",
+    "statsMetaTitle": "{name}'s stats",
+    "statsAllHidden": "@{username} keeps their stats to themselves.",
+    "statsNothing": "Nothing logged yet.",
+    "backToAlbum": "See the album",
+    "inCommonTitle": "In common",
+    "inCommonCount": "You've both finished {count, plural, one {# title} other {# titles}}.",
+    "inCommonMore": "+ {count} more"
   },
   "Album": {
     "arrange": "Arrange",

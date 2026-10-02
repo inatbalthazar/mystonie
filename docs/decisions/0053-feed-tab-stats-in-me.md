@@ -1,6 +1,6 @@
 # ADR 0053: Feed takes Stats' place in the nav island, and Stats becomes a tab of Me
 
-**Status:** Accepted · **Date:** 2026-10-01
+**Status:** Accepted, visitors get a profile's Stats tab since [ADR 0077](0077-public-stats.md) · **Date:** 2026-10-01
 
 > The Journal's chip on the feed went in [ADR 0062](0062-journal-in-the-feed.md): its list is now the feed's Articles tab.
 

@@ -12,6 +12,10 @@
   - On Me, "Arrange" opens a sheet where the owner moves sections by a drag handle or arrows and hides them with an eye. The Atlas's eye is "Show my Atlas on my profile".
   - Hiding takes a section off the album; it doesn't make anything private.
   - Visitors see the album as arranged.
+- **The Stats tab** ([ADR 0077](../../decisions/0077-public-stats.md)): the profile has Album · Stats tabs (`/u/[username]/stats`), which replace the history entry, so back leaves the profile.
+  - The Stats tab shows the owner's stats for a period, minus the parts they hid with the eyes on Me's Stats (`stats_hidden`). It has no sharing, no sticker album and no year in review, and is computed in the viewer's time zone.
+  - A signed-in visitor also sees "In common": what they have both finished.
+  - With every part hidden there is no Stats tab.
 - The page reads a safe subset of the profile through `public_profile()` (name, photo, join date, never locale or time zone). Everything else is read with the visitor's own client, so RLS decides.
 - Signed-out visitors also get a "Start your own collection" call to action. The owner doesn't see the Report button on their own page.
 - Not indexed by search engines (`noindex, follow`), like card pages.

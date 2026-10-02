@@ -623,6 +623,7 @@ export type Database = {
           reel_reminded_on: string | null
           reel_reminders: boolean
           shelf_pins: string[]
+          stats_hidden: string[]
           theme: string
           time_zone: string
           updated_at: string
@@ -645,6 +646,7 @@ export type Database = {
           reel_reminded_on?: string | null
           reel_reminders?: boolean
           shelf_pins?: string[]
+          stats_hidden?: string[]
           theme?: string
           time_zone?: string
           updated_at?: string
@@ -667,6 +669,7 @@ export type Database = {
           reel_reminded_on?: string | null
           reel_reminders?: boolean
           shelf_pins?: string[]
+          stats_hidden?: string[]
           theme?: string
           time_zone?: string
           updated_at?: string
@@ -2016,6 +2019,7 @@ export type Database = {
           id: string
           is_private: boolean
           shelf_pins: string[]
+          stats_hidden: string[]
           username: string
         }[]
       }

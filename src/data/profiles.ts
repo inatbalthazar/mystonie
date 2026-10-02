@@ -1,6 +1,6 @@
 // Public profiles and account data export (S1 profile & privacy, ADR 0027). Server only.
 import { collectPages } from "@/core/account";
-import { albumLayout, type AlbumLayout } from "@/core/album";
+import { albumLayout, statsHidden, type AlbumLayout, type StatsSection } from "@/core/album";
 import { posterUrl } from "@/core/catalog/images";
 import type { UserClient } from "./supabase-server";
 
@@ -17,6 +17,8 @@ export type PublicProfile =
       joinedAt: string;
       /** How its owner arranged the album (ADR 0069). */
       layout: AlbumLayout;
+      /** The Stats tab's parts its owner keeps from visitors (ADR 0077). */
+      statsHidden: StatsSection[];
     };
 
 /** The safe subset of a profile by username (`public_profile()`), or null when nobody has that name. */
@@ -37,6 +39,7 @@ export async function publicProfile(db: UserClient, username: string): Promise<P
         album_order: string[] | null;
         album_hidden: string[] | null;
         shelf_pins: string[] | null;
+        stats_hidden: string[] | null;
       }
     | undefined;
   if (!row) return null;
@@ -51,6 +54,7 @@ export async function publicProfile(db: UserClient, username: string): Promise<P
     avatarUrl: row.avatar_url,
     joinedAt: row.created_at,
     layout: albumLayout(row.album_order, row.album_hidden, row.shelf_pins),
+    statsHidden: statsHidden(row.stats_hidden),
   };
 }
 
@@ -110,7 +114,7 @@ export async function exportAccount(db: UserClient, user: { id: string; email: s
   ] = await Promise.all([
     db
       .from("profiles")
-      .select("username, display_name, bio, avatar_url, locale, time_zone, country, visibility, theme, email_recaps, reel_reminders, album_order, album_hidden, shelf_pins, created_at, updated_at")
+      .select("username, display_name, bio, avatar_url, locale, time_zone, country, visibility, theme, email_recaps, reel_reminders, album_order, album_hidden, shelf_pins, stats_hidden, created_at, updated_at")
       .eq("id", user.id)
       .single()
       .then(({ data, error }) => {

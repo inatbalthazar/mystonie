@@ -34,7 +34,7 @@ import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
 import { AlbumCover, type AlbumProfile } from "./album-cover";
 import { ArrangeAlbum } from "./arrange-album";
-import { MeTabs } from "./me-tabs";
+import { MeTabs, ProfileTabs } from "./me-tabs";
 import { Shelf } from "./shelf";
 import { ShelfFavourites } from "./shelf-favourites";
 
@@ -51,7 +51,8 @@ export type { AlbumProfile } from "./album-cover";
  * two rows and "Show all". Visitors see it at /u/<username>; the owner also at /me, the nav island's Me (ADR 0050), even
  * while it's private to everyone else (`privateToOthers`), as the Album tab next to Stats (`me`, ADR 0053). The
  * owner gets Share my collection and Settings, and on Me "Arrange" and "Pick favourites". No cards: they're the owner's,
- * on Me's Cards tab (ADR 0076), and each shared one has its own page.
+ * on Me's Cards tab (ADR 0076), and each shared one has its own page. Visitors get the profile's Stats tab next to it
+ * (`statsTab`, ADR 0077).
  */
 export async function ProfileAlbum({
   db,
@@ -61,6 +62,7 @@ export async function ProfileAlbum({
   timeZone = "UTC",
   privateToOthers = false,
   me = false,
+  statsTab = false,
   layout,
 }: {
   db: UserClient;
@@ -71,8 +73,10 @@ export async function ProfileAlbum({
   /** The owner's own zone, for their Share my collection cards (visitors' pages don't read it). */
   timeZone?: string;
   privateToOthers?: boolean;
-  /** Shown at /me: Me's tabs (Album · Stats) under the cover. */
+  /** Shown at /me: Me's tabs (Album · Stats · Cards) under the cover. */
   me?: boolean;
+  /** At /u/<username>: the profile's tabs (Album · Stats, ADR 0077), unless its owner hid every part of the stats. */
+  statsTab?: boolean;
 }) {
   const isOwner = viewerId === profile.id;
   const [rows, watching, counts, awarded, patches, clubs, saved, places, atlasPublic, t, tb, tc, tl, tj] = await Promise.all([
@@ -244,8 +248,8 @@ export async function ProfileAlbum({
         counts={counts}
         follow={isOwner ? undefined : { signedIn: !!viewerId, next: localizedPath(`/u/${profile.username}`, locale, routing.defaultLocale) }}
       />
-      {me && <MeTabs current="album" />}
-      <MeSwipe me={me}>
+      {me ? <MeTabs current="album" /> : statsTab && <ProfileTabs username={profile.username} current="album" />}
+      <AlbumSwipe next={me ? "/stats" : statsTab ? `/u/${profile.username}/stats` : null} replace={!me}>
         {privateToOthers && (
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl bg-brand-soft px-4 py-2 text-sm">
             <LockIcon className="size-4 shrink-0 text-brand" aria-hidden="true" />
@@ -295,15 +299,15 @@ export async function ProfileAlbum({
             </div>
           </>
         )}
-      </MeSwipe>
+      </AlbumSwipe>
     </main>
   );
 }
 
-/** Me's album swipes over to Stats, the tab next to it (ADR 0070); a visitor's album is just the page. */
-function MeSwipe({ me, children }: { me: boolean; children: ReactNode }) {
-  return me ? (
-    <SwipeArea next="/stats" className="flex flex-col gap-8">
+/** The album swipes over to Stats, the tab next to it (ADR 0070, a profile's: ADR 0077); without tabs it's just the page. */
+function AlbumSwipe({ next, replace, children }: { next: string | null; replace: boolean; children: ReactNode }) {
+  return next ? (
+    <SwipeArea next={next} replace={replace} className="flex flex-col gap-8">
       {children}
     </SwipeArea>
   ) : (

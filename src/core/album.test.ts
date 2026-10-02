@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { ALBUM_SECTIONS, albumHidden, albumOrder, HIDEABLE_SECTIONS, moveSection, parseAlbumSections } from "./album";
+import { ALBUM_SECTIONS, albumHidden, albumOrder, HIDEABLE_SECTIONS, moveSection, parseAlbumSections, parseStatsSections, statsHidden } from "./album";
 
 describe("albumOrder", () => {
   it("is the default order when nothing was arranged", () => {
@@ -52,5 +52,25 @@ describe("moveSection", () => {
   it("clamps past either end", () => {
     expect(moveSection(order, "watching", -3)).toEqual(order);
     expect(moveSection(order, "watching", 99).at(-1)).toBe("watching");
+  });
+});
+
+describe("statsHidden", () => {
+  it("keeps the known sections, in page order", () => {
+    expect(statsHidden(["records", "nope", "activity", "records"])).toEqual(["activity", "records"]);
+    expect(statsHidden(null)).toEqual([]);
+  });
+});
+
+describe("parseStatsSections", () => {
+  it("accepts known sections, in page order without repeats", () => {
+    expect(parseStatsSections(["milestones", "numbers", "numbers"])).toEqual(["numbers", "milestones"]);
+    expect(parseStatsSections([])).toEqual([]);
+  });
+
+  it("rejects anything else", () => {
+    expect(parseStatsSections(["shelf"])).toBeNull();
+    expect(parseStatsSections("activity")).toBeNull();
+    expect(parseStatsSections(null)).toBeNull();
   });
 });

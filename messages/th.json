@@ -642,7 +642,7 @@
     "topLanguages": "ภาษาที่ดูบ่อย",
     "titleCount": "{count} เรื่อง",
     "favourites": "คนโปรด",
-    "favouritesHint": "คนที่อยู่เบื้องหลังเรื่องที่คุณจบในช่วงนี้",
+    "favouritesHint": "คนที่อยู่เบื้องหลังเรื่องที่จบในช่วงนี้",
     "favouriteRole": "{role, select, actor {นักแสดง} director {ผู้กำกับและผู้สร้าง} studio {สตูดิโอ} author {นักเขียน} developer {ผู้พัฒนาเกม} other {บุคคล}}",
     "personDetail": "{count} เรื่อง · {time}",
     "tasteEmpty": "แนวและภาษาจะแสดงเมื่อมีเรื่องที่ดูในช่วงนี้",
@@ -667,7 +667,7 @@
     "readingHint": "เวลาอ่านเป็นค่าประมาณ: หน้าละ 1.5 นาที มังงะตอนละ 5 นาที เล่มละ 45 นาที",
     "playTime": "เวลาที่เล่น",
     "gamesFinished": "เกมที่เล่นจบ",
-    "playHint": "เวลาที่เล่นคือชั่วโมงที่คุณใส่ไว้ของแต่ละเกม หรือเวลาเล่นเฉลี่ยจาก RAWG",
+    "playHint": "เวลาที่เล่นคือชั่วโมงที่ใส่ไว้ของแต่ละเกม หรือเวลาเล่นเฉลี่ยจาก RAWG",
     "milestones": "หมุดหมาย",
     "milestonesHint": "ตัวเลขกลมๆ ที่คุณทำได้แล้ว แตะเพื่อทำการ์ด",
     "milestoneOn": "{date} · {name}",
@@ -675,7 +675,16 @@
     "yearReviewLink": "ดูสรุปปี {year} ของคุณ",
     "shareCollection": "แชร์คอลเลกชันของฉัน",
     "shareArea": "{area, select, watch {ที่ดู} read {ที่อ่าน} play {ที่เล่น} other {ทั้งหมด}}",
-    "shareAreaAll": "{area, select, watch {แชร์ทุกเรื่องที่ดู} read {แชร์ทุกเล่มที่อ่าน} play {แชร์ทุกเกมที่เล่น} other {แชร์คอลเลกชันของฉัน}}"
+    "shareAreaAll": "{area, select, watch {แชร์ทุกเรื่องที่ดู} read {แชร์ทุกเล่มที่อ่าน} play {แชร์ทุกเกมที่เล่น} other {แชร์คอลเลกชันของฉัน}}",
+    "headlineVisitor": "{period, select, week {สัปดาห์นี้} month {เดือนนี้} year {ปีนี้} other {ทั้งหมดที่ผ่านมา}}",
+    "milestonesHintVisitor": "ตัวเลขกลมๆ ที่ทำได้แล้ว",
+    "section": "{section, select, numbers {ตัวเลข} activity {กิจกรรม} months {รายเดือน} taste {รสนิยม} favourites {คนโปรด} records {สถิติสูงสุด} milestones {หมุดหมาย} other {ส่วนนี้}}",
+    "hideSection": "ซ่อน{section}จากโปรไฟล์",
+    "showSection": "แสดง{section}บนโปรไฟล์",
+    "onlyYou": "คุณเห็นคนเดียว",
+    "visibilityHint": "คนที่เข้ามาดูโปรไฟล์ของคุณจะเห็นสถิติเหล่านี้ แตะรูปตาเพื่อเก็บส่วนไหนไว้ดูคนเดียว",
+    "visibilitySee": "ดูแบบที่คนอื่นเห็น",
+    "visibilityFailed": "บันทึกไม่สำเร็จ ลองอีกครั้ง"
   },
   "Profile": {
     "metaTitle": "{name} (@{username})",
@@ -719,7 +728,15 @@
     "atlasCard": "Atlas {count} ประเทศ",
     "atlasRegionsCard": "Atlas ของ{country}",
     "shelfHintPinned": "เรื่องโปรดก่อน แล้วตามด้วยเรื่องล่าสุด",
-    "shelfFavourite": "เรื่องโปรด"
+    "shelfFavourite": "เรื่องโปรด",
+    "profileTabsLabel": "อัลบั้มและสถิติของ @{username}",
+    "statsMetaTitle": "สถิติของ {name}",
+    "statsAllHidden": "@{username} เก็บสถิติไว้ดูคนเดียว",
+    "statsNothing": "ยังไม่มีบันทึก",
+    "backToAlbum": "ดูอัลบั้ม",
+    "inCommonTitle": "ที่ดูเหมือนกัน",
+    "inCommonCount": "คุณทั้งคู่จบเรื่องเดียวกัน {count} เรื่อง",
+    "inCommonMore": "+ อีก {count}"
   },
   "Album": {
     "arrange": "จัดเรียง",

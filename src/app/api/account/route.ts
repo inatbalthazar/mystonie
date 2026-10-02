@@ -26,7 +26,7 @@ export async function GET() {
 }
 
 /**
- * PATCH /api/account { username?, displayName?, bio?, avatarUrl?: null, locale?, timeZone?, country?, theme?, visibility?, emailRecaps?, reelReminders?, atlasPublic? }
+ * PATCH /api/account { username?, displayName?, bio?, avatarUrl?: null, locale?, timeZone?, country?, theme?, visibility?, emailRecaps?, reelReminders?, atlasPublic?, albumOrder?, albumHidden?, shelfPins?, statsHidden? }
  * → the saved settings | 400 invalid | 401 | 409 username_taken | 422 name_not_allowed { field } | 503.
  * Settings are written as the user (RLS + column grants); the database re-checks the username, the name
  * blocklist and the time zone. The preferences cookie is refreshed, so the saved language and theme apply at once.
@@ -44,7 +44,7 @@ export async function PATCH(request: Request) {
     .from("profiles")
     .update(patch)
     .eq("id", userId)
-    .select("username, display_name, bio, avatar_url, locale, time_zone, country, theme, visibility, email_recaps, reel_reminders, atlas_public")
+    .select("username, display_name, bio, avatar_url, locale, time_zone, country, theme, visibility, email_recaps, reel_reminders, atlas_public, stats_hidden")
     .single();
   if (error) {
     if (error.code === "23505") return Response.json({ error: "username_taken" }, { status: 409, headers: noStore });
@@ -74,6 +74,7 @@ export async function PATCH(request: Request) {
       emailRecaps: data.email_recaps,
       reelReminders: data.reel_reminders,
       atlasPublic: data.atlas_public,
+      statsHidden: data.stats_hidden,
     },
     { headers: noStore },
   );

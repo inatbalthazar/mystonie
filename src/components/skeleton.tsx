@@ -152,12 +152,12 @@ export function SectionBones({ children }: { children: ReactNode }) {
   );
 }
 
-/** An album (Me, a profile): the cover, Me's tabs (Album · Stats · Cards), the numbers and the shelf. */
-export function AlbumBones({ tabs = false }: { tabs?: boolean }) {
+/** An album (Me, a profile): the cover, its tabs (Me's three, a profile's two), the numbers and the shelf. */
+export function AlbumBones({ tabs = 0 }: { tabs?: number }) {
   return (
     <SkeletonPage>
       <CoverBones />
-      {tabs && <TabBones count={3} />}
+      {tabs > 0 && <TabBones count={tabs} />}
       <TicketBones />
       <SectionBones>
         <PosterBones count={6} />

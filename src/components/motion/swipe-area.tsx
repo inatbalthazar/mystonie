@@ -35,6 +35,7 @@ export function SwipeArea({
   next,
   onSwipe,
   canSwipe,
+  replace = false,
   className,
   children,
 }: {
@@ -42,6 +43,8 @@ export function SwipeArea({
   next?: string | null;
   onSwipe?: (side: Side) => boolean;
   canSwipe?: (side: Side) => boolean;
+  /** `prev` / `next` replace the history entry (a profile's tabs, ADR 0077). */
+  replace?: boolean;
   className?: string;
   children: ReactNode;
 }) {
@@ -57,7 +60,8 @@ export function SwipeArea({
       const href = side === "next" ? next : prev;
       if (!href) return false;
       setNavDirection(side === "next" ? "tab-next" : "tab-prev");
-      router.push(href);
+      if (replace) router.replace(href);
+      else router.push(href);
       return true;
     };
     can.current = (side) => (canSwipe ? canSwipe(side) : Boolean(side === "next" ? next : prev));

@@ -2,7 +2,7 @@
 // mirrors a signed-in user's saved language and theme. The database stays the authority: it re-checks the
 // username format, the name blocklist and the time zone.
 
-import { HIDEABLE_SECTIONS, parseAlbumSections, type AlbumSection } from "./album";
+import { HIDEABLE_SECTIONS, parseAlbumSections, parseStatsSections, type AlbumSection, type StatsSection } from "./album";
 import { isCountryCode, type CountryCode } from "./countries";
 import { parseShelfPins } from "./shelf";
 
@@ -64,13 +64,14 @@ export type AccountPatch = {
   album_order?: AlbumSection[];
   album_hidden?: AlbumSection[];
   shelf_pins?: string[];
+  stats_hidden?: StatsSection[];
 };
 
 /**
  * Validates a PATCH /api/account body: any of `username`, `displayName` (empty or null clears it), `bio` (the same),
  * `avatarUrl` (only null: remove the photo), `locale`, `timeZone`, `country` (ISO 3166-1, for where to watch), `theme`, `visibility`, `emailRecaps`,
  * `reelReminders` (ADR 0054), `atlasPublic` (the Atlas on the album, ADR 0059), `albumOrder`, `albumHidden` and
- * `shelfPins` (the album as arranged, ADR 0069).
+ * `shelfPins` (the album as arranged, ADR 0069), `statsHidden` (the Stats tab's parts visitors don't see, ADR 0077).
  * Null when anything sent is invalid or nothing is.
  */
 export function parseAccountPatch(body: unknown, locales: readonly string[]): AccountPatch | null {
@@ -152,6 +153,11 @@ export function parseAccountPatch(body: unknown, locales: readonly string[]): Ac
     const pins = parseShelfPins(b.shelfPins);
     if (!pins) return null;
     patch.shelf_pins = pins;
+  }
+  if ("statsHidden" in b) {
+    const hidden = parseStatsSections(b.statsHidden);
+    if (!hidden) return null;
+    patch.stats_hidden = hidden;
   }
   return Object.keys(patch).length > 0 ? patch : null;
 }

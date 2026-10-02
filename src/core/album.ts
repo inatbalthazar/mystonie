@@ -49,3 +49,21 @@ export function moveSection(order: readonly AlbumSection[], section: AlbumSectio
   next.splice(Math.max(0, Math.min(next.length, to)), 0, section);
   return next;
 }
+
+/**
+ * A profile's Stats tab (ADR 0077): the parts visitors can be shown, in page order. Its owner hides any of them from
+ * visitors (`profiles.stats_hidden`) and still sees all of them on Me's Stats. All hidden: visitors get no Stats tab.
+ */
+export const STATS_SECTIONS = ["numbers", "activity", "months", "taste", "favourites", "records", "milestones"] as const;
+export type StatsSection = (typeof STATS_SECTIONS)[number];
+
+/** The known sections of a saved `stats_hidden`, in page order. */
+export function statsHidden(saved: readonly unknown[] | null | undefined): StatsSection[] {
+  return STATS_SECTIONS.filter((s) => (saved ?? []).includes(s));
+}
+
+/** `statsHidden` sent to PATCH /api/account, in page order; null when invalid. */
+export function parseStatsSections(value: unknown): StatsSection[] | null {
+  if (!Array.isArray(value) || !value.every((v) => (STATS_SECTIONS as readonly unknown[]).includes(v))) return null;
+  return statsHidden(value);
+}
