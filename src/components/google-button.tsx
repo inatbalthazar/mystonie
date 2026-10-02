@@ -3,6 +3,7 @@
 import { useLocale } from "next-intl";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { browserClient } from "@/lib/supabase-browser";
+import { cn } from "@/lib/utils";
 
 // Google Identity Services, loaded from Google on the sign-in page only (ADR 0073). Typed here: no package.
 type CredentialResponse = { credential?: string };
@@ -170,14 +171,18 @@ export function GoogleButton({
   return (
     <div className="relative">
       {state !== "ready" && fallback}
-      {/* Google's button draws itself in here; laid out at full width while hidden, so it can be measured. */}
+      {/* Google's button draws itself in here; laid out at full width while hidden, so it can be measured. Its
+          iframe's page has no dark scheme: under ours (`color-scheme: dark`) the browser paints an opaque white box
+          behind it, so this box keeps the light scheme and the iframe stays see-through. Same height as the other
+          buttons (h-12), so the row lines up. */}
       <div
         ref={ref}
-        className={
+        className={cn(
+          "[color-scheme:light]",
           state === "ready"
-            ? "flex min-h-11 justify-center"
-            : "invisible absolute inset-x-0 top-0 h-0 overflow-hidden"
-        }
+            ? "flex min-h-12 items-center justify-center"
+            : "invisible absolute inset-x-0 top-0 h-0 overflow-hidden",
+        )}
       />
     </div>
   );
