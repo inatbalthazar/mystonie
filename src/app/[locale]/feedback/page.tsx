@@ -43,7 +43,7 @@ export default async function FeedbackPage({ params, searchParams }: PageProps<"
   const kind = one(query.kind);
   const ref = one(query.ref);
   const mail = (chunks: ReactNode) => (
-    <a href={`mailto:${LEGAL.contactEmail}`} className="underline underline-offset-4">
+    <a href={`mailto:${LEGAL.helloEmail}`} className="underline underline-offset-4">
       {chunks}
     </a>
   );
@@ -92,7 +92,7 @@ export default async function FeedbackPage({ params, searchParams }: PageProps<"
         <h2 id="report" className="font-display text-2xl font-extrabold tracking-[-0.02em]">
           {t("reportTitle")}
         </h2>
-        <p className="text-sm text-muted-foreground">{signedIn ? t.rich("replySignedIn", { mail }) : t.rich("replySignedOut", { mail, email: LEGAL.contactEmail })}</p>
+        <p className="text-sm text-muted-foreground">{signedIn ? t.rich("replySignedIn", { mail }) : t.rich("replySignedOut", { mail, email: LEGAL.helloEmail })}</p>
         <FeedbackForm initialKind={isFeedbackKind(kind) ? kind : "bug"} page={feedbackPage(one(query.from))} errorRef={ref ?? null} signedIn={signedIn} />
       </section>
 

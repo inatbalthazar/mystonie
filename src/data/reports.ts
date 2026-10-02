@@ -54,7 +54,7 @@ export async function fileReport(report: Report, reporterId: string | null): Pro
   if (error) throw new Error(`reports insert failed: ${error.message}`);
 
   const rendered = reportEmail({ ...report, id }, new URL(path, siteUrl()).toString());
-  const email = { to: LEGAL.contactEmail, ...rendered };
+  const email = { to: LEGAL.teamInbox, ...rendered };
   const config = emailConfig();
   try {
     if (config) await sendEmail(config, email, `report-${id}`);

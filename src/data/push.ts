@@ -24,7 +24,7 @@ export function pushConfig(): VapidKeys | null {
     console.error("VAPID keys are malformed: web push is off");
     return null;
   }
-  return { publicKey, privateKey, subject: process.env.VAPID_SUBJECT?.trim() || `mailto:${LEGAL.contactEmail}` };
+  return { publicKey, privateKey, subject: process.env.VAPID_SUBJECT?.trim() || `mailto:${LEGAL.helloEmail}` };
 }
 
 /** Outside production a local push server may stand in for the browsers' (e2e/home.spec.ts). */

@@ -13,7 +13,10 @@ The owner bought `mystonie.com` at Spaceship on 2026-10-03 and wants the site's 
 - **Vercel:** the project serves `mystonie.com`, and `www.mystonie.com` redirects to it with a 308. `NEXT_PUBLIC_SITE_URL=https://mystonie.com` is set for production, so `siteUrl()` gives it to metadata, the sitemap, emails, share and unsubscribe links. Nothing else in the code names a domain.
 - **`mystonie.vercel.app`** keeps working until the new domain is live. Then it redirects to `mystonie.com`, so links already shared still land.
 - **The code's examples and tests** use `mystonie.com` in place of `mystonie.app`.
-- **The contact email** stays the owner's Gmail (`src/lib/legal.ts`) until `privacy@mystonie.com` forwards to it.
+- **Contact emails** (`src/lib/legal.ts`, switched 2026-10-03 once forwarding worked):
+  - `privacy@mystonie.com` on the Privacy and Terms pages.
+  - `hello@mystonie.com` on Report a problem, and as the push service's contact.
+  - The app's own mail to the team (beta reports, reported profiles and cards) goes straight to the owner's Gmail (`teamInbox`). Mail sent from our domain and forwarded back can land in spam.
 - **Mail:**
   - Receiving uses free email forwarding into Gmail, not a paid mailbox. Spacemail was declined at checkout.
   - Sending (sign-in codes, recaps, the launch email) goes through Resend on the verified domain.
@@ -41,7 +44,7 @@ The owner bought `mystonie.com` at Spaceship on 2026-10-03 and wants the site's 
 6. **Resend:**
    1. Add the domain `mystonie.com` and put the records it shows (SPF `TXT`, DKIM `TXT`, an `MX` on `send`) in Spaceship DNS.
    2. Once it's verified, set `EMAIL_FROM` in Vercel to `Mystonie <hello@mystonie.com>` and redeploy.
-7. **Email forwarding:** in Spaceship (Email forwarding, free) forward `hello@`, `privacy@` and `support@` to the owner's Gmail. Then tell an agent to switch `LEGAL.contactEmail` to `privacy@mystonie.com`.
+7. **Email forwarding** (done 2026-10-03): in Spaceship (Email forwarding, free), "To a single address" sends every `@mystonie.com` address to the owner's Gmail. Forwarded mail can land in spam. A Gmail filter on `to:(@mystonie.com)` with "Never send it to Spam" fixes that.
 8. **Search Console** (optional): add the domain property `mystonie.com` (a `TXT` record) and submit `https://mystonie.com/sitemap.xml`.
 
 ## Consequences

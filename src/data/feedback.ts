@@ -30,7 +30,7 @@ export async function fileFeedback(feedback: Feedback, from: FeedbackFrom): Prom
   if (error) throw new Error(`feedback insert failed: ${error.message}`);
 
   const rendered = feedbackEmail({ ...feedback, id }, from, feedback.page && new URL(feedback.page, siteUrl()).toString());
-  const email = { to: LEGAL.contactEmail, ...rendered };
+  const email = { to: LEGAL.teamInbox, ...rendered };
   const config = emailConfig();
   try {
     if (config) await sendEmail(config, email, `feedback-${id}`);

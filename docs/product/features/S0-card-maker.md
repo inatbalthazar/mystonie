@@ -21,7 +21,7 @@ A single-page web tool: search a movie or series, pick one of 3 templates, optio
 - TMDB calls go through our route handler (`/api/search`). The API key stays server-side. Show TMDB attribution on the page.
 - UI strings go through next-intl. `en` is the default, `th` is available ([i18n](../../architecture/i18n.md)).
 - Track PostHog events: `card_created`, `template_switched`, `size_switched`, `card_shared`, `card_downloaded`, `waitlist_joined`. Use cookieless mode (no consent banner needed).
-- Pages: Privacy Policy and Terms exist and are linked in the footer. **Operator / data controller:** the owner, contact `inatbalthazar@gmail.com`, operator site `https://www.codenat.me/`. Keep the contact email in one config constant so it can switch to `privacy@<mystonie domain>` (forwarding to the same inbox) once the domain is bought.
+- Pages: Privacy Policy and Terms exist and are linked in the footer. **Operator / data controller:** the owner, contact `privacy@mystonie.com` (forwarded to the owner's inbox, [ADR 0087](../../decisions/0087-brand-domain.md); `hello@mystonie.com` on the Report a problem page), operator site `https://www.codenat.me/`. Both live in `src/lib/legal.ts`.
 
 ### Share & export (technical rules)
 - **Pre-render the PNG** whenever the preview settles (debounced after template / size / text changes) and keep the `Blob` ready. The Share button must call `navigator.share({ files, url })` synchronously in the click handler: iOS Safari rejects a share that starts after an async render (`NotAllowedError`). Fall back to Download when `navigator.canShare({ files })` is false.

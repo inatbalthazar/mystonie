@@ -19,7 +19,7 @@ test("privacy and terms are linked from the footer and name the operator contact
   await page.goto("/");
   await page.getByRole("contentinfo").getByRole("link", { name: "Privacy" }).click();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Privacy Policy");
-  await expect(page.getByRole("link", { name: "inatbalthazar@gmail.com" }).first()).toHaveAttribute("href", "mailto:inatbalthazar@gmail.com");
+  await expect(page.getByRole("link", { name: "privacy@mystonie.com" }).first()).toHaveAttribute("href", "mailto:privacy@mystonie.com");
   await expect(page.getByRole("link", { name: "codenat.me" })).toHaveAttribute("href", "https://www.codenat.me/");
 
   await page.getByRole("contentinfo").getByRole("link", { name: "Terms" }).click();

@@ -125,7 +125,7 @@ test("profile settings, export, the public page, reports and privacy", async ({ 
   await expect(sheet.getByRole("status")).toHaveText("Thanks. We'll take a look.");
   const reports = await request.get(`${base}/reports?target_id=eq.${userId}&select=reason,note,target_kind`, { headers });
   expect(await reports.json()).toEqual([{ reason: "spam", note: "Test report from e2e", target_kind: "profile" }]);
-  expect((await lastEmail(request, LEGAL.contactEmail)).Subject).toMatch(/^Report: (profile|card) \(/);
+  expect((await lastEmail(request, LEGAL.teamInbox)).Subject).toMatch(/^Report: (profile|card) \(/);
 
   // The card page links to the profile and can be reported too.
   await guest.goto(`/c/${cardId}`);

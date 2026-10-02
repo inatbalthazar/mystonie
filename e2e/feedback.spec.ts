@@ -8,7 +8,7 @@ import { MAILPIT, mailpitUp, signUp } from "./helpers";
 /** The operator's notification whose body contains `token`, polled until it arrives. */
 async function operatorEmail(request: APIRequestContext, token: string): Promise<{ Subject: string; Text: string }> {
   for (let i = 0; i < 30; i++) {
-    const search = await request.get(`${MAILPIT}/api/v1/search`, { params: { query: `to:"${LEGAL.contactEmail}" ${token}` } });
+    const search = await request.get(`${MAILPIT}/api/v1/search`, { params: { query: `to:"${LEGAL.teamInbox}" ${token}` } });
     const { messages } = (await search.json()) as { messages: { ID: string }[] };
     if (messages[0]) return (await request.get(`${MAILPIT}/api/v1/message/${messages[0].ID}`)).json();
     await new Promise((r) => setTimeout(r, 500));
