@@ -15,6 +15,7 @@ import { NavIsland } from "@/components/nav-island";
 import { SyncProvider } from "@/components/offline/sync-provider";
 import { SyncStatus } from "@/components/offline/sync-status";
 import { PwaListener } from "@/components/pwa/browser";
+import { InstallSheet } from "@/components/pwa/install-sheet";
 import { PrepaintScript } from "@/components/prepaint-script";
 import { RawgAttribution } from "@/components/rawg-attribution";
 import { SupportLink } from "@/components/support-link";
@@ -135,6 +136,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
           <NavIsland />
           {/* New accounts: the getting-started checklist behind a round progress button, just above the island (ADR 0056). */}
           <GettingStartedButton />
+          {/* Visitors on a phone: put Mystonie on the home screen, before any sign-up (ADR 0085). */}
+          <InstallSheet />
         </NextIntlClientProvider>
       </body>
     </html>

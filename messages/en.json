@@ -61,6 +61,24 @@
       "people": "Find people"
     }
   },
+  "Install": {
+    "title": "Put Mystonie on your home screen",
+    "appName": "Mystonie",
+    "body": "One tap away, full screen like an app. It's free, and there's no app store to go through.",
+    "iosShare": "Tap the Share button in your browser",
+    "iosAdd": "Scroll down and choose “Add to Home Screen”",
+    "menuOpen": "Open your browser's menu",
+    "menuAdd": "Choose “Install app” or “Add to Home screen”",
+    "inAppBody": "This app's built-in browser can't add Mystonie to your home screen. Open this page in your phone's browser first, then add it from there.",
+    "inAppMenu": "Tap the menu button at the top",
+    "inAppOpen": "Choose “Open in browser” (or Safari, or Chrome)",
+    "copyLink": "Copy the link",
+    "copied": "Link copied",
+    "install": "Install",
+    "notNow": "Not now",
+    "done": "Got it",
+    "close": "Close"
+  },
   "LocaleSwitcher": {
     "label": "Language"
   },

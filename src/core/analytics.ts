@@ -45,6 +45,11 @@ export type AnalyticsEvents = {
   reel_shared: { channel: "share_sheet" | "copy" };
   /** The "Buy me a coffee" tip link was opened (ADR 0049): from the footer or Settings. */
   support_clicked: { place: "footer" | "settings" };
+  /**
+   * The visitors' install sheet (ADR 0085): shown, answered with the browser's Install, or closed. `way`: the
+   * browser's dialog, Safari's Share steps, an Android menu, or an app's browser (open in the real one first).
+   */
+  install_prompt: { action: "shown" | "installed" | "dismissed"; way: "prompt" | "ios" | "menu" | "in_app" };
   /** A beta report was sent from /feedback (ADR 0055): its kind only, never the message. */
   feedback_sent: { kind: "bug" | "idea" | "other" };
   /** "Check for family viewing" tapped on a title page: the family set of avoid-topics was saved (stage 4). */

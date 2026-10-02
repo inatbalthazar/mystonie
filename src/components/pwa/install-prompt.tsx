@@ -3,9 +3,8 @@
 import { ShareIcon, SmartphoneIcon, SquarePlusIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useState, useSyncExternalStore } from "react";
-import { dismissedRecently, installPromptReady, isIos, isStandalone, promptInstall, rememberDismissed, subscribeInstall } from "./browser";
+import { dismissedRecently, INSTALL_DISMISSED as DISMISSED, installPromptReady, isIos, isStandalone, promptInstall, rememberDismissed, subscribeInstall } from "./browser";
 
-const DISMISSED = "mystonie.install.dismissed";
 const noSubscribe = () => () => {};
 
 /** How this browser installs: its own dialog (Chromium), the Share sheet (iOS Safari), or not at all here. */

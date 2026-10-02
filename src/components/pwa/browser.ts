@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
+import { isIosDevice } from "@/core/install";
 
 // Browser-side PWA state (ADR 0028): is the app installed, can it be installed, can it get notifications.
 
@@ -60,8 +61,11 @@ export function isStandalone(): boolean {
 
 /** iPhone or iPad (iPadOS reports itself as a Mac with touch), where installing is "Share → Add to Home Screen". */
 export function isIos(): boolean {
-  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+  return isIosDevice(navigator.userAgent, navigator.platform, navigator.maxTouchPoints);
 }
+
+/** "Not now" on Home's install card or the visitors' install sheet: one answer quiets both for 30 days (ADR 0085). */
+export const INSTALL_DISMISSED = "mystonie.install.dismissed";
 
 export function pushSupported(): boolean {
   return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
