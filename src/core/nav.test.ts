@@ -13,8 +13,11 @@ describe("navTab", () => {
     expect(navTab("/settings/warnings")).toBe("me");
   });
 
-  it("lights Feed on the community pages and the Journal", () => {
-    for (const path of ["/people", "/board", "/challenges", "/clubs", "/clubs/horror", "/reel", "/journal", "/journal/how-to-write"]) {
+  it("lights Home on the community pages (ADR 0078) and Feed on the Journal", () => {
+    for (const path of ["/people", "/board", "/challenges", "/clubs", "/clubs/horror", "/reel"]) {
+      expect(navTab(path), path).toBe("home");
+    }
+    for (const path of ["/journal", "/journal/how-to-write"]) {
       expect(navTab(path), path).toBe("feed");
     }
   });

@@ -1,6 +1,6 @@
 # ADR 0074: Dots for friends' finishes, new articles and today's reel
 
-**Status:** Accepted · **Date:** 2026-10-02 · Changes [ADR 0054](0054-feed-dot-reel-reminders.md) (one dot, about you only, rejected "dots on several tabs")
+**Status:** Accepted, today's reel lights Home instead of Feed since [ADR 0078](0078-community-on-home.md) · **Date:** 2026-10-02 · Changes [ADR 0054](0054-feed-dot-reel-reminders.md) (one dot, about you only, rejected "dots on several tabs")
 
 ## Context
 The owner (2026-10-02) hadn't played today's Reel of the Day, yet nothing on the nav island or the reel's own card said so. They also want a dot on Feed, and on its Following tab, when someone they follow does something, and one for new articles.

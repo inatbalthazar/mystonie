@@ -6,7 +6,7 @@
 A daily movie game, the owner's "Wordle for movies": one movie a day for everyone, six guesses, and each wrong guess reveals a clue. The result shares as spoiler-free squares (text) or a card, with streaks and stats for signed-in players. It uses what the app already has (posters, search, credits, cards) and works in every language: no English-letter grid.
 
 ## Behaviour
-- **`/reel`**, public: signed out or in. Linked from Home (a note with today's number and where you are), the Feed's community tabs and the sitemap.
+- **`/reel`**, public: signed out or in. Linked from Home (a note with today's number and where you are, and the Reel shortcut, [ADR 0078](../../decisions/0078-community-on-home.md)) and the sitemap.
 - **One reel a day, the same for everyone:** a new one at midnight UTC, numbered from #1 on 2026-09-30. The server picks it on the day's first request, from TMDB's best-known movies (the top 500 by votes, no documentaries or TV movies), one with a poster that was never a reel before. Every server picks the same movie for a day (a hash of the date), and the database keeps one row.
 - **Clues:** a blurred poster from the start. After each wrong guess the poster sharpens and one clue opens: year, then genre, top-billed actor, director, tagline (from the title's credits, [S4 deeper stats](S4-deeper-stats.md)). A clue the movie lacks says "Not known". Everything opens when the play is over.
 - **Guessing:** from our movie search, so spelling never costs a try. The same movie can't be guessed twice. A hit ends the play; six misses too. The page then shows the answer (linking to its title page), "Got it in 3 guesses!" or "Out of guesses", and a countdown to the next reel.

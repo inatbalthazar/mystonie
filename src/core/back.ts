@@ -86,7 +86,8 @@ export type BackParent = { href: `/${string}`; signedIn: boolean };
 const PARENTS: [RegExp, BackParent][] = [
   [/^\/collection\/atlas\/[a-z]{2}$/i, { href: "/collection/atlas", signedIn: true }],
   [/^\/title\//, { href: "/collection", signedIn: true }],
-  [/^\/(people|board|challenges|clubs|reel)$/, { href: "/feed", signedIn: true }],
+  // The community pages are on Home (ADR 0078).
+  [/^\/(people|board|challenges|clubs|reel)$/, { href: "/home", signedIn: true }],
   [/^\/clubs\/[^/]+$/, { href: "/clubs", signedIn: true }],
   // The articles are listed in the feed, which visitors see too (ADR 0062).
   [/^\/journal\/[^/]+$/, { href: "/feed", signedIn: false }],

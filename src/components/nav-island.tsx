@@ -40,7 +40,8 @@ const ICONS: Record<NavTab, LucideIcon> = {
  * once signed in (`signed-in:`), so public pages stay static and it's there from the first paint. Icons only on
  * phones (the names are for screen readers), names under them from 640px. The coral ➕ is quick add, one tap from
  * anywhere. A coral dot on Feed says something waits there (ADR 0054, ADR 0074): a finish by someone you follow, a
- * Stamp or follower, a new article, or today's Reel of the Day still to play. The island asks for it on each page.
+ * Stamp or follower, or a new article; one on Home, today's Reel of the Day still to play (ADR 0078). The island asks
+ * for them on each page.
  */
 export function NavIsland() {
   const t = useTranslations("Account");
@@ -50,8 +51,9 @@ export function NavIsland() {
   // The tabs it prefetches refresh when shown after a change (ADR 0075).
   useChangeWatch();
   const dots = useFeedDots();
-  // On the feed's pages, the tabs and the Reel chip carry the dots instead.
-  const feedNews = (dots.following || dots.articles || dots.reel) && current !== "feed";
+  // On the feed's pages its tabs carry the dots instead; on Home's, the reel's note (ADR 0078).
+  const feedNews = (dots.following || dots.articles) && current !== "feed";
+  const homeNews = dots.reel && current !== "home";
 
   function add(event: MouseEvent<HTMLAnchorElement>) {
     if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) return; // a new tab
@@ -64,14 +66,14 @@ export function NavIsland() {
   function tab(id: NavTab) {
     const Icon = ICONS[id];
     const active = current === id;
-    const dot = id === "feed" && feedNews;
+    const dot = (id === "feed" && feedNews) || (id === "home" && homeNews);
     return (
       <Link
         href={NAV_TAB_PATHS[id].href}
         // The whole page, ahead of the tap, so switching tabs shows it at once (ADR 0075).
         prefetch
         aria-current={active ? "page" : undefined}
-        aria-label={dot ? t("feedNews") : undefined}
+        aria-label={dot ? t(id === "home" ? "homeNews" : "feedNews") : undefined}
         className={cn(
           "relative flex size-12 flex-col items-center justify-center gap-0.5 rounded-full transition-[color,transform] outline-none focus-visible:ring-2 focus-visible:ring-ring active:scale-90 sm:h-14 sm:w-20",
           active ? "text-foreground" : "text-muted-foreground hover:text-foreground",
@@ -79,7 +81,7 @@ export function NavIsland() {
       >
         <span className="relative">
           <Icon className="size-6" strokeWidth={active ? 2.3 : 1.8} aria-hidden="true" />
-          {/* Something waits on the feed: a coral dot, no count. */}
+          {/* Something waits there: a coral dot, no count. */}
           {dot && <span aria-hidden="true" className="absolute -top-0.5 -right-1 size-2.5 rounded-full bg-brand ring-2 ring-card dark:ring-muted" />}
         </span>
         <span className="sr-only text-[11px] leading-none font-semibold sm:not-sr-only">{t(id)}</span>

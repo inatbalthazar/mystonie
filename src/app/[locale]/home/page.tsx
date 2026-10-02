@@ -14,6 +14,7 @@ import { ChallengeNote, type NoteChallenge } from "@/components/challenges/chall
 import { JOURNAL_NOTE_DAYS, JournalNote } from "@/components/journal/journal-note";
 import { ReelNote } from "@/components/reel/reel-note";
 import { BoardNote } from "@/components/social/board-note";
+import { CommunityLinks } from "@/components/social/community-links";
 import { FriendsFinished } from "@/components/social/friends-finished";
 import { QuizNote } from "@/components/warnings/quiz-note";
 import { localizedPath } from "@/core/auth";
@@ -72,7 +73,8 @@ async function loadTrending(db: UserClient): Promise<TrendingTitle[]> {
  * Home (signed-in landing, S1 collection): the Year in Review note (December and January, ADR 0031), the latest
  * recap's note, the next episode of every series being watched,
  * the user's recent cards and what's trending (one tap into quick add). Stage 3 adds friends' finishes, the board,
- * this month's challenges and the warnings quiz. Also offers installing the app and, once
+ * this month's challenges and the warnings quiz, and under the greeting the community pages (ADR 0078). Also offers
+ * installing the app and, once
  * installed, recap notifications (ADR 0028). (The getting-started checklist floats over every page, ADR 0056.) It also
  * tells the nav island whether something about you happened since you last opened the feed (ADR 0054).
  */
@@ -169,6 +171,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
           {name ? t("greeting", { name }) : t("title")}
         </h1>
       </header>
+      <CommunityLinks />
 
       <InstallPrompt />
       {publicKey && <PushPrompt publicKey={publicKey} />}

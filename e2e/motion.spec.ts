@@ -54,8 +54,8 @@ test("pages slide the way you go, tabs swipe and sheets drag away (ADR 0070)", a
   await expect.poll(() => transitions(page)).toContain("tab");
 
   // ...a link goes forward, and the back button back.
-  await page.getByRole("link", { name: "The board" }).click();
-  await expect(page).toHaveURL(/\/board$/);
+  await page.getByRole("main").getByRole("link", { name: "Find people" }).first().click();
+  await expect(page).toHaveURL(/\/people$/);
   await expect.poll(() => transitions(page)).toContain("forward");
   await page.getByRole("banner").getByRole("link", { name: "Back to Feed" }).click();
   await expect(page).toHaveURL(/\/feed$/);

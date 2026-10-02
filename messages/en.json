@@ -51,7 +51,15 @@
     "reviewBody": "Your year of watching and reading, page by page.",
     "reviewCta": "Open my year",
     "atlasCard": "Atlas of {count, plural, one {# country} other {# countries}}",
-    "atlasRegionsCard": "Atlas of {country}"
+    "atlasRegionsCard": "Atlas of {country}",
+    "community": "Community",
+    "communityLink": {
+      "board": "The board",
+      "challenges": "Challenges",
+      "clubs": "Clubs",
+      "reel": "Reel",
+      "people": "Find people"
+    }
   },
   "LocaleSwitcher": {
     "label": "Language"
@@ -373,7 +381,8 @@
     "feedNews": "Feed, new activity",
     "home": "Home",
     "me": "Me",
-    "nav": "Main"
+    "nav": "Main",
+    "homeNews": "Home, today's reel waits"
   },
   "Auth": {
     "title": "Open your collection",
@@ -912,11 +921,8 @@
     "homeEmptyHint": "Follow people to see what they finish and give them a Stamp.",
     "friendFinished": "<b>{name}</b> finished <b>{title}</b>",
     "rareFinish": "Rare finish · {share}",
-    "toBoard": "The board",
     "toChallenges": "Challenges",
-    "toClubs": "Clubs",
-    "toReel": "Reel of the Day",
-    "communityLabel": "Community"
+    "toClubs": "Clubs"
   },
   "Board": {
     "title": "The board",

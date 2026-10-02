@@ -41,7 +41,7 @@ describe("backParent", () => {
   it("goes up a level", () => {
     expect(backParent("/collection/atlas/th")).toEqual({ href: "/collection/atlas", signedIn: true });
     expect(backParent("/title/series/66732")).toEqual({ href: "/collection", signedIn: true });
-    expect(backParent("/people")).toEqual({ href: "/feed", signedIn: true });
+    expect(backParent("/people")).toEqual({ href: "/home", signedIn: true });
     expect(backParent("/clubs/horror")).toEqual({ href: "/clubs", signedIn: true });
     expect(backParent("/review/2026")).toEqual({ href: "/stats", signedIn: true });
     expect(backParent("/settings")).toEqual({ href: "/me", signedIn: true });

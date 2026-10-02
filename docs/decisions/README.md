@@ -80,6 +80,7 @@ One file per decision: `NNNN-short-slug.md`, numbered in order. Write one whenev
 | [0075](0075-instant-tabs.md) | Tabs prefetched whole and shown from memory, refreshed in the background (`FreshPage`); still skeletons after 300 ms | **Accepted** |
 | [0076](0076-cards-tab.md) | No card gallery on albums (yours or visitors'); every card you made on Me's new Cards tab (`/me/cards`) | **Accepted** |
 | [0077](0077-public-stats.md) | A Stats tab on every public profile (`/u/<username>/stats`), each part hidden from visitors with an eye on Me's Stats (`stats_hidden`), plus "In common" for signed-in visitors | **Accepted** |
+| [0078](0078-community-on-home.md) | The community pages (board, challenges, clubs, reel, find people) as five shortcuts on Home, all in sight; they keep Home lit, and today's reel's dot moves to Home | **Accepted** |
 | [0021](0021-collection-tables-rules-in-the-database.md) | Collection tables enforce the day-one rules in the DB: UUID v7 check, no client DELETE, column grants, composite FKs for card ownership, public-profile reads via `private.is_public_profile` | **Accepted** |
 
 ## Template

@@ -1,5 +1,5 @@
 import { FreshPage } from "@/components/motion/fresh-page";
-import { ClapperboardIcon, FlagIcon, LogInIcon, ShieldIcon, TrophyIcon, UsersIcon } from "lucide-react";
+import { LogInIcon, UsersIcon } from "lucide-react";
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
@@ -35,9 +35,9 @@ export async function generateMetadata(): Promise<Metadata> {
  * **Following**, the default, is what the people you follow finished and your own finishes, newest first, each with a
  * Stamp, with the Journal's newest articles among them by date (ADR 0052), under the latest Stamps on your finishes
  * and new followers ("Follow back"); **Articles** is every article, For you first (articles about the titles in your
- * collection, saying why); **Saved** shows once you saved one. Above them, the community pages. Visitors get the
- * articles, newest first, and a way to sign in. Following and Articles carry dots for what's new on them, and the Reel
- * chip one while today's reel waits; opening a tab clears its dot (ADR 0054, ADR 0074).
+ * collection, saying why); **Saved** shows once you saved one. The community pages are on Home (ADR 0078). Visitors
+ * get the articles, newest first, and a way to sign in. Following and Articles carry dots for what's new on them;
+ * opening a tab clears its dot (ADR 0054, ADR 0074).
  */
 export default async function FeedPage({ params, searchParams }: PageProps<"/[locale]/feed">) {
   const locale = (await params).locale as Locale;
@@ -95,28 +95,7 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
         {!userId && <p className="mt-1 text-muted-foreground">{t("feedVisitorIntro")}</p>}
       </header>
 
-      {userId ? (
-        // The community pages, as tabs stuck along the album's edge: one row to swipe on a phone.
-        <nav aria-label={t("communityLabel")} className="-mx-4 -mt-5 flex gap-2 overflow-x-auto px-4 py-1 [scrollbar-width:none] sm:flex-wrap">
-          {[
-            { href: "/board", icon: TrophyIcon, label: t("toBoard") },
-            { href: "/challenges", icon: FlagIcon, label: t("toChallenges") },
-            { href: "/clubs", icon: ShieldIcon, label: t("toClubs") },
-            { href: "/reel", icon: ClapperboardIcon, label: t("toReel") },
-            { href: "/people", icon: UsersIcon, label: t("findPeople") },
-          ].map(({ href, icon: Icon, label }) => (
-            <Link
-              key={href}
-              href={href}
-              className="flex min-h-11 shrink-0 items-center gap-1.5 rounded-full bg-card px-3.5 text-sm font-semibold whitespace-nowrap text-brand shadow-sm ring-1 ring-border hover:bg-muted"
-            >
-              <Icon className="size-4" aria-hidden="true" />
-              {label}
-              {href === "/reel" && <FeedDot kind="reel" />}
-            </Link>
-          ))}
-        </nav>
-      ) : (
+      {!userId && (
         <Link
           href={{ pathname: "/auth", query: { next: self } }}
           className="-mt-4 flex h-12 items-center gap-2 self-start rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press"

@@ -50,7 +50,15 @@
     "reviewBody": "ทั้งปีที่คุณดูและอ่าน ทีละหน้า",
     "reviewCta": "เปิดดูปีของฉัน",
     "atlasCard": "Atlas {count} ประเทศ",
-    "atlasRegionsCard": "Atlas ของ{country}"
+    "atlasRegionsCard": "Atlas ของ{country}",
+    "community": "ชุมชน",
+    "communityLink": {
+      "board": "กระดาน",
+      "challenges": "ชาเลนจ์",
+      "clubs": "คลับ",
+      "reel": "Reel",
+      "people": "หาคน"
+    }
   },
   "LocaleSwitcher": {
     "label": "ภาษา"
@@ -279,7 +287,8 @@
     "feedNews": "ฟีด มีความเคลื่อนไหวใหม่",
     "home": "หน้าแรก",
     "me": "ฉัน",
-    "nav": "เมนูหลัก"
+    "nav": "เมนูหลัก",
+    "homeNews": "หน้าแรก มี reel วันนี้รออยู่"
   },
   "Auth": {
     "title": "เปิดสมุดสะสมของคุณ",
@@ -818,11 +827,8 @@
     "homeEmptyHint": "ติดตามคนอื่นเพื่อดูว่าเขาดูอะไรจบ แล้วปั๊มตราให้เขา",
     "friendFinished": "<b>{name}</b> ดู <b>{title}</b> จบแล้ว",
     "rareFinish": "จบแบบหายาก · {share}",
-    "toBoard": "กระดาน",
     "toChallenges": "ชาเลนจ์",
-    "toClubs": "คลับ",
-    "toReel": "Reel of the Day",
-    "communityLabel": "ชุมชน"
+    "toClubs": "คลับ"
   },
   "Board": {
     "title": "กระดาน",

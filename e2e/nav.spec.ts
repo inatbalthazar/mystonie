@@ -86,20 +86,28 @@ test("the nav island: the lit tab, ➕ from anywhere and in place on the collect
   await page.keyboard.press("Escape");
   await expect(sheet).toBeHidden();
 
-  // Feed (ADR 0053), lit on the community pages too. A new account has today's reel to play, so it has a dot (ADR 0074).
+  // Feed (ADR 0053). A new account has today's reel to play: Home has the dot while you're elsewhere (ADR 0078).
   await island.getByRole("link", { name: /^Feed/ }).click();
   await expect(page).toHaveURL(/\/feed$/);
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("Feed");
   await expect(island.getByRole("link", { name: "Feed", exact: true })).toHaveAttribute("aria-current", "page");
-  await page.getByRole("main").getByRole("link", { name: "The board", exact: true }).click();
-  await expect(page).toHaveURL(/\/board$/);
-  await expect(island.getByRole("link", { name: "Feed", exact: true })).toHaveAttribute("aria-current", "page");
+  await expect(island.getByRole("link", { name: "Home, today's reel waits" })).toBeVisible();
 
-  // The back button (ADR 0061): "‹ Feed" in place of the logo, back to the page before; none on a tab.
+  // The community pages are on Home, all five in sight, and keep Home lit (ADR 0078).
+  await island.getByRole("link", { name: /^Home/ }).click();
+  await expect(page).toHaveURL(/\/home$/);
+  const community = page.getByRole("navigation", { name: "Community" });
+  await expect(community.getByRole("link")).toHaveText(["The board", "Challenges", "Clubs", "Reel", "Find people"]);
+  for (const link of await community.getByRole("link").all()) await expect(link).toBeInViewport();
+  await community.getByRole("link", { name: "The board" }).click();
+  await expect(page).toHaveURL(/\/board$/);
+  await expect(island.getByRole("link", { name: "Home", exact: true })).toHaveAttribute("aria-current", "page");
+
+  // The back button (ADR 0061): "‹ Home" in place of the logo, back to the page before; none on a tab.
   const banner = page.getByRole("banner");
   await expect(banner.getByRole("link", { name: "Mystonie home" })).toHaveCount(0);
-  await banner.getByRole("link", { name: "Back to Feed" }).click();
-  await expect(page).toHaveURL(/\/feed$/);
+  await banner.getByRole("link", { name: "Back to Home" }).click();
+  await expect(page).toHaveURL(/\/home$/);
   await expect(banner.getByRole("link", { name: /^Back/ })).toHaveCount(0);
   await expect(banner.getByRole("link", { name: "Mystonie home" })).toBeVisible();
 

@@ -5,11 +5,12 @@ export type NavTab = (typeof NAV_TABS)[number];
 
 /** Each tab's page, and the pages under it that keep it lit. The ➕ between Collection and Feed is an action, never lit. */
 export const NAV_TAB_PATHS: Record<NavTab, { href: `/${string}`; within: readonly string[] }> = {
-  home: { href: "/home", within: ["/home"] },
+  // Home and the community pages it leads to (ADR 0078).
+  home: { href: "/home", within: ["/home", "/people", "/board", "/challenges", "/clubs", "/reel"] },
   // The collection's Watch · Read · Play, and its Atlas tab (`/collection/atlas`, ADR 0059).
   collection: { href: "/collection", within: ["/collection"] },
-  // The feed and the community pages it leads to, and the Journal's articles, which it lists (ADR 0062).
-  feed: { href: "/feed", within: ["/feed", "/people", "/board", "/challenges", "/clubs", "/reel", "/journal"] },
+  // The feed and the Journal's articles, which it lists (ADR 0062).
+  feed: { href: "/feed", within: ["/feed", "/journal"] },
   // Your page: its Stats tab (and Year in Review, the stats of a whole year), and the settings you open from it.
   me: { href: "/me", within: ["/me", "/stats", "/review", "/settings"] },
 };
