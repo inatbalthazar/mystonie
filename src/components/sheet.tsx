@@ -105,7 +105,7 @@ export function Sheet({
               type="button"
               onClick={onClose}
               aria-label={closeLabel}
-              className="flex size-11 shrink-0 items-center justify-center rounded-full hover:bg-muted"
+              className="flex size-11 shrink-0 items-center justify-center rounded-full outline-none hover:bg-muted focus-visible:ring-2 focus-visible:ring-ring"
             >
               <XIcon className="size-5" aria-hidden="true" />
             </button>

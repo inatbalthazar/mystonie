@@ -60,6 +60,9 @@ export async function generateMetadata({ params }: LayoutProps<"/[locale]">): Pr
     description: t("description"),
     // Installed on iOS (Add to Home Screen): opens standalone, which also allows notifications (ADR 0028).
     appleWebApp: { capable: true, title: "Mystonie", statusBarStyle: "default" },
+    // Next writes only the standard `mobile-web-app-capable`; older iOS reads Apple's own name (the manifest's
+    // `display: standalone` covers the rest, ADR 0088).
+    other: { "apple-mobile-web-app-capable": "yes" },
   };
 }
 

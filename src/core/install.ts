@@ -5,9 +5,11 @@
  * - `ios`: Safari's (or another iOS browser's) Share → Add to Home Screen.
  * - `menu`: an Android browser that installs from its own menu (⋮ → Install app / Add to Home screen).
  * - `in_app`: inside Instagram, Facebook, LINE, TikTok…, which can't install: open the page in the browser first.
+ * - `desktop`: a computer without the dialog ready (the address bar's install icon, Safari's Add to Dock). Only when
+ *   asked for (`askedInstallWay`): nobody on a computer is asked unprompted.
  * - `none`: already installed, a computer, or a robot.
  */
-export type InstallWay = "prompt" | "ios" | "menu" | "in_app" | "none";
+export type InstallWay = "prompt" | "ios" | "menu" | "in_app" | "desktop" | "none";
 
 // Apps that open links in their own browser, which has no "Add to Home Screen": Facebook and Messenger (FBAN, FBAV,
 // FB_IAB), Instagram, LINE, TikTok (musical_ly, Bytedance), Snapchat, Pinterest, LinkedIn, X, and Android webviews.
@@ -42,6 +44,19 @@ export function installWay(device: {
   if (isIosDevice(device.ua, device.platform, device.maxTouchPoints)) return "ios";
   if (/Android/i.test(device.ua)) return "menu";
   return "none";
+}
+
+/**
+ * Someone asked to install (the getting-started checklist's step, ADR 0088): every browser gets its way, a computer and
+ * automation included. `none` only when it's already the installed app.
+ */
+export function askedInstallWay(device: Omit<Parameters<typeof installWay>[0], "touch" | "robot">): InstallWay {
+  if (device.standalone) return "none";
+  if (device.promptReady) return "prompt";
+  if (isInAppBrowser(device.ua)) return "in_app";
+  if (isIosDevice(device.ua, device.platform, device.maxTouchPoints)) return "ios";
+  if (/Android/i.test(device.ua)) return "menu";
+  return "desktop";
 }
 
 /** Pages where a visitor is busy or just passing through: signing in, an email link, the card lab, offline. */

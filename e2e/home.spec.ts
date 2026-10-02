@@ -85,10 +85,17 @@ test("Home: up next, recent cards, trending into quick add, install prompt", asy
   await expect(page).toHaveURL(/\/collection$/);
   await expect(main.getByRole("button", { name: "Edit Parasite" })).toContainText("Finished");
 
-  // Install: Chromium's own prompt behind our button…
+  // Install: on a phone the card is there from the start, and "Show me how" opens the browser's steps (ADR 0088)…
   await page.goto("/home");
   const install = main.getByRole("complementary", { name: "Keep Mystonie on your home screen" });
-  await expect(install).toHaveCount(0);
+  const steps = page.getByRole("dialog", { name: "Put Mystonie on your home screen" });
+  await install.getByRole("button", { name: "Show me how" }).click();
+  await expect(steps).toContainText("Install app");
+  await steps.getByRole("button", { name: "Not now" }).click();
+  await expect(steps).toBeHidden();
+  await expect(install).toBeVisible(); // asking for the steps isn't "Not now"
+
+  // …Chromium's own prompt behind the card's Install…
   await expect(async () => {
     await page.evaluate(() => {
       const event = Object.assign(new Event("beforeinstallprompt", { cancelable: true }), {
@@ -104,15 +111,21 @@ test("Home: up next, recent cards, trending into quick add, install prompt", asy
   await install.getByRole("button", { name: "Install" }).click();
   await expect(install).toHaveCount(0);
   expect(await page.evaluate(() => (window as unknown as { prompted?: boolean }).prompted)).toBe(true);
+  expect(await page.evaluate(() => window.localStorage.getItem("mystonie.installed"))).toBe("1");
+  await page.evaluate(() => window.localStorage.removeItem("mystonie.installed"));
 
-  // …and the Share → Add to Home Screen steps on an iPhone, until "Not now".
+  // …and the Share → Add to Home Screen → Open as Web App steps on an iPhone, until the card's "Not now".
   await page.addInitScript(() =>
     Object.defineProperty(Navigator.prototype, "userAgent", {
       get: () => "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1",
     }),
   );
   await page.reload();
-  await expect(install).toContainText("Tap Share in Safari's toolbar");
+  await install.getByRole("button", { name: "Show me how" }).click();
+  await expect(steps).toContainText("Open as Web App");
+  await expect(steps).toContainText("sign in once more");
+  await steps.getByRole("button", { name: "Not now" }).click();
+  await expect(steps).toBeHidden();
   await install.getByRole("button", { name: "Not now" }).click();
   await expect(install).toHaveCount(0);
   await page.reload();

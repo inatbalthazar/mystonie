@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { installWay, isInAppBrowser, quietForInstall } from "./install";
+import { askedInstallWay, installWay, isInAppBrowser, quietForInstall } from "./install";
 
 const IPHONE_SAFARI = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
 const IPHONE_INSTAGRAM = `${IPHONE_SAFARI.replace(" Safari/604.1", "")} Instagram 350.0.0.0 (iPhone15,2; iOS 18_0; en_US)`;
@@ -35,6 +35,25 @@ describe("installWay", () => {
     expect(installWay({ ...phone, ua: IPHONE_SAFARI, standalone: true })).toBe("none");
     expect(installWay({ ...phone, ua: ANDROID_CHROME, promptReady: true, robot: true })).toBe("none");
     expect(installWay({ ...phone, ua: MAC_SAFARI, touch: false })).toBe("none");
+  });
+});
+
+describe("askedInstallWay", () => {
+  const asked = { standalone: false, promptReady: false };
+
+  it("gives a computer its own steps, and the dialog when it's ready", () => {
+    expect(askedInstallWay({ ...asked, ua: MAC_SAFARI })).toBe("desktop");
+    expect(askedInstallWay({ ...asked, ua: MAC_SAFARI, promptReady: true })).toBe("prompt");
+  });
+
+  it("gives phones the same ways as an unprompted ask", () => {
+    expect(askedInstallWay({ ...asked, ua: IPHONE_SAFARI })).toBe("ios");
+    expect(askedInstallWay({ ...asked, ua: ANDROID_CHROME })).toBe("menu");
+    expect(askedInstallWay({ ...asked, ua: IPHONE_INSTAGRAM })).toBe("in_app");
+  });
+
+  it("has nothing to offer in the installed app", () => {
+    expect(askedInstallWay({ ...asked, ua: ANDROID_CHROME, promptReady: true, standalone: true })).toBe("none");
   });
 });
 

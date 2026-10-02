@@ -42,7 +42,7 @@ export function PwaListener() {
     };
     const onInstalled = () => {
       installEvent = null;
-      notify();
+      markInstalled(); // also from the address bar's own install icon
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
     window.addEventListener("appinstalled", onInstalled);
@@ -64,18 +64,54 @@ export function isIos(): boolean {
   return isIosDevice(navigator.userAgent, navigator.platform, navigator.maxTouchPoints);
 }
 
-/** "Not now" on Home's install card or the visitors' install sheet: one answer quiets both for 30 days (ADR 0085). */
+// Installed on this device (best effort; ADR 0088): seen as the installed app, accepted in the browser's dialog, or
+// "It's on my home screen" after the steps. On iOS the home-screen app keeps its own storage, so Safari only learns it
+// from that answer.
+const INSTALLED = "mystonie.installed";
+
+export function wasInstalled(): boolean {
+  try {
+    return window.localStorage.getItem(INSTALLED) === "1";
+  } catch {
+    return false;
+  }
+}
+
+export function markInstalled() {
+  try {
+    window.localStorage.setItem(INSTALLED, "1");
+  } catch {
+    // Storage blocked: it counts until the page reloads.
+  }
+  notify();
+}
+
+const ASK = "mystonie:install";
+
+/** Opens the install sheet (mounted once in the layout) with this browser's way, for anyone, on any device. */
+export function askToInstall() {
+  window.dispatchEvent(new Event(ASK));
+}
+
+export function onAskToInstall(listener: () => void) {
+  window.addEventListener(ASK, listener);
+  return () => window.removeEventListener(ASK, listener);
+}
+
+/** "Not now" on Home's install card or the install sheet: one answer quiets both (ADR 0085). */
 export const INSTALL_DISMISSED = "mystonie.install.dismissed";
+/** Installing comes first (the owner, 2026-10-03, ADR 0088): after "Not now" it's asked again a week later. */
+export const INSTALL_QUIET_DAYS = 7;
 
 export function pushSupported(): boolean {
   return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;
 }
 
-/** "Not now" on a prompt, remembered on this device for 30 days (best effort). */
-export function dismissedRecently(key: string): boolean {
+/** "Not now" on a prompt, remembered on this device for 30 days unless said otherwise (best effort). */
+export function dismissedRecently(key: string, days = 30): boolean {
   try {
     const at = Number(window.localStorage.getItem(key));
-    return at > 0 && Date.now() - at < 30 * 86_400_000;
+    return at > 0 && Date.now() - at < days * 86_400_000;
   } catch {
     return false;
   }

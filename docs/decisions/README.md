@@ -90,6 +90,7 @@ One file per decision: `NNNN-short-slug.md`, numbered in order. Write one whenev
 | [0085](0085-install-before-sign-up.md) | Visitors on phones are asked to put Mystonie on their home screen before signing up, in a sheet that fits their browser (Install, Safari's Share steps, an Android menu, or out of an app's browser first) | **Accepted** |
 | [0086](0086-stonie-alive-and-brand-kit.md) | Stonie in the header blinks and does a random act every 7 to 16 seconds (hop, sway, look, wink, blush, spin, tilt), in CSS; a brand kit of logos, expressions and icons in `brand/` | **Accepted** |
 | [0087](0087-brand-domain.md) | `mystonie.com` is the site's address (www and mystonie.vercel.app redirect to it), with the owner's switch-over steps for DNS, Supabase, Google, Resend and forwarding | **Accepted** |
+| [0088](0088-install-from-the-checklist.md) | Install first: the checklist's Install step is a button (the browser's dialog, or the sheet with this browser's steps), every phone's browser is asked before the welcome, iOS 26's steps with Open as Web App, Google's redirect sign-in in the iOS app | **Accepted** |
 | [0021](0021-collection-tables-rules-in-the-database.md) | Collection tables enforce the day-one rules in the DB: UUID v7 check, no client DELETE, column grants, composite FKs for card ownership, public-profile reads via `private.is_public_profile` | **Accepted** |
 
 ## Template

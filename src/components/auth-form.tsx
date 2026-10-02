@@ -2,13 +2,14 @@
 
 import type { AuthError } from "@supabase/supabase-js";
 import { useLocale, useTranslations } from "next-intl";
-import { useId, useState, type FormEvent, type ReactElement } from "react";
+import { useId, useState, useSyncExternalStore, type FormEvent, type ReactElement } from "react";
 import { PREFS_COOKIE } from "@/core/account";
 import { localizedPath } from "@/core/auth";
 import type { OAuthProvider } from "@/core/avatar";
 import { EMAIL_MAX, isValidEmail, normalizeEmail } from "@/core/waitlist";
 import { Link } from "@/i18n/navigation";
 import { GoogleButton } from "./google-button";
+import { isIos, isStandalone } from "./pwa/browser";
 import { routing } from "@/i18n/routing";
 import { browserClient } from "@/lib/supabase-browser";
 import { cn } from "@/lib/utils";
@@ -23,6 +24,13 @@ function timeZone(): string {
     return "UTC";
   }
 }
+
+const noSubscribe = () => () => {};
+/**
+ * The app on an iPhone's home screen (ADR 0088). Google's own button signs in through a popup that talks back to the
+ * page, which a home-screen app on iOS can't do reliably, so there Google goes the redirect way like the others.
+ */
+const iosApp = () => isStandalone() && isIos();
 
 function noticeFor(error: AuthError, fallback: Notice): Notice {
   if (error.status === 429 || error.code?.startsWith("over_")) return "rateLimited";
@@ -58,6 +66,7 @@ export function AuthForm({
   const [code, setCode] = useState("");
   const [sentTo, setSentTo] = useState<string | null>(null);
   const [busy, setBusy] = useState<Busy>(null);
+  const inIosApp = useSyncExternalStore(noSubscribe, iosApp, () => false);
   const [notice, setNotice] = useState<Notice | null>(
     initialError === "link" ? "errorLink" : initialError === "oauth" ? "errorOauth" : null,
   );
@@ -203,7 +212,7 @@ export function AuthForm({
                 {t(provider)}
               </button>
             );
-            return provider === "google" && googleClientId ? (
+            return provider === "google" && googleClientId && !inIosApp ? (
               <GoogleButton
                 key={provider}
                 clientId={googleClientId}

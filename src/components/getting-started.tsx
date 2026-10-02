@@ -1,22 +1,22 @@
 "use client";
 
-import { CheckIcon, PartyPopperIcon } from "lucide-react";
+import { CheckIcon, DownloadIcon, PartyPopperIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useSyncExternalStore } from "react";
 import { gettingStarted, type GettingStarted, type GettingStartedFacts, type GettingStartedStep } from "@/core/getting-started";
 import { Link, usePathname } from "@/i18n/navigation";
 import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
-import { isStandalone } from "./pwa/browser";
+import { askToInstall, installPromptReady, isStandalone, markInstalled, subscribeInstall, wasInstalled } from "./pwa/browser";
+import { installAskComing } from "./pwa/install-sheet";
 import { Sheet } from "./sheet";
 import { Reveal } from "@/components/motion/reveal";
 
-// On this device (best effort): "Skip for now", the celebration seen, the welcome done, and having opened the
-// installed app.
+// On this device (best effort): "Skip for now", the celebration seen and the welcome done. Installing is kept by
+// ./pwa/browser (`wasInstalled`).
 const SKIPPED = "mystonie.gettingStarted.skipped";
 const CELEBRATED = "mystonie.gettingStarted.celebrated";
 const WELCOMED = "mystonie.gettingStarted.welcomed";
-const INSTALLED = "mystonie.installed";
 
 const listeners = new Set<() => void>();
 function subscribe(listener: () => void) {
@@ -77,7 +77,8 @@ const HIDDEN_ON = ["/import"];
 /**
  * The getting-started checklist (stage 4, ADR 0046, ADR 0056): a round progress button floating over the bottom right
  * of every signed-in page, just above the nav island. Tapping it opens the checklist in a sheet: five steps ticked from
- * real data (the server's counts, asked again on each page; installing is seen here, in the browser), "Skip for now"
+ * real data (the server's counts, asked again on each page; installing is seen here, in the browser, and its step is a
+ * button that installs, ADR 0088), "Skip for now"
  * (Settings brings it back) and a small celebration at 100 %, once. A new account's first page opens it by itself,
  * once on each device (the owner, 2026-10-02; ADR 0072).
  */
@@ -89,13 +90,13 @@ export function GettingStartedButton() {
   const skipped = useSyncExternalStore(subscribe, () => read(SKIPPED), () => true);
   const celebrated = useSyncExternalStore(subscribe, () => read(CELEBRATED), () => true);
   const standalone = useSyncExternalStore(subscribe, isStandalone, () => false);
-  const installed = useSyncExternalStore(subscribe, () => read(INSTALLED), () => false) || standalone;
+  const installed = useSyncExternalStore(subscribeInstall, wasInstalled, () => false) || standalone;
   const [facts, setFacts] = useState<Omit<GettingStartedFacts, "installed"> | null>(null);
   const [open, setOpen] = useState(false);
   const [asked, setAsked] = useState(0);
 
   useEffect(() => {
-    if (standalone && !read(INSTALLED)) write(INSTALLED, true);
+    if (standalone && !wasInstalled()) markInstalled();
   }, [standalone]);
 
   // The counts, again on every page (and each time the sheet opens) while the checklist is still in use.
@@ -114,7 +115,8 @@ export function GettingStartedButton() {
         if (hidden || read(WELCOMED)) return;
         const f = body.facts;
         const fresh = f.entries + f.cards + f.avoidTopics + f.following + f.clubs === 0;
-        if (fresh && document.querySelector("dialog[open]")) return;
+        // Installing comes first (ADR 0088): while the install sheet is about to ask, the welcome waits too.
+        if (fresh && (document.querySelector("dialog[open]") || installAskComing(pathname))) return;
         write(WELCOMED, true);
         if (!fresh) return;
         setOpen(true);
@@ -168,6 +170,11 @@ export function GettingStartedButton() {
           <Checklist
             g={g}
             onNavigate={close}
+            onInstall={() => {
+              // The browser's own dialog opens over the checklist, which then ticks; the steps get a sheet of their own.
+              if (!installPromptReady()) close();
+              askToInstall();
+            }}
             onSkip={() => {
               track("getting_started", { action: "skipped" });
               close();
@@ -222,7 +229,7 @@ function Bar({ g }: { g: GettingStarted }) {
   );
 }
 
-function Checklist({ g, onNavigate, onSkip }: { g: GettingStarted; onNavigate: () => void; onSkip: () => void }) {
+function Checklist({ g, onNavigate, onInstall, onSkip }: { g: GettingStarted; onNavigate: () => void; onInstall: () => void; onSkip: () => void }) {
   const t = useTranslations("GettingStarted");
   return (
     <div className="flex flex-col gap-3">
@@ -250,8 +257,24 @@ function Checklist({ g, onNavigate, onSkip }: { g: GettingStarted; onNavigate: (
           );
           return (
             <li key={step}>
-              {done || step === "install" ? (
+              {done ? (
                 <div className="flex min-h-12 items-center gap-3 py-1.5">{label}</div>
+              ) : step === "install" ? (
+                <button
+                  type="button"
+                  data-install-step
+                  onClick={onInstall}
+                  className="-mx-2 flex min-h-12 w-[calc(100%+1rem)] items-center gap-3 rounded-lg px-2 py-1.5 text-left hover:bg-muted"
+                >
+                  {label}
+                  <span
+                    aria-hidden="true"
+                    className="ml-auto flex h-9 shrink-0 items-center gap-1.5 rounded-full bg-brand px-3.5 text-sm font-semibold text-brand-foreground shadow-sm press"
+                  >
+                    <DownloadIcon className="size-4" strokeWidth={2.5} />
+                    {t("installButton")}
+                  </span>
+                </button>
               ) : (
                 <Link href={HREF[step]} onClick={onNavigate} className="-mx-2 flex min-h-12 items-center gap-3 rounded-lg px-2 py-1.5 hover:bg-muted">
                   {label}
