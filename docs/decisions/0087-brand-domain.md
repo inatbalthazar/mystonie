@@ -11,7 +11,7 @@ The owner bought `mystonie.com` at Spaceship on 2026-10-03 and wants the site's 
 ## Decision
 **`https://mystonie.com` is the one address:**
 - **Vercel:** the project serves `mystonie.com`, and `www.mystonie.com` redirects to it with a 308. `NEXT_PUBLIC_SITE_URL=https://mystonie.com` is set for production, so `siteUrl()` gives it to metadata, the sitemap, emails, share and unsubscribe links. Nothing else in the code names a domain.
-- **`mystonie.vercel.app`** keeps working until the new domain is live. Then it redirects to `mystonie.com`, so links already shared still land.
+- **`mystonie.vercel.app`** redirects (308) to `mystonie.com`, with the path and query kept, so links already shared still land. The redirect is in `next.config.ts` (`redirects()`, matching that exact host only, so preview deployments keep their own URLs), because the Vercel tools can't edit an existing domain.
 - **The code's examples and tests** use `mystonie.com` in place of `mystonie.app`.
 - **Contact emails** (`src/lib/legal.ts`, switched 2026-10-03 once forwarding worked):
   - `privacy@mystonie.com` on the Privacy and Terms pages.

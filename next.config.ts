@@ -16,6 +16,18 @@ const nextConfig: NextConfig = {
       { source: "/ingest/:path*", destination: `${posthogHost}/:path*` },
     ];
   },
+  // The old address forwards to the brand domain, path and query kept, so links shared before still land (ADR 0087).
+  // Only that exact host: preview deployments keep their own *.vercel.app URLs.
+  async redirects() {
+    return [
+      {
+        source: "/:path*",
+        has: [{ type: "host", value: "mystonie.vercel.app" }],
+        destination: "https://mystonie.com/:path*",
+        permanent: true,
+      },
+    ];
+  },
   // The service worker (public/sw.js, ADR 0028) must never be cached, so fixes reach installed apps at once. Its own
   // fetches follow this policy: it keeps posters from the catalogs' image hosts for offline use (ADR 0042).
   async headers() {
