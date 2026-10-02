@@ -174,11 +174,19 @@ test("push subscriptions: saved per device, only for real push services, dropped
 test("the getting-started checklist: a round button on every page, ticked from real data, skipped, and back from Settings", async ({ page, request }) => {
   test.skip(!(await mailpitUp(request)) || !canSeed(), "local Supabase (Mailpit, service role key) is not available");
   await seedTitles(request, [MOVIE]);
-  await signUp(page, request, "getting-started", "/home");
-  // Not on Home's page any more: a round progress button floats above the nav island (ADR 0056).
+  await signUp(page, request, "getting-started", "/home", { welcome: true });
+  // A new account's first page opens the checklist by itself (ADR 0072)...
+  const sheet = page.getByRole("dialog", { name: "Getting started" });
+  await expect(sheet).toBeVisible();
+  await expect(sheet).toContainText("0 of 5 done");
+  expect(await page.evaluate(() => window.__mystonieEvents)).toContainEqual(["getting_started", { action: "welcomed" }]);
+  await sheet.getByRole("button", { name: "Close" }).click();
+  await expect(sheet).toHaveCount(0);
+  // ...once: then it waits behind a round progress button floating above the nav island (ADR 0056).
   const button = page.getByRole("button", { name: /^Getting started: / });
   await expect(button).toHaveAccessibleName("Getting started: 0 of 5 done");
-  const sheet = page.getByRole("dialog", { name: "Getting started" });
+  await page.reload();
+  await expect(button).toBeVisible();
   await expect(sheet).toHaveCount(0);
 
   // Adding a title and choosing topics tick their steps, on any page.

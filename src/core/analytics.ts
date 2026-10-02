@@ -32,7 +32,7 @@ export type AnalyticsEvents = {
   /** A fandom club was joined, from its page or the clubs list. */
   club_joined: { club: string; via: "club" | "list" };
   /** The getting-started checklist (stage 4, ADR 0056): its floating button opened, skipped, or its 100 % celebration closed. */
-  getting_started: { action: "opened" | "skipped" | "completed" };
+  getting_started: { action: "opened" | "welcomed" | "skipped" | "completed" };
   /** A picked title's details and warnings opened in the ➕ sheet before adding (stage 4, ADR 0058): its kind. */
   title_details_opened: { kind: string };
   /** A country put on the Atlas, changed or taken off (stage 4, ADR 0059): its new status, never the country. */

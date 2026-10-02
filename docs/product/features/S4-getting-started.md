@@ -3,7 +3,7 @@
 **Stage:** 4 (owner ideas, 2026-09-30) · **Built** 2026-09-30 ([ADR 0046](../../decisions/0046-getting-started-checklist.md)) · on every page since 2026-10-01 ([ADR 0056](../../decisions/0056-getting-started-button.md))
 
 ## Summary
-New users see what to do first on every page: a round progress button opens five steps and a progress bar. Each step ticks itself from real data. Nothing opens by itself.
+New users see what to do first on every page: a round progress button opens five steps and a progress bar. Each step ticks itself from real data. A new account's first page opens it by itself, once per device ([ADR 0072](../../decisions/0072-getting-started-welcome.md)).
 
 ## Behaviour
 - **The button** (every signed-in page, bottom right, just above the nav island): a coral ring filling as steps are done, "2/5" inside (a bouncing party popper at 100 %). Hidden on `/import` (its Import bar sits there) and while the phone keyboard is up.
@@ -16,13 +16,13 @@ New users see what to do first on every page: a round progress button opens five
 - Done steps are struck through with a tick and aren't links; open ones link to where they're done, with a one-line hint (the sheet closes on the way).
 - **Skip for now** hides the button. **Settings → Getting started → Show the getting-started checklist** brings it back.
 - **100 %:** a small celebration ("You're all set!", a party popper, the full bar) until "Nice", then it's gone for good (Settings can show it again).
-- Events: `getting_started` `{ action: "opened" | "skipped" | "completed" }`.
+- Events: `getting_started` `{ action: "opened" | "welcomed" | "skipped" | "completed" }`.
 
 ## Acceptance criteria
 - [x] The steps tick from real data (collection, cards, avoid-topics, follows or clubs, the installed app). (`src/core/getting-started.test.ts`, `e2e/home.spec.ts`)
 - [x] "Skip for now" hides it after a reload; Settings brings it back. (`e2e/home.spec.ts`)
 - [x] At 100 % it celebrates once, then goes away.
-- [x] No tour: the sheet opens only from the button, mobile-first at 360px. (`e2e/home.spec.ts`)
+- [x] No tour: the sheet opens from the button, and by itself only on a new account's first page, once per device ([ADR 0072](../../decisions/0072-getting-started-welcome.md)); mobile-first at 360px. (`e2e/home.spec.ts`)
 - [x] The button is on every signed-in page and its count follows steps done anywhere. (`e2e/home.spec.ts`)
 
 ## Data

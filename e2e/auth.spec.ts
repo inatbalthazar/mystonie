@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { lastEmail, mailpitUp, navIsland, uniqueEmail } from "./helpers";
+import { lastEmail, mailpitUp, navIsland, skipWelcome, uniqueEmail } from "./helpers";
 
 test("app pages send signed-out visitors to sign-in and back", async ({ page }) => {
   await page.goto("/th/settings");
@@ -10,6 +10,7 @@ test("app pages send signed-out visitors to sign-in and back", async ({ page }) 
 
 test("email code: sign up, see settings, delete the account", async ({ page, request }) => {
   test.skip(!(await mailpitUp(request)), "local Supabase (Mailpit) is not running");
+  await skipWelcome(page);
   const email = uniqueEmail("code");
 
   await page.goto("/auth?next=/settings");
@@ -56,6 +57,7 @@ test("email code: sign up, see settings, delete the account", async ({ page, req
 
 test("email link in Thai: confirm page signs in after a tap, sign out ends the session", async ({ page, request }) => {
   test.skip(!(await mailpitUp(request)), "local Supabase (Mailpit) is not running");
+  await skipWelcome(page);
   const email = uniqueEmail("link");
 
   await page.goto("/th/auth?next=/th/settings");

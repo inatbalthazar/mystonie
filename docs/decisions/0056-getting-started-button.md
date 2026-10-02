@@ -15,7 +15,7 @@ The getting-started checklist ([S4 getting started](../product/features/S4-getti
   - Tapping the button opens the same checklist in the app's `Sheet` (a modal `<dialog>`: up from the bottom on phones, centred on wider screens).
   - It has the progress, the bar, the five steps and "Skip for now". At 100 % it shows the celebration and "Nice".
   - A step's link closes the sheet on its way to the page.
-  - It never opens by itself.
+  - It never opens by itself. *(Changed by [ADR 0072](0072-getting-started-welcome.md): a new account's first page opens it once.)*
 - **The counts:**
   - The layout is shared by static pages, so the button asks `GET /api/getting-started` (head-only counts of `entries`, `cards`, `user_avoid_topics`, `follows` and `club_members`) on each page and each time it opens.
   - It asks only while it's still in use: signed in (the pre-paint `data-auth` hint), not skipped, not celebrated. After that, no request is made.

@@ -74,6 +74,7 @@ One file per decision: `NNNN-short-slug.md`, numbered in order. Write one whenev
 | [0069](0069-arrange-the-album.md) | The album as its owner arranges it: long sections show two rows and "Show all", the cards come first by default, "Arrange" on Me moves (drag handle or arrows) and hides sections for visitors too, and up to 4 pinned favourites stand first on the Shelf | **Accepted** |
 | [0070](0070-motion-and-loading.md) | Motion across the app, Threads-like, with no new package: pages slide the way you go (React `<ViewTransition>`), skeletons on the main pages, swipes between a page's tabs, sheets that rise and drag away, pill buttons that give under the finger; all off with reduced motion | **Accepted** |
 | [0071](0071-sign-up-and-more-providers.md) | The landing page leads to sign-up (a hero button and a sign-up box in place of the waitlist form), and sign-in with Google, Apple, Facebook, X or Discord, each when switched on in Supabase | **Accepted** |
+| [0072](0072-getting-started-welcome.md) | The getting-started checklist opens by itself on a new account's first page, once per device; then it waits behind its button | **Accepted** |
 | [0021](0021-collection-tables-rules-in-the-database.md) | Collection tables enforce the day-one rules in the DB: UUID v7 check, no client DELETE, column grants, composite FKs for card ownership, public-profile reads via `private.is_public_profile` | **Accepted** |
 
 ## Template

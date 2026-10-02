@@ -10,9 +10,11 @@ import { cn } from "@/lib/utils";
 import { isStandalone } from "./pwa/browser";
 import { Sheet } from "./sheet";
 
-// On this device (best effort): "Skip for now", the celebration seen, and having opened the installed app.
+// On this device (best effort): "Skip for now", the celebration seen, the welcome done, and having opened the
+// installed app.
 const SKIPPED = "mystonie.gettingStarted.skipped";
 const CELEBRATED = "mystonie.gettingStarted.celebrated";
+const WELCOMED = "mystonie.gettingStarted.welcomed";
 const INSTALLED = "mystonie.installed";
 
 const listeners = new Set<() => void>();
@@ -75,7 +77,8 @@ const HIDDEN_ON = ["/import"];
  * The getting-started checklist (stage 4, ADR 0046, ADR 0056): a round progress button floating over the bottom right
  * of every signed-in page, just above the nav island. Tapping it opens the checklist in a sheet: five steps ticked from
  * real data (the server's counts, asked again on each page; installing is seen here, in the browser), "Skip for now"
- * (Settings brings it back) and a small celebration at 100 %, once. It never opens by itself.
+ * (Settings brings it back) and a small celebration at 100 %, once. A new account's first page opens it by itself,
+ * once on each device (the owner, 2026-10-02; ADR 0072).
  */
 export function GettingStartedButton() {
   const t = useTranslations("GettingStarted");
@@ -96,21 +99,32 @@ export function GettingStartedButton() {
 
   // The counts, again on every page (and each time the sheet opens) while the checklist is still in use.
   const active = auth && !skipped && !celebrated;
+  const hidden = HIDDEN_ON.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   useEffect(() => {
     if (!active) return;
     const controller = new AbortController();
     fetch("/api/getting-started", { signal: controller.signal, cache: "no-store" })
       .then((response) => (response.ok ? (response.json() as Promise<{ facts: Omit<GettingStartedFacts, "installed"> }>) : null))
       .then((body) => {
-        if (body) setFacts(body.facts);
+        if (!body) return;
+        setFacts(body.facts);
+        // The welcome: an account that has done nothing yet sees the checklist open on its first page. Not over
+        // another sheet (it waits for a later page), and once per device; an account under way never gets it.
+        if (hidden || read(WELCOMED)) return;
+        const f = body.facts;
+        const fresh = f.entries + f.cards + f.avoidTopics + f.following + f.clubs === 0;
+        if (fresh && document.querySelector("dialog[open]")) return;
+        write(WELCOMED, true);
+        if (!fresh) return;
+        setOpen(true);
+        track("getting_started", { action: "welcomed" });
       })
       .catch(() => {}); // offline or a hiccup: keep what it showed
     return () => controller.abort();
-  }, [active, pathname, asked]);
+  }, [active, pathname, asked, hidden]);
 
   if (!active || !facts) return null;
   const g = gettingStarted({ ...facts, installed });
-  const hidden = HIDDEN_ON.some((p) => pathname === p || pathname.startsWith(`${p}/`));
   const close = () => setOpen(false);
 
   return (

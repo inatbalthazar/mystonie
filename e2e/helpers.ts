@@ -36,8 +36,17 @@ export async function openQuickAdd(page: Page): Promise<void> {
 
 export const uniqueEmail = (tag: string) => `${tag}-${Date.now()}-${Math.floor(Math.random() * 1e6)}@example.com`;
 
-/** Signs up a new account with the English email-code flow and lands on `next`. */
-export async function signUp(page: Page, request: APIRequestContext, tag: string, next = "/collection"): Promise<string> {
+/**
+ * Marks the getting-started welcome as seen on this page's device, so a new account's first page doesn't open the
+ * checklist over what a test does next (ADR 0072). `e2e/home.spec.ts` leaves it out to test the welcome.
+ */
+export async function skipWelcome(page: Page): Promise<void> {
+  await page.addInitScript(() => window.localStorage.setItem("mystonie.gettingStarted.welcomed", "1"));
+}
+
+/** Signs up a new account with the English email-code flow and lands on `next` (without the welcome, unless `welcome`). */
+export async function signUp(page: Page, request: APIRequestContext, tag: string, next = "/collection", { welcome = false } = {}): Promise<string> {
+  if (!welcome) await skipWelcome(page);
   const email = uniqueEmail(tag);
   await page.goto(`/auth?next=${encodeURIComponent(next)}`);
   await page.getByLabel("Email").fill(email);
