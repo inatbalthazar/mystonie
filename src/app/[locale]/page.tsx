@@ -2,6 +2,7 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Locale } from "next-intl";
 import { ExampleCards } from "@/cards/example-cards";
 import { TitlePicker } from "@/components/title-picker";
+import { Link } from "@/i18n/navigation";
 import { tmdbImageUrl } from "@/core/catalog/tmdb";
 import type { SearchResult } from "@/core/catalog/types";
 import type { CardData } from "@/core/cards/types";
@@ -44,10 +45,13 @@ async function loadExamples(trending: SearchResult[], sample: CardData): Promise
   return found.length > 0 ? found : [{ ...sample, finishedOn }];
 }
 
+const heroButton =
+  "mt-3 hidden h-12 items-center justify-center rounded-full bg-brand px-6 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press";
+
 export default async function Home({ params }: PageProps<"/[locale]">) {
   const { locale } = await params;
   setRequestLocale(locale as Locale);
-  const [t, tc, trending] = await Promise.all([getTranslations("Home"), getTranslations("Card"), loadTrending()]);
+  const [t, tc, ts, trending] = await Promise.all([getTranslations("Home"), getTranslations("Card"), getTranslations("SignUp"), loadTrending()]);
   const host = siteUrl().host;
   const examples = await loadExamples(trending, {
     kind: "series",
@@ -67,6 +71,13 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
           {t.rich("headline", { mark: (chunks) => <span className="text-brand">{chunks}</span> })}
         </h1>
         <p className="max-w-sm text-lg text-muted-foreground text-balance">{t("intro")}</p>
+        {/* The way in (ADR 0071); signed in, the way back to the collection. CSS picks one, so the page stays static. */}
+        <Link href="/auth" className={`${heroButton} signed-out:inline-flex`}>
+          {ts("hero")}
+        </Link>
+        <Link href="/home" className={`${heroButton} signed-in:inline-flex`}>
+          {ts("heroSignedIn")}
+        </Link>
       </section>
       <ExampleCards examples={examples} host={host} />
       <TitlePicker trending={trending.slice(0, 12)} host={host} />

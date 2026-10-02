@@ -1,4 +1,4 @@
-// Profile photos (ADR 0064): uploaded by the person, or copied from Google or Facebook when they sign up with it, and
+// Profile photos (ADR 0064): uploaded by the person, or copied from the social account they sign up with, and
 // kept in our own public `avatars` bucket at `<user id>/<photo id>.<ext>`. Providers' photo links expire (Facebook's)
 // or tell the provider who looks at them, so nothing is shown from their servers once a copy exists.
 
@@ -41,8 +41,11 @@ export function isAvatarUrl(url: unknown, storageUrl: string): url is string {
   return typeof url === "string" && url.startsWith(prefix) && PHOTO_FILE_RE.test(url.slice(prefix.length));
 }
 
-/** Sign-in providers the sign-in page can offer, in the order of their buttons (each only when switched on). */
-export const OAUTH_PROVIDERS = ["google", "facebook"] as const;
+/**
+ * Sign-in providers the sign-in page can offer, in the order of their buttons (each only when switched on in Supabase
+ * Auth, ADR 0071). `twitter` is Supabase's name for X.
+ */
+export const OAUTH_PROVIDERS = ["google", "apple", "facebook", "twitter", "discord"] as const;
 export type OAuthProvider = (typeof OAUTH_PROVIDERS)[number];
 
 export const isOAuthProvider = (v: unknown): v is OAuthProvider => (OAUTH_PROVIDERS as readonly unknown[]).includes(v);
@@ -55,8 +58,9 @@ export function enabledProviders(settings: unknown): OAuthProvider[] {
 }
 
 /**
- * A provider's photo link at a size worth copying. Google's end in a size (`=s96-c`): ask for `AVATAR_SIZE`.
- * Anything not https is no photo.
+ * A provider's photo link at a size worth copying. Google's end in a size (`=s96-c`): ask for `AVATAR_SIZE`. X's are
+ * 48 px (`_normal`): ask for 400 px. Discord's take `?size=` in powers of two: ask for 512. Anything not https is no
+ * photo.
  */
 export function providerPhotoUrl(raw: unknown): string | null {
   if (typeof raw !== "string" || raw.length > 2000) return null;
@@ -68,6 +72,8 @@ export function providerPhotoUrl(raw: unknown): string | null {
   }
   if (url.protocol !== "https:") return null;
   if (url.hostname.endsWith(".googleusercontent.com")) return url.href.replace(/=s\d+(-c)?$/, `=s${AVATAR_SIZE}-c`);
+  if (url.hostname === "pbs.twimg.com") return url.href.replace(/_normal(\.\w+)$/, "_400x400$1");
+  if (url.hostname === "cdn.discordapp.com") url.searchParams.set("size", "512");
   return url.href;
 }
 

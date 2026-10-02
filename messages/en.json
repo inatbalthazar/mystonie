@@ -171,17 +171,14 @@
     "atlasRegionsOf": "of {total} {many}",
     "atlasRegionsShare": "of {country}"
   },
-  "Waitlist": {
-    "heading": "Want all your cards in one collection? Join the waitlist.",
-    "headingAfterCard": "Save all your cards in one collection. Join the waitlist.",
-    "placeholder": "you@example.com",
-    "join": "Join",
-    "consent": "We'll email you when the app launches. Unsubscribe anytime. <privacy>Privacy</privacy>",
-    "done": "You're on the list. We'll email you when the app launches.",
-    "invalid": "Check your email address.",
-    "rateLimited": "Too many tries. Wait a few minutes, then try again.",
-    "error": "Couldn't save that right now. Try again in a moment.",
-    "honeypot": "Leave this field empty"
+  "SignUp": {
+    "heading": "Keep everything you finish in one collection.",
+    "headingAfterCard": "Save this card, and every one after it, in your collection.",
+    "body": "It's free, and signing up takes a few seconds.",
+    "cta": "Start your collection",
+    "signIn": "Already have an account? <link>Sign in</link>",
+    "hero": "Start your collection, free",
+    "heroSignedIn": "Open your collection"
   },
   "Legal": {
     "privacy": "Privacy",
@@ -208,7 +205,7 @@
       },
       "account": {
         "title": "Your account",
-        "body": "If you create an account, we store your email address, a username (made from your name or email; you can change it), the language and time zone you signed up with, and, if you sign in with Google or Facebook, the name and profile picture it shares with us. Profile photo: we keep a copy of that picture, or a photo you upload in Settings, in our storage, cropped and resized to 320 pixels; you can change or remove it in Settings at any time, and it is deleted with your account. Sign-in happens through Supabase Auth: we never see or store a password, and each sign-in code is emailed to you and works once. We use this to run your account and to send you sign-in codes. Your page: while your collection is public (the default), anyone with its link can see your display name, username, profile picture, bio, the cards you shared, your collection totals and what you're watching. You can make it private in Settings; cards you shared stay viewable by their link. A card shows your username and profile photo unless you hide them on it. Totals across everyone include private collections, but never who: how many people finished a title (and what share of everyone on Mystonie had finished it when you did) and what's trending on Mystonie, which lists a title only once at least 3 people logged it that week. The same goes for how many people are in a fandom club or joined a monthly challenge, and what a club's members are on lately. While your collection is public, the clubs you joined and the challenges you completed show on your page, and your finishes of titles that fit a club you joined show on that club's page. While you're signed in, a small cookie remembers your chosen language and theme, and it's removed when you sign out. You can download all your data as a file in Settings (Export my data), and your collection as spreadsheets that import back into Mystonie (Export as CSV). You can delete your account at any time in Settings, which immediately removes your profile and everything you've logged."
+        "body": "If you create an account, we store your email address, a username (made from your name or email; you can change it), the language and time zone you signed up with, and, if you sign in with a social account (Google, Apple, Facebook, X or Discord), the name and profile picture it shares with us. Profile photo: we keep a copy of that picture, or a photo you upload in Settings, in our storage, cropped and resized to 320 pixels; you can change or remove it in Settings at any time, and it is deleted with your account. Sign-in happens through Supabase Auth: we never see or store a password, and each sign-in code is emailed to you and works once. We use this to run your account and to send you sign-in codes. Your page: while your collection is public (the default), anyone with its link can see your display name, username, profile picture, bio, the cards you shared, your collection totals and what you're watching. You can make it private in Settings; cards you shared stay viewable by their link. A card shows your username and profile photo unless you hide them on it. Totals across everyone include private collections, but never who: how many people finished a title (and what share of everyone on Mystonie had finished it when you did) and what's trending on Mystonie, which lists a title only once at least 3 people logged it that week. The same goes for how many people are in a fandom club or joined a monthly challenge, and what a club's members are on lately. While your collection is public, the clubs you joined and the challenges you completed show on your page, and your finishes of titles that fit a club you joined show on that club's page. While you're signed in, a small cookie remembers your chosen language and theme, and it's removed when you sign out. You can download all your data as a file in Settings (Export my data), and your collection as spreadsheets that import back into Mystonie (Export as CSV). You can delete your account at any time in Settings, which immediately removes your profile and everything you've logged."
       },
       "collect": {
         "title": "What we collect",
@@ -220,7 +217,7 @@
       },
       "processors": {
         "title": "Services we rely on",
-        "body": "Vercel (hosting), Supabase (database and sign-in), PostHog (privacy-friendly analytics), Sentry (error reports) and Resend (email delivery) process data on our behalf under their data processing terms. Posters and title information come from TMDB (movies and series), AniList (manga), Google Books (books, through our server) and RAWG (games): your browser loads posters, photos of cast and crew, and game art directly from TMDB's, AniList's and RAWG's servers, which see your IP address like any website you visit. If you sign in with Google or Facebook, Google or Meta confirms who you are under its own privacy policy; we ask Facebook only for your name, email address and profile picture. Notifications you turn on are delivered by your device's push service (Apple, Google, Mozilla or Microsoft); they are encrypted so only your device can read them."
+        "body": "Vercel (hosting), Supabase (database and sign-in), PostHog (privacy-friendly analytics), Sentry (error reports) and Resend (email delivery) process data on our behalf under their data processing terms. Posters and title information come from TMDB (movies and series), AniList (manga), Google Books (books, through our server) and RAWG (games): your browser loads posters, photos of cast and crew, and game art directly from TMDB's, AniList's and RAWG's servers, which see your IP address like any website you visit. If you sign in with Google, Apple, Facebook, X or Discord, that company confirms who you are under its own privacy policy; we ask it only for your name, email address and profile picture (Apple lets you hide your email behind an address it forwards). Notifications you turn on are delivered by your device's push service (Apple, Google, Mozilla or Microsoft); they are encrypted so only your device can read them."
       },
       "transfers": {
         "title": "Where data is stored",
@@ -403,7 +400,10 @@
     "errorLink": "That sign-in link has expired or was already used. Send yourself a new code.",
     "errorOauth": "Sign-in didn't finish. Try again, or use your email.",
     "terms": "By continuing you agree to the <terms>Terms</terms> and the <privacy>Privacy Policy</privacy>.",
-    "facebook": "Continue with Facebook"
+    "facebook": "Continue with Facebook",
+    "apple": "Continue with Apple",
+    "twitter": "Continue with X",
+    "discord": "Continue with Discord"
   },
   "AuthConfirm": {
     "title": "Almost in",
@@ -420,6 +420,9 @@
     "signedInWith": "Signed in with",
     "providerGoogle": "Google",
     "providerFacebook": "Facebook",
+    "providerApple": "Apple",
+    "providerTwitter": "X",
+    "providerDiscord": "Discord",
     "providerEmail": "Email code",
     "language": "Language",
     "timeZone": "Time zone",

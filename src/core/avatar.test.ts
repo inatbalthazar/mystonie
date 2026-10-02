@@ -61,13 +61,17 @@ describe("storage", () => {
 describe("providers", () => {
   it("lists the switched-on providers in button order", () => {
     expect(enabledProviders({ external: { facebook: true, email: true, google: true, github: true } })).toEqual(["google", "facebook"]);
+    expect(enabledProviders({ external: { discord: true, twitter: true, apple: true, google: true } })).toEqual(["google", "apple", "twitter", "discord"]);
     expect(enabledProviders({ external: { google: false } })).toEqual([]);
     expect(enabledProviders(null)).toEqual([]);
   });
 
-  it("asks Google for a bigger photo and keeps only https links", () => {
+  it("asks Google, X and Discord for a bigger photo and keeps only https links", () => {
     expect(providerPhotoUrl("https://lh3.googleusercontent.com/a/ACg8oc=s96-c")).toBe("https://lh3.googleusercontent.com/a/ACg8oc=s320-c");
     expect(providerPhotoUrl("https://platform-lookaside.fbsbx.com/platform/profilepic/?asid=1&ext=2&hash=3")).toContain("fbsbx.com");
+    expect(providerPhotoUrl("https://pbs.twimg.com/profile_images/123/abc_normal.jpg")).toBe("https://pbs.twimg.com/profile_images/123/abc_400x400.jpg");
+    expect(providerPhotoUrl("https://cdn.discordapp.com/avatars/1/a1b2.png")).toBe("https://cdn.discordapp.com/avatars/1/a1b2.png?size=512");
+    expect(providerPhotoUrl("https://cdn.discordapp.com/avatars/1/a1b2.png?size=64")).toBe("https://cdn.discordapp.com/avatars/1/a1b2.png?size=512");
     expect(providerPhotoUrl("http://example.com/me.jpg")).toBeNull();
     expect(providerPhotoUrl("javascript:alert(1)")).toBeNull();
     expect(providerPhotoUrl(5)).toBeNull();

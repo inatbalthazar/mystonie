@@ -11,9 +11,9 @@ import { routing } from "@/i18n/routing";
 const NEW_PROFILE_MS = 10 * 60 * 1000;
 
 /**
- * GET /api/auth/callback?code=…&next=…&tz=…: where Google and Facebook sign-in return (OAuth with PKCE, ADR 0020,
- * ADR 0064). Exchanges the code for a session cookie. OAuth can't carry sign-up metadata, so a brand-new profile
- * gets its locale (from `next`) and browser time zone (`tz`) here. After the redirect, the provider's photo is
+ * GET /api/auth/callback?code=…&next=…&tz=…: where every social sign-in returns (OAuth with PKCE, ADR 0020,
+ * ADR 0064, ADR 0071). Exchanges the code for a session cookie. OAuth can't carry sign-up metadata, so a brand-new
+ * profile gets its locale (from `next`) and browser time zone (`tz`) here. After the redirect, the provider's photo is
  * copied into our own storage (`importSignInPhoto`), so sign-in doesn't wait for it.
  */
 export async function GET(request: Request) {

@@ -14,6 +14,7 @@ import { ProfileForm } from "@/components/settings/profile-form";
 import { SettingSwitch } from "@/components/settings/setting-switch";
 import { isTheme } from "@/core/account";
 import { localizedPath } from "@/core/auth";
+import { isOAuthProvider, type OAuthProvider } from "@/core/avatar";
 import { countryOptions, isCountryCode } from "@/core/countries";
 import { pushConfig } from "@/data/push";
 import { getProState } from "@/data/subscriptions";
@@ -24,6 +25,14 @@ import { avoidTopicIds } from "@/data/warnings";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { BETA } from "@/lib/site";
+
+const PROVIDER_LABEL = {
+  google: "providerGoogle",
+  apple: "providerApple",
+  facebook: "providerFacebook",
+  twitter: "providerTwitter",
+  discord: "providerDiscord",
+} as const satisfies Record<OAuthProvider, string>;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Settings");
@@ -63,11 +72,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
     [t("email"), user.email ?? ""],
     [
       t("signedInWith"),
-      user.app_metadata.provider === "google"
-        ? t("providerGoogle")
-        : user.app_metadata.provider === "facebook"
-          ? t("providerFacebook")
-          : t("providerEmail"),
+      isOAuthProvider(user.app_metadata.provider) ? t(PROVIDER_LABEL[user.app_metadata.provider]) : t("providerEmail"),
     ],
   ];
 

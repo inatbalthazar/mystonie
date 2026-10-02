@@ -10,7 +10,7 @@ import type { SearchResult, Title } from "@/core/catalog/types";
 import { localDateString } from "@/core/cards/edit";
 import type { CardData } from "@/core/cards/types";
 import { MIN_SEARCH_CHARS, PosterButton, SearchStatus, useTitleSearch } from "./title-search";
-import { WaitlistForm } from "./waitlist-form";
+import { SignUpPrompt } from "./sign-up-prompt";
 
 type Picked = { result: SearchResult; title?: Title; failed?: boolean };
 
@@ -107,7 +107,7 @@ export function TitlePicker({ trending, host }: { trending: SearchResult[]; host
       )}
 
       {/* Once a title is picked, the card editor asks after Share / Download instead. */}
-      {!picked && <WaitlistForm placement="home" />}
+      {!picked && <SignUpPrompt placement="home" />}
     </div>
   );
 }

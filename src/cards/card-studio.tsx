@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { useEffect, useId, useRef, useState, type PointerEvent } from "react";
 import { cardShareUrl, cycle, finalReview, localDateString } from "@/core/cards/edit";
 import type { CardData, CardSize } from "@/core/cards/types";
-import { WaitlistForm } from "@/components/waitlist-form";
+import { SignUpPrompt } from "@/components/sign-up-prompt";
 import { track } from "@/lib/analytics";
 import { cn } from "@/lib/utils";
 import { useCanShareFiles } from "./can-share";
@@ -169,7 +169,7 @@ export function CardStudio({ data, paletteSource, host }: Props) {
         </button>
       </div>
 
-      {delivered && <WaitlistForm placement="after_card" />}
+      {delivered && <SignUpPrompt placement="after_card" />}
     </div>
   );
 }

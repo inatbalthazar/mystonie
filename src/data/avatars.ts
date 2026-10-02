@@ -85,10 +85,10 @@ export type SignInPhoto = {
 };
 
 /**
- * After a Google or Facebook sign-in: copies the provider's photo into our bucket when the account is new, or when
- * the profile still shows a provider's link from before photos were kept here. A photo someone uploaded or removed
- * stays as it is. Facebook's own photo links expire, so when its photo can't be copied the link is dropped (the
- * profile shows the initial). Never throws: a photo isn't worth failing a sign-in for.
+ * After a social sign-in (Google, Apple, Facebook, X, Discord): copies the provider's photo into our bucket when the
+ * account is new, or when the profile still shows a provider's link from before photos were kept here. A photo someone
+ * uploaded or removed stays as it is. Facebook's own photo links expire, so when its photo can't be copied the link is
+ * dropped (the profile shows the initial). Never throws: a photo isn't worth failing a sign-in for.
  */
 export async function importSignInPhoto(photo: SignInPhoto, size: number): Promise<void> {
   const env = publicSupabaseEnv();

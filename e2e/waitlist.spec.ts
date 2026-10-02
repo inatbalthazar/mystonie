@@ -1,36 +1,18 @@
 import { expect, test } from "@playwright/test";
 
-// The API itself is checked against Supabase by hand (see S0 spec); here the route is stubbed so
-// runs don't fill the local waitlist or hit its rate limit.
-test("home waitlist form sends email, locale and landing attribution", async ({ page }) => {
-  const bodies: Record<string, unknown>[] = [];
-  await page.route("**/api/waitlist", async (route) => {
-    bodies.push(route.request().postDataJSON());
-    await route.fulfill({ json: { ok: true } });
-  });
+// The landing page's way in (ADR 0071): the hero's button and the box under the card maker go to /auth, where
+// sign-up and sign-in are one step. (The waitlist's form is gone; its API stays for the launch email.)
+test("the landing page invites visitors to sign up", async ({ page }) => {
+  await page.goto("/th");
+  await expect(page.getByRole("heading", { name: "เก็บทุกเรื่องที่ดูจบไว้ในคอลเลกชันเดียว" })).toBeVisible();
+  await expect(page.getByRole("link", { name: "เปิดคอลเลกชันของคุณ" })).toBeHidden();
 
-  await page.goto("/th?ref=card&tpl=polaroid");
-  const email = page.getByPlaceholder("you@example.com");
-  await email.fill("not-an-email");
-  await page.getByRole("button", { name: "ลงชื่อ" }).click();
-  await expect(page.getByText("ตรวจสอบอีเมลอีกครั้ง")).toBeVisible();
-  expect(bodies).toHaveLength(0);
-
-  await email.fill("fan@example.com");
-  await page.getByRole("button", { name: "ลงชื่อ" }).click();
-  await expect(page.getByRole("status")).toContainText("ลงชื่อแล้ว");
-  expect(await page.evaluate(() => window.__mystonieEvents)).toContainEqual(["waitlist_joined", { placement: "home" }]);
-  expect(bodies).toEqual([
-    { email: "fan@example.com", locale: "th", website: "", source: "placement=home&ref=card&tpl=polaroid" },
-  ]);
-});
-
-test("the honeypot is invisible and out of the tab order", async ({ page }) => {
   await page.goto("/");
-  const honeypot = page.locator('input[name="website"]');
-  await expect(honeypot).toHaveAttribute("tabindex", "-1");
-  const box = await honeypot.boundingBox();
-  expect(box === null || box.x + box.width <= 0).toBe(true);
+  await expect(page.getByRole("link", { name: "Start your collection", exact: true })).toHaveAttribute("href", "/auth");
+  await page.getByRole("link", { name: "Start your collection, free" }).click();
+  await expect(page).toHaveURL(/\/auth$/);
+  await expect(page.getByRole("heading", { level: 1 })).toHaveText("Open your collection");
+  await expect(page.getByRole("button", { name: "Email me a code" })).toBeVisible();
 });
 
 test("privacy and terms are linked from the footer and name the operator contact", async ({ page }) => {
