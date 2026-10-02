@@ -24,7 +24,7 @@ import {
 } from "./browser";
 
 /** How long a visitor looks around before being asked (and again, if another sheet was open then). */
-const DELAY_MS = 6000;
+const DELAY_MS = 3000;
 /** Someone signed in is asked almost at once: installing comes before using it in the browser (ADR 0088). */
 const SIGNED_IN_DELAY_MS = 1500;
 /** The ways there are to ask (never "none"). */
@@ -81,7 +81,7 @@ function deviceWay(): InstallWay {
  * opens full screen like an app. Visitors a few seconds into their visit, before any sign-up; signed-in people almost
  * at once, before the getting-started welcome. Chromium gets an Install button (its own dialog), iOS the Share → Add to
  * Home Screen → Open as Web App steps, other Android browsers their menu, and an app's own browser (Instagram, LINE…)
- * how to open the page in the real one. Once a visit; one "Not now" quiets it and Home's install card for a week.
+ * how to open the page in the real one. Once a visit; one "Not now" quiets it and Home's install card for 24 hours.
  *
  * Anyone can also ask for it (`askToInstall()`, the getting-started checklist's step, ADR 0088): the browser's dialog
  * at once when it's ready, otherwise this sheet with this browser's steps (a computer's too) and "It's on my home

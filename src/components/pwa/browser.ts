@@ -100,8 +100,8 @@ export function onAskToInstall(listener: () => void) {
 
 /** "Not now" on Home's install card or the install sheet: one answer quiets both (ADR 0085). */
 export const INSTALL_DISMISSED = "mystonie.install.dismissed";
-/** Installing comes first (the owner, 2026-10-03, ADR 0088): after "Not now" it's asked again a week later. */
-export const INSTALL_QUIET_DAYS = 7;
+/** Installing comes first (the owner, 2026-10-03, ADR 0088): after "Not now" it's asked again a day later. */
+export const INSTALL_QUIET_DAYS = 1;
 
 export function pushSupported(): boolean {
   return "serviceWorker" in navigator && "PushManager" in window && "Notification" in window;

@@ -23,9 +23,9 @@ The owner then asked for installing to come first (2026-10-03): "I don't want pe
 
 ### Install first (the second request)
 - **Everyone on a phone's browser is asked, not only visitors:**
-  - Visitors are asked after 6 s, as before (ADR 0085).
+  - Visitors are asked after 3 s (was 6 s in ADR 0085; the owner, 2026-10-03).
   - Signed-in people are asked after 1.5 s.
-  - It's asked once a visit, and "Not now" quiets it and Home's card for **7 days** (was 30).
+  - It's asked once a visit, and "Not now" quiets it and Home's card for **24 hours** (was 30 days; the owner, 2026-10-03).
   - The getting-started welcome waits while the sheet is about to ask (`installAskComing`), so installing comes before the checklist, which opens on the next page.
 - **Home's install card** shows on every phone that installs by hand. Its "Show me how" opens the same sheet (it used to show only on iOS, with its own copy of the steps).
 - **The iOS steps fit iOS 26:**

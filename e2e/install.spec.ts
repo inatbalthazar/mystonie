@@ -1,7 +1,7 @@
 import { devices, expect, test, type Page } from "@playwright/test";
 
 // The visitors' install sheet (ADR 0085). It never asks automation (navigator.webdriver), so these tests pretend to be
-// a person. It waits 6 seconds before asking.
+// a person. It waits 3 seconds before asking.
 async function asPerson(page: Page) {
   await page.addInitScript(() => Object.defineProperty(Navigator.prototype, "webdriver", { get: () => false }));
 }

@@ -35,7 +35,7 @@ const handPhone = () => {
 /**
  * Home: "Keep Mystonie on your home screen" (ADR 0028). Chromium gets an Install button (its own dialog); other phones
  * "Show me how", which opens the install sheet with their browser's steps (ADR 0088). Hidden in the installed app,
- * once it's been installed here, and for a week after "Not now".
+ * once it's been installed here, and for 24 hours after "Not now".
  */
 export function InstallPrompt() {
   const t = useTranslations("HomeApp");
