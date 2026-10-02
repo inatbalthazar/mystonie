@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { askedInstallWay, canHandToChrome, chromeIntentUrl, installWay, isInAppBrowser, quietForInstall } from "./install";
+import { askedInstallWay, canHandToChrome, iosGuide, chromeIntentUrl, installWay, isInAppBrowser, quietForInstall } from "./install";
 
 const IPHONE_SAFARI = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
 const IPHONE_INSTAGRAM = `${IPHONE_SAFARI.replace(" Safari/604.1", "")} Instagram 350.0.0.0 (iPhone15,2; iOS 18_0; en_US)`;
@@ -54,6 +54,21 @@ describe("askedInstallWay", () => {
 
   it("has nothing to offer in the installed app", () => {
     expect(askedInstallWay({ ...asked, ua: ANDROID_CHROME, promptReady: true, standalone: true })).toBe("none");
+  });
+});
+
+describe("iosGuide", () => {
+  const SAFARI_26 = IPHONE_SAFARI.replace("OS 18_0", "OS 18_6").replace("Version/18.0", "Version/26.0");
+
+  it("points at Safari 26's ••• at the bottom right, and older Safari's Share in the middle", () => {
+    expect(iosGuide(SAFARI_26)).toEqual({ spot: "bottom-right", menuFirst: true });
+    expect(iosGuide(IPHONE_SAFARI)).toEqual({ spot: "bottom-center", menuFirst: false });
+  });
+
+  it("points at the top right on an iPad and in Chrome, and at the menu in Firefox", () => {
+    expect(iosGuide(MAC_SAFARI, "MacIntel", 5)).toEqual({ spot: "top-right", menuFirst: false });
+    expect(iosGuide(IPHONE_SAFARI.replace("Version/18.0", "CriOS/130.0.0.0"))).toEqual({ spot: "top-right", menuFirst: false });
+    expect(iosGuide(IPHONE_SAFARI.replace("Version/18.0", "FxiOS/131.0"))).toEqual({ spot: "bottom-right", menuFirst: true });
   });
 });
 

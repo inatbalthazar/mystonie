@@ -59,6 +59,30 @@ export function askedInstallWay(device: Omit<Parameters<typeof installWay>[0], "
   return "desktop";
 }
 
+/** Where the browser's Share button is on an iPhone or iPad, for the install guide (ADR 0088). */
+export type IosShareSpot = "bottom-right" | "bottom-center" | "top-right";
+
+export type IosGuide = {
+  spot: IosShareSpot;
+  /** Share sits behind a menu first (iOS 26 Safari's •••, Firefox's and Edge's menus). */
+  menuFirst: boolean;
+};
+
+/**
+ * - Safari 26 (its UA keeps "iPhone OS 18_6" but says `Version/26`): the compact bar at the bottom, ••• on its right.
+ * - Older Safari: Share in the middle of the bottom toolbar.
+ * - iPad Safari, and Chrome (`CriOS`): Share at the top right.
+ * - Firefox, Edge, other iOS browsers: their menu, bottom right (top right on an iPad), then Share.
+ */
+export function iosGuide(ua: string, platform = "", maxTouchPoints = 0): IosGuide {
+  const ipad = /iPad/.test(ua) || (platform === "MacIntel" && maxTouchPoints > 1);
+  if (/CriOS/.test(ua)) return { spot: "top-right", menuFirst: false };
+  if (/FxiOS|EdgiOS|OPiOS|OPT\/|DuckDuckGo|GSA\//.test(ua)) return { spot: ipad ? "top-right" : "bottom-right", menuFirst: true };
+  if (ipad) return { spot: "top-right", menuFirst: false };
+  const version = Number(/Version\/(\d+)/.exec(ua)?.[1] ?? 0);
+  return version >= 26 ? { spot: "bottom-right", menuFirst: true } : { spot: "bottom-center", menuFirst: false };
+}
+
 // Android browsers with their own engine or name: everything else that says "Chrome/" is Chrome itself.
 const NOT_CHROME = /SamsungBrowser|EdgA|OPR\/|Firefox|FxiOS|YaBrowser|MiuiBrowser|HeyTapBrowser|UCBrowser|Vivaldi|DuckDuckGo|Brave/i;
 

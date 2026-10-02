@@ -172,3 +172,24 @@ test.describe("in Firefox on Android", () => {
     await expect(install).toHaveAttribute("href", /^intent:\/\/localhost(:\d+)?\/privacy\?from=card#Intent;scheme=http;package=com\.android\.chrome;/, { timeout: 15_000 });
   });
 });
+
+test.describe("in Safari 26 on an iPhone", () => {
+  // Safari 26 keeps "iPhone OS 18_6" in its user agent; its version says 26.
+  test.use({ userAgent: devices["iPhone 15"].userAgent.replace(/OS \d+_\d+(_\d+)?/, "OS 18_6").replace(/Version\/[\d.]+/, "Version/26.0") });
+
+  test("the guide plays the steps, and “Show me where to tap” points at ••• until it's closed, then floats", async ({ page }) => {
+    await asPerson(page);
+    await page.goto("/");
+    await expect(sheet(page)).toContainText("Tap ••• (or your browser's menu), then Share", { timeout: 15_000 });
+    await sheet(page).getByRole("button", { name: /Add to Home Screen/ }).click();
+    await expect(sheet(page).getByRole("button", { name: /Add to Home Screen/ })).toHaveAttribute("aria-current", "step");
+
+    await sheet(page).getByRole("button", { name: "Show me where to tap" }).click();
+    await expect(sheet(page)).toBeHidden();
+    const coach = page.getByRole("dialog", { name: "Where to tap" });
+    await expect(coach).toContainText("Tap ••• down here, then Share");
+    await coach.getByRole("button", { name: "Close the guide" }).click();
+    await expect(coach).toBeHidden();
+    await expect(page.getByRole("button", { name: "Install Mystonie" })).toBeVisible();
+  });
+});

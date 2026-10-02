@@ -31,7 +31,14 @@ The owner then asked for installing to come first (2026-10-03): "I don't want pe
 - **"Not now" shrinks the sheet into a floating Install button** (the owner, 2026-10-03), bottom left, above the nav island when signed in, so a mis-tap can be undone. It shows for the 24 hours the sheet stays quiet, or for the rest of the visit after a sheet someone asked for. Cancelling Chrome's own dialog does the same. Tapping it opens the browser's dialog, or the sheet. It hides once installed, in the installed app, on quiet pages and on `/import` (its own bottom bar).
 - **An Install button wherever a tap can install** (the owner, 2026-10-03: "make it Install, and install"). No page can install itself without the browser's own dialog. So:
   - Android's other browsers (Firefox, Samsung Internet without its dialog ready) get **Install**. It's an intent link that opens the same page in Chrome, where Chrome's dialog does it in one tap. App browsers (LINE, Instagram, Facebook on Android) get **Open in Chrome to install**.
-  - iOS has no such way for a page: the steps stay.
+  - iOS has no such way for a page, so it gets a guide instead (the owner: "guide iOS users in the install sheet"):
+    - **A little phone plays the steps:** the browser's Share button lit, the Share sheet's "Add to Home Screen", the "Open as Web App" switch and Add, then Mystonie on the home screen. The step on show is lit in the list, and tapping a step shows its picture. It's still under reduced motion.
+    - **"Show me where to tap"** puts the sheet away. An arrow then points at the browser's real button, with the remaining steps under it, until it's closed (then the floating button).
+    - `iosGuide` (`src/core/install.ts`) knows where that button is:
+      - Safari 26 (its UA still says iOS 18, `Version/26`): ••• at the bottom right, then Share.
+      - Older Safari: Share in the middle of the bottom toolbar.
+      - iPad Safari and Chrome: the top right.
+      - Firefox, Edge and other iOS browsers: their menu, then Share.
   - "It's on my home screen" becomes a small link, "I've added it already", under Not now. It's kept for iOS, so the checklist can tick.
 - **In Chrome the sheet opens with the Install button:** when Chrome hasn't offered its dialog yet, the sheet waits up to 4 s more for it rather than open with the menu's steps.
 - **Home's install card** shows on every phone that installs by hand. Its "Show me how" opens the same sheet (it used to show only on iOS, with its own copy of the steps).

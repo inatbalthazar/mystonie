@@ -1,14 +1,15 @@
 "use client";
 
-import { AppWindowMacIcon, CheckIcon, DownloadIcon, EllipsisVerticalIcon, ExternalLinkIcon, LinkIcon, MonitorDownIcon, ShareIcon, SmartphoneIcon, SquarePlusIcon } from "lucide-react";
+import { AppWindowMacIcon, CheckIcon, DownloadIcon, EllipsisVerticalIcon, ExternalLinkIcon, LinkIcon, MonitorDownIcon, PointerIcon, SquarePlusIcon } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
-import { askedInstallWay, canHandToChrome, chromeIntentUrl, installWay, quietForInstall, type InstallWay } from "@/core/install";
+import { askedInstallWay, canHandToChrome, chromeIntentUrl, installWay, iosGuide, quietForInstall, type InstallWay } from "@/core/install";
 import { routing } from "@/i18n/routing";
 import { track } from "@/lib/analytics";
 import { Sheet } from "../sheet";
+import { IosCoach, IosSteps } from "./ios-guide";
 import {
   askToInstall,
   dismissedRecently,
@@ -141,6 +142,8 @@ export function InstallSheet() {
   const [requested, setRequested] = useState(false);
   const [copied, setCopied] = useState(false);
   const shrunk = useSyncExternalStore(subscribeMini, miniShown, () => false);
+  // "Show me where to tap" on an iPhone: the arrow at the browser's Share button, in place of the sheet.
+  const [coach, setCoach] = useState(false);
   // Chrome may offer its dialog only after the sheet opened: then the steps become the Install button.
   const way: Asked | null = asked && ready ? "prompt" : asked;
 
@@ -217,10 +220,20 @@ export function InstallSheet() {
   // Android outside Chrome: Install opens the page in Chrome, which installs in one tap (ADR 0088). iOS has no way for a
   // page to install itself, so there the steps stay.
   const toChrome = (way === "menu" || way === "in_app") && canHandToChrome(navigator.userAgent);
-  const floating = shrunk && way === null && !quietForInstall(pathname, routing.locales) && !/\/import(\/|$)/.test(pathname);
+  const guide = way === "ios" || coach ? iosGuide(navigator.userAgent, navigator.platform, navigator.maxTouchPoints) : null;
+  const floating = shrunk && way === null && !coach && !quietForInstall(pathname, routing.locales) && !/\/import(\/|$)/.test(pathname);
 
   return (
     <>
+      {coach && guide && (
+        <IosCoach
+          guide={guide}
+          onClose={() => {
+            setCoach(false);
+            setMini(true);
+          }}
+        />
+      )}
       {floating && (
         <button
           type="button"
@@ -236,8 +249,8 @@ export function InstallSheet() {
       )}
       <Sheet open={way !== null} onClose={() => close("dismissed")} title={way === "desktop" ? t("desktopTitle") : t("title")} closeLabel={t("close")}>
         <div className="flex flex-col gap-5">
-          {/* A home screen with Mystonie on it: what they'll get. */}
-          <div aria-hidden="true" className="mx-auto grid grid-cols-4 gap-x-4 gap-y-3 rounded-[28px] bg-brand-soft/70 p-4 dark:bg-brand/15">
+          {/* A home screen with Mystonie on it: what they'll get (iOS's guide ends on its own). */}
+          <div aria-hidden="true" hidden={way === "ios"} className="mx-auto grid grid-cols-4 gap-x-4 gap-y-3 rounded-[28px] bg-brand-soft/70 p-4 dark:bg-brand/15">
             {Array.from({ length: 3 }, (_, i) => (
               <span key={i} className="size-12 rounded-[14px] bg-foreground/8" />
             ))}
@@ -250,13 +263,7 @@ export function InstallSheet() {
             {way === "in_app" ? t("inAppBody") : way === "desktop" ? t("desktopBody", { site: window.location.host }) : t("body")}
           </p>
 
-          {way === "ios" && (
-            <Steps>
-              <Step icon={<ShareIcon />}>{t("iosShare")}</Step>
-              <Step icon={<SquarePlusIcon />}>{t("iosAdd")}</Step>
-              <Step icon={<SmartphoneIcon />}>{t("iosWebApp")}</Step>
-            </Steps>
-          )}
+          {way === "ios" && guide && <IosSteps guide={guide} />}
           {/* iOS gives the home-screen app its own storage: someone signed in here signs in there once more. */}
           {way === "ios" && signedIn() && <p className="text-sm text-muted-foreground">{t("iosSignIn")}</p>}
           {way === "menu" && (
@@ -289,6 +296,21 @@ export function InstallSheet() {
                 className="h-12 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
               >
                 {t("install")}
+              </button>
+            )}
+            {way === "ios" && (
+              <button
+                type="button"
+                onClick={() => {
+                  track("install_prompt", requested ? { action: "coached", way: "ios", requested } : { action: "coached", way: "ios" });
+                  setAsked(null);
+                  setRequested(false);
+                  setCoach(true);
+                }}
+                className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
+              >
+                <PointerIcon className="size-5" aria-hidden="true" />
+                {t("showWhere")}
               </button>
             )}
             {toChrome && (
