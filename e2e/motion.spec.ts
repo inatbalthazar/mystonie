@@ -87,6 +87,8 @@ test("pages slide the way you go, tabs swipe and sheets drag away (ADR 0070)", a
   // A sheet rises, and dragging its top down closes it.
   await openQuickAdd(page);
   const sheet = page.getByRole("dialog", { name: "Add a title" });
+  // (Grab its top once it has risen: mid-rise, the top is still on its way up.)
+  await expect.poll(() => sheet.evaluate((el) => el.getAnimations().length)).toBe(0);
   const top = (await sheet.boundingBox())!;
   await drag(cdp, top.x + top.width / 3, top.y + 12, 0, 260);
   await expect(sheet).toBeHidden();

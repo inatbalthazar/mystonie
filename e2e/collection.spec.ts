@@ -69,8 +69,11 @@ test("quick add: a finished movie in 3 taps, shown at once, then edited and remo
   const summary = page.getByRole("region", { name: "All time so far" });
   await expect(summary).toContainText("2h 47m");
   await expect(summary.getByRole("definition").nth(1)).toHaveText("1");
-  await page.getByLabel("Year").selectOption("2024");
-  await expect(page.getByRole("region", { name: "Your 2024" })).toContainText("2h 47m");
+  // (The page streams after a reload: a choice made before it hydrates is lost, so it's made again.)
+  await expect(async () => {
+    await page.getByLabel("Year").selectOption("2024");
+    await expect(page.getByRole("region", { name: "Your 2024" })).toContainText("2h 47m", { timeout: 1000 });
+  }).toPass();
   await expect(rows(page)).toHaveCount(1);
   await page.getByLabel("Status", { exact: true }).selectOption("want");
   await expect(page.getByText("Nothing on this page yet")).toBeVisible();
