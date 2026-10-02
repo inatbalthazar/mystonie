@@ -59,6 +59,28 @@ export function askedInstallWay(device: Omit<Parameters<typeof installWay>[0], "
   return "desktop";
 }
 
+// Android browsers with their own engine or name: everything else that says "Chrome/" is Chrome itself.
+const NOT_CHROME = /SamsungBrowser|EdgA|OPR\/|Firefox|FxiOS|YaBrowser|MiuiBrowser|HeyTapBrowser|UCBrowser|Vivaldi|DuckDuckGo|Brave/i;
+
+/**
+ * Android, but not in Chrome (Firefox, Samsung Internet without its dialog ready, an app's browser): Chrome installs in
+ * one tap, so the Install button opens the page there (ADR 0088).
+ */
+export function canHandToChrome(ua: string): boolean {
+  if (!/Android/i.test(ua)) return false;
+  return isInAppBrowser(ua) || !/Chrome\/\d/.test(ua) || NOT_CHROME.test(ua);
+}
+
+/**
+ * The same page in Chrome on Android (an intent link). Without Chrome, it stays on `href` (the fallback).
+ * `https://mystonie.com/c/1?x=1` → `intent://mystonie.com/c/1?x=1#Intent;scheme=https;package=com.android.chrome;…`.
+ */
+export function chromeIntentUrl(href: string): string {
+  const url = new URL(href);
+  const fallback = encodeURIComponent(url.href);
+  return `intent://${url.host}${url.pathname}${url.search}#Intent;scheme=${url.protocol.replace(":", "")};package=com.android.chrome;S.browser_fallback_url=${fallback};end`;
+}
+
 /** Pages where a visitor is busy or just passing through: signing in, an email link, the card lab, offline. */
 const QUIET = /^\/(auth|unsubscribe|card-lab|offline)(\/|$)/;
 

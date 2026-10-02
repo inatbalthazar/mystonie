@@ -46,11 +46,12 @@ export type AnalyticsEvents = {
   /** The "Buy me a coffee" tip link was opened (ADR 0049): from the footer or Settings. */
   support_clicked: { place: "footer" | "settings" };
   /**
-   * The install sheet (ADR 0085): shown, answered with the browser's Install (or "It's on my home screen"), or closed.
+   * The install sheet (ADR 0085): shown, answered with the browser's Install (or "I've added it already"), sent to
+   * Chrome to install there (Android's other browsers), or closed.
    * `way`: the browser's dialog, Safari's Share steps, an Android menu, an app's browser (open in the real one first) or
    * a computer. `requested`: someone asked for it (the getting-started checklist, ADR 0088), not unprompted.
    */
-  install_prompt: { action: "shown" | "installed" | "dismissed"; way: "prompt" | "ios" | "menu" | "in_app" | "desktop"; requested?: true };
+  install_prompt: { action: "shown" | "installed" | "dismissed" | "to_chrome"; way: "prompt" | "ios" | "menu" | "in_app" | "desktop"; requested?: true };
   /** A beta report was sent from /feedback (ADR 0055): its kind only, never the message. */
   feedback_sent: { kind: "bug" | "idea" | "other" };
   /** "Check for family viewing" tapped on a title page: the family set of avoid-topics was saved (stage 4). */

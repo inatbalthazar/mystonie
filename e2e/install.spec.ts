@@ -87,7 +87,7 @@ test.describe("on an iPhone, signed in", () => {
     const checklist = await withChecklist(page, baseURL);
     await checklist.locator("[data-install-step]").click();
     await expect(sheet(page)).toContainText("Add to Home Screen");
-    await expect(sheet(page).getByRole("button", { name: "It's on my home screen" })).toBeVisible();
+    await expect(sheet(page).getByRole("button", { name: "I've added it already" })).toBeVisible();
     await sheet(page).getByRole("button", { name: "Not now" }).click();
     await expect(sheet(page)).toBeHidden();
     expect(await page.evaluate(() => window.localStorage.getItem("mystonie.install.dismissed"))).toBeNull();
@@ -128,7 +128,7 @@ test.describe("signed in, in an iPhone's Safari", () => {
     await expect(sheet(page)).toContainText("Open as Web App", { timeout: 8000 });
     await expect(sheet(page)).toContainText("sign in once more");
     await expect(page.getByRole("dialog", { name: "Getting started" })).toBeHidden();
-    await sheet(page).getByRole("button", { name: "It's on my home screen" }).click();
+    await sheet(page).getByRole("button", { name: "I've added it already" }).click();
     await expect(sheet(page)).toBeHidden();
 
     await page.goto("/terms");
@@ -160,4 +160,15 @@ test("an out-of-date “installed” (Chrome offers to install again) neither si
   await sheet(page).getByRole("button", { name: "Not now" }).click();
   await page.locator("[data-getting-started]").click();
   await expect(page.locator("[data-install-step]")).toBeVisible();
+});
+
+test.describe("in Firefox on Android", () => {
+  test.use({ userAgent: "Mozilla/5.0 (Android 14; Mobile; rv:131.0) Gecko/131.0 Firefox/131.0" });
+
+  test("Install opens the page in Chrome, where it installs in one tap", async ({ page }) => {
+    await asPerson(page);
+    await page.goto("/privacy?from=card");
+    const install = sheet(page).getByRole("link", { name: "Install" });
+    await expect(install).toHaveAttribute("href", /^intent:\/\/localhost(:\d+)?\/privacy\?from=card#Intent;scheme=http;package=com\.android\.chrome;/, { timeout: 15_000 });
+  });
 });

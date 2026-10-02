@@ -29,6 +29,10 @@ The owner then asked for installing to come first (2026-10-03): "I don't want pe
   - It's asked once a visit, and "Not now" quiets it and Home's card for **24 hours** (was 30 days; the owner, 2026-10-03).
   - The getting-started welcome waits while the sheet is about to ask (`installAskComing`), so installing comes before the checklist, which opens on the next page.
 - **"Not now" shrinks the sheet into a floating Install button** (the owner, 2026-10-03), bottom left, above the nav island when signed in, so a mis-tap can be undone. It shows for the 24 hours the sheet stays quiet, or for the rest of the visit after a sheet someone asked for. Cancelling Chrome's own dialog does the same. Tapping it opens the browser's dialog, or the sheet. It hides once installed, in the installed app, on quiet pages and on `/import` (its own bottom bar).
+- **An Install button wherever a tap can install** (the owner, 2026-10-03: "make it Install, and install"). No page can install itself without the browser's own dialog. So:
+  - Android's other browsers (Firefox, Samsung Internet without its dialog ready) get **Install**. It's an intent link that opens the same page in Chrome, where Chrome's dialog does it in one tap. App browsers (LINE, Instagram, Facebook on Android) get **Open in Chrome to install**.
+  - iOS has no such way for a page: the steps stay.
+  - "It's on my home screen" becomes a small link, "I've added it already", under Not now. It's kept for iOS, so the checklist can tick.
 - **In Chrome the sheet opens with the Install button:** when Chrome hasn't offered its dialog yet, the sheet waits up to 4 s more for it rather than open with the menu's steps.
 - **Home's install card** shows on every phone that installs by hand. Its "Show me how" opens the same sheet (it used to show only on iOS, with its own copy of the steps).
 - **The iOS steps fit iOS 26:**

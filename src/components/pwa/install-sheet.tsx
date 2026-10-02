@@ -5,7 +5,7 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { useEffect, useState, useSyncExternalStore, type ReactNode } from "react";
-import { askedInstallWay, installWay, quietForInstall, type InstallWay } from "@/core/install";
+import { askedInstallWay, canHandToChrome, chromeIntentUrl, installWay, quietForInstall, type InstallWay } from "@/core/install";
 import { routing } from "@/i18n/routing";
 import { track } from "@/lib/analytics";
 import { Sheet } from "../sheet";
@@ -211,9 +211,12 @@ export function InstallSheet() {
     setRequested(false);
   }
 
-  // After the steps they say when it's done (iOS's home-screen app keeps its own storage, so Safari can't see it), which
-  // ticks the checklist and hides Home's card; an app's browser can't install, so there it's only "Got it".
+  // After the steps they can say it's done (iOS's home-screen app keeps its own storage, so Safari can't see it), which
+  // ticks the checklist and hides Home's card: a small link, as the Install button is the way forward where there is one.
   const confirm = way === "ios" || way === "menu" || way === "desktop";
+  // Android outside Chrome: Install opens the page in Chrome, which installs in one tap (ADR 0088). iOS has no way for a
+  // page to install itself, so there the steps stay.
+  const toChrome = (way === "menu" || way === "in_app") && canHandToChrome(navigator.userAgent);
   const floating = shrunk && way === null && !quietForInstall(pathname, routing.locales) && !/\/import(\/|$)/.test(pathname);
 
   return (
@@ -288,6 +291,17 @@ export function InstallSheet() {
                 {t("install")}
               </button>
             )}
+            {toChrome && (
+              <a
+                href={chromeIntentUrl(window.location.href)}
+                onClick={() => track("install_prompt", { action: "to_chrome", way })}
+                className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
+              >
+                <DownloadIcon className="size-5" strokeWidth={2.5} aria-hidden="true" />
+                {way === "in_app" ? t("openChrome") : t("install")}
+              </a>
+            )}
+            {toChrome && way === "menu" && <p className="text-center text-xs text-muted-foreground">{t("viaChrome")}</p>}
             {way === "in_app" && (
               <button
                 type="button"
@@ -299,25 +313,29 @@ export function InstallSheet() {
                     // No clipboard here: the steps above still work.
                   }
                 }}
-                className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
+                className={
+                  toChrome
+                    ? "flex h-12 items-center justify-center gap-2 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press"
+                    : "flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
+                }
               >
                 {copied ? <CheckIcon className="size-5" aria-hidden="true" /> : <LinkIcon className="size-5" aria-hidden="true" />}
                 {copied ? t("copied") : t("copyLink")}
               </button>
             )}
+            <button type="button" onClick={() => close("dismissed")} className="h-12 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press">
+              {way === "prompt" || confirm || toChrome ? t("notNow") : t("done")}
+            </button>
             {confirm && (
               <button
                 type="button"
                 onClick={() => close("installed")}
-                className="flex h-12 items-center justify-center gap-2 rounded-full bg-brand px-5 font-semibold text-brand-foreground shadow-sm hover:bg-brand/90 press"
+                className="inline-flex min-h-11 items-center justify-center gap-1.5 self-center text-sm font-semibold text-muted-foreground underline-offset-4 hover:underline"
               >
-                <CheckIcon className="size-5" aria-hidden="true" />
+                <CheckIcon className="size-4" aria-hidden="true" />
                 {way === "desktop" ? t("installedDesktop") : t("installed")}
               </button>
             )}
-            <button type="button" onClick={() => close("dismissed")} className="h-12 rounded-full px-5 font-semibold ring-1 ring-border hover:bg-muted press">
-              {way === "prompt" || confirm ? t("notNow") : t("done")}
-            </button>
           </div>
         </div>
       </Sheet>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { askedInstallWay, installWay, isInAppBrowser, quietForInstall } from "./install";
+import { askedInstallWay, canHandToChrome, chromeIntentUrl, installWay, isInAppBrowser, quietForInstall } from "./install";
 
 const IPHONE_SAFARI = "Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15E148 Safari/604.1";
 const IPHONE_INSTAGRAM = `${IPHONE_SAFARI.replace(" Safari/604.1", "")} Instagram 350.0.0.0 (iPhone15,2; iOS 18_0; en_US)`;
@@ -54,6 +54,26 @@ describe("askedInstallWay", () => {
 
   it("has nothing to offer in the installed app", () => {
     expect(askedInstallWay({ ...asked, ua: ANDROID_CHROME, promptReady: true, standalone: true })).toBe("none");
+  });
+});
+
+describe("canHandToChrome", () => {
+  it("hands Android's other browsers and app browsers to Chrome, never Chrome itself or an iPhone", () => {
+    expect(canHandToChrome("Mozilla/5.0 (Android 14; Mobile; rv:131.0) Gecko/131.0 Firefox/131.0")).toBe(true);
+    expect(canHandToChrome(`${ANDROID_CHROME.replace("Chrome/130.0.0.0 Mobile", "SamsungBrowser/26.0 Chrome/130.0.0.0 Mobile")}`)).toBe(true);
+    expect(canHandToChrome(ANDROID_LINE)).toBe(true);
+    expect(canHandToChrome(ANDROID_WEBVIEW)).toBe(true);
+    expect(canHandToChrome(ANDROID_CHROME)).toBe(false);
+    expect(canHandToChrome(IPHONE_SAFARI)).toBe(false);
+    expect(canHandToChrome(IPHONE_INSTAGRAM)).toBe(false);
+  });
+});
+
+describe("chromeIntentUrl", () => {
+  it("keeps the path and query, and falls back to the page itself", () => {
+    expect(chromeIntentUrl("https://mystonie.com/c/abc?x=1")).toBe(
+      `intent://mystonie.com/c/abc?x=1#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent("https://mystonie.com/c/abc?x=1")};end`,
+    );
   });
 });
 
