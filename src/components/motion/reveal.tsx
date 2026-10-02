@@ -18,7 +18,7 @@ export function Reveal({ as = "div", ...props }: { as?: "div" | "section" | "li"
   useEffect(() => {
     const el = ref.current;
     if (!el) return;
-    const io = new IntersectionObserver(([entry]) => setShown(entry!.isIntersecting), { rootMargin: "0px 0px -6% 0px" });
+    const io = new IntersectionObserver(([entry]) => setShown(entry!.isIntersecting), { rootMargin: "0px" });
     io.observe(el);
     return () => io.disconnect();
   }, []);

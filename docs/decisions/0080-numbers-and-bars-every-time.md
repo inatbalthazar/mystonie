@@ -60,3 +60,13 @@ They count on Stats and on a visitor's Stats tab ([ADR 0077](0077-public-stats.m
 ## Consequences
 - **Every page with stats moves a little more.** Each animation is under a second and plays only where you're looking.
 - **No migration, no new package.** e2e runs with reduced motion, so the tests see the final numbers at once.
+
+## Update (2026-10-02): no flash on the way in
+The owner saw the top of a card flash as it scrolled into view. The cause:
+- The observer counted a card as in view only 6% above the bottom edge (`rootMargin: -6%`).
+- Below that line the card was already on screen in its final state. The entrance then started from nothing, so the card blinked.
+
+The fix:
+- `Reveal` and `CountUp` count something as in view from its first pixel (`rootMargin: 0`).
+- While out of view, whatever will come in (`.rise`, `.deal` and the `grow-*` parts) waits unseen.
+- Reduced motion: it always shows.

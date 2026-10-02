@@ -49,7 +49,7 @@ export function CountUp({ value, ms = 800 }: { value: string; ms?: number }) {
         };
         run = requestAnimationFrame(tick);
       },
-      { rootMargin: "0px 0px -6% 0px" },
+      { rootMargin: "0px" },
     );
     io.observe(el);
     return () => {

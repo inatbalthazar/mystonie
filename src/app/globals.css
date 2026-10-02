@@ -527,6 +527,14 @@ dialog[data-sheet]:not([open])::backdrop {
 [data-reveal][data-shown].rise {
   animation: rise 520ms var(--ease-out-soft) var(--grow-delay, 0ms) backwards;
 }
+/* Out of view, what will come in waits unseen, so the first edge to scroll in (a paper card's tape, a bar) never shows
+   its end state a moment before the entrance starts from nothing (the flash at a card's top). Reduced motion: shown. */
+@media (prefers-reduced-motion: no-preference) {
+  [data-reveal]:not([data-shown]):is(.rise, .deal),
+  [data-reveal]:not([data-shown]) :is(.grow-w, .grow-h, .grow-pop, .grow-ring) {
+    opacity: 0;
+  }
+}
 
 /* prefers-reduced-motion: nothing moves. Things still appear and change, at once (end states, no slides). */
 @media (prefers-reduced-motion: reduce) {
