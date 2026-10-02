@@ -420,7 +420,7 @@ test("a profile's Stats tab: visitors see the stats minus the parts its owner hi
   const headings = (p: Page) => p.getByRole("main").getByRole("heading", { level: 2 });
 
   // Me's Stats: every part has an eye; hiding Activity keeps it on Me, marked "Only you".
-  await expect(page.getByRole("main")).toContainText("Visitors see these stats on your profile.");
+  await expect(page.getByRole("main")).not.toContainText("Visitors see these stats on your profile.");
   const activitySaved = saved(page);
   await expect(async () => {
     // Retried: a tap before hydration is lost.

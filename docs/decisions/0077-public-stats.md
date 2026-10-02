@@ -30,7 +30,7 @@ What was there already:
 **Hiding, on Me's Stats:**
 - Each part has an eye in its corner. A tap hides that part from visitors and saves at once (`statsHidden` → `PATCH /api/account`).
 - **The owner still sees every part.** A hidden part is marked "Only you", not removed, because your stats are for you first. This differs from the album, where Me shows exactly what visitors see.
-- A line under the period tabs says visitors see these stats and links to "See them as visitors do".
+- A line under the period tabs said visitors see these stats and linked to "See them as visitors do"; removed on 2026-10-02 (the owner: it repeated "View your page"). The eyes stay.
 - **The eyes show only while the profile is public.** A private profile hides everything anyway.
 - **Every part hidden:** the profile has no Stats tab, and its URL says "@name keeps their stats to themselves."
 

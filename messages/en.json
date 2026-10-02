@@ -788,8 +788,6 @@
     "hideSection": "Hide {section} from your profile",
     "showSection": "Show {section} on your profile",
     "onlyYou": "Only you",
-    "visibilityHint": "Visitors see these stats on your profile. Tap an eye to keep a part to yourself.",
-    "visibilitySee": "See them as visitors do",
     "visibilityFailed": "Couldn't save. Try again."
   },
   "Profile": {

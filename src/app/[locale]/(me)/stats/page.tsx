@@ -128,14 +128,6 @@ export default async function StatsPage({ params, searchParams }: PageProps<"/[l
         ) : (
           <StatsParts hidden={profile.visibility === "public" ? statsHidden(profile.stats_hidden) : null}>
             <PeriodTabs period={period} />
-            {profile.visibility === "public" && (
-              <p className="-mt-4 text-sm text-muted-foreground">
-                {t("visibilityHint")}{" "}
-                <Link href={`/u/${profile.username}/stats`} className="font-semibold text-brand underline underline-offset-4">
-                  {t("visibilitySee")}
-                </Link>
-              </p>
-            )}
             {/* Another period slides in from its side (ADR 0070). */}
             <PageTransition key={period}>
               <div className="flex flex-col gap-8">
