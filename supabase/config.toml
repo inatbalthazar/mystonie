@@ -277,12 +277,13 @@ max_frequency = "5s"
 
 # Sign-in emails are rendered and sent by our app (ADR 0020): Supabase calls this route, which renders the
 # email in the user's locale and sends it with Resend (or, locally without a key, to Mailpit). Needs
-# `pnpm dev` running on port 3000. The secret below is for the local stack only: put the same value in
-# .env.local as SEND_EMAIL_HOOK_SECRET. Production generates its own in the dashboard (Auth → Hooks).
+# `pnpm dev` running on port 3000. The secret is never committed: the CLI reads SEND_EMAIL_HOOK_SECRET from
+# .env.local, the same variable the app checks the hook with (format and how to make one in .env.example).
+# Production generates its own in the dashboard (Auth → Hooks).
 [auth.hook.send_email]
 enabled = true
 uri = "http://host.docker.internal:3000/api/auth/email-hook"
-secrets = "v1,whsec_BVNos1f5O9Db0wQYrzCSH05U1NY0Bh3XadZWD2dPr34="
+secrets = "env(SEND_EMAIL_HOOK_SECRET)"
 
 # This hook runs before a new user is created and allows developers to reject the request based on the incoming user object.
 # [auth.hook.before_user_created]
