@@ -88,6 +88,7 @@ One file per decision: `NNNN-short-slug.md`, numbered in order. Write one whenev
 | [0083](0083-suggested-people.md) | Suggested for you on Find people: public people with titles in common, followed by people you follow, in your club or who lived in your country on a public Atlas, with active collectors as the fallback; one line on why | **Accepted** |
 | [0084](0084-more-pro-styles.md) | Four more Pro card styles, one for each kind of card: Premiere (movies and series), Gilded (books and manga), Arcade (games) and Lineup (recaps, stats, Year in Review), with two card faces loaded only when used | **Accepted** |
 | [0085](0085-install-before-sign-up.md) | Visitors on phones are asked to put Mystonie on their home screen before signing up, in a sheet that fits their browser (Install, Safari's Share steps, an Android menu, or out of an app's browser first) | **Accepted** |
+| [0086](0086-stonie-alive-and-brand-kit.md) | Stonie in the header blinks and does a random act every 7 to 16 seconds (hop, sway, look, wink, blush, spin, tilt), in CSS; a brand kit of logos, expressions and icons in `brand/` | **Accepted** |
 | [0021](0021-collection-tables-rules-in-the-database.md) | Collection tables enforce the day-one rules in the DB: UUID v7 check, no client DELETE, column grants, composite FKs for card ownership, public-profile reads via `private.is_public_profile` | **Accepted** |
 
 ## Template
