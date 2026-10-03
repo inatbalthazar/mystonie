@@ -53,7 +53,7 @@ export default async function ReelPage({ params }: PageProps<"/[locale]/reel">) 
           <div className="relative aspect-[2/3] w-14 shrink-0 overflow-hidden rounded-md bg-muted ring-1 ring-border">
             {yesterday.posterUrl && <Image src={yesterday.posterUrl} alt="" fill unoptimized sizes="56px" className="object-cover" />}
           </div>
-          <div className="flex min-w-0 flex-col">
+          <div className="flex min-w-0 flex-1 flex-col">
             <h2 className="text-xs font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">
               {t("yesterday", { number: yesterday.number })}
             </h2>
@@ -62,6 +62,13 @@ export default async function ReelPage({ params }: PageProps<"/[locale]/reel">) 
               {yesterday.answer.year ? ` (${yesterday.answer.year})` : ""}
             </Link>
           </div>
+          <Link
+            href={{ pathname: "/collection", query: { add: "1", pick: `movie:${yesterday.answer.externalId}` } }}
+            aria-label={t("addLabel", { name: yesterday.answer.name })}
+            className="flex min-h-11 shrink-0 items-center rounded-full bg-brand px-4 text-sm font-bold text-brand-foreground hover:bg-brand/90 active:scale-95"
+          >
+            {t("add")}
+          </Link>
         </PaperCard>
       )}
 

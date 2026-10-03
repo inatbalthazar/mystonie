@@ -737,7 +737,11 @@
   },
   "Movie": {
     "meta": "Movie{year, select, none {} other { · {year}}}",
-    "loadError": "Couldn't load this movie right now. Try again in a moment."
+    "loadError": "Couldn't load this movie right now. Try again in a moment.",
+    "status": "{status, select, finished {Finished} watching {Watching} other {Want to watch}}, in your collection",
+    "notInCollection": "Not in your collection yet",
+    "openCollection": "Open your collection",
+    "addFromCollection": "Add it to your collection"
   },
   "WhereToWatch": {
     "title": "Where to watch",
@@ -2052,6 +2056,8 @@
     "answerWas": "Today's reel",
     "openTitle": "Open the movie",
     "shareResult": "Share result",
+    "add": "Add to collection",
+    "addLabel": "Add {name} to your collection",
     "copied": "Result copied: paste it anywhere.",
     "makeCard": "Make a card",
     "guestNote": "Sign in to keep your streak and make a card of your result.",

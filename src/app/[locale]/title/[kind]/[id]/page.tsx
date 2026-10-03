@@ -183,6 +183,17 @@ export default async function TitlePage({ params, searchParams }: PageProps<"/[l
         </div>
       </header>
       {check}
+      {isMovie && (
+        <p className="flex flex-wrap items-center gap-x-3 gap-y-2 rounded-2xl bg-card px-4 py-3 text-sm ring-1 ring-border">
+          <span className="font-semibold">{entry?.status ? movie("status", { status: entry.status }) : movie("notInCollection")}</span>
+          <Link
+            href={entry?.status ? "/collection" : { pathname: "/collection", query: { add: "1", pick: `movie:${id}` } }}
+            className="inline-flex min-h-11 items-center font-semibold text-brand"
+          >
+            {entry?.status ? movie("openCollection") : movie("addFromCollection")}
+          </Link>
+        </p>
+      )}
       {warnings}
       {sceneWarnings}
       {whereToWatch}

@@ -1,6 +1,6 @@
 "use client";
 
-import { CheckIcon, LockIcon, Share2Icon, SparklesIcon, XIcon } from "lucide-react";
+import { CheckIcon, LockIcon, PlusIcon, Share2Icon, SparklesIcon, XIcon } from "lucide-react";
 import Image from "next/image";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { useEffect, useRef, useState } from "react";
@@ -338,6 +338,14 @@ export function ReelGame({
               <Share2Icon className="size-4" aria-hidden="true" />
               {t("shareResult")}
             </button>
+            <Link
+              href={{ pathname: "/collection", query: { add: "1", pick: `movie:${state.answer.externalId}` } }}
+              aria-label={t("addLabel", { name: state.answer.name })}
+              className="inline-flex h-11 items-center gap-2 rounded-full bg-card px-5 font-semibold shadow-sm ring-1 ring-border hover:bg-muted"
+            >
+              <PlusIcon className="size-4" aria-hidden="true" />
+              {t("add")}
+            </Link>
             {signedIn && data.card && (
               <button
                 type="button"
