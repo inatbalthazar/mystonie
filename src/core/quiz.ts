@@ -29,6 +29,8 @@ export type QuizQuestion = {
   where: ScenePlace | null;
   /** Counted answers so far (a topic question) or confirmations (a warning). */
   answers: number;
+  /** People on Mystonie who avoid the topic, not counting the asker (0 under 3; ADR 0094). */
+  avoiders: number;
 };
 
 export type QuizServe = QuizQuestion | { status: "paused"; until: string } | { status: "no_finishes" } | { status: "done" };
@@ -88,7 +90,7 @@ export function parseQuizServe(json: unknown): QuizServe | null {
   if (json.kind !== "topic" && json.kind !== "warning") return null;
   const title = quizTitle(json.title);
   if (!title) return null;
-  return { status: "question", id: json.id, kind: json.kind, topic: json.topic, title, where: json.kind === "warning" ? where(json.where) : null, answers: count(json.answers) ?? 0 };
+  return { status: "question", id: json.id, kind: json.kind, topic: json.topic, title, where: json.kind === "warning" ? where(json.where) : null, answers: count(json.answers) ?? 0, avoiders: 0 };
 }
 
 const RESULTS: readonly string[] = ["open", "yes", "no", "contested", "pending", "confirmed", "disputed"];

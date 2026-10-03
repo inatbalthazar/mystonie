@@ -14,6 +14,7 @@ describe("parseQuizServe", () => {
       title: { id: TITLE.id, kind: "series", externalId: "66732", name: "Stranger Things", year: 2016, posterUrl: "https://image.tmdb.org/t/p/w342/x.jpg" },
       where: null,
       answers: 3,
+      avoiders: 0,
     });
   });
 

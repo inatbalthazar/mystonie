@@ -8,6 +8,7 @@ import {
   SCENE_TOPICS,
   type NewSceneWarning,
   type SceneStatus,
+  type SceneTopicSlug,
   type SceneUnit,
   type SceneWarning,
   type TopicVerdict,
@@ -193,7 +194,21 @@ export async function quizNext(db: UserClient, titleId: string | null): Promise<
   if (error) throw new Error(`quiz_next failed: ${error.message}`);
   const served = parseQuizServe(data);
   if (!served) throw new Error("quiz_next answered something this app can't show");
-  return served;
+  if (served.status !== "question") return served;
+  return { ...served, avoiders: await topicAvoiders(db, served.topic) };
+}
+
+/**
+ * How many people avoid a topic, not counting the user (ADR 0094; 0 under 3). Never throws: the question matters more
+ * than the count, and a database without `topic_avoiders` yet (the migration not applied) answers 0.
+ */
+export async function topicAvoiders(db: UserClient, topic: SceneTopicSlug): Promise<number> {
+  const { data, error } = await db.rpc("topic_avoiders", { p_topic: topic });
+  if (error) {
+    console.error(`topic_avoiders failed: ${error.message}`);
+    return 0;
+  }
+  return typeof data === "number" && Number.isInteger(data) && data > 0 ? data : 0;
 }
 
 /** Answers a served question as the user; the database times it and counts it (or not). */

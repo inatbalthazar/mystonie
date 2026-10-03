@@ -19,11 +19,13 @@ import { QuoteOfTheDay } from "@/components/quote-of-the-day";
 import { QuizNote } from "@/components/warnings/quiz-note";
 import { localizedPath } from "@/core/auth";
 import { currentMonth, isChallengeSlug, monthChallenges } from "@/core/challenges";
+import { quizStanding } from "@/core/quiz-standing";
 import { MOVIE_QUOTES } from "@/core/quotes";
 import { reelDay, reelNumber } from "@/core/reel";
 import { localDateKey, safeTimeZone } from "@/core/stats/period";
 import { reviewSeasonYear } from "@/core/stats/year-review";
 import { blendTrending, type TrendingTitle } from "@/core/trending";
+import { quizHelps } from "@/data/badges";
 import { friendBoard } from "@/data/board";
 import { recentCards } from "@/data/cards";
 import { userJoins, type ChallengeJoin } from "@/data/challenges";
@@ -121,7 +123,8 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
   // A random movie line each time Home opens (ADR 0093).
   // eslint-disable-next-line react-hooks/purity -- a server render, once per request
   const firstQuote = Math.floor(Math.random() * MOVIE_QUOTES.length);
-  const [episodes, logs, board, joins, reel] = await Promise.all([
+  const finishedSomething = items.some((i) => i.status === "finished");
+  const [episodes, logs, board, joins, reel, helps] = await Promise.all([
     cachedEpisodes(supabase, ids),
     episodeLogs(supabase, userId, ids),
     friendBoard(supabase, viewer, "week", timeZone, now).catch((error: unknown) => {
@@ -137,6 +140,13 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
       console.error(error);
       return null;
     }),
+    // The quiz note's streak and next sticker (ADR 0094).
+    finishedSomething
+      ? quizHelps(supabase, userId).catch((error: unknown) => {
+          console.error(error);
+          return null;
+        })
+      : null,
   ]);
   // This month's challenges: progress as the last save recorded it (S3 challenges & clubs).
   const challenges: NoteChallenge[] = monthChallenges(month).flatMap(({ slug, rule }) => {
@@ -197,7 +207,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
       <ChallengeNote month={month} challenges={challenges} />
       <ReelNote number={reelNumber(today)} play={reel && { guesses: reel.guesses.length, solved: reel.solved, finished: reel.finished }} />
       {/* The warnings quiz asks about finished titles (S3 warnings & quiz). */}
-      {items.some((i) => i.status === "finished") && <QuizNote />}
+      {finishedSomething && <QuizNote standing={helps ? quizStanding(helps, timeZone, now) : null} />}
 
       <section aria-labelledby="recent-cards" className="flex flex-col gap-3">
         <div className="flex items-baseline justify-between gap-3">

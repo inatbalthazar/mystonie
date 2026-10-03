@@ -81,8 +81,9 @@ DoesTheDogDie says *whether* a title has something ("a dog dies: yes"). Mystonie
 - **Empty states:**
   - nothing finished yet: "Finish something first", with a link to the collection;
   - nothing left to ask: "That's everything for now".
-- **After an answer:** a short note ("Thanks, that helps.", "That settled it. People who finished X say: yes.", "That confirmed it."), then the next question. A count shows the answers given this visit.
-- **Ways in:** a note on Home (for someone who has finished something), the title page ("Quiz me about this one"), and Settings → Content warnings.
+- **After an answer:** the answer is stamped on the card, a short note ("Thanks, that helps.", "Final say! Your answer settled it…", "Your answer confirmed it."), then the next question.
+- **Rewards** ([ADR 0094](../../decisions/0094-quiz-rewards.md)): the lookout log at the top (answers, final says, days in a row, the ladder of answer stickers and the next one's progress). Questions come in rounds of five, each ending with what it did and "Another round". Stickers: Spotter, Lookout, Sentinel, Guardian, Lighthouse, Final Say, On Duty.
+- **Ways in:** a note on Home (for someone who has finished something; it names the streak or the next sticker), the title page ("Quiz me about this one"), and Settings → Content warnings.
 
 ### Online only
 Adding, voting and the quiz need the network: the server checks them and times them. They don't use the offline outbox ([S3 offline](S3-offline.md)).

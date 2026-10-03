@@ -1196,13 +1196,33 @@
         "name": "Season Pass",
         "how": "Complete challenges in 6 different months."
       },
+      "spotter": {
+        "name": "Spotter",
+        "how": "Answer your first question in the warnings quiz."
+      },
       "lookout": {
         "name": "Lookout",
         "how": "Answer 10 questions in the warnings quiz."
       },
+      "sentinel": {
+        "name": "Sentinel",
+        "how": "Answer 50 questions in the warnings quiz."
+      },
       "guardian": {
         "name": "Guardian",
         "how": "Answer 100 questions in the warnings quiz."
+      },
+      "lighthouse": {
+        "name": "Lighthouse",
+        "how": "Answer 250 questions in the warnings quiz."
+      },
+      "final-say": {
+        "name": "Final Say",
+        "how": "Give the answer that settles a question in the warnings quiz."
+      },
+      "on-duty": {
+        "name": "On Duty",
+        "how": "Answer the warnings quiz 7 days in a row."
       },
       "critic": {
         "name": "Critic",
@@ -1781,7 +1801,7 @@
   "Quiz": {
     "metaTitle": "Warnings quiz",
     "title": "Warnings quiz",
-    "intro": "Quick questions about things you've finished. Your answers help people skip scenes they'd rather not see.",
+    "intro": "Quick questions about things you've finished. Every answer helps someone skip a scene they'd rather not see, and earns you stickers along the way.",
     "back": "Back to Home",
     "noFinishesTitle": "Finish something first",
     "noFinishesBody": "The quiz asks about titles you've finished. Mark one as finished in your collection, then come back.",
@@ -1799,16 +1819,46 @@
     "topicProgress": "{count, plural, =0 {Be the first to answer · {total} answers settle it} other {# of {total} answers so far}}",
     "warningProgress": "{count} of {total} confirmations",
     "thanks": "Thanks, that helps.",
-    "settled": "That settled it. People who finished {title} say: {result, select, yes {yes} no {no} other {they disagree}}.",
-    "confirmedNow": "That confirmed it.",
-    "answered": "{count, plural, one {# answer} other {# answers}} this visit",
+    "settled": "Final say! Your answer settled it: people who finished {title} say {result, select, yes {yes} no {no} other {they disagree}}.",
+    "confirmedNow": "Your answer confirmed it.",
     "error": "Couldn't load a question. Try again.",
     "retry": "Try again",
     "homeTitle": "Warnings quiz",
-    "homeBody": "A few quick questions about things you've finished help others skip what they'd rather not see.",
+    "homeBody": "Quick questions about things you've finished help others skip what they'd rather not see, and earn you stickers.",
     "homeCta": "Answer a few",
     "settingsBody": "Help others skip what they'd rather not see: answer quick questions about things you've finished.",
-    "settingsLink": "Take the warnings quiz"
+    "settingsLink": "Take the warnings quiz",
+    "logTitle": "Your lookout log",
+    "statAnswers": "{count, plural, one {answer} other {answers}}",
+    "statSettled": "{count, plural, one {final say} other {final says}}",
+    "statStreak": "{count, plural, one {day in a row} other {days in a row}}",
+    "ladderLabel": "Answer stickers",
+    "ladderStep": "{name}, {target, plural, one {# answer} other {# answers}}: {earned, select, yes {earned} other {not yet}}",
+    "nextSticker": "<b>{left, plural, one {# more answer} other {# more answers}}</b> to your {name} sticker",
+    "ladderDone": "Every answer sticker is yours. Thank you for keeping watch.",
+    "streakToday": "{count, plural, one {Today counts: come back tomorrow for day 2.} other {Day # in a row: come back tomorrow.}} {days} days in a row earn On Duty.",
+    "streakKeep": "{count, plural, one {Answer one today to keep your streak going.} other {Answer one today to keep your #-day streak.}}",
+    "streakStart": "Answer one a day: {days} days in a row earn the On Duty sticker.",
+    "roundLabel": "This round",
+    "roundProgress": "Question {count} of {total}",
+    "stamp": {
+      "yes": "Yes",
+      "no": "No",
+      "unsure": "Pass"
+    },
+    "roundDoneTitle": "Round done!",
+    "roundQuietTitle": "Round done",
+    "roundHelped": "{count, plural, one {# answer helped someone skip a scene} other {# answers helped people skip scenes}}",
+    "roundSettled": "{count, plural, one {You had the final say on # question} other {You had the final say on # questions}}",
+    "roundConfirmed": "{count, plural, one {You confirmed # warning} other {You confirmed # warnings}}",
+    "roundStreak": "{count, plural, one {Day 1 of your streak} other {# days in a row}}",
+    "anotherRound": "Another round",
+    "doneForNow": "Done for now",
+    "homeStreakKeep": "{count, plural, one {Answer one today to keep your streak going.} other {Your #-day streak ends tonight: answer one to keep it.}}",
+    "homeStreakDone": "{count, plural, one {Today's done: day 1 of your streak.} other {Today's done: # days in a row.}}",
+    "homeNext": "{left, plural, one {# more answer} other {# more answers}} to your {name} sticker.",
+    "avoiders": "{count} people on Mystonie avoid this. Your answer helps them decide.",
+    "roundReach": "Your answers help up to {count} people who avoid these scenes"
   },
   "Challenges": {
     "items": {

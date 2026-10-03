@@ -2239,6 +2239,7 @@ export type Database = {
       todo_start:
         | { Args: never; Returns: boolean[] }
         | { Args: { "": string }; Returns: boolean[] }
+      topic_avoiders: { Args: { p_topic: string }; Returns: number }
       trending_titles: {
         Args: { p_days?: number; p_limit?: number }
         Returns: {

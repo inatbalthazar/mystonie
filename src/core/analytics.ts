@@ -62,6 +62,8 @@ export type AnalyticsEvents = {
   scene_warning_voted: { vote: "confirm" | "dispute" | "undo" };
   /** A warnings quiz answer: the kind of question, the choice, and whether the server counted it. */
   quiz_answered: { kind: "topic" | "warning"; choice: "yes" | "no" | "unsure"; counted: boolean };
+  /** A round of the warnings quiz finished (ADR 0094), with how many of its answers helped. */
+  quiz_round: { helped: number };
   /** A Stamp on a Journal article (ADR 0052): from the Journal's rows, the article's page or the Following feed. */
   article_stamped: { place: ArticlePlace };
   /** A Journal article saved to read later. */

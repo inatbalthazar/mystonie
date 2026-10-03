@@ -142,6 +142,16 @@ test("the warnings quiz asks about finished titles, and only answers given time 
   await seedTitles(request, [{ kind: "movie", externalId, name: movie, year: 2024, posterPath: null, runtimeMin: 100 }]);
   await titleId(request, "movie", externalId);
 
+  // Three others avoid every quiz topic, so each question says who the answer helps (ADR 0094).
+  const { url, headers } = rest();
+  const topics = (await (await request.get(`${url}/rest/v1/warning_topics?quiz=eq.true&select=dtdd_id`, { headers })).json()) as { dtdd_id: number }[];
+  for (const tag of ["avoid1", "avoid2", "avoid3"]) {
+    const user = await createUser(request, tag);
+    const rows = topics.map((t) => ({ id: uuidv7(), user_id: user, topic_id: t.dtdd_id }));
+    const res = await request.post(`${url}/rest/v1/user_avoid_topics`, { headers, data: rows });
+    expect(res.ok(), await res.text()).toBe(true);
+  }
+
   await signUp(page, request, "quiz", "/quiz");
   await expect(page.getByRole("heading", { name: "Finish something first" })).toBeVisible();
   await expect(page.getByRole("link", { name: "Go to your collection" })).toHaveAttribute("href", "/collection");
@@ -155,10 +165,16 @@ test("the warnings quiz asks about finished titles, and only answers given time 
   await expect(question).toBeVisible();
   const first = await question.textContent();
   await expect(page.getByRole("button", { name: "Yes" })).toBeEnabled({ timeout: 5000 });
+  await expect(page.getByText("Question 1 of 5")).toBeVisible();
+  await expect(page.getByText("1 more answer to your Spotter sticker")).toBeVisible();
+  await expect(page.getByText(/^\d+ people on Mystonie avoid this\. Your answer helps them decide\.$/)).toBeVisible();
   await page.getByRole("button", { name: "Yes" }).click();
-  await expect(page.getByRole("main").getByRole("status")).toHaveText("Thanks, that helps.");
+  await expect(page.getByText("Thanks, that helps.")).toBeVisible();
   await expect(question).not.toHaveText(first!);
-  await expect(page.getByText("1 answer this visit")).toBeVisible();
+  // The first answer earns Spotter (ADR 0094), the log counts it and the round moves on.
+  await expect(page.getByRole("status").filter({ hasText: "New sticker" })).toContainText("Spotter");
+  await expect(page.getByText("Question 2 of 5")).toBeVisible();
+  await expect(page.getByText("9 more answers to your Lookout sticker")).toBeVisible();
 
   // Answering the instant a question arrives (a script) counts for nothing, and the third time pauses the quiz.
   for (const expected of ["too_fast", "too_fast", "paused"]) {

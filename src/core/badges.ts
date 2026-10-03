@@ -22,8 +22,13 @@ export type BadgeRule =
   | { type: "reelStreak"; target: number }
   /** Monthly challenges completed: `target` of them, in `target` different months, or `target` in one month. */
   | { type: "challenges"; target: number; of: "all" | "months" | "oneMonth" }
-  /** `target` of something done: counted warnings-quiz answers, reviews, Journal articles, support (Pro or a tip). */
-  | { type: "times"; target: number; of: "quiz" | "reviews" | "articles" | "support" };
+  /**
+   * `target` of something done: counted warnings-quiz answers, quiz answers that settled a question, reviews, Journal
+   * articles, support (Pro or a tip).
+   */
+  | { type: "times"; target: number; of: "quiz" | "quizSettles" | "reviews" | "articles" | "support" }
+  /** Counted warnings-quiz answers on `target` local days in a row. */
+  | { type: "quizStreak"; target: number };
 
 /** The catalogue, in the order the sticker album shows it: firsts, then how much, then taste, then range. */
 export const BADGES = [
@@ -59,9 +64,15 @@ export const BADGES = [
   { id: "challenger", rule: { type: "challenges", target: 1, of: "all" } },
   { id: "clean-sweep", rule: { type: "challenges", target: 4, of: "oneMonth" } },
   { id: "season-pass", rule: { type: "challenges", target: 6, of: "months" } },
-  // Helping others with the warnings quiz (answers that count: not "don't remember", not too fast).
+  // Helping others with the warnings quiz (answers that count: not "don't remember", not too fast): a ladder of answers
+  // from the first to 250 (ADR 0094), the answer that settles a question, and a week of days in a row.
+  { id: "spotter", rule: { type: "times", target: 1, of: "quiz" } },
   { id: "lookout", rule: { type: "times", target: 10, of: "quiz" } },
+  { id: "sentinel", rule: { type: "times", target: 50, of: "quiz" } },
   { id: "guardian", rule: { type: "times", target: 100, of: "quiz" } },
+  { id: "lighthouse", rule: { type: "times", target: 250, of: "quiz" } },
+  { id: "final-say", rule: { type: "times", target: 1, of: "quizSettles" } },
+  { id: "on-duty", rule: { type: "quizStreak", target: 7 } },
   // Writing: reviews on finishes, articles in the Journal (a team article's `profile` is the writer's username; a
   // member's own published articles count too, ADR 0092).
   { id: "critic", rule: { type: "times", target: 10, of: "reviews" } },
@@ -93,6 +104,8 @@ export type BadgeActivity = {
   challenges: readonly { month: string; at: number }[];
   /** When each counted warnings-quiz answer was given. */
   quiz: readonly number[];
+  /** When each of those answers settled its question (the tenth counted answer). */
+  quizSettles: readonly number[];
   /** When each finish with a review was finished. */
   reviews: readonly number[];
   /** The dates of the published Journal articles they wrote. */
@@ -101,7 +114,7 @@ export type BadgeActivity = {
   support: readonly number[];
 };
 
-export const NO_ACTIVITY: BadgeActivity = { reel: [], challenges: [], quiz: [], reviews: [], articles: [], support: [] };
+export const NO_ACTIVITY: BadgeActivity = { reel: [], challenges: [], quiz: [], quizSettles: [], reviews: [], articles: [], support: [] };
 
 const matches = (rule: Extract<BadgeRule, { type: "count" }>, f: Finish): boolean => fitsFilter(rule, f.title, f.genres);
 
@@ -150,6 +163,16 @@ export function evaluateBadges(
         run = p.solved ? (last !== null && run > 0 && addDays(last, 1) === p.day ? run + 1 : 1) : 0;
         last = p.day;
         if (run > 0) reach(run, p.at, null);
+      }
+    } else if (rule.type === "quizStreak") {
+      let run = 0;
+      let last: string | null = null;
+      for (const at of [...activity.quiz].sort((a, b) => a - b)) {
+        const day = localDateKey(at, zone);
+        if (day === last) continue;
+        run = last !== null && addDays(last, 1) === day ? run + 1 : 1;
+        last = day;
+        reach(run, at, null);
       }
     } else if (rule.type === "challenges") {
       const perMonth = new Map<string, number>();

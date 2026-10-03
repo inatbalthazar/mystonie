@@ -48,7 +48,9 @@ export async function POST(request: Request) {
   try {
     const result = await quizAnswer(user.supabase, input.id, input.choice);
     const helped = input.choice !== "unsure" && (result.status === "counted" || result.status === "not_counted");
-    const badges = helped ? await activityBadgeNews(user.supabase, user.userId, Date.now()) : [];
+    // The streak sticker counts days in the user's time zone (ADR 0094).
+    const zone = helped ? (await user.supabase.from("profiles").select("time_zone").eq("id", user.userId).maybeSingle()).data?.time_zone : undefined;
+    const badges = helped ? await activityBadgeNews(user.supabase, user.userId, Date.now(), zone ?? "UTC") : [];
     return Response.json({ ...result, badges }, { headers: noStore });
   } catch (error) {
     console.error(error);

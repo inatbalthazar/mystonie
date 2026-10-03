@@ -126,6 +126,7 @@ Scene warnings and the warnings quiz ([S3 warnings & quiz](../product/features/S
 Functions (security definer, `search_path = ''`, signed in):
 - `title_scene_warnings(p_title_id)`: a title's live pending and confirmed warnings (disputed ones only to their adder), in viewing order, with `mine` and `my_vote`; never who added or voted. `scene_warning_tally(p_warning_id)`: one warning's status, counts and the caller's vote.
 - `quiz_next(p_title_id, p_topics)` and `quiz_answer(p_id, p_choice)` → JSON. They serve and time the quiz on the database's clock: waiting warnings on finished titles first, then open questions, then a new (title, topic); under 1.5 s an answer doesn't count and the third in 10 minutes pauses the quiz for an hour; 10 counted answers settle a question (`private.quiz_resolution`). `p_topics` are the topics the app has words for.
+- `topic_avoiders(p_topic)` (ADR 0094, migration `20261025090000_stage4_topic_avoiders.sql`): how many people avoid a warning topic, without the caller; 0 under 3. A total only, never who. Signed in only.
 - `community_avoid_hits(p_title_ids)`: the caller's avoid-topics (DTDD ids) that a confirmed warning or a quiz "yes" puts in those titles (badges, next to `avoid_warnings`).
 
 All of it is in `20261007090000_stage3_scene_warnings_quiz.sql` (tested in `stage3_scene_warnings_quiz.test.sql`). Local only so far.

@@ -16,7 +16,7 @@ The album gets stickers: **badges** earned from what you finish ("Rookie Bookwor
   | Range | Subtitles On (5 original languages), Genre Hopper (10 genres), All-Rounder (4 kinds of title: movies, series, books, manga or games) |
   | Reel of the Day ([ADR 0063](../../decisions/0063-more-stickers.md)) | Reel Rookie (first solve), One Take (with the first guess), Sharp Eye (10 solved in ≤ 3 guesses), Hot Streak (7 days in a row), Reel Legend (30 days in a row; the hardest, with a gold rim) |
   | Monthly challenges | Challenger (the first), Clean Sweep (all 4 of one month), Season Pass (6 different months) |
-  | Warnings quiz | Lookout (10 answers), Guardian (100): a yes or a no, not too fast |
+  | Warnings quiz | Spotter (first answer), Lookout (10), Sentinel (50), Guardian (100), Lighthouse (250, rare), Final Say (your answer settled a question), On Duty (7 days in a row): a yes or a no, not too fast ([ADR 0094](../../decisions/0094-quiz-rewards.md)) |
   | Writing | Critic (reviews on 10 finishes), Byline (a published Journal article with your username as `profile`) |
   | Support | Supporter (Pro that was paid for, or a Buy Me a Coffee tip with the account's email) |
 
