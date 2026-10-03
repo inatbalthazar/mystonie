@@ -19,7 +19,7 @@ import { QuoteOfTheDay } from "@/components/quote-of-the-day";
 import { QuizNote } from "@/components/warnings/quiz-note";
 import { localizedPath } from "@/core/auth";
 import { currentMonth, isChallengeSlug, monthChallenges } from "@/core/challenges";
-import { MOVIE_QUOTES, quoteOfTheDay } from "@/core/quotes";
+import { MOVIE_QUOTES } from "@/core/quotes";
 import { reelDay, reelNumber } from "@/core/reel";
 import { localDateKey, safeTimeZone } from "@/core/stats/period";
 import { reviewSeasonYear } from "@/core/stats/year-review";
@@ -118,7 +118,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
   const viewer = { id: userId, username: profile?.username ?? "", displayName: profile?.display_name ?? null, avatarUrl: profile?.avatar_url ?? null };
   const month = currentMonth(now, timeZone);
   const today = reelDay(now);
-  const quote = quoteOfTheDay(localDateKey(now, safeTimeZone(timeZone)));
+  // A random movie line each time Home opens (ADR 0093).
+  // eslint-disable-next-line react-hooks/purity -- a server render, once per request
+  const firstQuote = Math.floor(Math.random() * MOVIE_QUOTES.length);
   const [episodes, logs, board, joins, reel] = await Promise.all([
     cachedEpisodes(supabase, ids),
     episodeLogs(supabase, userId, ids),
@@ -168,7 +170,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
         <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">
           {format.dateTime(now, { weekday: "long", month: "long", day: "numeric", timeZone })}
         </p>
-        <QuoteOfTheDay first={MOVIE_QUOTES.indexOf(quote)} greeting={name ? t("greeting", { name }) : t("title")} longName={[...name].length > 12} />
+        <QuoteOfTheDay first={firstQuote} greeting={name ? t("greeting", { name }) : t("title")} longName={[...name].length > 12} />
       </header>
       <CommunityLinks />
 

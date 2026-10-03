@@ -95,7 +95,7 @@ One file per decision: `NNNN-short-slug.md`, numbered in order. Write one whenev
 | [0090](0090-store-listing-from-the-real-app.md) | The Google Play listing shows the real app: a seeded demo world captured in English and Thai, light and dark, laid out as album pages with the landing tour's headings, a feature graphic of real card exports, the listing text, and `scripts/store` to remake it all | **Accepted** |
 | [0091](0091-card-posters-own-url.md) | Cards draw posters from their own URL (TMDB at w780, AniList's large cover with `?card`), so the copy a list cached without CORS can't blank a card's poster and colours | **Accepted** |
 | [0092](0092-members-write-for-the-journal.md) | Members write for the Journal: articles as rows (`journal_posts`) with what they're about and categories, on the writer's page and followers' feeds; the team features the best from `/admin/journal` (`ADMIN_EMAILS`), and the Journal filters and sorts | **Accepted** |
-| [0093](0093-quote-of-the-day.md) | A movie quote of the day on Home: one short line a day for everyone, from a curated list, under the date and linking to the movie | **Accepted** |
+| [0093](0093-quote-of-the-day.md) | Movie lines on Home: short famous lines from a curated list, written in and swapped for a random one every 10 s, under the date and linking to the movie; the greeting makes room for a long one | **Accepted** |
 | [0021](0021-collection-tables-rules-in-the-database.md) | Collection tables enforce the day-one rules in the DB: UUID v7 check, no client DELETE, column grants, composite FKs for card ownership, public-profile reads via `private.is_public_profile` | **Accepted** |
 
 ## Template

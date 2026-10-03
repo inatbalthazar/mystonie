@@ -1,5 +1,5 @@
 /**
- * Quote of the day (Home, under the date): one short, famous line from a movie a day, the same for everyone, each
+ * Movie lines on Home (under the date, ADR 0093): short, famous lines from movies, a random one after another, each
  * linking to its movie's page. The lines stay in their original English; only the attribution is translated.
  */
 
@@ -95,8 +95,6 @@ export const MOVIE_QUOTES: readonly MovieQuote[] = [
   { text: "Now I am become Death, the destroyer of worlds.", movie: "Oppenheimer", year: 2023, tmdbId: "872585" },
 ];
 
-const DAY_MS = 86_400_000;
-
 /** The longest quote: three lines on a 360 px phone, the most Home's header holds with the greeting hidden. */
 export const QUOTE_MAX_CHARS = 75;
 
@@ -106,11 +104,4 @@ export const QUOTE_MAX_CHARS = 75;
  */
 export function quoteFitsOneLine(text: string): boolean {
   return text.length <= 28;
-}
-
-/** The quote for a local day (`YYYY-MM-DD`): the list in order, one a day, starting over at the end. */
-export function quoteOfTheDay(day: string, quotes: readonly MovieQuote[] = MOVIE_QUOTES): MovieQuote {
-  const days = Math.floor(Date.parse(`${day}T00:00:00Z`) / DAY_MS);
-  const n = quotes.length;
-  return quotes[(((Number.isNaN(days) ? 0 : days) % n) + n) % n]!;
 }

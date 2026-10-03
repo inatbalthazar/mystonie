@@ -17,11 +17,11 @@ const CYCLE_MS = 10_000;
 const GONE_AT = 0.93;
 
 /**
- * The movie lines on Home's header, with the greeting (ADR 0093): today's quote first, the same for everyone, then a
- * random one after each cycle, for as long as Home is open. Each quote links to its movie's page.
+ * The movie lines on Home's header, with the greeting (ADR 0093): a random quote (the server picks the first, each time Home
+ * opens), then another random one after each cycle, for as long as Home is open. Each quote links to its movie's page.
  * Every quote is written at one size. The header is a fixed height (it grows only if a quote needs more than three
  * lines, on a very narrow screen): a one-line quote leaves room for the greeting at its foot; a longer one fades the
- * greeting away and takes its place, so nothing under the header moves. With reduced motion it stays on today's, still.
+ * greeting away and takes its place, so nothing under the header moves. With reduced motion the first one stays, still.
  */
 export function QuoteOfTheDay({ first, greeting, longName }: { first: number; greeting: string; longName: boolean }) {
   const t = useTranslations("HomeApp");

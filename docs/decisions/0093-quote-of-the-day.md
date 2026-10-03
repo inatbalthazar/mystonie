@@ -1,4 +1,4 @@
-# ADR 0093: A movie quote of the day on Home
+# ADR 0093: Movie lines on Home
 
 **Status:** Accepted · **Date:** 2026-10-03
 
@@ -9,7 +9,7 @@ Home's header showed the date in handwriting above "Hi, <name>". The owner asked
 - **C:** quotes rotating every few seconds while Home is open.
 
 ## Decision
-- **A, one quote a day.** It suits Home's daily rhythm (the Reel of the Day, streaks) and doesn't move while people read their feed, so it needs no reduced-motion fallback.
+- The owner first picked **A, one quote a day**. Seeing it, they moved to a random quote after each cycle, then to a random first quote too (below).
 - The date stays, as a small line above. The quote takes the handwriting, with "Movie, year" under it.
 - Tapping the quote opens the movie's page, which has Add.
 - **Motion, on a loop** (the owner wants people to spend a moment with it):
@@ -17,7 +17,8 @@ Home's header showed the date in handwriting above "Hi, <name>". The owner asked
   - Then the movie's line comes in, and a pen draws a wavy brand-colour line under it.
   - After the twelfth word, the rest come in together, so writing takes about 1.5 s.
   - The quote stays about 7 s. Then the pen line pulls away and the words fade in the same order.
-  - **Then a random other quote is written** (the owner's call, after a first version that rewrote the same one). So the day's quote opens Home, the same for everyone, and the rest play on for as long as Home is open. The date above stays as it was, with no label.
+  - **Then a random other quote is written** (the owner's call, after a first version that rewrote the same one). The rest play on for as long as Home is open.
+  - **Home opens on a random quote too**, not the day's (the owner's call: seeing the same opening line on every visit got tiring). The server picks it per request. The date above stays as it was, with no label.
 - **One size, one header height; the greeting makes room.** A quote's length would otherwise move everything under it with each swap.
   - Every quote is written at the same size.
   - The quote and "Hi, <name>" share a header of fixed height. A one-line quote leaves the greeting at its foot.
@@ -28,10 +29,10 @@ Home's header showed the date in handwriting above "Hi, <name>". The owner asked
   - **Versions that didn't work:**
     - Sizing quotes by length bands in a box three lines tall left short quotes floating in empty space.
     - Fitting each quote's size to the box made sizes jump between quotes, and clipped some quotes on some devices.
-  - The keyframes are CSS (`globals.css`, [ADR 0070](0070-motion-and-loading.md)). A small client component (`src/components/quote-of-the-day.tsx`) swaps the quote when a cycle ends. With reduced motion, the day's quote shows still and doesn't change.
+  - The keyframes are CSS (`globals.css`, [ADR 0070](0070-motion-and-loading.md)). A small client component (`src/components/quote-of-the-day.tsx`) swaps the quote when a cycle ends. With reduced motion, the first quote shows still and doesn't change.
 - **A list we curate** (`src/core/quotes.ts`): about 80 short, famous lines, each with its movie's TMDB id. No catalog offers quotes with clear terms, and a fixed list keeps them short and well chosen.
   - Lines stay in their original English. The attribution is translated.
-  - Days run through the list in order, by the reader's local date, and start over at the end.
+  - Every quote is picked at random, never the one just shown.
 
 ## Consequences
 - Adding a quote means adding a line to the list. The tests check that lines are unique and short.
