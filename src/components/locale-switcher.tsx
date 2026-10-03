@@ -1,9 +1,9 @@
 "use client";
 
 import { useLocale, useTranslations, type Locale } from "next-intl";
-import { useState, useSyncExternalStore, useTransition } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { hasAuthCookie } from "@/core/auth";
-import { usePathname, useRouter } from "@/i18n/navigation";
+import { getPathname, usePathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { saveAccount } from "./settings/save-account";
 
@@ -20,18 +20,20 @@ const readSignedIn = () => hasAuthCookie(document.cookie.split("; ").map((c) => 
  * users to their saved language, S1 profile); if saving fails the page stays put and `failed` is set.
  */
 export function useChangeLocale() {
-  const router = useRouter();
   const pathname = usePathname();
   const signedIn = useSyncExternalStore(noSubscribe, readSignedIn, () => false);
-  const [isPending, startTransition] = useTransition();
+  const [isPending, setPending] = useState(false);
   const [failed, setFailed] = useState(false);
 
   async function change(next: Locale) {
     setFailed(false);
     if (signedIn && !(await saveAccount({ locale: next })).ok) return setFailed(true);
-    startTransition(() => {
-      router.replace(pathname, { locale: next });
-    });
+    // A whole new page, not a client-side switch: the language is the root layout's, and React re-creating <html> for
+    // it wipes what the pre-paint script set there (`data-auth`, so the nav island vanished and "Sign in" showed, and
+    // the saved theme). A fresh load runs that script again.
+    setPending(true);
+    const query = Object.fromEntries(new URLSearchParams(window.location.search));
+    window.location.assign(getPathname({ href: { pathname, query }, locale: next }) + window.location.hash);
   }
   return { change, isPending, failed };
 }

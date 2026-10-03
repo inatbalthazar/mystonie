@@ -161,6 +161,9 @@ test("language and theme apply at once and stick to the account", async ({ page,
     await expect(page).toHaveURL(/\/th\/settings$/, { timeout: 3000 });
   }).toPass();
   await expect(page.getByRole("heading", { level: 1 })).toHaveText("การตั้งค่า");
+  // Still signed in after the switch: the nav island, no "Sign in" (a client-side switch used to lose both).
+  await expect(page.locator("html")).toHaveAttribute("data-auth", "");
+  await expect(page.locator("[data-nav-island]")).toBeVisible();
   await page.goto("/stats");
   await expect(page).toHaveURL(/\/th\/stats$/); // the saved language wins over the URL
 
