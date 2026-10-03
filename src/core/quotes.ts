@@ -44,7 +44,7 @@ export const MOVIE_QUOTES: readonly MovieQuote[] = [
   { text: "Please, be kind. Especially when we don't know what's going on.", movie: "Everything Everywhere All at Once", year: 2022, tmdbId: "545611" },
   { text: "Here's Johnny!", movie: "The Shining", year: 1980, tmdbId: "694" },
   { text: "Wakanda forever!", movie: "Black Panther", year: 2018, tmdbId: "284054" },
-  { text: "My mama always said life was like a box of chocolates. You never know what you're gonna get.", movie: "Forrest Gump", year: 1994, tmdbId: "13" },
+  { text: "Stupid is as stupid does.", movie: "Forrest Gump", year: 1994, tmdbId: "13" },
   { text: "I'm sorry, Dave. I'm afraid I can't do that.", movie: "2001: A Space Odyssey", year: 1968, tmdbId: "62" },
   { text: "No capes!", movie: "The Incredibles", year: 2004, tmdbId: "9806" },
   { text: "You talkin' to me?", movie: "Taxi Driver", year: 1976, tmdbId: "103" },
@@ -53,7 +53,7 @@ export const MOVIE_QUOTES: readonly MovieQuote[] = [
   { text: "Hasta la vista, baby.", movie: "Terminator 2: Judgment Day", year: 1991, tmdbId: "280" },
   { text: "Nobody puts Baby in a corner.", movie: "Dirty Dancing", year: 1987, tmdbId: "88" },
   { text: "I am Iron Man.", movie: "Iron Man", year: 2008, tmdbId: "1726" },
-  { text: "Life moves pretty fast. If you don't stop and look around once in a while, you could miss it.", movie: "Ferris Bueller's Day Off", year: 1986, tmdbId: "9377" },
+  { text: "Life moves pretty fast.", movie: "Ferris Bueller's Day Off", year: 1986, tmdbId: "9377" },
   { text: "There is no secret ingredient.", movie: "Kung Fu Panda", year: 2008, tmdbId: "9502" },
   { text: "All those moments will be lost in time, like tears in rain.", movie: "Blade Runner", year: 1982, tmdbId: "78" },
   { text: "Some people are worth melting for.", movie: "Frozen", year: 2013, tmdbId: "109445" },
@@ -97,19 +97,15 @@ export const MOVIE_QUOTES: readonly MovieQuote[] = [
 
 const DAY_MS = 86_400_000;
 
-/** The longest line the quote's box fits (three lines at the smallest size on a 360 px phone). */
-export const QUOTE_MAX_CHARS = 100;
+/** The longest quote: three lines on a 360 px phone, the most Home's header holds with the greeting hidden. */
+export const QUOTE_MAX_CHARS = 75;
 
 /**
- * About how big (px) a quote is written so it fills Home's quote box on a 360 px phone: a short one large like a
- * poster's tagline, a long one smaller (ADR 0093). The page then fits it to the real box; this is the first guess, for
- * the server's HTML.
+ * Whether a quote likely fits one line on a 360 px phone, so the greeting under it can stay (ADR 0093). Home then
+ * measures the real line count; this is the first guess, for the server's HTML.
  */
-export function quoteSize(text: string): number {
-  if (text.length <= 14) return 48;
-  if (text.length <= 32) return 34;
-  if (text.length <= 60) return 26;
-  return 20;
+export function quoteFitsOneLine(text: string): boolean {
+  return text.length <= 28;
 }
 
 /** The quote for a local day (`YYYY-MM-DD`): the list in order, one a day, starting over at the end. */

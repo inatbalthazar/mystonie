@@ -18,13 +18,16 @@ Home's header showed the date in handwriting above "Hi, <name>". The owner asked
   - After the twelfth word, the rest come in together, so writing takes about 1.5 s.
   - The quote stays about 7 s. Then the pen line pulls away and the words fade in the same order.
   - **Then a random other quote is written** (the owner's call, after a first version that rewrote the same one). So the day's quote opens Home, the same for everyone, and the rest play on for as long as Home is open. The date above stays as it was, with no label.
-- **One box for every quote, filled.** A quote's length would otherwise move everything under it with each swap.
-  - The quote sits at the foot of a box about two lines tall, right above the movie's line.
-  - It's sized to fill the box. A short one is written large, like a poster's tagline ("Rosebud."), and a long one smaller.
-  - The page measures the real fit: the largest size from 52 px down to 16 px whose lines fit, again when the font loads or the window resizes.
-  - `quoteSize` is the first guess, for the server's HTML.
-  - A first version kept one size per length band in a box three lines tall, which left short quotes floating in empty space.
-  - The tests cap a quote at 100 characters (`QUOTE_MAX_CHARS`), which still fits at 16 px on a 360 px phone.
+- **One size, one header height; the greeting makes room.** A quote's length would otherwise move everything under it with each swap.
+  - Every quote is written at the same size.
+  - The quote and "Hi, <name>" share a header of fixed height. A one-line quote leaves the greeting at its foot.
+  - When a quote wraps, the greeting fades away and the quote takes its place. It comes back with the next one-line quote.
+  - The page measures the real line count with the real font and width, again on resize. `quoteFitsOneLine` is the server's first guess.
+  - Measured on a 360 px phone: 60 quotes take one line and 20 take two. On 320 px, one takes three and the header grows for it, never clipping.
+  - The tests cap a quote at 75 characters (`QUOTE_MAX_CHARS`). The two longest lines (Forrest Gump, Ferris Bueller) became shorter lines from the same movies.
+  - **Versions that didn't work:**
+    - Sizing quotes by length bands in a box three lines tall left short quotes floating in empty space.
+    - Fitting each quote's size to the box made sizes jump between quotes, and clipped some quotes on some devices.
   - The keyframes are CSS (`globals.css`, [ADR 0070](0070-motion-and-loading.md)). A small client component (`src/components/quote-of-the-day.tsx`) swaps the quote when a cycle ends. With reduced motion, the day's quote shows still and doesn't change.
 - **A list we curate** (`src/core/quotes.ts`): about 80 short, famous lines, each with its movie's TMDB id. No catalog offers quotes with clear terms, and a fixed list keeps them short and well chosen.
   - Lines stay in their original English. The attribution is translated.

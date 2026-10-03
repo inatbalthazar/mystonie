@@ -1,12 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { MOVIE_QUOTES, QUOTE_MAX_CHARS, quoteOfTheDay, quoteSize } from "./quotes";
+import { MOVIE_QUOTES, QUOTE_MAX_CHARS, quoteFitsOneLine, quoteOfTheDay } from "./quotes";
 
-describe("quoteSize", () => {
-  it("writes short quotes large and long ones smaller", () => {
-    expect(quoteSize("Rosebud.")).toBe(48);
-    expect(quoteSize("Why so serious?")).toBe(34);
-    expect(quoteSize("x".repeat(60))).toBe(26);
-    expect(quoteSize("x".repeat(61))).toBe(20);
+describe("quoteFitsOneLine", () => {
+  it("guesses short quotes fit one line", () => {
+    expect(quoteFitsOneLine("Why so serious?")).toBe(true);
+    expect(quoteFitsOneLine("You're gonna need a bigger boat.")).toBe(false);
   });
 });
 

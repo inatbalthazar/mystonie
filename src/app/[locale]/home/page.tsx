@@ -168,10 +168,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
         <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">
           {format.dateTime(now, { weekday: "long", month: "long", day: "numeric", timeZone })}
         </p>
-        <QuoteOfTheDay first={MOVIE_QUOTES.indexOf(quote)} />
-        <h1 className={`font-display font-extrabold tracking-[-0.03em] break-words ${[...name].length > 12 ? "text-3xl" : "text-4xl"}`}>
-          {name ? t("greeting", { name }) : t("title")}
-        </h1>
+        <QuoteOfTheDay first={MOVIE_QUOTES.indexOf(quote)} greeting={name ? t("greeting", { name }) : t("title")} longName={[...name].length > 12} />
       </header>
       <CommunityLinks />
 
