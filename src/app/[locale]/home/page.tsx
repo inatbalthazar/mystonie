@@ -18,6 +18,7 @@ import { FriendsFinished } from "@/components/social/friends-finished";
 import { QuizNote } from "@/components/warnings/quiz-note";
 import { localizedPath } from "@/core/auth";
 import { currentMonth, isChallengeSlug, monthChallenges } from "@/core/challenges";
+import { quoteOfTheDay } from "@/core/quotes";
 import { reelDay, reelNumber } from "@/core/reel";
 import { localDateKey, safeTimeZone } from "@/core/stats/period";
 import { reviewSeasonYear } from "@/core/stats/year-review";
@@ -116,6 +117,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
   const viewer = { id: userId, username: profile?.username ?? "", displayName: profile?.display_name ?? null, avatarUrl: profile?.avatar_url ?? null };
   const month = currentMonth(now, timeZone);
   const today = reelDay(now);
+  const quote = quoteOfTheDay(localDateKey(now, safeTimeZone(timeZone)));
   const [episodes, logs, board, joins, reel] = await Promise.all([
     cachedEpisodes(supabase, ids),
     episodeLogs(supabase, userId, ids),
@@ -161,10 +163,20 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
       <FreshPage />
       <SignupFromCard newAccount={newAccount} />
-      <header className="flex flex-col gap-1">
-        <p className="font-hand text-2xl leading-none text-muted-foreground">
+      <header className="flex flex-col gap-2">
+        <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">
           {format.dateTime(now, { weekday: "long", month: "long", day: "numeric", timeZone })}
         </p>
+        <Link
+          href={`/title/movie/${quote.tmdbId}`}
+          aria-label={`${quote.text} ${t("quoteLabel", { movie: quote.movie })}`}
+          className="group -my-1 flex flex-col gap-0.5 rounded-lg py-1"
+        >
+          <span className="font-hand text-2xl leading-tight text-muted-foreground transition-colors group-hover:text-foreground">
+            {t("quote", { text: quote.text })}
+          </span>
+          <span className="text-xs text-muted-foreground/80">{t("quoteFrom", { movie: quote.movie, year: quote.year })}</span>
+        </Link>
         <h1 className={`font-display font-extrabold tracking-[-0.03em] break-words ${[...name].length > 12 ? "text-3xl" : "text-4xl"}`}>
           {name ? t("greeting", { name }) : t("title")}
         </h1>
