@@ -536,12 +536,11 @@ dialog[data-sheet]:not([open])::backdrop {
   }
 }
 
-/* Quote of the day on Home (ADR 0093), on a 10 s loop: each word inks in (fades up out of a blur, tilted like a hand's
-   stroke), one after another (--ink-delay), then the movie's line comes in and a pen underlines it (--pen-delay on the
-   link). It stays about 7 s; the pen line is pulled away first, then the words fade in the same order and are written
-   again. One cycle length for all, so the
-   per-element delays keep the order every time. Reduced motion: the global rule ends it at once, and with no fill
-   the quote simply shows. */
+/* Movie lines on Home (ADR 0093, src/components/quote-of-the-day.tsx): one 10 s cycle per quote. Each word inks in
+   (fades up out of a blur, tilted like a hand's stroke), one after another (--ink-delay), then the movie's line comes
+   in and a pen underlines it (--pen-delay on the link). It stays about 7 s; the pen line is pulled away first, then the
+   words fade in the same order and stay gone (fill: both) until the component swaps in a random quote, which starts
+   the cycle again. Only with motion allowed: with reduced motion the quote shows still. */
 @keyframes ink {
   0% { opacity: 0; filter: blur(5px); translate: 0 0.35em; rotate: -6deg; animation-timing-function: var(--ease-out-soft); }
   6%, 86% { opacity: 1; filter: blur(0); translate: 0 0; rotate: 0deg; animation-timing-function: ease-in; }
@@ -559,14 +558,18 @@ dialog[data-sheet]:not([open])::backdrop {
 }
 .quote-word {
   display: inline-block;
-  animation: ink 10s linear var(--ink-delay, 0ms) infinite backwards;
 }
-.quote-from {
-  animation: quote-from 10s linear var(--pen-delay, 0ms) infinite backwards;
-}
-.quote-pen path {
-  stroke-dasharray: 1;
-  animation: pen 10s linear calc(var(--pen-delay, 0ms) + 200ms) infinite backwards;
+@media (prefers-reduced-motion: no-preference) {
+  .quote-word {
+    animation: ink 10s linear var(--ink-delay, 0ms) both;
+  }
+  .quote-from {
+    animation: quote-from 10s linear var(--pen-delay, 0ms) both;
+  }
+  .quote-pen path {
+    stroke-dasharray: 1;
+    animation: pen 10s linear calc(var(--pen-delay, 0ms) + 200ms) both;
+  }
 }
 
 /* prefers-reduced-motion: nothing moves. Things still appear and change, at once (end states, no slides). */

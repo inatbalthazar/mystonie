@@ -15,10 +15,11 @@ import { ReelNote } from "@/components/reel/reel-note";
 import { BoardNote } from "@/components/social/board-note";
 import { CommunityLinks } from "@/components/social/community-links";
 import { FriendsFinished } from "@/components/social/friends-finished";
+import { QuoteOfTheDay } from "@/components/quote-of-the-day";
 import { QuizNote } from "@/components/warnings/quiz-note";
 import { localizedPath } from "@/core/auth";
 import { currentMonth, isChallengeSlug, monthChallenges } from "@/core/challenges";
-import { quoteOfTheDay } from "@/core/quotes";
+import { MOVIE_QUOTES, quoteOfTheDay } from "@/core/quotes";
 import { reelDay, reelNumber } from "@/core/reel";
 import { localDateKey, safeTimeZone } from "@/core/stats/period";
 import { reviewSeasonYear } from "@/core/stats/year-review";
@@ -45,11 +46,6 @@ const TRENDING = 9;
 /** Friends' finishes on Home, picked from the first feed items (which include the viewer's own). */
 const FRIENDS = 3;
 const FRIENDS_LOOKAHEAD = 12;
-// The quote of the day is written in word by word: when the first word starts, the gap between words, and the word
-// after which the rest come together (so a long line doesn't keep people waiting).
-const QUOTE_START_MS = 150;
-const QUOTE_STAGGER_MS = 70;
-const QUOTE_STAGGER_MAX = 12;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("HomeApp");
@@ -123,7 +119,6 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
   const month = currentMonth(now, timeZone);
   const today = reelDay(now);
   const quote = quoteOfTheDay(localDateKey(now, safeTimeZone(timeZone)));
-  const quoteWords = t("quote", { text: quote.text }).split(" ");
   const [episodes, logs, board, joins, reel] = await Promise.all([
     cachedEpisodes(supabase, ids),
     episodeLogs(supabase, userId, ids),
@@ -171,35 +166,9 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
       <SignupFromCard newAccount={newAccount} />
       <header className="flex flex-col gap-2">
         <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">
-          {format.dateTime(now, { weekday: "long", month: "long", day: "numeric", timeZone })}
+          {t("quoteDate", { date: format.dateTime(now, { weekday: "long", month: "long", day: "numeric", timeZone }) })}
         </p>
-        <Link
-          href={`/title/movie/${quote.tmdbId}`}
-          aria-label={`${quote.text} ${t("quoteLabel", { movie: quote.movie })}`}
-          className="group press -my-1 flex origin-left flex-col gap-1 rounded-lg py-1"
-          style={{ ["--pen-delay" as string]: `${QUOTE_START_MS + Math.min(quoteWords.length, QUOTE_STAGGER_MAX) * QUOTE_STAGGER_MS + 150}ms` }}
-        >
-          {/* Written in word by word, then a pen underlines the movie (ADR 0093). */}
-          <span aria-hidden="true" className="font-hand text-2xl leading-tight text-muted-foreground transition-colors group-hover:text-foreground">
-            {quoteWords.map((word, i) => (
-              <span key={i}>
-                <span
-                  className="quote-word"
-                  style={{ ["--ink-delay" as string]: `${QUOTE_START_MS + Math.min(i, QUOTE_STAGGER_MAX) * QUOTE_STAGGER_MS}ms` }}
-                >
-                  {word}
-                </span>
-                {i < quoteWords.length - 1 && " "}
-              </span>
-            ))}
-          </span>
-          <span aria-hidden="true" className="quote-from relative w-fit pb-1.5 text-xs text-muted-foreground/80">
-            {t("quoteFrom", { movie: quote.movie, year: quote.year })}
-            <svg viewBox="0 0 100 6" preserveAspectRatio="none" className="quote-pen absolute inset-x-0 bottom-0 h-1.5 w-full text-brand">
-              <path d="M1 4 C 18 1, 30 5.5, 50 3 S 82 1.5, 99 3.5" pathLength="1" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" vectorEffect="non-scaling-stroke" />
-            </svg>
-          </span>
-        </Link>
+        <QuoteOfTheDay first={MOVIE_QUOTES.indexOf(quote)} />
         <h1 className={`font-display font-extrabold tracking-[-0.03em] break-words ${[...name].length > 12 ? "text-3xl" : "text-4xl"}`}>
           {name ? t("greeting", { name }) : t("title")}
         </h1>

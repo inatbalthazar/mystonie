@@ -61,6 +61,7 @@
     "title": "หน้าแรก",
     "reelCard": "Reel of the Day #{number}",
     "greeting": "สวัสดี {name}",
+    "quoteDate": "กำลังฉาย · {date}",
     "quote": "“{text}”",
     "quoteFrom": "จาก {movie} ({year})",
     "quoteLabel": "ประโยคประจำวันจาก {movie} เปิดหน้าหนังเรื่องนี้",
