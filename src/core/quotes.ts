@@ -101,13 +101,15 @@ const DAY_MS = 86_400_000;
 export const QUOTE_MAX_CHARS = 100;
 
 /**
- * How big a quote is written, so every quote fits the same box on Home and nothing under it moves: short ones large,
- * longer ones smaller (ADR 0093).
+ * About how big (px) a quote is written so it fills Home's quote box on a 360 px phone: a short one large like a
+ * poster's tagline, a long one smaller (ADR 0093). The page then fits it to the real box; this is the first guess, for
+ * the server's HTML.
  */
-export function quoteSize(text: string): "lg" | "md" | "sm" {
-  if (text.length <= 60) return "lg";
-  if (text.length <= 80) return "md";
-  return "sm";
+export function quoteSize(text: string): number {
+  if (text.length <= 14) return 48;
+  if (text.length <= 32) return 34;
+  if (text.length <= 60) return 26;
+  return 20;
 }
 
 /** The quote for a local day (`YYYY-MM-DD`): the list in order, one a day, starting over at the end. */

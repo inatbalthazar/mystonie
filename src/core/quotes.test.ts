@@ -3,10 +3,10 @@ import { MOVIE_QUOTES, QUOTE_MAX_CHARS, quoteOfTheDay, quoteSize } from "./quote
 
 describe("quoteSize", () => {
   it("writes short quotes large and long ones smaller", () => {
-    expect(quoteSize("Why so serious?")).toBe("lg");
-    expect(quoteSize("x".repeat(60))).toBe("lg");
-    expect(quoteSize("x".repeat(61))).toBe("md");
-    expect(quoteSize("x".repeat(81))).toBe("sm");
+    expect(quoteSize("Rosebud.")).toBe(48);
+    expect(quoteSize("Why so serious?")).toBe(34);
+    expect(quoteSize("x".repeat(60))).toBe(26);
+    expect(quoteSize("x".repeat(61))).toBe(20);
   });
 });
 

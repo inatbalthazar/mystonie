@@ -1,12 +1,13 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { useEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { MOVIE_QUOTES, quoteSize } from "@/core/quotes";
 import { Link } from "@/i18n/navigation";
-import { cn } from "@/lib/utils";
 
-const SIZES = { lg: "text-2xl", md: "text-xl", sm: "text-lg" } as const;
+/** The sizes a quote is fitted between (px). */
+const MAX_PX = 52;
+const MIN_PX = 16;
 
 // Each quote is written in word by word: when the first word starts, the gap between words, and the word after which
 // the rest come together (so a long line doesn't keep people waiting). A cycle (write, stay, fade) is CYCLE_MS,
@@ -29,6 +30,29 @@ export function QuoteOfTheDay({ first }: { first: number }) {
   const words = t("quote", { text: quote.text }).split(" ");
   const penDelay = START_MS + Math.min(words.length, STAGGER_MAX) * STAGGER_MS + 150;
 
+  // Fit the quote to the box: the largest size whose lines fit it, measured with the real font and width.
+  const boxRef = useRef<HTMLSpanElement>(null);
+  const textRef = useRef<HTMLSpanElement>(null);
+  useLayoutEffect(() => {
+    const fit = () => {
+      const box = boxRef.current;
+      const text = textRef.current;
+      if (!box || !text) return;
+      for (let size = MAX_PX; size >= MIN_PX; size -= 2) {
+        text.style.fontSize = `${size}px`;
+        if (text.offsetHeight <= box.clientHeight && text.scrollWidth <= box.clientWidth) break;
+      }
+    };
+    fit();
+    let live = true;
+    void document.fonts?.ready.then(() => live && fit());
+    window.addEventListener("resize", fit);
+    return () => {
+      live = false;
+      window.removeEventListener("resize", fit);
+    };
+  }, [index]);
+
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
     const timer = window.setTimeout(() => {
@@ -48,15 +72,13 @@ export function QuoteOfTheDay({ first }: { first: number }) {
       className="group press -my-1 flex origin-left flex-col gap-1 rounded-lg py-1"
       style={{ ["--pen-delay" as string]: `${penDelay}ms` }}
     >
-      {/* A box three large lines tall, the quote at its foot: a longer quote is written smaller, so nothing below moves. */}
+      {/* One box for every quote, so nothing below moves; the quote is sized to fill it, at its foot. */}
       <span
+        ref={boxRef}
         aria-hidden="true"
-        className={cn(
-          "flex h-[5.625rem] items-end overflow-hidden font-hand leading-tight text-muted-foreground transition-colors group-hover:text-foreground",
-          SIZES[quoteSize(quote.text)],
-        )}
+        className="flex h-[4.75rem] items-end overflow-hidden font-hand leading-[1.15] text-muted-foreground transition-colors group-hover:text-foreground"
       >
-        <span>
+        <span ref={textRef} className="block w-full" style={{ fontSize: `${quoteSize(quote.text)}px` }}>
           {words.map((word, i) => (
             <span key={i}>
               <span className="quote-word" style={{ ["--ink-delay" as string]: `${START_MS + Math.min(i, STAGGER_MAX) * STAGGER_MS}ms` }}>
