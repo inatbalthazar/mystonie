@@ -1,11 +1,24 @@
 // The Journal as a feed (stage 4, ADR 0052): rows with their picture and Stamps, the reader's own Stamps and Saves,
-// and For you from the reader's collection. Server only. Runs as the reader (RLS) or as a visitor (anon).
+// and For you from the reader's collection; the team's articles and members' (ADR 0092) together. Server only. Runs as the reader (RLS) or as a visitor (anon).
 import { posterUrl } from "@/core/catalog/images";
 import { sourceForKind, type TitleKind } from "@/core/catalog/types";
 import { isEntryStatus } from "@/core/collection/entries";
-import { uuidv7 } from "@/core/ids";
-import { collectionSignals, hasSignals, rankForYou, titleKey, type CollectionSignals, type FeedArticle, type ForYouReason, type JournalMarkKind } from "@/core/journal-feed";
+import { isUuidV7, uuidv7 } from "@/core/ids";
+import {
+  articleFeedTime,
+  collectionSignals,
+  hasSignals,
+  rankForYou,
+  titleKey,
+  type CollectionSignals,
+  type FeedArticle,
+  type ForYouReason,
+  type JournalMarkKind,
+} from "@/core/journal-feed";
+import { subjectKinds } from "@/core/journal-posts";
+import { routing } from "@/i18n/routing";
 import { journalList } from "./journal";
+import { journalPosts, postsByIds, type ListedPost } from "./journal-posts";
 import { insertLive, type SocialWrite } from "./social";
 import type { UserClient } from "./supabase-server";
 
@@ -130,28 +143,89 @@ export type JournalFeed = {
   personal: boolean;
 };
 
+/** An article of either kind on its way to a row: the team's (a file) or a member's (ADR 0092). */
+type Listed = Omit<FeedArticle, "image" | "stamps" | "stamped" | "saved" | "reason"> & { cover: string | null; titles: TitleRef[] };
+
+const teamListed = (a: Awaited<ReturnType<typeof journalList>>[number]): Listed => ({
+  slug: a.slug,
+  locale: a.locale,
+  title: a.meta.title,
+  description: a.meta.description,
+  date: a.meta.date,
+  minutes: a.minutes,
+  author: a.meta.author,
+  avatar: a.meta.avatar,
+  profile: a.meta.profile,
+  cover: a.meta.cover,
+  featured: a.meta.featured,
+  draft: a.meta.draft,
+  tags: a.meta.tags,
+  titles: a.titles,
+  kinds: subjectKinds(a.titles),
+  publishedAt: null,
+  place: null,
+  spoilers: false,
+});
+
+const memberListed = (p: ListedPost): Listed => {
+  const titles = p.subjects.flatMap((s) => (s.kind === "place" ? [] : [{ kind: s.kind, externalId: s.externalId }]));
+  const place = p.subjects.find((s) => s.kind === "place");
+  return {
+    slug: p.id,
+    locale: p.locale,
+    title: p.title,
+    description: p.summary ?? "",
+    date: (p.publishedAt ?? p.updatedAt).slice(0, 10),
+    minutes: p.minutes,
+    author: p.byline ? (p.byline.displayName ?? p.byline.username) : null,
+    avatar: p.byline?.avatarUrl ?? null,
+    profile: p.byline?.username ?? null,
+    cover: null,
+    featured: p.state === "featured",
+    draft: false,
+    tags: p.tags,
+    titles,
+    kinds: subjectKinds(p.subjects),
+    publishedAt: p.publishedAt,
+    place: place?.kind === "place" && titles.length === 0 ? place.country : null,
+    spoilers: p.spoilers,
+  };
+};
+
 /**
- * The Journal's articles in `locale` as rows: the picture (cover, else the first cached poster), Stamps, and for a
- * signed-in reader their own Stamps and Saves. `forYou: "rank"` also orders them For you; "reasons" only says
+ * The Journal in `locale` as rows: the team's articles and members' (Featured ones, the people the reader follows
+ * and their own, ADR 0092), each with its picture (cover, else the first cached poster), Stamps and, for a
+ * signed-in reader, their own Stamps and Saves. `forYou: "rank"` also orders them For you; "reasons" only says
  * which of the reader's titles each one shows (the Following feed). `limit` keeps the newest few. A database
- * problem leaves the rows plain rather than failing the page.
+ * problem leaves the rows plain (and without members' articles) rather than failing the page.
  */
 export async function journalFeed(
   locale: string,
   { db, viewerId, forYou = false, limit }: { db: UserClient | null; viewerId: string | null; forYou?: "rank" | "reasons" | false; limit?: number },
 ): Promise<JournalFeed> {
-  const all = await journalList(locale);
-  const list = all.slice(0, limit);
-  const refs = list.flatMap((a) => a.titles);
   const soft = <T,>(promise: Promise<T>, fallback: T): Promise<T> =>
     promise.catch((error: unknown) => {
       console.error(error);
       return fallback;
     });
   const reader = db && viewerId ? { db, viewerId } : null;
-  const [counts, marks, titles, signals] = await Promise.all([
-    db ? soft(journalStampCounts(db), new Map<string, number>()) : new Map<string, number>(),
+  const [team, members, marks, counts] = await Promise.all([
+    journalList(locale),
+    db ? soft(journalPosts(db, viewerId, locale, routing.defaultLocale), []) : [],
     reader ? soft(myJournalMarks(reader.db, reader.viewerId), noMarks()) : noMarks(),
+    db ? soft(journalStampCounts(db), new Map<string, number>()) : new Map<string, number>(),
+  ]);
+  // Saved members' articles that aren't in this reader's Journal (not Featured, nor by someone they follow).
+  const listed = new Set(members.map((p) => p.id));
+  const savedElsewhere = [...marks.saved.keys()].filter((slug) => isUuidV7(slug) && !listed.has(slug));
+  const extra = db && savedElsewhere.length ? await soft(postsByIds(db, savedElsewhere), []) : [];
+
+  const all = [...team.map(teamListed), ...[...members, ...extra].map(memberListed)].sort(
+    (a, b) => articleFeedTime(b) - articleFeedTime(a) || a.slug.localeCompare(b.slug),
+  );
+  const list = all.slice(0, limit);
+  const refs = list.flatMap((a) => a.titles);
+  const [titles, signals] = await Promise.all([
     db ? cachedTitles(db, refs) : new Map<string, CachedTitle>(),
     reader && forYou ? soft(readerSignals(reader.db, reader.viewerId, refs, forYou === "rank"), null) : null,
   ]);
@@ -160,8 +234,8 @@ export async function journalFeed(
     ? rankForYou(
         list.map((a) => ({
           slug: a.slug,
-          date: a.meta.date,
-          featured: a.meta.featured,
+          date: a.date,
+          featured: a.featured,
           titles: a.titles.map((t) => ({ ...t, genres: titles.get(titleKey(t.kind, t.externalId))?.genres ?? [] })),
         })),
         signals,
@@ -171,26 +245,16 @@ export async function journalFeed(
   const reasons = new Map<string, ForYouReason | null>(ranked?.map((r) => [r.slug, r.reason]) ?? []);
 
   return {
-    articles: list.map((a) => ({
-      slug: a.slug,
-      locale: a.locale,
-      title: a.meta.title,
-      description: a.meta.description,
-      date: a.meta.date,
-      minutes: a.minutes,
-      author: a.meta.author,
-      avatar: a.meta.avatar,
-      profile: a.meta.profile,
-      image: a.meta.cover ?? a.titles.map((t) => titles.get(titleKey(t.kind, t.externalId))?.posterUrl).find((url) => !!url) ?? null,
-      featured: a.meta.featured,
-      draft: a.meta.draft,
+    articles: list.map(({ cover, titles: refs, ...a }) => ({
+      ...a,
+      image: cover ?? refs.map((t) => titles.get(titleKey(t.kind, t.externalId))?.posterUrl).find((url) => !!url) ?? null,
       stamps: counts.get(a.slug) ?? 0,
       stamped: marks.stamped.has(a.slug),
       saved: marks.saved.has(a.slug),
       reason: reasons.get(a.slug) ?? null,
     })),
     forYou: forYou === "rank" && ranked ? ranked.map((r) => r.slug) : null,
-    // Only articles that are still published (one taken down stays saved, out of sight).
+    // Only articles that are still there (one taken down stays saved, out of sight).
     saved: [...marks.saved.keys()].filter((slug) => all.some((a) => a.slug === slug)),
     personal: signals ? hasSignals(signals) : false,
   };

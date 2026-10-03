@@ -16,6 +16,7 @@ import { isTheme } from "@/core/account";
 import { localizedPath } from "@/core/auth";
 import { isOAuthProvider, type OAuthProvider } from "@/core/avatar";
 import { countryOptions, isCountryCode } from "@/core/countries";
+import { isAdminEmail } from "@/core/journal-posts";
 import { pushConfig } from "@/data/push";
 import { getProState } from "@/data/subscriptions";
 import { SupportLink } from "@/components/support-link";
@@ -67,6 +68,7 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
     avoidTopicIds(supabase, user.id),
   ]);
   const pushKey = pushConfig()?.publicKey;
+  const team = isAdminEmail(process.env.ADMIN_EMAILS, user.email);
   const pro = await getProState(supabase, user.id).catch(() => null);
   const rows: [string, string][] = [
     [t("email"), user.email ?? ""],
@@ -172,6 +174,8 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
             [
               ["/privacy", tl("privacy")],
               ["/terms", tl("terms")],
+              // The team's review of members' Journal articles (ADR 0092), for ADMIN_EMAILS accounts only.
+              ...(team ? ([["/admin/journal", t("teamReview")]] as const) : []),
             ] as const
           ).map(([href, label]) => (
             <Link key={href} href={href} className="flex h-12 items-center justify-between gap-3 font-semibold hover:text-brand">

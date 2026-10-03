@@ -143,7 +143,17 @@ From the owner's notes at the end of [brief.th.md](brief.th.md). Each task write
 - [x] **The Journal as a feed** (the owner, 2026-10-01: like Medium's home; [ADR 0052](decisions/0052-journal-feed.md)): rows with a byline (photo, link to the writer's page) and a polaroid, tabs For you (ranked by your collection, with the reason) · Latest · Featured (`featured: true`) · Saved, Share, and the newest articles in the Following feed by date. · ⚡ medium · **Done 2026-10-01.**
 - [x] **Stamps and Saves on articles:** public Stamp counts, Saved on the Journal and on Me ("Saved to read"), visitors sent to sign in. · ⚡ low · **Done 2026-10-01.** **Before the next deploy:** apply `20261012090000_stage4_journal_marks.sql` to the remote project too.
 - [ ] 🧑 Write the first articles (copy `content/journal/how-to-write/`, which stays a draft), then publish with `draft: false`, commit and deploy. Mark one `featured: true` to start the Featured tab; add `avatar:` and `profile:` for your byline.
-- Long reviews, a review feed by users and comments on articles wait for their gate ([later/long-reviews.md](product/later/long-reviews.md)). Sponsored articles aren't planned: the Journal is the owner's own content, no ads (2026-10-01).
+- [x] **Members write for the Journal** (the owner, 2026-10-03: a real Journal where users write reviews, see their own, tick to be Featured and the owner approves from a back office; category filters and a sort; pick categories and what it's about, movies to places, shown to readers with Check like Trending's posters; [ADR 0092](decisions/0092-members-write-for-the-journal.md)):
+  - `/journal/write`: what it's about (titles or countries, up to 6), 1–3 of 7 categories, Markdown text with a preview (no links or images), spoilers, language, and "Send it to be Featured".
+  - Articles at `/journal/u/<id>` with Check, on the writer's page (a Journal tab on profiles and on Me) and in followers' feeds.
+  - Everyone's Journal has the team's and Featured ones, with filters and a sort.
+  - The team's `/admin/journal` (`ADMIN_EMAILS`) features, declines and takes down.
+  - · ⚡ large · **Done 2026-10-03** ([spec](product/features/S4-community-journal.md)). Migration `20261024090000_stage4_community_journal.sql`.
+- [ ] 🧑 **Before deploying the members' Journal:**
+  1. Apply `20261024090000_stage4_community_journal.sql` to the remote project (SQL Editor or MCP), then `get_advisors`.
+  2. In Vercel, add `ADMIN_EMAILS` with the address you sign in with (not secret).
+  3. After the deploy, sign in and check Settings → About Mystonie → "Journal review (team)".
+- Comments on articles and a feed of everyone's long reviews still wait for their gate ([later/long-reviews.md](product/later/long-reviews.md)). Sponsored articles aren't planned: the Journal is the team's and its members' own writing, no ads (2026-10-01).
 
 **Revenue plan** (the owner's question of 2026-09-30, [ADR 0049](decisions/0049-revenue-plan.md): tips at launch, then Pro and affiliate links, no banner ads)
 - [x] **Tip link:** "Buy me a coffee" ([buymeacoffee.com/inatbalthab](https://buymeacoffee.com/inatbalthab)) in the footer of every page and a "Support Mystonie" section in Settings; unlocks nothing, the Terms say so ("Tips"); clicks tracked as `support_clicked`. · ⚡ low · **Done 2026-09-30.**

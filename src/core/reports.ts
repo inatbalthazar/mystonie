@@ -1,11 +1,11 @@
-// "Report" on public profiles and shared cards (S1 profile & privacy → Safety). The reasons match the
-// `reports.reason` check in the database.
+// "Report" on public profiles and shared cards (S1 profile & privacy → Safety) and on members' Journal articles
+// (ADR 0092). The reasons match the `reports.reason` check in the database.
 import { isUuid } from "./email/unsubscribe";
 
 export const REPORT_REASONS = ["spam", "harassment", "hate", "sexual", "impersonation", "other"] as const;
 export type ReportReason = (typeof REPORT_REASONS)[number];
 
-export const REPORT_TARGETS = ["profile", "card"] as const;
+export const REPORT_TARGETS = ["profile", "card", "article"] as const;
 export type ReportTarget = (typeof REPORT_TARGETS)[number];
 
 export const REPORT_NOTE_MAX = 500;

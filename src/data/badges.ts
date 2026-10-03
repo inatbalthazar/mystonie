@@ -18,6 +18,7 @@ import {
 import { uuidv7 } from "@/core/ids";
 import { PAID_STATUSES } from "@/core/support";
 import { journalBy } from "./journal";
+import { postTimes } from "./journal-posts";
 import type { StatsRows } from "./stats";
 import { adminClient } from "./supabase-admin";
 import type { UserClient } from "./supabase-server";
@@ -88,7 +89,8 @@ export async function badgeActivity(db: UserClient, userId: string): Promise<Bad
     challenges: (challenges.data ?? []).map((c) => ({ month: c.month.slice(0, 7), at: time(c.completed_at) })),
     quiz: times((quiz.data ?? []).map((a) => a.answered_at)),
     reviews: times((reviews.data ?? []).map((e) => e.finished_at)),
-    articles: profile.data?.username ? await journalBy(profile.data.username) : [],
+    // The team's articles naming the writer, and their own published ones (ADR 0092).
+    articles: [...(profile.data?.username ? await journalBy(profile.data.username) : []), ...(await postTimes(db, userId))],
     support: times((subs.data ?? []).map((sub) => sub.created_at)),
   };
 }

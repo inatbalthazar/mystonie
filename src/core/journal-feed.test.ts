@@ -153,9 +153,16 @@ describe("interleaveArticles", () => {
     slots.map((s) => (s.type === "entry" ? s.item.id : `@${s.article.slug}`));
 
   it("places an article at the end of its day, above that day's finishes", () => {
-    expect(articleFeedTime("2026-10-01")).toBe(Date.parse("2026-10-01T23:59:59.999Z"));
+    expect(articleFeedTime({ date: "2026-10-01" })).toBe(Date.parse("2026-10-01T23:59:59.999Z"));
     const items = [entry("a", "2026-10-02T08:00:00Z"), entry("b", "2026-10-01T20:00:00Z"), entry("c", "2026-09-20T10:00:00Z")];
     expect(ids(interleaveArticles(items, [art("new", "2026-10-01"), art("older", "2026-09-25")], true))).toEqual(["a", "@new", "b", "@older", "c"]);
+  });
+
+  it("places a member's article at the minute it was published (ADR 0092)", () => {
+    expect(articleFeedTime({ date: "2026-10-01", publishedAt: "2026-10-01T09:30:00Z" })).toBe(Date.parse("2026-10-01T09:30:00Z"));
+    const items = [entry("a", "2026-10-01T20:00:00Z"), entry("b", "2026-10-01T08:00:00Z")];
+    const member = { slug: "member", date: "2026-10-01", publishedAt: "2026-10-01T09:30:00Z" };
+    expect(ids(interleaveArticles(items, [member], true))).toEqual(["a", "@member", "b"]);
   });
 
   it("keeps older articles back until their page is loaded, then adds a few after the last finish", () => {

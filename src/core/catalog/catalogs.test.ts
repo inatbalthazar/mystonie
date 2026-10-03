@@ -5,7 +5,7 @@ import mangaOnePiece from "./fixtures/anilist-manga-30013.json";
 import anilistSearch from "./fixtures/anilist-search-one-piece.json";
 import booksSearch from "./fixtures/google-books-search.json";
 import { normalizeGoogleBooksDetails, normalizeGoogleBooksSearch } from "./google-books";
-import { isCardPosterUrl, posterUrl } from "./images";
+import { cardImageUrl, isCardPosterUrl, posterUrl } from "./images";
 import { mergeSearch, searchKey } from "./search";
 import { isExternalId, sourceForKind, type SearchResult } from "./types";
 
@@ -150,6 +150,20 @@ describe("catalog ids and posters", () => {
     for (const bad of ["/api/covers/3fzJEAAAQBAJ?size=huge", "/api/covers/short", "https://s4.anilist.co/file/x.jpg", "//evil.example/x.jpg"]) {
       expect(isCardPosterUrl(bad), bad).toBe(false);
     }
+  });
+
+  it("draws cards from another URL than the list's, so they never get its cached non-CORS copy", () => {
+    expect(cardImageUrl("https://image.tmdb.org/t/p/w342/x.jpg")).toBe("https://image.tmdb.org/t/p/w780/x.jpg");
+    expect(cardImageUrl("https://image.tmdb.org/t/p/w92/x.jpg")).toBe("https://image.tmdb.org/t/p/w780/x.jpg");
+    expect(isCardPosterUrl(cardImageUrl("https://image.tmdb.org/t/p/w342/x.jpg"))).toBe(true);
+    // AniList: the large cover, which lists show too, so the card's copy carries a query of its own.
+    const medium = "https://s4.anilist.co/file/anilistcdn/media/manga/cover/medium/bx30013-BeslEMqiPhlk.jpg";
+    const large = medium.replace("/medium/", "/large/");
+    expect(cardImageUrl(medium)).toBe(`${large}?card`);
+    expect(cardImageUrl(large)).toBe(`${large}?card`);
+    // Our own book cover proxy is same-origin, and anything else is left alone.
+    expect(cardImageUrl("/api/covers/3fzJEAAAQBAJ")).toBe("/api/covers/3fzJEAAAQBAJ");
+    expect(cardImageUrl("https://evil.example/t/p/w342/x.jpg")).toBe("https://evil.example/t/p/w342/x.jpg");
   });
 });
 

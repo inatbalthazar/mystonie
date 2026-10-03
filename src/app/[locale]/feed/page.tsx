@@ -5,6 +5,7 @@ import type { Locale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { DividerTabs } from "@/components/divider-tabs";
 import { ArticleRow } from "@/components/journal/article-row";
+import { JournalFilters } from "@/components/journal/journal-filters";
 import { Avatar } from "@/components/social/avatar";
 import { FeedList } from "@/components/social/feed-list";
 import { ArticlesSeen, FeedDot, FollowingSeen } from "@/components/social/feed-news";
@@ -13,6 +14,7 @@ import { SwipeArea } from "@/components/motion/swipe-area";
 import { FollowButton } from "@/components/social/follow-button";
 import { localizedPath } from "@/core/auth";
 import { FEED_ARTICLES, feedTabs, pickFeedTab, type FeedArticle, type FeedTab } from "@/core/journal-feed";
+import { filterArticles, parseJournalFilters, sortArticles, type JournalFilters as Filters } from "@/core/journal-posts";
 import { nextFeedCursor } from "@/core/social";
 import { newestArticleKey } from "@/data/journal";
 import { journalFeed } from "@/data/journal-feed";
@@ -42,7 +44,8 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function FeedPage({ params, searchParams }: PageProps<"/[locale]/feed">) {
   const locale = (await params).locale as Locale;
   setRequestLocale(locale);
-  const asked = (await searchParams).tab;
+  const query = await searchParams;
+  const asked = query.tab;
   const self = localizedPath("/feed", locale, routing.defaultLocale);
 
   const supabase = await userClient();
@@ -51,6 +54,8 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
   // The tab asked for, so only what it shows is read; Saved is checked once the reader's Saves are known.
   const wanted: FeedTab = !userId ? "articles" : asked === "articles" || asked === "saved" ? asked : "following";
   const following = !!supabase && !!userId && wanted === "following";
+  // The Journal's categories, kinds and order (ADR 0092).
+  const filters = parseJournalFilters(query, !!userId);
 
   const [items, activity, journal, newestArticle, t, format] = await Promise.all([
     following ? followingFeed(supabase, userId, null) : [],
@@ -65,7 +70,7 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
           console.error(error);
           return null;
         })
-      : journalFeed(locale, { db: supabase, viewerId: userId, forYou: wanted === "articles" && userId ? "rank" : false }),
+      : journalFeed(locale, { db: supabase, viewerId: userId, forYou: wanted === "articles" && userId && filters.sort === "for_you" ? "rank" : false }),
     userId && wanted === "articles" ? newestArticleKey() : null,
     getTranslations("Social"),
     getFormatter(),
@@ -172,7 +177,7 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
                   )}
                 </>
               ) : (
-                journal && <Articles tab={tab} feed={journal} now={now} signInNext={userId ? undefined : self} />
+                journal && <Articles tab={tab} feed={journal} now={now} filters={filters} signedIn={!!userId} signInNext={userId ? undefined : self} />
               )}
             </div>
           </PageTransition>
@@ -182,30 +187,47 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
   );
 }
 
-/** The Articles and Saved tabs: the Journal's articles as rows (ADR 0052), For you first when signed in. */
+/**
+ * The Articles and Saved tabs: the Journal's articles as rows (ADR 0052), the team's and members' (ADR 0092). Articles
+ * has the filters and sort: For you first when signed in, else newest.
+ */
 async function Articles({
   tab,
   feed,
   now,
+  filters,
+  signedIn,
   signInNext,
 }: {
   tab: Exclude<FeedTab, "following">;
   feed: Awaited<ReturnType<typeof journalFeed>>;
   now: number;
+  filters: Filters;
+  signedIn: boolean;
   signInNext?: string;
 }) {
   const t = await getTranslations("Journal");
   const bySlug = new Map(feed.articles.map((a) => [a.slug, a]));
   const pick = (slugs: readonly string[]) => slugs.flatMap((slug) => bySlug.get(slug) ?? []);
-  const rows: FeedArticle[] = tab === "saved" ? pick(feed.saved) : feed.forYou ? pick(feed.forYou) : feed.articles;
+  const ordered = filters.sort === "for_you" && feed.forYou ? pick(feed.forYou) : sortArticles(feed.articles, filters.sort === "top" ? "top" : "new");
+  const rows: FeedArticle[] = tab === "saved" ? pick(feed.saved) : filterArticles(ordered, filters);
+  const filtered = tab === "articles" && (filters.tag !== null || filters.kind !== null);
 
   return (
     <>
-      {tab === "articles" && feed.forYou && !feed.personal && rows.length > 0 && (
+      {tab === "articles" && <JournalFilters filters={filters} signedIn={signedIn} />}
+      {tab === "articles" && filters.sort === "for_you" && feed.forYou && !feed.personal && rows.length > 0 && (
         <p className="-mt-2 text-sm text-muted-foreground">{t("forYouHint")}</p>
       )}
       {rows.length === 0 ? (
-        <p className="rounded-2xl border-2 border-dashed border-border p-6 text-center font-hand text-2xl text-muted-foreground">{t("empty")}</p>
+        <div className="flex flex-col items-center gap-3 rounded-2xl border-2 border-dashed border-border p-6 text-center">
+          <p className="font-hand text-2xl text-muted-foreground">{filtered ? t("noMatch") : t("empty")}</p>
+          {filtered && (
+            <Link href={{ pathname: "/feed", query: { tab: "articles" } }} replace className="flex min-h-11 items-center font-semibold text-brand underline underline-offset-4">
+              {t("clearFilters")}
+            </Link>
+          )}
+        </div>
       ) : (
         <ol className="stagger -mt-4 flex flex-col divide-y-2 divide-dashed divide-border">
           {rows.map((a, i) => (

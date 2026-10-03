@@ -33,6 +33,7 @@ import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
 import { AlbumCover, type AlbumProfile } from "./album-cover";
 import { ArrangeAlbum } from "./arrange-album";
+import { profileTabHref, type ProfileTab } from "@/lib/profile-tabs";
 import { ProfileTabs } from "./me-tabs";
 import { Shelf } from "./shelf";
 import { ShelfFavourites } from "./shelf-favourites";
@@ -49,8 +50,8 @@ export type { AlbumProfile } from "./album-cover";
  * two rows and "Show all". Visitors see it at /u/<username>; the owner also at /me, the nav island's Me (ADR 0050), even
  * while it's private to everyone else (`privateToOthers`), as the Album tab next to Stats (`me`, ADR 0053). The
  * owner gets Share my collection and Settings, and on Me "Arrange" and "Pick favourites". No cards: they're the owner's,
- * on Me's Cards tab (ADR 0076), and each shared one has its own page. Visitors get the profile's Stats tab next to it
- * (`statsTab`, ADR 0077).
+ * on Me's Cards tab (ADR 0076), and each shared one has its own page. Visitors get the profile's tabs, Stats and Journal, next
+ * to it (`tabs`, ADR 0077, ADR 0092).
  */
 export async function ProfileAlbum({
   db,
@@ -60,7 +61,7 @@ export async function ProfileAlbum({
   timeZone = "UTC",
   privateToOthers = false,
   me = false,
-  statsTab = false,
+  tabs = ["album"],
   layout,
 }: {
   db: UserClient;
@@ -73,8 +74,8 @@ export async function ProfileAlbum({
   privateToOthers?: boolean;
   /** Shown at /me: only the album itself; Me's layout has the cover and the tabs (Album · Stats · Cards, ADR 0081). */
   me?: boolean;
-  /** At /u/<username>: the profile's tabs (Album · Stats, ADR 0077), unless its owner hid every part of the stats. */
-  statsTab?: boolean;
+  /** At /u/<username>: the profile's tabs (Album, then Stats and Journal when there are, ADR 0077, ADR 0092). */
+  tabs?: readonly ProfileTab[];
 }) {
   const isOwner = viewerId === profile.id;
   const [rows, watching, counts, awarded, patches, clubs, places, atlasPublic, t, tb, tc, tl] = await Promise.all([
@@ -205,7 +206,7 @@ export async function ProfileAlbum({
   };
 
   const album = (
-      <AlbumSwipe next={me ? "/stats" : statsTab ? `/u/${profile.username}/stats` : null} replace={!me}>
+      <AlbumSwipe next={me ? "/stats" : tabs[1] ? profileTabHref(profile.username, tabs[1]) : null} replace={!me}>
         {privateToOthers && (
           <p className="flex flex-wrap items-center gap-x-2 gap-y-1 rounded-2xl bg-brand-soft px-4 py-2 text-sm">
             <LockIcon className="size-4 shrink-0 text-brand" aria-hidden="true" />
@@ -266,7 +267,7 @@ export async function ProfileAlbum({
         counts={counts}
         follow={isOwner ? undefined : { signedIn: !!viewerId, next: localizedPath(`/u/${profile.username}`, locale, routing.defaultLocale) }}
       />
-      {statsTab && <ProfileTabs username={profile.username} current="album" />}
+      <ProfileTabs username={profile.username} current="album" tabs={tabs} />
       {album}
     </main>
   );

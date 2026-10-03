@@ -1,5 +1,7 @@
 # Later: long reviews and a review feed by users
 
+> **Partly built (2026-10-03, [ADR 0092](../../decisions/0092-members-write-for-the-journal.md)):** members write Journal articles (reviews, lists, guides…) with what they're about, spoilers, reports, caps on writing and the Terms' wording; the team features the best for everyone. Still waiting: comments on articles, a feed of everyone's writing, and pinning articles on profiles.
+
 **Gate:** about 300 short reviews a week on Mystonie (the 280-character review on a finish, shown in "What people said", [ADR 0051](../../decisions/0051-journal-and-title-reviews.md)) and people asking to write more. The owner's go is needed.
 
 ## Idea

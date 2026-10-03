@@ -21,9 +21,12 @@ author: Your name                # optional, "The Mystonie team" (with Stonie) b
 avatar: /journal/authors/me.jpg  # optional: your photo for the byline, else your initial
 profile: your_username           # optional: your Mystonie username, the byline links to your page
 featured: true                   # optional: on the Featured tab, a little higher in For you
+tags: review, list               # optional: up to 3 of review, list, opinion, guide, travel, on this day, behind the scenes (the Journal's filters)
 draft: true                      # optional
 ---
 ```
+
+Folder names `u` and `write` are taken (they're pages: members' articles and the editor, ADR 0092).
 
 Anything after ` #` on a line is a note to yourself and is dropped, so a title with a `#` in it goes in quotes: `title: "Top 10 #1 picks"`. Without a cover, the feed shows the poster of the first title in the article.
 

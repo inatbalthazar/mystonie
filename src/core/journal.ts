@@ -21,6 +21,15 @@ export type Block =
   /** `@[movie:603](The Matrix)` on its own line: the title as a card with Add (the label is used when it can't load). */
   | { type: "title"; kind: TitleKind; externalId: string; label: string | null };
 
+/**
+ * The Journal's categories (ADR 0092): up to three per article, from a team article's frontmatter (`tags: review,
+ * list`) or a writer's picks. The Journal filters by them.
+ */
+export const JOURNAL_TAGS = ["review", "list", "opinion", "guide", "travel", "on_this_day", "behind_the_scenes"] as const;
+export type JournalTag = (typeof JOURNAL_TAGS)[number];
+export const isJournalTag = (v: unknown): v is JournalTag => (JOURNAL_TAGS as readonly unknown[]).includes(v);
+export const JOURNAL_TAGS_MAX = 3;
+
 export type JournalMeta = {
   title: string;
   description: string;
@@ -37,6 +46,8 @@ export type JournalMeta = {
   featured: boolean;
   /** Drafts show only outside production. */
   draft: boolean;
+  /** Its categories, in the writer's order. */
+  tags: JournalTag[];
 };
 
 export type JournalArticle = { meta: JournalMeta; blocks: Block[] };
@@ -45,6 +56,9 @@ export class JournalError extends Error {}
 
 const SLUG_RE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 export const isJournalSlug = (v: unknown): v is string => typeof v === "string" && v.length <= 80 && SLUG_RE.test(v);
+
+/** Paths under /journal/ that are pages of their own, so no article folder may take them (ADR 0092). */
+export const RESERVED_JOURNAL_SLUGS: readonly string[] = ["u", "write"];
 
 /** Links may go to our own pages (`/…`), the web (http, https) or an email address. */
 export function isSafeHref(href: string): boolean {
@@ -104,14 +118,39 @@ function parseFrontmatter(lines: string[]): { meta: JournalMeta; rest: string[] 
     if (v !== undefined && v !== "true" && v !== "false") throw new JournalError(`${key} is true or false`);
     return v === "true";
   };
+  const tags = [
+    ...new Set(
+      (fields.get("tags") ?? "")
+        .split(",")
+        .map((tag) => tag.trim().toLowerCase().replace(/[\s-]+/g, "_"))
+        .filter(Boolean),
+    ),
+  ];
+  const unknown = tags.find((tag) => !isJournalTag(tag));
+  if (unknown !== undefined) throw new JournalError(`tags are some of ${JOURNAL_TAGS.join(", ")}, not ${unknown}`);
+  if (tags.length > JOURNAL_TAGS_MAX) throw new JournalError(`an article has up to ${JOURNAL_TAGS_MAX} tags`);
   return {
-    meta: { title, description, date, cover, author: fields.get("author") || null, avatar, profile, featured: flag("featured"), draft: flag("draft") },
+    meta: {
+      title,
+      description,
+      date,
+      cover,
+      author: fields.get("author") || null,
+      avatar,
+      profile,
+      featured: flag("featured"),
+      draft: flag("draft"),
+      tags: tags as JournalTag[],
+    },
     rest: lines.slice(end + 1),
   };
 }
 
-/** `**strong**`, `*em*` / `_em_`, `` `code` `` and `[text](href)`; anything else is text. */
-export function parseInline(src: string): Inline[] {
+/**
+ * `**strong**`, `*em*` / `_em_`, `` `code` `` and `[text](href)`; anything else is text. Without `links` (a
+ * writer's article, ADR 0092), `[text](href)` stays text.
+ */
+export function parseInline(src: string, links = true): Inline[] {
   const out: Inline[] = [];
   let text = "";
   const flush = () => {
@@ -127,17 +166,17 @@ export function parseInline(src: string): Inline[] {
       i += 2;
     } else if ((m = /^\*\*(.+?)\*\*/.exec(rest))) {
       flush();
-      out.push({ type: "strong", children: parseInline(m[1]!) });
+      out.push({ type: "strong", children: parseInline(m[1]!, links) });
       i += m[0].length;
     } else if ((m = /^\*([^*\s](?:[^*]*[^*\s])?)\*/.exec(rest)) || (m = /^_([^_\s](?:[^_]*[^_\s])?)_(?![\p{L}\p{N}])/u.exec(rest))) {
       flush();
-      out.push({ type: "em", children: parseInline(m[1]!) });
+      out.push({ type: "em", children: parseInline(m[1]!, links) });
       i += m[0].length;
     } else if ((m = /^`([^`]+)`/.exec(rest))) {
       flush();
       out.push({ type: "code", text: m[1]! });
       i += m[0].length;
-    } else if ((m = /^\[([^\]]+)\]\(([^)\s]+)\)/.exec(rest)) && isSafeHref(m[2]!)) {
+    } else if ((m = /^\[([^\]]+)\]\(([^)\s]+)\)/.exec(rest)) && links && isSafeHref(m[2]!)) {
       flush();
       out.push({ type: "link", href: m[2]!, children: parseInline(m[1]!) });
       i += m[0].length;
@@ -154,16 +193,20 @@ const TITLE_RE = /^@\[([a-z]+):([A-Za-z0-9_-]+)\](?:\(([^)]*)\))?$/;
 const IMAGE_RE = /^!\[([^\]]*)\]\(([^)\s]+)\)$/;
 const LIST_RE = /^(?:([-*])|(\d+)\.)\s+(.*)$/;
 
-/** Blocks are separated by blank lines; a paragraph's lines join with a space. */
-function parseBlocks(lines: string[]): Block[] {
+/**
+ * Blocks are separated by blank lines; a paragraph's lines join with a space. Without `rich` (a writer's article,
+ * ADR 0092) there are no links, images or title cards: those lines stay text.
+ */
+function parseBlocks(lines: string[], rich = true): Block[] {
+  const inline = (src: string) => parseInline(src, rich);
   const blocks: Block[] = [];
   let para: string[] = [];
   let list: { ordered: boolean; items: string[] } | null = null;
   let quote: string[] = [];
   const flush = () => {
-    if (para.length) blocks.push({ type: "paragraph", children: parseInline(para.join(" ")) });
-    if (list) blocks.push({ type: "list", ordered: list.ordered, items: list.items.map(parseInline) });
-    if (quote.length) blocks.push({ type: "quote", children: parseInline(quote.join(" ")) });
+    if (para.length) blocks.push({ type: "paragraph", children: inline(para.join(" ")) });
+    if (list) blocks.push({ type: "list", ordered: list.ordered, items: list.items.map(inline) });
+    if (quote.length) blocks.push({ type: "quote", children: inline(quote.join(" ")) });
     para = [];
     list = null;
     quote = [];
@@ -177,16 +220,16 @@ function parseBlocks(lines: string[]): Block[] {
     let m: RegExpExecArray | null;
     if ((m = /^(#{2,3})\s+(.+)$/.exec(line))) {
       flush();
-      blocks.push({ type: "heading", level: m[1]!.length as 2 | 3, children: parseInline(m[2]!) });
+      blocks.push({ type: "heading", level: m[1]!.length as 2 | 3, children: inline(m[2]!) });
     } else if (/^(?:-{3,}|\*{3,})$/.test(line)) {
       flush();
       blocks.push({ type: "rule" });
-    } else if ((m = TITLE_RE.exec(line))) {
+    } else if (rich && (m = TITLE_RE.exec(line))) {
       const [, kind, id, label] = m;
       if (!isTitleKind(kind) || !isExternalId(kind, id)) throw new JournalError(`not a title: ${line}`);
       flush();
       blocks.push({ type: "title", kind, externalId: id!, label: label?.trim() || null });
-    } else if ((m = IMAGE_RE.exec(line))) {
+    } else if (rich && (m = IMAGE_RE.exec(line))) {
       if (!isSafeImage(m[2]!)) throw new JournalError(`images come from /journal/ or https: ${line}`);
       flush();
       blocks.push({ type: "image", src: m[2]!, alt: m[1]!.trim() });
@@ -216,6 +259,14 @@ export function parseJournal(source: string): JournalArticle {
   const blocks = parseBlocks(rest);
   if (blocks.length === 0) throw new JournalError("the article has no text");
   return { meta, blocks };
+}
+
+/**
+ * A writer's article text (ADR 0092): the same Markdown subset as the team's, minus links, images and title cards,
+ * which stay plain text (what it's about is picked apart, as subjects). Never throws.
+ */
+export function parseWriterBody(source: string): Block[] {
+  return parseBlocks(source.replace(/^﻿/, "").split(/\r?\n/), false);
 }
 
 /** The titles an article shows as cards, once each, in order. */

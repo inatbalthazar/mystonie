@@ -5,11 +5,12 @@ import Image from "next/image";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
 import { StampButton } from "@/components/social/stamp-button";
 import type { ArticlePlace } from "@/core/analytics";
-import type { FeedArticle } from "@/core/journal-feed";
+import { articlePath, type FeedArticle } from "@/core/journal-feed";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import { SaveButton, ShareButton } from "./article-actions";
 import { Byline } from "./byline";
+import { PassportStamp } from "./passport-stamp";
 
 const TILTS = ["rotate-[-0.6deg]", "rotate-[0.5deg]", "rotate-[-0.3deg]", "rotate-[0.7deg]"];
 
@@ -75,7 +76,7 @@ export function ArticleRow({
           <h2 lang={written} className="font-display text-xl leading-tight font-extrabold tracking-[-0.02em] text-balance break-words">
             {/* The row's link: stretched over the whole row, so it opens from anywhere but the buttons. */}
             <Link
-              href={`/journal/${a.slug}`}
+              href={articlePath(a.slug)}
               className="outline-none after:absolute after:inset-0 after:rounded-2xl after:content-[''] group-hover:underline focus-visible:after:ring-2 focus-visible:after:ring-ring"
             >
               {a.title}
@@ -85,7 +86,7 @@ export function ArticleRow({
             {a.description}
           </p>
         </div>
-        {a.image && (
+        {a.image ? (
           // The picture, as a polaroid taped beside the text (taps go through to the row's link).
           <span aria-hidden="true" className={cn("pointer-events-none relative mt-1 shrink-0 self-start rounded-[3px] bg-card p-1 pb-3 shadow-md ring-1 ring-border", index % 2 ? "rotate-[2deg]" : "rotate-[-2deg]")}>
             <span className="absolute -top-1.5 left-1/2 z-10 h-3 w-8 -translate-x-1/2 rotate-[-4deg] rounded-[2px] bg-brand-soft/90 ring-1 ring-brand/10 dark:bg-brand/30" />
@@ -93,6 +94,8 @@ export function ArticleRow({
               <Image src={a.image} alt="" fill unoptimized sizes="72px" className="object-cover" />
             </span>
           </span>
+        ) : (
+          a.place && <PassportStamp country={a.place} className="pointer-events-none mt-1 size-18 shrink-0 text-[13px]" />
         )}
       </div>
 
@@ -100,10 +103,13 @@ export function ArticleRow({
 
       <footer className="flex flex-wrap items-center gap-x-2 gap-y-1">
         <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-muted-foreground">
+          {a.tags[0] && <span className="font-semibold text-foreground/80">{t("tag", { tag: a.tags[0] })}</span>}
+          {a.tags[0] && <span aria-hidden="true">·</span>}
           <time dateTime={a.date}>{date}</time>
           <span aria-hidden="true">·</span>
           <span>{t("readTime", { minutes: a.minutes })}</span>
           {written && <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold">{t("inLanguage", { language: new Intl.DisplayNames([locale], { type: "language" }).of(written) ?? written })}</span>}
+          {a.spoilers && <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-semibold">{t("spoilers")}</span>}
           {a.draft && <span className="rounded-full bg-brand-soft px-2 py-0.5 text-xs font-semibold text-brand">{t("draft")}</span>}
         </p>
         <div className="relative z-10 ml-auto flex items-center gap-1">

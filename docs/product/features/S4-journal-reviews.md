@@ -3,7 +3,7 @@
 **Stage:** 4 (the owner's question, 2026-10-01) · **Built** 2026-10-01 ([ADR 0051](../../decisions/0051-journal-and-title-reviews.md); the Journal as a feed, [ADR 0052](../../decisions/0052-journal-feed.md))
 
 ## Summary
-Two ways to read about what to finish next. **The Journal** is articles written by the Mystonie team, with title cards anyone can add from, listed in the feed ([ADR 0062](../../decisions/0062-journal-in-the-feed.md)): its Articles tab (For you first) and Saved, with Stamps, Saves and Share, and the newest articles among Following. **"What people said"** puts the short reviews people write when they finish a title on that title's page. A blog or long reviews by users come later ([later/long-reviews.md](../later/long-reviews.md)).
+Two ways to read about what to finish next. **The Journal** is articles written by the Mystonie team, with title cards anyone can add from, listed in the feed ([ADR 0062](../../decisions/0062-journal-in-the-feed.md)): its Articles tab (For you first) and Saved, with Stamps, Saves and Share, and the newest articles among Following. **"What people said"** puts the short reviews people write when they finish a title on that title's page. Members write articles for it too, and the team features the best ([S4 members write for the Journal](S4-community-journal.md), [ADR 0092](../../decisions/0092-members-write-for-the-journal.md)); comments wait ([later/long-reviews.md](../later/long-reviews.md)).
 
 ## Behaviour
 **The Journal**

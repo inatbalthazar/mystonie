@@ -10,6 +10,8 @@ import { SwipeArea } from "@/components/motion/swipe-area";
 import { PaperCard } from "@/components/paper-card";
 import { AlbumCover } from "@/components/profile/album-cover";
 import { ProfileTabs } from "@/components/profile/me-tabs";
+import { profileTabs } from "@/lib/profile-tabs";
+import { hasPosts } from "@/data/journal-posts";
 import { MilestoneShelf } from "@/components/stats/milestone-shelf";
 import { Favourites, Headline, Heatmap, MonthBars, PeriodTabs, Records, Taste } from "@/components/stats/stats-view";
 import { STATS_SECTIONS, type StatsSection } from "@/core/album";
@@ -68,7 +70,7 @@ export default async function ProfileStatsPage({ params, searchParams }: PagePro
 
   const isOwner = viewerId === profile.id;
   const allHidden = profile.statsHidden.length >= STATS_SECTIONS.length;
-  const [rows, counts, viewer, t, ts] = await Promise.all([
+  const [rows, counts, viewer, t, ts, journal] = await Promise.all([
     statsRows(db, profile.id),
     followCounts(db, profile.id).catch((error: unknown) => {
       console.error(error);
@@ -77,7 +79,9 @@ export default async function ProfileStatsPage({ params, searchParams }: PagePro
     viewerId && !isOwner ? viewerFacts(db, viewerId) : null,
     getTranslations("Profile"),
     getTranslations("Stats"),
+    hasPosts(db, profile.id),
   ]);
+  const tabs = profileTabs({ stats: !allHidden, journal });
   const cover = (
     <AlbumCover
       profile={profile}
@@ -117,8 +121,8 @@ export default async function ProfileStatsPage({ params, searchParams }: PagePro
     <main className="mx-auto flex w-full max-w-2xl flex-1 flex-col gap-8 px-4 pt-10 pb-16">
       <FreshPage />
       {cover}
-      {!allHidden && <ProfileTabs username={profile.username} current="stats" />}
-      <SwipeArea prev={`/u/${profile.username}`} replace className="flex flex-col gap-8">
+      {!allHidden && <ProfileTabs username={profile.username} current="stats" tabs={tabs} />}
+      <SwipeArea prev={`/u/${profile.username}`} next={journal ? `/u/${profile.username}/journal` : undefined} replace className="flex flex-col gap-8">
         {allHidden ? (
           <Note
             action={

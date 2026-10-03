@@ -51,18 +51,26 @@ export function posterUrl(source: CatalogSource | string, path: string | null | 
   return null;
 }
 
-/**
- * The image a card draws for a poster URL: RAWG's key art at 1280 px, since a card shows it big (lists keep the
- * smaller one). Anything else as it is.
- */
-export function cardImageUrl(url: string): string {
-  const path = rawgMediaPath(url);
-  return path ? rawgImageUrl(path, 1280) : url;
-}
-
 // Only catalog images: a card link must not be able to show an arbitrary picture under our name.
 const TMDB_POSTER_RE = /^https:\/\/image\.tmdb\.org\/t\/p\/w\d{2,4}\/[A-Za-z0-9_-]+\.(jpg|jpeg|png|webp)$/;
 const BOOK_COVER_RE = /^\/api\/covers\/[A-Za-z0-9_-]{12}(\?size=large)?$/;
+
+/**
+ * The image a card draws for a poster URL, as big as a card shows it: TMDB's poster at w780, AniList's large cover,
+ * RAWG's key art at 1280 px. Anything else as it is.
+ *
+ * It's also never the URL a list loads. TMDB's and AniList's CDNs send `Access-Control-Allow-Origin` only to requests
+ * that ask for it, without `Vary: Origin`, so the copy a list loaded without CORS sits in the browser's cache and
+ * fails the card's CORS request (no poster, no colours). Lists show AniList's large cover too, so the card's copy
+ * carries `?card`.
+ */
+export function cardImageUrl(url: string): string {
+  const path = rawgMediaPath(url);
+  if (path) return rawgImageUrl(path, 1280);
+  if (TMDB_POSTER_RE.test(url)) return url.replace(/\/t\/p\/w\d{2,4}\//, "/t/p/w780/");
+  const anilist = ANILIST_COVER_RE.exec(url);
+  return anilist ? `${url.replace(`/cover/${anilist[1]}/`, "/cover/large/")}?card` : url;
+}
 
 /** Whether a card may show this poster: a TMDB image, an AniList cover, our Google Books cover proxy or RAWG art. */
 export function isCardPosterUrl(url: string): boolean {

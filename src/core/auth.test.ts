@@ -34,6 +34,11 @@ describe("protected paths", () => {
     expect(isProtectedPath("/board")).toBe(true);
     expect(isProtectedPath("/challenges")).toBe(true);
     expect(isProtectedPath("/me")).toBe(true);
+    // Articles are public; writing one and the team's admin pages need an account (ADR 0092).
+    expect(isProtectedPath("/journal/ten-shows")).toBe(false);
+    expect(isProtectedPath("/journal/u/01926000-0000-7000-8000-000000000001")).toBe(false);
+    expect(isProtectedPath("/journal/write")).toBe(true);
+    expect(isProtectedPath("/admin/journal")).toBe(true);
     // Club pages are public: signed-out visitors see the club and are asked to sign in to join.
     expect(isProtectedPath("/clubs/kdrama")).toBe(false);
     expect(isProtectedPath("/settingsx")).toBe(false);

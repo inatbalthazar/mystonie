@@ -311,7 +311,7 @@
       },
       "collect": {
         "title": "What we collect",
-        "body": "Waitlist: if you join, we store your email address, the language you used, where you signed up from (for example, from a shared card link) and the time you agreed to be emailed. Searches: the text you type is sent to our server and to the catalogs (TMDB, Google Books, AniList, RAWG) to find titles; we don't store it with anything that identifies you. Imports: an export you import from another app (Letterboxd, Goodreads, MyAnimeList, TV Time) is read on your device. Only the names, years, authors, ISBNs and catalog ids needed to find your titles are sent to our server and the catalogs (TMDB, Google Books, AniList, RAWG), and only what you confirm is saved to your collection. Offline use: so the app works without a connection, the pages you open in it, the posters on them and the titles you looked at lately are kept in your browser's storage on your device, with changes you make while offline until they reach us. Signing out deletes them from the device. Reports: if you report a page or card, we store the reason, your note and, if you're signed in, your account id, and use them only to review the report. Problem reports: if you use Report a problem, we store your message, the page you sent it from, your browser's name and version and, if you're signed in, your account id, and email them to ourselves. We use them only to fix and improve Mystonie and to reply to you, and delete them with your account. Notifications: if you turn on weekly recap notifications in the installed app, we store that device's push address and encryption keys, and delete them when you turn notifications off, sign out, or the device stops accepting them. Abuse protection: to stop automated abuse we count requests per visitor using a one-way, salted hash of your IP address. We never store the IP address itself, and these counters are deleted within a day. Usage and errors: we measure how the site is used (for example, how many cards are made or shared) and collect error reports, without advertising cookies and without building profiles across other sites. Content warnings: if you choose topics to avoid, we store them with your account and only you can see them. Titles are looked up on DoesTheDogDie from our server, never with anything that identifies you. Scene warnings and the warnings quiz: the warnings you add, your votes on them and your quiz answers are stored with your account. Others see the warnings and the totals, never who added or voted. If you delete your account, the warnings you added stay, without your name. Reel of the Day: signed in, your guesses and results are stored with your account (for your streak and stats) and only you can see them; signed out, they stay in your browser. The Journal: signed in, the articles you Stamp or save are stored with your account. Only you see which ones; everyone sees how many Stamps an article has, never who gave them. Tips: if you tip through Buy Me a Coffee, it tells us the email you paid with. If a Mystonie account uses that email, we give it the Supporter sticker; we don't keep the email or anything else about the tip."
+        "body": "Waitlist: if you join, we store your email address, the language you used, where you signed up from (for example, from a shared card link) and the time you agreed to be emailed. Searches: the text you type is sent to our server and to the catalogs (TMDB, Google Books, AniList, RAWG) to find titles; we don't store it with anything that identifies you. Imports: an export you import from another app (Letterboxd, Goodreads, MyAnimeList, TV Time) is read on your device. Only the names, years, authors, ISBNs and catalog ids needed to find your titles are sent to our server and the catalogs (TMDB, Google Books, AniList, RAWG), and only what you confirm is saved to your collection. Offline use: so the app works without a connection, the pages you open in it, the posters on them and the titles you looked at lately are kept in your browser's storage on your device, with changes you make while offline until they reach us. Signing out deletes them from the device. Reports: if you report a page or card, we store the reason, your note and, if you're signed in, your account id, and use them only to review the report. Problem reports: if you use Report a problem, we store your message, the page you sent it from, your browser's name and version and, if you're signed in, your account id, and email them to ourselves. We use them only to fix and improve Mystonie and to reply to you, and delete them with your account. Notifications: if you turn on weekly recap notifications in the installed app, we store that device's push address and encryption keys, and delete them when you turn notifications off, sign out, or the device stops accepting them. Abuse protection: to stop automated abuse we count requests per visitor using a one-way, salted hash of your IP address. We never store the IP address itself, and these counters are deleted within a day. Usage and errors: we measure how the site is used (for example, how many cards are made or shared) and collect error reports, without advertising cookies and without building profiles across other sites. Content warnings: if you choose topics to avoid, we store them with your account and only you can see them. Titles are looked up on DoesTheDogDie from our server, never with anything that identifies you. Scene warnings and the warnings quiz: the warnings you add, your votes on them and your quiz answers are stored with your account. Others see the warnings and the totals, never who added or voted. If you delete your account, the warnings you added stay, without your name. Reel of the Day: signed in, your guesses and results are stored with your account (for your streak and stats) and only you can see them; signed out, they stay in your browser. The Journal: signed in, the articles you Stamp or save are stored with your account. Articles you write are stored with your account: drafts only you can see; a published one is public while your page is public (on your page and in your followers' feeds), and the team may feature it in everyone's Journal. If you send one to be Featured, the team reads it and may leave you a note. Deleting an article or your account deletes it. Only you see which ones; everyone sees how many Stamps an article has, never who gave them. Tips: if you tip through Buy Me a Coffee, it tells us the email you paid with. If a Mystonie account uses that email, we give it the Supporter sticker; we don't keep the email or anything else about the tip."
       },
       "use": {
         "title": "How we use it",
@@ -353,7 +353,7 @@
       },
       "content": {
         "title": "Your content",
-        "body": "You're responsible for the ratings and reviews you put on your cards and where you share them. Don't use Mystonie to make content that is illegal, harassing, hateful or that infringes someone else's rights. We may remove content or accounts that break these rules."
+        "body": "You're responsible for the ratings and reviews you put on your cards and where you share them. Don't use Mystonie to make content that is illegal, harassing, hateful or that infringes someone else's rights. Journal articles you write stay yours: by publishing one, you let Mystonie show it on your page, in your followers' feeds and, if the team features it, in everyone's Journal, on the site and in what we share about it, for as long as it's published. Write about what you watched, read, played or visited in your own words; don't copy other people's writing, and mark spoilers. We may decline to feature an article, or take one down, without notice. We may remove content or accounts that break these rules."
       },
       "tmdb": {
         "title": "Titles and posters",
@@ -381,7 +381,7 @@
       },
       "contact": {
         "title": "Contact",
-        "body": "Questions: <mail>{email}</mail>. To report abuse, use Report on the profile or card, or email the same address."
+        "body": "Questions: <mail>{email}</mail>. To report abuse, use Report on the profile, card or article, or email the same address."
       }
     }
   },
@@ -615,7 +615,8 @@
     "photoAnother": "Pick another",
     "photoCancel": "Cancel",
     "photoUnreadable": "That file isn't a photo this browser can open. Try a JPEG or PNG.",
-    "photoError": "The photo couldn't be saved. Try again in a moment."
+    "photoError": "The photo couldn't be saved. Try again in a moment.",
+    "teamReview": "Journal review (team)"
   },
   "Collection": {
     "title": "Your collection",
@@ -934,7 +935,12 @@
     "backToAlbum": "See the album",
     "inCommonTitle": "In common",
     "inCommonCount": "You've both finished {count, plural, one {# title} other {# titles}}.",
-    "inCommonMore": "+ {count} more"
+    "inCommonMore": "+ {count} more",
+    "tabJournal": "Journal",
+    "meJournalEmpty": "You haven’t written an article yet. Review a favourite, make a list, or tell the story of a trip.",
+    "writeFirst": "Write your first article",
+    "journalEmpty": "@{username} hasn’t published an article yet.",
+    "journalMetaTitle": "{name}’s Journal"
   },
   "Album": {
     "arrange": "Arrange",
@@ -1221,7 +1227,7 @@
   },
   "Report": {
     "button": "Report",
-    "title": "Report this {kind, select, card {card} other {page}}",
+    "title": "Report this {kind, select, card {card} article {article} other {page}}",
     "reasonLabel": "What's wrong?",
     "reason": "{reason, select, spam {Spam} harassment {Harassment or bullying} hate {Hate speech} sexual {Sexual content} impersonation {Pretending to be someone else} other {Something else}}",
     "noteLabel": "Anything else we should know? (optional)",
@@ -2091,6 +2097,99 @@
     "share": "Share",
     "copied": "Link copied",
     "enjoyed": "Enjoyed this one?",
-    "actionsLabel": "Stamp, save or share"
+    "actionsLabel": "Stamp, save or share",
+    "write": "Write",
+    "writeLabel": "Write an article",
+    "filtersLabel": "Filter and sort articles",
+    "tagsLabel": "Categories",
+    "allTags": "All",
+    "tag": "{tag, select, review {Review} list {List} opinion {Opinion} guide {Guide} travel {Travel} on_this_day {On this day} behind_the_scenes {Behind the scenes} other {Other}}",
+    "kindLabel": "About",
+    "kindOption": "{kind, select, movie {Movies} series {Series} book {Books} manga {Manga} game {Games} place {Places} other {All kinds}}",
+    "sortLabel": "Sort",
+    "sort": "{sort, select, for_you {For you} new {Newest} top {Most stamped} other {Newest}}",
+    "noMatch": "No articles like that yet.",
+    "clearFilters": "Show every article",
+    "spoilers": "Spoilers",
+    "spoilerWarning": "This article talks about how it ends.",
+    "showSpoilers": "Read it anyway",
+    "aboutTitle": "What it’s about",
+    "check": "Check",
+    "checkLabel": "Check {name}",
+    "place": "Place",
+    "state": "{state, select, draft {Draft} published {Published} pending {Waiting for the team} featured {Featured} declined {Not featured} hidden {Taken down} other {}}",
+    "stateHelp": "{state, select, draft {Only you can see it.} published {On your page and in your followers’ feeds.} pending {The Mystonie team will read it. If it’s picked, it’s Featured in everyone’s Journal.} featured {Featured in everyone’s Journal.} declined {The team didn’t pick it for Featured this time. It’s still on your page.} hidden {The Mystonie team took this article down. Only you can see it.} other {}}",
+    "reviewNote": "From the team: {note}",
+    "edit": "Edit",
+    "yourArticle": "Your article",
+    "privatePage": "Your page is private, so only you can see your articles. Make it public in Settings.",
+    "writeAbout": "Write about it"
+  },
+  "JournalWrite": {
+    "newTitle": "Write an article",
+    "editTitle": "Edit your article",
+    "kicker": "For the Journal",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Why Past Lives stayed with me",
+    "descriptionLabel": "One line under the title (optional)",
+    "descriptionPlaceholder": "A quiet film about the people we might have been.",
+    "aboutLabel": "What it’s about",
+    "aboutHint": "Up to 6 titles or places. Readers see them with a Check button.",
+    "aboutTitles": "Titles",
+    "aboutPlaces": "Places",
+    "searchTitles": "Search movies, series, books, manga and games",
+    "searchPlaces": "Search countries",
+    "remove": "Remove {name}",
+    "aboutFull": "That’s 6. Remove one to add another.",
+    "tagsLabel": "Categories",
+    "tagsHint": "Pick 1 to 3.",
+    "bodyLabel": "Your article",
+    "bodyHint": "**bold**, *italic*, ## heading, > quote, - list. Links and pictures aren’t shown.",
+    "bodyPlaceholder": "Start with what stayed with you…",
+    "writeTab": "Write",
+    "previewTab": "Preview",
+    "previewEmpty": "Nothing to preview yet.",
+    "spoilersLabel": "It has spoilers",
+    "spoilersHint": "Readers see a warning first.",
+    "languageLabel": "Written in",
+    "featureLabel": "Send it to be Featured",
+    "featureHint": "The Mystonie team reads it. If it’s picked, it’s Featured in everyone’s Journal.",
+    "featuredEdit": "It’s Featured. Changing it sends it back to the team, and it leaves Featured until they’ve read it again.",
+    "saveDraft": "Save draft",
+    "publish": "Publish",
+    "update": "Update",
+    "unpublish": "Back to drafts",
+    "delete": "Delete",
+    "deleteConfirm": "Delete this article? This can’t be undone.",
+    "deleteYes": "Yes, delete it",
+    "cancel": "Cancel",
+    "saving": "Saving…",
+    "savedDraft": "Draft saved.",
+    "savedPublished": "Published.",
+    "savedPending": "Published and sent to the team.",
+    "see": "See it",
+    "count": "{count} / {max}",
+    "terms": "You keep what you write. By publishing, you let Mystonie show it, as the <terms>Terms</terms> say.",
+    "privatePage": "Your page is private: published articles show only to you until you make it public in <settings>Settings</settings>.",
+    "error": "{problem, select, title {Give it a title of up to 120 characters.} description {Keep the line under the title to 200 characters.} body {That’s more than 20,000 characters.} short {Write at least 100 characters before publishing.} links {Too many web addresses. Links aren’t shown, so leave them out.} tags {Pick 1 to 3 categories before publishing.} subjects {Couldn’t find one of the titles. Remove it and pick it again.} limit {That’s a lot of articles for one day. Try again tomorrow.} other {Couldn’t save that. Try again in a moment.}}",
+    "modeLabel": "Write or preview"
+  },
+  "JournalAdmin": {
+    "title": "Journal review",
+    "intro": "Members’ articles sent to be Featured, and reported ones. Only the team sees this page.",
+    "pending": "Sent to be Featured",
+    "reported": "Reported",
+    "nothing": "Nothing waiting.",
+    "read": "Read it",
+    "approve": "Feature it",
+    "decline": "Not this time",
+    "hide": "Take down",
+    "unhide": "Put back",
+    "noteLabel": "Note to the writer (optional)",
+    "done": "{action, select, approve {Featured.} decline {Declined.} hide {Taken down.} unhide {Put back.} other {Done.}}",
+    "error": "Couldn’t do that. Try again.",
+    "reports": "{count, plural, one {# report} other {# reports}}",
+    "report": "{reason}: {note}",
+    "by": "by @{username}"
   }
 }

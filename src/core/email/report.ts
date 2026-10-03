@@ -4,7 +4,7 @@ import type { Report } from "../reports";
 import { escapeHtml, type RenderedEmail } from "./layout";
 
 export function reportEmail(report: Report & { id: string }, targetUrl: string | null): RenderedEmail {
-  const what = report.targetKind === "card" ? "card" : "profile";
+  const what = report.targetKind;
   const lines = [
     `Reason: ${report.reason}`,
     `Note: ${report.note ?? "(none)"}`,
@@ -15,6 +15,16 @@ export function reportEmail(report: Report & { id: string }, targetUrl: string |
   ];
   return {
     subject: `Report: ${what} (${report.reason})`,
+    text: lines.join("\n"),
+    html: `<pre style="font:14px/1.5 monospace;white-space:pre-wrap">${escapeHtml(lines.join("\n"))}</pre>`,
+  };
+}
+
+/** The team's note that a member's Journal article was sent to be Featured (ADR 0092), with the admin page's link. */
+export function reviewRequestEmail(post: { title: string; writer: string | null }, adminUrl: string): RenderedEmail {
+  const lines = [`“${post.title}”${post.writer ? ` by @${post.writer}` : ""} was sent to be Featured.`, "", `Review it: ${adminUrl}`];
+  return {
+    subject: `Journal: “${post.title}” wants to be Featured`,
     text: lines.join("\n"),
     html: `<pre style="font:14px/1.5 monospace;white-space:pre-wrap">${escapeHtml(lines.join("\n"))}</pre>`,
   };

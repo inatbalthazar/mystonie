@@ -70,8 +70,8 @@ export type AnalyticsEvents = {
   article_shared: { place: ArticlePlace; channel: "share_sheet" | "copy" };
 };
 
-/** Where a Journal article's Stamp, Save or Share was tapped. */
-export type ArticlePlace = "article" | "feed";
+/** Where a Journal article's Stamp, Save or Share was tapped: its page, the feed (and the Journal), or a profile's Journal tab (ADR 0092). */
+export type ArticlePlace = "article" | "feed" | "profile";
 
 export type AnalyticsEvent = keyof AnalyticsEvents;
 

@@ -62,6 +62,6 @@ export function CardLab({ host }: { host: string }) {
 }
 
 function LabCard(props: { template: TemplateId; size: CardSize; data: CardData; host: string }) {
-  const palette = usePosterPalette(props.data.posterUrl?.replace("/w780/", "/w92/"));
+  const palette = usePosterPalette(props.data.posterUrl);
   return <CardPreview {...props} palette={palette} />;
 }

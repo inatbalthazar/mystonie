@@ -1,14 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { cardImageUrl } from "@/core/catalog/images";
 import { DEFAULT_PALETTE, paletteFromPixels } from "@/core/cards/palette";
 import type { Palette } from "@/core/cards/types";
 
 const cache = new Map<string, Palette>();
 
 /**
- * Card palette from a (small) poster URL. TMDB images send CORS headers, so the canvas
- * stays readable. Falls back to the default palette without a poster or on any error.
+ * Card palette from a poster URL, read from the image the card draws (`cardImageUrl`): TMDB and AniList send CORS
+ * headers to it, so the canvas stays readable, and it's one download for both. Falls back to the default palette
+ * without a poster or on any error.
  */
 export function usePosterPalette(url: string | null | undefined): Palette {
   const [loaded, setLoaded] = useState<{ url: string; palette: Palette } | null>(null);
@@ -33,7 +35,7 @@ export function usePosterPalette(url: string | null | undefined): Palette {
         // Tainted canvas or decode error: keep the default palette.
       }
     };
-    img.src = url;
+    img.src = cardImageUrl(url);
     return () => {
       cancelled = true;
     };

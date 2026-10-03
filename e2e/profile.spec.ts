@@ -363,7 +363,7 @@ test("the album as its owner arranges it: favourites on the shelf, sections move
   const layoutSaved = saved(page);
   await arrange.getByRole("button", { name: "Save", exact: true }).click();
   expect((await layoutSaved).request().postDataJSON()).toEqual({
-    albumOrder: ["shelf", "watching", "stickers", "atlas", "patches", "clubs", "saved"],
+    albumOrder: ["shelf", "watching", "stickers", "atlas", "patches", "clubs"],
     albumHidden: ["clubs"],
   });
   await expect(arrange).toBeHidden();

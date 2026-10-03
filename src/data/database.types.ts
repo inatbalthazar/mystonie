@@ -527,6 +527,80 @@ export type Database = {
           },
         ]
       }
+      journal_posts: {
+        Row: {
+          body: string
+          created_at: string
+          deleted_at: string | null
+          description: string | null
+          excerpt: string | null
+          feature_request: string | null
+          featured_at: string | null
+          hidden_at: string | null
+          id: string
+          locale: string
+          minutes: number
+          published_at: string | null
+          review_note: string | null
+          spoilers: boolean
+          subjects: string[]
+          tags: string[]
+          title: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          excerpt?: string | null
+          feature_request?: string | null
+          featured_at?: string | null
+          hidden_at?: string | null
+          id: string
+          locale: string
+          minutes?: number
+          published_at?: string | null
+          review_note?: string | null
+          spoilers?: boolean
+          subjects?: string[]
+          tags?: string[]
+          title: string
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          deleted_at?: string | null
+          description?: string | null
+          excerpt?: string | null
+          feature_request?: string | null
+          featured_at?: string | null
+          hidden_at?: string | null
+          id?: string
+          locale?: string
+          minutes?: number
+          published_at?: string | null
+          review_note?: string | null
+          spoilers?: boolean
+          subjects?: string[]
+          tags?: string[]
+          title?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "journal_posts_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       place_regions: {
         Row: {
           country: string
@@ -1948,6 +2022,15 @@ export type Database = {
       is_reserved_username: { Args: { name: string }; Returns: boolean }
       is_time_zone: { Args: { tz: string }; Returns: boolean }
       isnt_empty: { Args: { "": string }; Returns: string }
+      journal_bylines: {
+        Args: { p_user_ids: string[] }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          id: string
+          username: string
+        }[]
+      }
       journal_stamp_counts: {
         Args: never
         Returns: {

@@ -2,6 +2,7 @@
 // order picked from the reader's collection, Stamps and Saves on articles, and where articles go in the Following feed.
 import type { TitleKind } from "./catalog/types";
 import type { EntryStatus } from "./collection/entries";
+import { isUuidV7 } from "./ids";
 import { isJournalSlug } from "./journal";
 
 export const FEED_TABS = ["following", "articles", "saved"] as const;
@@ -58,7 +59,19 @@ export type FeedArticle = {
   stamped: boolean;
   saved: boolean;
   reason: ForYouReason | null;
+  /** Its categories (ADR 0092). */
+  tags: readonly string[];
+  /** The kinds it's about (its titles' and places), for the Journal's filter. */
+  kinds: readonly string[];
+  /** A member's article: when it was published (to the minute); null for the team's. */
+  publishedAt: string | null;
+  /** A member's article about a place and no title: the country, shown as a passport stamp in place of a picture. */
+  place: string | null;
+  spoilers: boolean;
 };
+
+/** Where an article lives: a member's (named by its id, ADR 0092) under /journal/u/, the team's under /journal/. */
+export const articlePath = (slug: string) => (isUuidV7(slug) ? `/journal/u/${slug}` : `/journal/${slug}`);
 
 /** A title an article shows as a card, with its genres from the catalog cache (none when it isn't cached). */
 export type ArticleTitle = { kind: TitleKind; externalId: string; genres: readonly string[] };
@@ -155,8 +168,12 @@ export function rankForYou(
 export const FEED_ARTICLES = 6;
 export const FEED_TRAILING = 3;
 
-/** An article's place in time in the Following feed: the end of its day (UTC), so a new one tops that day's finishes. */
-export const articleFeedTime = (date: string) => Date.parse(`${date}T23:59:59.999Z`);
+/**
+ * An article's place in time in the Following feed: a member's when it was published; a team article's the end of
+ * its day (UTC), so a new one tops that day's finishes.
+ */
+export const articleFeedTime = (a: { date: string; publishedAt?: string | null }) =>
+  a.publishedAt ? Date.parse(a.publishedAt) : Date.parse(`${a.date}T23:59:59.999Z`);
 
 export type FeedSlot<I, A> = { type: "entry"; item: I } | { type: "article"; article: A };
 
@@ -166,18 +183,18 @@ export type FeedSlot<I, A> = { type: "entry"; item: I } | { type: "article"; art
  * pages (`complete`), up to `trailing` older articles follow its last finish, so a new account's empty feed still
  * shows the newest ones.
  */
-export function interleaveArticles<I extends { finishedAt: string }, A extends { date: string }>(
+export function interleaveArticles<I extends { finishedAt: string }, A extends { date: string; publishedAt?: string | null }>(
   items: readonly I[],
   articles: readonly A[],
   complete: boolean,
   trailing = FEED_TRAILING,
 ): FeedSlot<I, A>[] {
-  const queue = [...articles].sort((a, b) => articleFeedTime(b.date) - articleFeedTime(a.date));
+  const queue = [...articles].sort((a, b) => articleFeedTime(b) - articleFeedTime(a));
   const out: FeedSlot<I, A>[] = [];
   let next = 0;
   for (const item of items) {
     const at = Date.parse(item.finishedAt);
-    while (next < queue.length && articleFeedTime(queue[next]!.date) >= at) out.push({ type: "article", article: queue[next++]! });
+    while (next < queue.length && articleFeedTime(queue[next]!) >= at) out.push({ type: "article", article: queue[next++]! });
     out.push({ type: "entry", item });
   }
   if (complete) {

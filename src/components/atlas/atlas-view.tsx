@@ -53,6 +53,7 @@ export function AtlasView({
   profilePublic,
   username,
   host,
+  initialOpen = null,
 }: {
   initialPlaces: Place[];
   stories: StoryCountry[];
@@ -64,6 +65,8 @@ export function AtlasView({
   profilePublic: boolean;
   username: string | null;
   host: string;
+  /** A country whose sheet is open from the start (`?country=`, a Journal article's Check, ADR 0092). */
+  initialOpen?: CountryCode | null;
 }) {
   const t = useTranslations("Atlas");
   const locale = useLocale();
@@ -71,7 +74,7 @@ export function AtlasView({
   const [places, setPlaces] = useState<ReadonlyMap<CountryCode, Place>>(() => new Map(initialPlaces.map((p) => [p.country, p])));
   const [layer, setLayer] = useState<Layer>("been");
   const [view, setView] = useState<MapView>("world");
-  const [open, setOpen] = useState<CountryCode | null>(null);
+  const [open, setOpen] = useState<CountryCode | null>(initialOpen);
   const [error, setError] = useState(false);
   const [sharing, setSharing] = useState<CardData | null>(null);
   const [regions, setRegions] = useState(initialRegions);

@@ -1,8 +1,13 @@
 import type { MetadataRoute } from "next";
 import { journalArticle, journalSlugs } from "@/data/journal";
+import { featuredForSitemap } from "@/data/journal-posts";
+import { adminClient } from "@/data/supabase-admin";
 import { getPathname } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
+
+// Refreshed daily, for members' Featured articles (ADR 0092).
+export const revalidate = 86400;
 
 // Public, indexable pages. Add new ones here as they ship.
 const pages = ["/", "/feed", "/reel", "/pro", "/privacy", "/terms"] as const;
@@ -31,5 +36,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return locales.length ? entry(`/journal/${slug}`, locales, found?.article.meta.date) : null;
     }),
   );
-  return [...pages.map((href) => entry(href, routing.locales)), ...articles.filter((a) => a !== null)];
+  // Members' Featured articles (ADR 0092), in the one language each is written in.
+  const admin = adminClient();
+  const featured = admin
+    ? await featuredForSitemap(admin).catch((error: unknown) => {
+        console.error(error);
+        return [];
+      })
+    : [];
+  const members = featured.flatMap((p) =>
+    (routing.locales as readonly string[]).includes(p.locale) ? [entry(`/journal/u/${p.id}`, [p.locale as Locale], p.at)] : [],
+  );
+  return [...pages.map((href) => entry(href, routing.locales)), ...articles.filter((a) => a !== null), ...members];
 }

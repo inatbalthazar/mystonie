@@ -5,7 +5,7 @@
  * App pages that need a signed-in user. Add new ones as they ship (collection, stats, …). Not `/feed`: visitors see
  * the Journal's articles there (ADR 0062).
  */
-export const PROTECTED_PATHS = ["/home", "/collection", "/settings", "/title", "/recap", "/people", "/board", "/challenges", "/me"] as const;
+export const PROTECTED_PATHS = ["/home", "/collection", "/settings", "/title", "/recap", "/people", "/board", "/challenges", "/me", "/journal/write", "/admin"] as const;
 
 /** `/th/settings` → { locale: "th", path: "/settings" }; unprefixed paths are the default locale. */
 export function splitLocale(pathname: string, locales: readonly string[], defaultLocale: string) {

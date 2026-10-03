@@ -22,6 +22,22 @@ async function targetPath(report: Report): Promise<string | null> {
     if (error) throw new Error(`cards read failed: ${error.message}`);
     return data ? `/c/${data.id}` : null;
   }
+  if (report.targetKind === "article") {
+    // A member's published Journal article on a public page (ADR 0092).
+    const { data, error } = await db
+      .from("journal_posts")
+      .select("id, user_id")
+      .eq("id", report.targetId)
+      .not("published_at", "is", null)
+      .is("hidden_at", null)
+      .is("deleted_at", null)
+      .maybeSingle();
+    if (error) throw new Error(`journal_posts read failed: ${error.message}`);
+    if (!data) return null;
+    const { data: writer, error: writerError } = await db.from("profiles").select("id").eq("id", data.user_id).eq("visibility", "public").maybeSingle();
+    if (writerError) throw new Error(`profiles read failed: ${writerError.message}`);
+    return writer ? `/journal/u/${data.id}` : null;
+  }
   const { data, error } = await db
     .from("profiles")
     .select("username")

@@ -6,6 +6,7 @@ import type { TitleKind } from "@/core/catalog/types";
 import { articleKey } from "@/core/feed-news";
 import {
   isJournalSlug,
+  RESERVED_JOURNAL_SLUGS,
   journalIndex,
   JournalError,
   journalTitles,
@@ -33,6 +34,7 @@ async function load(): Promise<Loaded[]> {
   for (const dir of dirs) {
     if (!dir.isDirectory()) continue;
     if (!isJournalSlug(dir.name)) throw new JournalError(`content/journal/${dir.name}: folder names are lowercase-with-dashes`);
+    if (RESERVED_JOURNAL_SLUGS.includes(dir.name)) throw new JournalError(`content/journal/${dir.name}: /journal/${dir.name} is a page of its own, pick another name`);
     for (const locale of routing.locales) {
       const file = path.join(ROOT, dir.name, `${locale}.md`);
       const source = await readFile(file, "utf8").catch(() => null);

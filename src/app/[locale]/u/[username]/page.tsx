@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
+import { profileTabs } from "@/lib/profile-tabs";
 import { ProfileAlbum } from "@/components/profile/profile-album";
 import { STATS_SECTIONS } from "@/core/album";
+import { hasPosts } from "@/data/journal-posts";
 import { ClosedProfile, loadProfile as load } from "./profile";
 
 export async function generateMetadata({ params }: PageProps<"/[locale]/u/[username]">): Promise<Metadata> {
@@ -48,8 +50,8 @@ export default async function ProfilePage({ params }: PageProps<"/[locale]/u/[us
       layout={profile.layout}
       viewerId={viewerId}
       locale={locale}
-      // The Stats tab, unless its owner keeps every part of it to themselves (ADR 0077).
-      statsTab={profile.statsHidden.length < STATS_SECTIONS.length}
+      // The Stats tab, unless its owner keeps every part of it to themselves (ADR 0077); Journal once they published (ADR 0092).
+      tabs={profileTabs({ stats: profile.statsHidden.length < STATS_SECTIONS.length, journal: await hasPosts(db, profile.id) })}
     />
   );
 }

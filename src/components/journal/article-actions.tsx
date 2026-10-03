@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { useState } from "react";
 import type { ArticlePlace } from "@/core/analytics";
 import { localizedPath } from "@/core/auth";
+import { articlePath } from "@/core/journal-feed";
 import { Link } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { track } from "@/lib/analytics";
@@ -90,7 +91,7 @@ export function ShareButton({ slug, title, place, compact = false }: { slug: str
   const [copied, setCopied] = useState(false);
 
   async function share() {
-    const url = new URL(localizedPath(`/journal/${slug}`, locale, routing.defaultLocale), window.location.origin);
+    const url = new URL(localizedPath(articlePath(slug), locale, routing.defaultLocale), window.location.origin);
     url.searchParams.set("ref", "journal");
     try {
       if (navigator.share) {

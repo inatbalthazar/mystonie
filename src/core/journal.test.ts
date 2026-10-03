@@ -27,8 +27,15 @@ describe("parseJournal", () => {
       profile: null,
       featured: false,
       draft: false,
+      tags: [],
     });
     expect(parseJournal(`${head("draft: true\n")}Hi`).meta.draft).toBe(true);
+  });
+
+  it("reads up to three known tags, in any case and with dashes or spaces", () => {
+    expect(parseJournal(`${head("tags: Review, on-this-day, behind the scenes\n")}Hi`).meta.tags).toEqual(["review", "on_this_day", "behind_the_scenes"]);
+    expect(() => parseJournal(`${head("tags: gossip\n")}Hi`)).toThrow(JournalError);
+    expect(() => parseJournal(`${head("tags: review, list, guide, travel\n")}Hi`)).toThrow(/up to 3/);
   });
 
   it("reads the byline's photo and profile, and featured", () => {
@@ -161,7 +168,7 @@ describe("journalIndex", () => {
   const v = (slug: string, locale: string, date: string, draft = false): JournalVersion => ({
     slug,
     locale,
-    meta: { title: `${slug}-${locale}`, description: "", date, cover: null, author: null, avatar: null, profile: null, featured: false, draft },
+    meta: { title: `${slug}-${locale}`, description: "", date, cover: null, author: null, avatar: null, profile: null, featured: false, draft, tags: [] },
   });
   const all = [v("a", "en", "2026-10-01"), v("a", "th", "2026-10-01"), v("b", "en", "2026-10-05"), v("c", "th", "2026-09-01"), v("d", "en", "2026-10-09", true)];
 

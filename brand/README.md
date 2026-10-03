@@ -20,6 +20,7 @@ drawn from the app itself:
 | `svg/app-icon.svg`, `-brand.svg`, `-night.svg` | Square app or avatar icons, on paper, on Mystonie orange, or on night. Platforms round the corners themselves. |
 | `png/*.png` | Every SVG above as PNG, with a transparent background except the app icons. Stonie comes at 128, 512 and 1024 px; logos and wordmarks at 1200 and 2400 px wide; app icons at 180, 512 and 1024 px. |
 | `png/stonie-alive.gif` | The animated Stonie as a GIF, on paper colour, for chats and email. |
+| `play-store/` | The Google Play listing: icon, feature graphics, phone screenshots and the listing text, in English and Thai. See its [README](play-store/README.md). |
 
 Prefer the SVGs: they stay sharp at any size.
 

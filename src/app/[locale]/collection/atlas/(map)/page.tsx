@@ -9,7 +9,7 @@ import { SwipeArea } from "@/components/motion/swipe-area";
 import { storiesByCountry } from "@/core/atlas";
 import { regionsByCountry, regionsOf } from "@/core/atlas-regions";
 import { localizedPath } from "@/core/auth";
-import { COUNTRY_CODES, countryName, countryOptions, type CountryCode } from "@/core/countries";
+import { COUNTRY_CODES, countryName, countryOptions, isCountryCode, type CountryCode } from "@/core/countries";
 import { storyTitles, userPlaces, userRegions } from "@/data/atlas";
 import { userClient } from "@/data/supabase-server";
 import { redirect } from "@/i18n/navigation";
@@ -29,8 +29,11 @@ export async function generateMetadata(): Promise<Metadata> {
  * (been to, lived in, want to go to) and the countries your stories come from, on one world map. Its own page; the
  * album shows the Been layer when the owner turns "Show my Atlas on my profile" on.
  */
-export default async function AtlasPage({ params }: PageProps<"/[locale]/collection/atlas">) {
+export default async function AtlasPage({ params, searchParams }: PageProps<"/[locale]/collection/atlas">) {
   const locale = (await params).locale as Locale;
+  // `?country=JP` opens that country's sheet (a Journal article's Check on a place, ADR 0092).
+  const asked = (await searchParams).country;
+  const openCountry = typeof asked === "string" && isCountryCode(asked.toUpperCase()) ? (asked.toUpperCase() as CountryCode) : null;
   setRequestLocale(locale);
   const db = await userClient();
   const { data } = db ? await db.auth.getClaims() : { data: null };
@@ -77,6 +80,7 @@ export default async function AtlasPage({ params }: PageProps<"/[locale]/collect
             regions={regions}
             options={options}
             thisYear={new Date().getUTCFullYear()}
+            initialOpen={openCountry}
             atlasPublic={profile.atlas_public}
             profilePublic={profile.visibility === "public"}
             username={profile.username}

@@ -69,7 +69,7 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
   return (
     <>
       <FreshPage />
-      <SwipeArea prev="/stats" className="flex flex-col gap-6">
+      <SwipeArea prev="/stats" next="/me/journal" className="flex flex-col gap-6">
         <section aria-labelledby="my-cards" className="flex flex-col gap-4">
           <div className="flex flex-col gap-1">
             <h2 id="my-cards" className="font-display text-xl font-extrabold">

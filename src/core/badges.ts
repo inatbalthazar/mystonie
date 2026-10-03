@@ -62,7 +62,8 @@ export const BADGES = [
   // Helping others with the warnings quiz (answers that count: not "don't remember", not too fast).
   { id: "lookout", rule: { type: "times", target: 10, of: "quiz" } },
   { id: "guardian", rule: { type: "times", target: 100, of: "quiz" } },
-  // Writing: reviews on finishes, articles in the Journal (the article's `profile` is the writer's username).
+  // Writing: reviews on finishes, articles in the Journal (a team article's `profile` is the writer's username; a
+  // member's own published articles count too, ADR 0092).
   { id: "critic", rule: { type: "times", target: 10, of: "reviews" } },
   { id: "byline", rule: { type: "times", target: 1, of: "articles" } },
   // Supporting Mystonie: Pro, or a Buy Me a Coffee tip with the account's email.

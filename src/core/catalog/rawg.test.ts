@@ -150,7 +150,6 @@ describe("RAWG art", () => {
     const small = posterUrl("rawg", ART)!;
     expect(rawgMediaPath(small)).toBe(ART);
     expect(cardImageUrl(small)).toBe(`https://media.rawg.io/media/resize/1280/-/${ART}`);
-    expect(cardImageUrl("https://image.tmdb.org/t/p/w342/x.jpg")).toBe("https://image.tmdb.org/t/p/w342/x.jpg");
     for (const ok of [small, `https://media.rawg.io/media/${ART}`, cardImageUrl(small)]) expect(isCardPosterUrl(ok), ok).toBe(true);
     for (const bad of [
       `https://media.rawg.io/media/resize/300/-/${ART}`,
