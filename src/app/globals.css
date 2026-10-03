@@ -536,24 +536,37 @@ dialog[data-sheet]:not([open])::backdrop {
   }
 }
 
-/* Quote of the day on Home (ADR 0093): each word inks in (fades up out of a blur, tilted like a hand's stroke), one
-   after another (--ink-delay), then the movie's line comes in and a pen underlines it (--pen-delay on the link). */
+/* Quote of the day on Home (ADR 0093), on a 10 s loop: each word inks in (fades up out of a blur, tilted like a hand's
+   stroke), one after another (--ink-delay), then the movie's line comes in and a pen underlines it (--pen-delay on the
+   link). It stays about 7 s; the pen line is pulled away first, then the words fade in the same order and are written
+   again. One cycle length for all, so the
+   per-element delays keep the order every time. Reduced motion: the global rule ends it at once, and with no fill
+   the quote simply shows. */
 @keyframes ink {
-  from { opacity: 0; filter: blur(5px); translate: 0 0.35em; rotate: -6deg; }
+  0% { opacity: 0; filter: blur(5px); translate: 0 0.35em; rotate: -6deg; animation-timing-function: var(--ease-out-soft); }
+  6%, 86% { opacity: 1; filter: blur(0); translate: 0 0; rotate: 0deg; animation-timing-function: ease-in; }
+  92%, 100% { opacity: 0; filter: blur(4px); translate: 0 -0.25em; rotate: 3deg; }
+}
+@keyframes quote-from {
+  0% { opacity: 0; translate: 0 10px; animation-timing-function: var(--ease-out-soft); }
+  4%, 86% { opacity: 1; translate: 0 0; animation-timing-function: ease-in; }
+  91%, 100% { opacity: 0; translate: 0 0; }
 }
 @keyframes pen {
-  from { stroke-dashoffset: 1; }
+  0% { stroke-dashoffset: 1; animation-timing-function: var(--ease-out-soft); }
+  7%, 78% { stroke-dashoffset: 0; animation-timing-function: ease-in; }
+  84%, 100% { stroke-dashoffset: -1; }
 }
 .quote-word {
   display: inline-block;
-  animation: ink 560ms var(--ease-out-soft) var(--ink-delay, 0ms) backwards;
+  animation: ink 10s linear var(--ink-delay, 0ms) infinite backwards;
 }
 .quote-from {
-  animation: enter 360ms var(--ease-out-soft) var(--pen-delay, 0ms) backwards;
+  animation: quote-from 10s linear var(--pen-delay, 0ms) infinite backwards;
 }
 .quote-pen path {
   stroke-dasharray: 1;
-  animation: pen 700ms var(--ease-out-soft) calc(var(--pen-delay, 0ms) + 200ms) backwards;
+  animation: pen 10s linear calc(var(--pen-delay, 0ms) + 200ms) infinite backwards;
 }
 
 /* prefers-reduced-motion: nothing moves. Things still appear and change, at once (end states, no slides). */
