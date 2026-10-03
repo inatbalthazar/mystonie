@@ -70,8 +70,8 @@ export default async function AtlasPage({ params, searchParams }: PageProps<"/[l
       <h1 data-stay="collection-title" className="font-display text-4xl font-extrabold tracking-[-0.03em]">
         {t("title")}
       </h1>
-      <div className="flex flex-col gap-6">
-        <ShelfTabs shelf="atlas" />
+      <ShelfTabs shelf="atlas" />
+      <div className="mt-4 flex flex-col gap-6">
         {/* Swiping right goes back to Play, the shelf before (ADR 0070); the map keeps its own drags. */}
         <SwipeArea prev="/collection?shelf=play">
           <AtlasView

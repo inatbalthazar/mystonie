@@ -2,7 +2,8 @@
 
 import { LayoutGridIcon, ListIcon } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { useId } from "react";
+import { useSearchParams } from "next/navigation";
+import { useId, useLayoutEffect, useRef } from "react";
 import { ENTRY_STATUSES, isEntryStatus } from "@/core/collection/entries";
 import {
   COLLECTION_SHELVES,
@@ -147,8 +148,27 @@ export function ShelfTabs({ shelf, onShelf }: { shelf: CollectionShelf | "atlas"
         ? "border-border bg-card text-foreground shadow-[0_-4px_10px_-8px_rgb(0_0_0/0.3)]"
         : "border-transparent text-muted-foreground hover:text-foreground",
     );
+  // On a narrow phone the row scrolls sideways. It keeps where it was scrolled to from page to page (the collection,
+  // the Atlas and their skeletons each have their own row), so it doesn't jump back as the page under it changes.
+  const rowRef = useRef<HTMLDivElement>(null);
+  useLayoutEffect(() => {
+    const row = rowRef.current;
+    if (!row) return;
+    row.scrollLeft = rowScroll;
+    const open = row.querySelector<HTMLElement>("[aria-pressed=true], [aria-current]");
+    if (open && (open.offsetLeft < row.scrollLeft || open.offsetLeft + open.offsetWidth > row.scrollLeft + row.clientWidth)) {
+      open.scrollIntoView({ block: "nearest", inline: "nearest" });
+    }
+  }, [shelf]);
   return (
-    <div role="group" aria-label={t("shelves")} data-stay="collection-tabs" className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none]">
+    <div
+      ref={rowRef}
+      role="group"
+      aria-label={t("shelves")}
+      data-stay="collection-tabs"
+      onScroll={(e) => (rowScroll = e.currentTarget.scrollLeft)}
+      className="-mx-4 overflow-x-auto px-4 [scrollbar-width:none]"
+    >
       <div data-tabs className="flex min-w-max gap-1.5 border-b-2 border-border min-[400px]:gap-2">
         {COLLECTION_SHELVES.map((value) =>
           onShelf ? (
@@ -156,7 +176,14 @@ export function ShelfTabs({ shelf, onShelf }: { shelf: CollectionShelf | "atlas"
               {t("shelf", { shelf: value })}
             </button>
           ) : (
-            <Link key={value} href={{ pathname: "/collection", query: { shelf: value } }} prefetch data-tab className={tab(false)}>
+            <Link
+              key={value}
+              href={{ pathname: "/collection", query: { shelf: value } }}
+              prefetch
+              data-tab
+              aria-current={shelf === value ? "page" : undefined}
+              className={tab(shelf === value)}
+            >
               {t("shelf", { shelf: value })}
             </Link>
           ),
@@ -167,6 +194,15 @@ export function ShelfTabs({ shelf, onShelf }: { shelf: CollectionShelf | "atlas"
       </div>
     </div>
   );
+}
+
+/** Where the shelves' row was last scrolled to sideways (see `ShelfTabs`). */
+let rowScroll = 0;
+
+/** The shelves on the collection's skeleton: the one in the address (`?shelf=`) is open, else Watch. */
+export function ShelfTabsFromUrl() {
+  const asked = useSearchParams().get("shelf");
+  return <ShelfTabs shelf={COLLECTION_SHELVES.find((s) => s === asked) ?? "watch"} />;
 }
 
 const selectClass =

@@ -74,7 +74,8 @@ test("pages slide the way you go, tabs swipe and sheets drag away (ADR 0070)", a
   await expect.poll(() => transitions(page)).toContain("tab-next");
   await settled(page);
   box = (await area.boundingBox())!;
-  await drag(cdp, box.x + box.width / 2, box.y + 40, 160, -4);
+  // Below the Journal's filters: its row of category chips scrolls sideways and keeps its own drags (ADR 0092).
+  await drag(cdp, box.x + box.width / 2, box.y + 200, 160, -4);
   await expect(page).toHaveURL(/\/feed$/);
   await expect.poll(() => transitions(page)).toContain("tab-prev");
   await settled(page);

@@ -45,3 +45,8 @@ Why it happened:
   - `src/core/back.test.ts`: no back button on `/me/cards`.
   - `e2e/profile.spec.ts`: the logo stays on Cards, and the cover is the same element after a tab.
 - **The same fix later:** a visitor's profile and its Stats tab (`/u/<username>`, [ADR 0077](0077-public-stats.md)) still draw their own cover per tab. They can get the same layout if needed.
+- **Fixed 2026-10-03, the collection and its Atlas:** the title and the shelves still left between them. A switch shows the next page's skeleton first, and the skeleton had grey blocks in their place. Then the page settled in from 10px below, title and all, so the title bobbed.
+  - Both skeletons (`collection/(shelves)/loading.tsx`, `collection/atlas/(map)/loading.tsx`) now draw the real title and shelves, named to stay. The collection's skeleton opens the shelf in the address (`ShelfTabsFromUrl`).
+  - On these pages, only what's under the title and shelves settles in or fades (`globals.css`, `:has(> [data-stay])`).
+  - The shelves' row keeps its sideways scroll from page to page, so on a narrow phone it doesn't jump back as the page under it changes.
+  - Frame by frame at 360 px, both ways, the title and the shelves no longer move. Only the open tab changes.

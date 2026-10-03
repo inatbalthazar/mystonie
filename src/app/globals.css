@@ -340,6 +340,20 @@
 [data-skeleton] {
   animation: fade 260ms ease-out 300ms both;
 }
+/* A page whose title and tabs stay put while it changes (the collection and its Atlas, ADR 0081): they don't settle
+   in or fade with it, so they hold still from the page before, through the skeleton, to the page itself. Only what's
+   under them does. */
+:root[data-app] body > main:has(> [data-stay]),
+[data-skeleton]:has(> [data-stay]) {
+  animation: none;
+}
+/* (`backwards`, not `both`: once settled, nothing is left on these parts, quick add's sheet among them.) */
+:root[data-app] body > main:not([data-skeleton]):has(> [data-stay]) > :not([data-stay]) {
+  animation: enter 300ms var(--ease-out-soft) backwards;
+}
+[data-skeleton]:has(> [data-stay]) > :not([data-stay]) {
+  animation: fade 260ms ease-out 300ms both;
+}
 
 /* Page transitions (React <ViewTransition>, src/components/motion/page-transition.tsx). Only the page moves: the
    header and the nav island stay put. `<html data-nav>` (src/components/motion/nav-motion.tsx) says which way you
