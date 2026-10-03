@@ -97,6 +97,19 @@ export const MOVIE_QUOTES: readonly MovieQuote[] = [
 
 const DAY_MS = 86_400_000;
 
+/** The longest line the quote's box fits (three lines at the smallest size on a 360 px phone). */
+export const QUOTE_MAX_CHARS = 100;
+
+/**
+ * How big a quote is written, so every quote fits the same box on Home and nothing under it moves: short ones large,
+ * longer ones smaller (ADR 0093).
+ */
+export function quoteSize(text: string): "lg" | "md" | "sm" {
+  if (text.length <= 60) return "lg";
+  if (text.length <= 80) return "md";
+  return "sm";
+}
+
 /** The quote for a local day (`YYYY-MM-DD`): the list in order, one a day, starting over at the end. */
 export function quoteOfTheDay(day: string, quotes: readonly MovieQuote[] = MOVIE_QUOTES): MovieQuote {
   const days = Math.floor(Date.parse(`${day}T00:00:00Z`) / DAY_MS);

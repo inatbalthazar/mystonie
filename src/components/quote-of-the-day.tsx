@@ -2,8 +2,11 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
-import { MOVIE_QUOTES } from "@/core/quotes";
+import { MOVIE_QUOTES, quoteSize } from "@/core/quotes";
 import { Link } from "@/i18n/navigation";
+import { cn } from "@/lib/utils";
+
+const SIZES = { lg: "text-2xl", md: "text-xl", sm: "text-lg" } as const;
 
 // Each quote is written in word by word: when the first word starts, the gap between words, and the word after which
 // the rest come together (so a long line doesn't keep people waiting). A cycle (write, stay, fade) is CYCLE_MS,
@@ -45,15 +48,24 @@ export function QuoteOfTheDay({ first }: { first: number }) {
       className="group press -my-1 flex origin-left flex-col gap-1 rounded-lg py-1"
       style={{ ["--pen-delay" as string]: `${penDelay}ms` }}
     >
-      <span aria-hidden="true" className="font-hand text-2xl leading-tight text-muted-foreground transition-colors group-hover:text-foreground">
-        {words.map((word, i) => (
-          <span key={i}>
-            <span className="quote-word" style={{ ["--ink-delay" as string]: `${START_MS + Math.min(i, STAGGER_MAX) * STAGGER_MS}ms` }}>
-              {word}
+      {/* A box three large lines tall, the quote at its foot: a longer quote is written smaller, so nothing below moves. */}
+      <span
+        aria-hidden="true"
+        className={cn(
+          "flex h-[5.625rem] items-end overflow-hidden font-hand leading-tight text-muted-foreground transition-colors group-hover:text-foreground",
+          SIZES[quoteSize(quote.text)],
+        )}
+      >
+        <span>
+          {words.map((word, i) => (
+            <span key={i}>
+              <span className="quote-word" style={{ ["--ink-delay" as string]: `${START_MS + Math.min(i, STAGGER_MAX) * STAGGER_MS}ms` }}>
+                {word}
+              </span>
+              {i < words.length - 1 && " "}
             </span>
-            {i < words.length - 1 && " "}
-          </span>
-        ))}
+          ))}
+        </span>
       </span>
       <span aria-hidden="true" className="quote-from relative w-fit pb-1.5 text-xs text-muted-foreground/80">
         {t("quoteFrom", { movie: quote.movie, year: quote.year })}

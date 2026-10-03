@@ -62,7 +62,6 @@
     "title": "Home",
     "reelCard": "Reel of the Day #{number}",
     "greeting": "Hi, {name}",
-    "quoteDate": "Now playing · {date}",
     "quote": "“{text}”",
     "quoteFrom": "{movie}, {year}",
     "quoteLabel": "Quote of the day, from {movie}. Open the movie",

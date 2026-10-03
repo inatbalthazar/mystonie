@@ -17,7 +17,8 @@ Home's header showed the date in handwriting above "Hi, <name>". The owner asked
   - Then the movie's line comes in, and a pen draws a wavy brand-colour line under it.
   - After the twelfth word, the rest come in together, so writing takes about 1.5 s.
   - The quote stays about 7 s. Then the pen line pulls away and the words fade in the same order.
-  - **Then a random other quote is written** (the owner's call, after a first version that rewrote the same one). So the day's quote opens Home, the same for everyone, and the rest play on for as long as Home is open. The label above reads "Now playing · <date>".
+  - **Then a random other quote is written** (the owner's call, after a first version that rewrote the same one). So the day's quote opens Home, the same for everyone, and the rest play on for as long as Home is open. The date above stays as it was, with no label.
+- **One box for every quote.** A quote's length would otherwise move everything under it with each swap. The quote sits in a box three large lines tall, at its foot, right above the movie's line. Quotes up to 60 characters are written large, up to 80 a size smaller, and longer ones smaller again (`quoteSize`). The tests cap a quote at 100 characters (`QUOTE_MAX_CHARS`), which still fits three lines on a 360 px phone.
   - The keyframes are CSS (`globals.css`, [ADR 0070](0070-motion-and-loading.md)). A small client component (`src/components/quote-of-the-day.tsx`) swaps the quote when a cycle ends. With reduced motion, the day's quote shows still and doesn't change.
 - **A list we curate** (`src/core/quotes.ts`): about 80 short, famous lines, each with its movie's TMDB id. No catalog offers quotes with clear terms, and a fixed list keeps them short and well chosen.
   - Lines stay in their original English. The attribution is translated.

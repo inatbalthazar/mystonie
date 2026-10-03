@@ -166,7 +166,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
       <SignupFromCard newAccount={newAccount} />
       <header className="flex flex-col gap-2">
         <p className="text-xs font-semibold tracking-wide text-muted-foreground uppercase [&:lang(th)]:tracking-normal">
-          {t("quoteDate", { date: format.dateTime(now, { weekday: "long", month: "long", day: "numeric", timeZone }) })}
+          {format.dateTime(now, { weekday: "long", month: "long", day: "numeric", timeZone })}
         </p>
         <QuoteOfTheDay first={MOVIE_QUOTES.indexOf(quote)} />
         <h1 className={`font-display font-extrabold tracking-[-0.03em] break-words ${[...name].length > 12 ? "text-3xl" : "text-4xl"}`}>
