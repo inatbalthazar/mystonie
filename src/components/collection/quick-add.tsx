@@ -86,7 +86,7 @@ function QuickAddSteps({
 
   return (
     <div className="flex flex-col gap-3">
-      <div role="group" aria-label={t("searchTypes")} className="-mx-1 flex gap-1 overflow-x-auto px-1 pb-0.5">
+      <div role="group" aria-label={t("searchTypes")} className="-mx-1 flex gap-1 overflow-x-auto px-1 py-0.5">
         {SEARCH_TYPES.map((value) => (
           <button
             key={value}

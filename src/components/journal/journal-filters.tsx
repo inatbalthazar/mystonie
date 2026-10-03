@@ -28,7 +28,7 @@ export function JournalFilters({ filters, signedIn }: { filters: Filters; signed
 
   return (
     <div role="group" aria-label={t("filtersLabel")} className="-mt-2 flex flex-col gap-3">
-      <nav aria-label={t("tagsLabel")} className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+      <nav aria-label={t("tagsLabel")} className="-mx-4 flex snap-x gap-2 overflow-x-auto px-4 pt-0.5 pb-1 [scrollbar-width:none]">
         <Link href={href({ tag: null })} replace scroll={false} aria-current={filters.tag === null ? "true" : undefined} className={chip(filters.tag === null)}>
           {t("allTags")}
         </Link>

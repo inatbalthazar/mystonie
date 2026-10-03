@@ -167,7 +167,7 @@ export function AtlasView({
       </div>
 
       <section aria-label={t("mapLabel")} className="flex flex-col gap-3">
-        <div role="group" aria-label={t("zoomLabel")} className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none]">
+        <div role="group" aria-label={t("zoomLabel")} className="-mx-4 flex gap-2 overflow-x-auto px-4 pt-0.5 pb-1 [scrollbar-width:none]">
           {VIEWS.map((v) => (
             <button key={v} type="button" aria-pressed={view === v} onClick={() => setView(v)} className={cn(chip, view === v ? chipOn : chipOff)}>
               {v === "world" ? t("world") : t(`continents.${v}`)}
