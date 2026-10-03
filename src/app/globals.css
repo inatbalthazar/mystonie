@@ -536,6 +536,26 @@ dialog[data-sheet]:not([open])::backdrop {
   }
 }
 
+/* Quote of the day on Home (ADR 0093): each word inks in (fades up out of a blur, tilted like a hand's stroke), one
+   after another (--ink-delay), then the movie's line comes in and a pen underlines it (--pen-delay on the link). */
+@keyframes ink {
+  from { opacity: 0; filter: blur(5px); translate: 0 0.35em; rotate: -6deg; }
+}
+@keyframes pen {
+  from { stroke-dashoffset: 1; }
+}
+.quote-word {
+  display: inline-block;
+  animation: ink 560ms var(--ease-out-soft) var(--ink-delay, 0ms) backwards;
+}
+.quote-from {
+  animation: enter 360ms var(--ease-out-soft) var(--pen-delay, 0ms) backwards;
+}
+.quote-pen path {
+  stroke-dasharray: 1;
+  animation: pen 700ms var(--ease-out-soft) calc(var(--pen-delay, 0ms) + 200ms) backwards;
+}
+
 /* prefers-reduced-motion: nothing moves. Things still appear and change, at once (end states, no slides). */
 @media (prefers-reduced-motion: reduce) {
   *,
