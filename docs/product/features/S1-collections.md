@@ -13,8 +13,8 @@ The journal. Users search a movie or series (incl. anime and K-drama, all via TM
 - `finished_at` defaults to **now** and is **editable**. It's stored in UTC and shown in the user's time zone.
 - **Built (quick add, [ADR 0022](../../decisions/0022-collection-writes-through-route-handlers.md)):**
   - The ➕ sits in the middle of the nav island on every signed-in page ([ADR 0050](../../decisions/0050-mobile-first-nav-island.md)). Elsewhere it opens `/collection?add=1`; on `/collection` it opens the sheet in place.
-  - The sheet has search → result → **Finished** (primary) / **Watching** / **Want to watch**. Above Finished, "When did you finish it?": Today (default), Yesterday, Pick a day or Years ago (a year, dated 1 January); the button names it ("Finished in 2019", [ADR 0096](../../decisions/0096-filling-in-the-past.md)).
-  - A finish from before yesterday is filling in the past: pasted in without the celebration, back to the search with a "N pasted in" strip and Done; the sheet links to the import (ADR 0096).
+  - The sheet has search → result → **Finished** (primary) / **Watching** / **Want to watch**. Above Finished, "When did you finish it?": Today (default) or Earlier, with an optional day (none: 1 January of the title's year); the button names it ("Finished earlier", [ADR 0096](../../decisions/0096-filling-in-the-past.md)).
+  - An Earlier finish is filling in the past: pasted in without the celebration, back to the search with a "N pasted in" strip and Done; the sheet links to the import (ADR 0096).
   - Tapping a row opens an edit sheet: status, finish date, and "Remove from collection" (two taps, soft delete).
   - A picked day becomes now (today) or noon that day in the profile's time zone (`finishedAtForDate`).
   - Adding a title that's already in the collection updates its entry.

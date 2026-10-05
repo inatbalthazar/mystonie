@@ -100,47 +100,40 @@ export function finishedAtForDate(date: string, timeZone: string, now: number = 
   return noon < EARLIEST ? null : new Date(noon).toISOString();
 }
 
-/** The first year quick add offers for a finish known only by its year. */
-export const FIRST_FINISH_YEAR = 1900;
-
 /**
- * When a finish happened, as quick add asks it (ADR 0096): today, yesterday, a picked day, or only the year (for
- * the ones from years ago nobody remembers the day of).
+ * When a finish happened, as quick add asks it (ADR 0096): today, or earlier, with the day if the user picks one
+ * (they don't have to).
  */
-export type FinishWhen = { on: "today" } | { on: "yesterday" } | { on: "day"; date: string } | { on: "year"; year: number };
+export type FinishWhen = { on: "today" } | { on: "earlier"; date: string | null };
 
 /** The user's calendar day before `today` (`YYYY-MM-DD`). */
-function dayBefore(today: string, zone: string): string {
+export function dayBefore(today: string, timeZone: string): string {
+  const zone = safeTimeZone(timeZone);
   const [year, month, day] = today.split("-").map(Number) as [number, number, number];
   return localDateKey(startOfLocalDay(year, month, day, zone) - 12 * 60 * 60 * 1000, zone);
 }
 
-/** The day a `FinishWhen` stands for in the user's calendar: a year alone is 1 January (as imports date it, ADR 0041). */
-function finishDay(when: FinishWhen, zone: string, now: number): string | null {
-  const today = localDateKey(now, zone);
-  if (when.on === "today") return today;
-  if (when.on === "yesterday") return dayBefore(today, zone);
-  if (when.on === "day") return when.date;
-  const year = when.year;
-  return Number.isInteger(year) && year >= FIRST_FINISH_YEAR && year <= Number(today.slice(0, 4)) ? `${year}-01-01` : null;
-}
-
-/** `finished_at` for a `FinishWhen`, by `finishedAtForDate`. Null for a bad or future day or year. */
-export function finishedAtFor(when: FinishWhen, timeZone: string, now: number = Date.now()): string | null {
+/**
+ * `finished_at` for a `FinishWhen`, by `finishedAtForDate`. An earlier finish without a day is dated 1 January of
+ * the title's year, as imports date one (ADR 0041), or yesterday when the title is from this year or has no year.
+ * Null for a bad or future day.
+ */
+export function finishedAtFor(when: FinishWhen, timeZone: string, titleYear: number | null, now: number = Date.now()): string | null {
   const zone = safeTimeZone(timeZone);
-  const day = finishDay(when, zone, now);
-  return day && finishedAtForDate(day, zone, now);
+  const today = localDateKey(now, zone);
+  if (when.on === "today") return finishedAtForDate(today, zone, now);
+  if (when.date) return finishedAtForDate(when.date, zone, now);
+  const thisYear = Number(today.slice(0, 4));
+  const day = titleYear && Number.isInteger(titleYear) && titleYear >= 1900 && titleYear < thisYear ? `${titleYear}-01-01` : dayBefore(today, zone);
+  return finishedAtForDate(day, zone, now);
 }
 
 /**
- * A finish from before yesterday (ADR 0096): filling in the past, so quick add pastes it in quietly and stays open
- * for the next one instead of celebrating each. Today's and yesterday's finishes get the celebration and the card.
+ * An earlier finish (ADR 0096): filling in the past, so quick add pastes it in quietly and stays open for the next
+ * one instead of celebrating each. Today's finishes get the celebration and the card.
  */
-export function isPastFinish(when: FinishWhen, timeZone: string, now: number = Date.now()): boolean {
-  if (when.on === "today" || when.on === "yesterday") return false;
-  const zone = safeTimeZone(timeZone);
-  const day = finishDay(when, zone, now);
-  return !!day && day < dayBefore(localDateKey(now, zone), zone);
+export function isPastFinish(when: FinishWhen): boolean {
+  return when.on === "earlier";
 }
 
 /** The columns a status change writes: finished keeps or gets a date, other statuses clear it. */

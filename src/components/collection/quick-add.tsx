@@ -3,9 +3,9 @@
 import { ArrowLeftIcon, CloudOffIcon, SearchIcon } from "lucide-react";
 import Image from "next/image";
 import { useFormatter, useTranslations } from "next-intl";
-import { useEffect, useId, useRef, useState } from "react";
+import { useId, useState } from "react";
 import { SEARCH_TYPES, type SearchResult, type SearchType } from "@/core/catalog/types";
-import { FIRST_FINISH_YEAR, finishedAtFor, isPastFinish, type EntryStatus, type FinishWhen } from "@/core/collection/entries";
+import { dayBefore, finishedAtFor, isPastFinish, type EntryStatus, type FinishWhen } from "@/core/collection/entries";
 import { shelfOfKind } from "@/core/collection/view";
 import { localDateKey } from "@/core/stats/period";
 import { Link } from "@/i18n/navigation";
@@ -84,7 +84,7 @@ function QuickAddSteps({
   };
 
   function add(result: SearchResult, status: EntryStatus, finishedAt: string | null) {
-    const past = status === "finished" && isPastFinish(when, timeZone);
+    const past = status === "finished" && isPastFinish(when);
     onAdd(result, status, finishedAt, past);
     if (!past) return;
     // Back to an empty search for the next one.
@@ -235,7 +235,7 @@ function OfflinePicks({ onPick }: { onPick: (r: SearchResult) => void }) {
   );
 }
 
-const WHEN_OPTIONS = ["today", "yesterday", "day", "year"] as const;
+const WHEN_OPTIONS = ["today", "earlier"] as const;
 
 function PickStatus({
   result,
@@ -258,7 +258,7 @@ function PickStatus({
   const t = useTranslations("Collection");
   const home = useTranslations("Home");
   const format = useFormatter();
-  const finishedAt = finishedAtFor(when, timeZone);
+  const finishedAt = finishedAtFor(when, timeZone, result.year ?? null);
   const shelf = shelfOfKind(result.kind);
   const game = result.kind === "game";
 
@@ -291,7 +291,7 @@ function PickStatus({
       <TitleDetails key={`${result.kind}-${result.externalId}`} result={result} warning={warning} />
 
       <div className="flex flex-col gap-3">
-        <FinishWhenPicker result={result} when={when} onWhen={onWhen} timeZone={timeZone} />
+        <FinishWhenPicker when={when} onWhen={onWhen} timeZone={timeZone} />
         <button
           type="button"
           disabled={!finishedAt}
@@ -299,9 +299,8 @@ function PickStatus({
           className="h-14 rounded-full bg-brand text-lg font-extrabold tracking-wide text-brand-foreground shadow-sm hover:bg-brand/90 disabled:opacity-50 press"
         >
           {t("finishedWhen", {
-            on: when.on,
+            on: when.on === "earlier" && when.date ? "day" : when.on,
             date: finishedAt ? format.dateTime(new Date(finishedAt), { dateStyle: "medium", timeZone }) : "",
-            year: when.on === "year" ? String(when.year) : "",
           })}
         </button>
       </div>
@@ -323,64 +322,26 @@ function PickStatus({
 }
 
 /**
- * When the finish was (ADR 0096), above the Finished button so it's seen before the tap: Today, Yesterday, Pick a
- * day (a date field) or Years ago (only the year, dated 1 January as imports are).
+ * When the finish was (ADR 0096), above the Finished button so it's seen before the tap: Today, or Earlier with a
+ * day the user may pick (they don't have to).
  */
-function FinishWhenPicker({
-  result,
-  when,
-  onWhen,
-  timeZone,
-}: {
-  result: SearchResult;
-  when: FinishWhen;
-  onWhen: (when: FinishWhen) => void;
-  timeZone: string;
-}) {
+function FinishWhenPicker({ when, onWhen, timeZone }: { when: FinishWhen; onWhen: (when: FinishWhen) => void; timeZone: string }) {
   const t = useTranslations("Collection");
   const dateId = useId();
-  const yearId = useId();
   const [today] = useState(() => localDateKey(Date.now(), timeZone));
-  const thisYear = Number(today.slice(0, 4));
-  // The date field's picker opens when Pick a day is tapped, not when a title opens on it.
-  const openPicker = useRef(false);
-  const dateRef = useRef<HTMLInputElement>(null);
-  useEffect(() => {
-    if (when.on !== "day" || !openPicker.current) return;
-    openPicker.current = false;
-    try {
-      dateRef.current?.showPicker();
-    } catch {
-      dateRef.current?.focus();
-    }
-  }, [when.on]);
-
-  function choose(on: (typeof WHEN_OPTIONS)[number]) {
-    if (on === when.on) return;
-    if (on === "day") {
-      openPicker.current = true;
-      onWhen({ on, date: today });
-    } else if (on === "year") {
-      // A first guess: the year it came out.
-      const year = result.year && result.year >= FIRST_FINISH_YEAR && result.year <= thisYear ? result.year : thisYear - 1;
-      onWhen({ on, year });
-    } else onWhen({ on });
-  }
-
-  const years = Array.from({ length: thisYear - FIRST_FINISH_YEAR + 1 }, (_, i) => thisYear - i);
 
   return (
     <fieldset className="flex flex-col gap-2">
       <legend className="mb-2 text-sm font-semibold">{t("whenLegend")}</legend>
-      <div className="grid grid-cols-4 gap-1 rounded-full bg-muted p-1">
+      <div className="grid grid-cols-2 gap-1 rounded-full bg-muted p-1">
         {WHEN_OPTIONS.map((on) => (
           <button
             key={on}
             type="button"
             aria-pressed={when.on === on}
-            onClick={() => choose(on)}
+            onClick={() => on !== when.on && onWhen(on === "today" ? { on } : { on, date: null })}
             className={cn(
-              "min-h-10 rounded-full px-1 text-[13px] leading-tight font-semibold transition-colors",
+              "min-h-10 rounded-full px-2 text-sm font-semibold transition-colors",
               when.on === on ? "bg-card text-foreground shadow-sm ring-1 ring-border" : "text-muted-foreground hover:text-foreground",
             )}
           >
@@ -388,40 +349,21 @@ function FinishWhenPicker({
           </button>
         ))}
       </div>
-      {when.on === "day" && (
-        <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-          <label htmlFor={dateId}>{t("finishedOn")}</label>
-          <input
-            ref={dateRef}
-            id={dateId}
-            type="date"
-            value={when.date}
-            max={today}
-            min="1900-01-01"
-            required
-            onChange={(e) => onWhen({ on: "day", date: e.target.value })}
-            className="h-11 rounded-lg border border-input bg-card px-2 text-foreground"
-          />
-        </div>
-      )}
-      {when.on === "year" && (
+      {when.on === "earlier" && (
         <div className="flex flex-col items-center gap-1">
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
-            <label htmlFor={yearId}>{t("finishYear")}</label>
-            <select
-              id={yearId}
-              value={when.year}
-              onChange={(e) => onWhen({ on: "year", year: Number(e.target.value) })}
+            <label htmlFor={dateId}>{t("finishedOnOptional")}</label>
+            <input
+              id={dateId}
+              type="date"
+              value={when.date ?? ""}
+              max={dayBefore(today, timeZone)}
+              min="1900-01-01"
+              onChange={(e) => onWhen({ on: "earlier", date: e.target.value || null })}
               className="h-11 rounded-lg border border-input bg-card px-2 text-foreground"
-            >
-              {years.map((year) => (
-                <option key={year} value={year}>
-                  {year}
-                </option>
-              ))}
-            </select>
+            />
           </div>
-          <p className="text-xs text-muted-foreground">{t("yearNote")}</p>
+          {!when.date && <p className="text-center text-xs text-muted-foreground">{t("undatedNote")}</p>}
         </div>
       )}
     </fieldset>

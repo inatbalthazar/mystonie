@@ -11,26 +11,27 @@ The owner (2026-10-05) found that people don't understand the ➕ can add what t
 - The import (Letterboxd, Goodreads, MyAnimeList, TV Time) wasn't offered in the sheet.
 
 ## Decision
-**When did you finish it?** sits above the Finished button, as four segments: **Today** (the default), **Yesterday**, **Pick a day** (the date field, its picker opened), **Years ago** (a year list).
-- The button says the choice: "Finished today", "Finished yesterday", "Finished on May 1, 2024", "Finished in 2019".
-- **Years ago** first offers the title's own year. A year alone is dated **1 January at noon** in the user's time zone, as imports date an undated finish ([ADR 0041](0041-import-export.md)), and the sheet says so ("Counted on 1 January of that year.").
+**When did you finish it?** sits above the Finished button, as two segments: **Today** (the default) and **Earlier**. The owner (2026-10-05) wanted it simple: the past can have a day, but doesn't need one.
+- Earlier shows an optional day field ("Which day? (optional)", up to yesterday).
+- The button says the choice: "Finished today", "Finished earlier", "Finished on May 1, 2024".
+- Earlier without a day is dated **1 January at noon** of the title's year in the user's time zone, as imports date an undated finish ([ADR 0041](0041-import-export.md)), or yesterday for a title from this year or without a year. The sheet says it's filed under the year it came out.
 - The choice is kept from one title to the next while the sheet is open.
 - `FinishWhen`, `finishedAtFor` and `isPastFinish` in `src/core/collection/entries.ts`.
 
-**Filling in the past.** A finish from before yesterday (a picked day two or more days back, or a year) is pasted in quietly:
+**Filling in the past.** An Earlier finish is pasted in quietly:
 - no celebration;
 - the sheet goes back to an empty search, with a strip counting what was pasted in ("2 pasted in"), its posters, and **Done**;
 - milestones and stickers it earned show once the sheet closes;
 - its card can still be made from the collection's edit sheet.
 
-Today's and yesterday's finishes are celebrated as before, still three taps from the ➕.
+Today's finishes are celebrated as before, still three taps from the ➕.
 
 **Copy.** The search says "What have you finished?"; the hint and the empty collection say the past counts ("from last night or years ago"); the getting-started step says "from today or years ago"; the sheet links to the import.
 
 **Rejected:**
-- A stored precision (`finished_precision`: day or year), to show "2019" instead of "Jan 1, 2019". It would need a migration and a change everywhere a finish date shows (rows, cards, title pages, export). Imports already date a year as 1 January without one, and the sheet says how it's counted. Worth revisiting if people mind the date.
+- A stored precision (`finished_precision`: day or year), to show "2019" instead of "Jan 1, 2019" for an undated finish. It would need a migration and a change everywhere a finish date shows (rows, cards, title pages, export). Imports already date a year as 1 January without one, and the sheet says how it's counted. Worth revisiting if people mind the date.
 - Celebrating every finish. A card for a film seen in 2012 isn't news, and the celebration stopped people adding more.
-- A "Don't remember" choice with no year. Every finish needs a date (`entries_finished_at_matches_status`), and the title's year, offered first, is the same guess.
+- More choices (Yesterday, a year list). Tried first; the owner found two simpler, and the optional day covers them.
 
 ## Consequences
 - No schema change.
