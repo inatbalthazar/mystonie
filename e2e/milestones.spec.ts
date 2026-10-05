@@ -37,7 +37,7 @@ test("the 10th title finished → its Milestone card after the Finish card → o
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Milestone Movie J");
   await page.getByRole("dialog").getByRole("button", { name: /^Milestone Movie J Movie/ }).click();
   const checked = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/milestones");
-  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  await page.getByRole("button", { name: "Finished today", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "You finished Milestone Movie J!" })).toBeVisible();
   expect((await (await checked).json()).milestones).toHaveLength(1);
 

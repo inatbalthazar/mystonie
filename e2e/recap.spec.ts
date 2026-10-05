@@ -23,7 +23,7 @@ test("a finished week → Monday recap email → recap card → share, then unsu
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Parasite");
   await page.getByRole("dialog").getByRole("button", { name: /^Parasite Movie/ }).first().click();
   const added = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/entries" && r.request().method() === "POST");
-  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  await page.getByRole("button", { name: "Finished today", exact: true }).click();
   expect((await added).status()).toBe(201);
   await page.getByRole("button", { name: "Skip" }).click();
 

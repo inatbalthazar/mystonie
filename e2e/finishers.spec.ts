@@ -86,7 +86,7 @@ test("rare finishes on the celebration, the saved card, the title page and the f
   await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill(movie.name);
   await page.getByRole("dialog").getByRole("button", { name: new RegExp(`^${movie.name} Movie`) }).click();
-  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  await page.getByRole("button", { name: "Finished today", exact: true }).click();
   const celebration = page.getByRole("dialog", { name: `You finished ${movie.name}!` });
   await expect(celebration.getByRole("heading", { name: `You finished ${movie.name}!` })).toBeVisible();
   if (shown) {

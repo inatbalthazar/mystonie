@@ -77,7 +77,7 @@ test("Home: up next, recent cards, trending into quick add, install prompt", asy
   await expect(sheet).toContainText("Parasite");
   const added = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/entries" && r.request().method() === "POST");
   await expect(async () => {
-    await sheet.getByRole("button", { name: "Finished", exact: true }).click({ timeout: 2000 });
+    await sheet.getByRole("button", { name: "Finished today", exact: true }).click({ timeout: 2000 });
     await expect(page.getByRole("button", { name: "Skip" })).toBeVisible({ timeout: 2000 });
   }).toPass();
   expect((await added).status()).toBe(201);

@@ -21,7 +21,7 @@ test("finish → celebration → publish the card → /c/[id] with its preview",
   await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Parasite");
   await page.getByRole("dialog").getByRole("button", { name: /^Parasite Movie/ }).first().click();
-  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  await page.getByRole("button", { name: "Finished today", exact: true }).click();
   const celebration = page.getByRole("dialog", { name: "You finished Parasite!" });
   await expect(celebration).toBeVisible();
   await expect(celebration.locator("[data-card]")).toContainText("Parasite");

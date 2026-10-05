@@ -62,7 +62,7 @@ test("games: search Games, finish one with the hours it took → the Cartridge c
   await expect(sheet.getByRole("button", { name: "Playing", exact: true })).toBeVisible();
   await expect(sheet.getByRole("button", { name: "Want to play", exact: true })).toBeVisible();
   const added = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/entries" && r.request().method() === "POST");
-  await sheet.getByRole("button", { name: "Finished", exact: true }).click();
+  await sheet.getByRole("button", { name: "Finished today", exact: true }).click();
   expect((await added).status()).toBe(201);
   const celebration = page.getByRole("dialog", { name: "You finished The Witcher 3: Wild Hunt!" });
   await expect(celebration.getByText("Cartridge · swipe for another style")).toBeVisible();

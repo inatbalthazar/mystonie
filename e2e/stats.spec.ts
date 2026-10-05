@@ -23,7 +23,7 @@ test("stats: empty state, then numbers that match the collection, and Share stat
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Parasite");
   await page.getByRole("dialog").getByRole("button", { name: /^Parasite Movie/ }).first().click();
   const added = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/entries" && r.request().method() === "POST");
-  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  await page.getByRole("button", { name: "Finished today", exact: true }).click();
   expect((await added).status()).toBe(201);
   await page.getByRole("button", { name: "Skip" }).click();
   const collection = await numbers(page, 'section[aria-labelledby="collection-summary"]');
@@ -82,7 +82,7 @@ test("stats: favourite actor and director from the credits of finished titles, o
     await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill(film.name);
     await page.getByRole("dialog").getByRole("button", { name: new RegExp(`^${film.name} Movie`) }).first().click();
     const added = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/entries" && r.request().method() === "POST");
-    await page.getByRole("button", { name: "Finished", exact: true }).click();
+    await page.getByRole("button", { name: "Finished today", exact: true }).click();
     expect((await added).status()).toBe(201);
     await page.getByRole("button", { name: "Skip" }).click();
   }

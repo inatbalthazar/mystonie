@@ -3,7 +3,7 @@
 import { ImageIcon } from "lucide-react";
 import Image from "next/image";
 import { useFormatter, useLocale, useTranslations } from "next-intl";
-import { startTransition, useEffect, useId, useMemo, useState, useSyncExternalStore } from "react";
+import { startTransition, useEffect, useId, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import { isReadingKind, type SearchResult } from "@/core/catalog/types";
 import {
   finishedAtForDate,
@@ -217,13 +217,20 @@ export function CollectionView({
     });
   }
 
+  // Finishes from the past pasted in while the sheet stayed open: their milestones show once it closes (ADR 0096).
+  const pastAdded = useRef(false);
+
   function closeAdd() {
     setAdding(false);
     clearAddParam();
+    if (!pastAdded.current) return;
+    pastAdded.current = false;
+    milestones.check();
   }
 
-  async function add(result: SearchResult, status: EntryStatus, finishedAt: string | null) {
-    closeAdd();
+  async function add(result: SearchResult, status: EntryStatus, finishedAt: string | null, past = false) {
+    // Filling in the past (ADR 0096): the sheet stays open for the next one, no celebration.
+    if (!past) closeAdd();
     const title: OpTitle = {
       source: result.source,
       kind: result.kind,
@@ -236,12 +243,13 @@ export function CollectionView({
     const existing = items.find((i) => titleKey(i.title) === key);
     setShelf(shelfOf({ title }));
     setNotice(t("added", { name: title.name }));
-    if (status === "finished") setCelebrating({ key, animate: true }); // celebrate first, sync after
+    if (status === "finished" && !past) setCelebrating({ key, animate: true }); // celebrate first, sync after
     const columns = statusColumns(status, finishedAt, Date.now());
     const saved = await send(userId, { type: "entry.add", entryId: existing?.id ?? uuidv7(), title, ...columns });
     if (!saved.ok) return setNotice(t("addError", { name: title.name }));
     keep(key, savedEntry(saved.body));
     if (saved.superseded) setNotice(t("changedElsewhere", { name: title.name }));
+    else if (past) pastAdded.current = true;
     else if (status === "finished") milestones.check();
   }
 

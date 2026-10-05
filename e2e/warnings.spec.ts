@@ -253,7 +253,7 @@ test("finishing something with jump scares offers the Survived card", async ({ p
   await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Doghouse");
   await page.getByRole("dialog").getByRole("button", { name: /^Warn Test Doghouse Movie/ }).click();
-  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  await page.getByRole("button", { name: "Finished today", exact: true }).click();
 
   const offer = page.getByRole("button", { name: "You made it through the jump scares. Make it a Survived card" });
   await expect(offer).toBeVisible();

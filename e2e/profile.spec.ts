@@ -281,7 +281,7 @@ test("a profile photo: picked, framed and uploaded, shown on the profile and on 
   await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Parasite");
   await page.getByRole("dialog").getByRole("button", { name: /^Parasite Movie/ }).first().click();
-  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  await page.getByRole("button", { name: "Finished today", exact: true }).click();
   const celebration = page.getByRole("dialog", { name: "You finished Parasite!" });
   const cardPhoto = celebration.locator(`[data-card] img[src="${avatarUrl}"]`);
   await expect(cardPhoto).toBeVisible();

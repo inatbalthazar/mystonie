@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { actionTime, finishedAtForDate, parseEntryPatch, parseNewEntry, sortCollection, statusColumns, titleKey } from "./entries";
+import { actionTime, finishedAtFor, finishedAtForDate, isPastFinish, parseEntryPatch, parseNewEntry, sortCollection, statusColumns, titleKey } from "./entries";
 
 const NOW = Date.parse("2026-09-27T20:00:00Z"); // 28 Sep 03:00 in Bangkok
 const ID = "01926000-0000-7000-8000-000000000001";
@@ -155,6 +155,39 @@ describe("finishedAtForDate", () => {
     expect(finishedAtForDate("2026-02-31", "UTC", NOW)).toBeNull();
     expect(finishedAtForDate("27/09/2026", "UTC", NOW)).toBeNull();
     expect(finishedAtForDate("1899-12-31", "UTC", NOW)).toBeNull();
+  });
+});
+
+describe("finishedAtFor (ADR 0096)", () => {
+  it("dates today, yesterday and a picked day in the user's calendar", () => {
+    expect(finishedAtFor({ on: "today" }, "Asia/Bangkok", NOW)).toBe("2026-09-27T20:00:00.000Z");
+    expect(finishedAtFor({ on: "yesterday" }, "Asia/Bangkok", NOW)).toBe("2026-09-27T05:00:00.000Z");
+    expect(finishedAtFor({ on: "yesterday" }, "UTC", NOW)).toBe("2026-09-26T12:00:00.000Z");
+    expect(finishedAtFor({ on: "day", date: "2024-05-01" }, "UTC", NOW)).toBe("2024-05-01T12:00:00.000Z");
+  });
+
+  it("dates a year alone on 1 January at noon, from 1900 to this year", () => {
+    expect(finishedAtFor({ on: "year", year: 2019 }, "Asia/Bangkok", NOW)).toBe("2019-01-01T05:00:00.000Z");
+    expect(finishedAtFor({ on: "year", year: 1900 }, "UTC", NOW)).toBe("1900-01-01T12:00:00.000Z");
+    expect(finishedAtFor({ on: "year", year: 2026 }, "UTC", NOW)).toBe("2026-01-01T12:00:00.000Z");
+    expect(finishedAtFor({ on: "year", year: 2027 }, "UTC", NOW)).toBeNull();
+    expect(finishedAtFor({ on: "year", year: 1899 }, "UTC", NOW)).toBeNull();
+    expect(finishedAtFor({ on: "year", year: 2019.5 }, "UTC", NOW)).toBeNull();
+    expect(finishedAtFor({ on: "day", date: "2026-09-28" }, "UTC", NOW)).toBeNull();
+  });
+});
+
+describe("isPastFinish (ADR 0096)", () => {
+  it("is a finish from before yesterday: a year, or a day two or more days back", () => {
+    expect(isPastFinish({ on: "today" }, "UTC", NOW)).toBe(false);
+    expect(isPastFinish({ on: "yesterday" }, "UTC", NOW)).toBe(false);
+    expect(isPastFinish({ on: "day", date: "2026-09-27" }, "UTC", NOW)).toBe(false);
+    expect(isPastFinish({ on: "day", date: "2026-09-26" }, "UTC", NOW)).toBe(false);
+    expect(isPastFinish({ on: "day", date: "2026-09-25" }, "UTC", NOW)).toBe(true);
+    // 28 Sep in Bangkok: the 26th is two days back there.
+    expect(isPastFinish({ on: "day", date: "2026-09-26" }, "Asia/Bangkok", NOW)).toBe(true);
+    expect(isPastFinish({ on: "year", year: 2019 }, "UTC", NOW)).toBe(true);
+    expect(isPastFinish({ on: "year", year: 2030 }, "UTC", NOW)).toBe(false);
   });
 });
 

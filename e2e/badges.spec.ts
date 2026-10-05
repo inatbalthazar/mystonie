@@ -51,7 +51,7 @@ test("the 5th book earns Rookie Bookworm once → the toast → the album → st
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill("Badge Movie");
   await page.getByRole("dialog").getByRole("button", { name: /^Badge Movie Movie/ }).click();
   const checked = page.waitForResponse((r) => new URL(r.url()).pathname === "/api/milestones");
-  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  await page.getByRole("button", { name: "Finished today", exact: true }).click();
   await expect(page.getByRole("dialog", { name: "You finished Badge Movie!" })).toBeVisible();
   expect((await (await checked).json()).badges).toEqual([{ id: "first-movie", titleName: "Badge Movie" }]);
   await page.getByRole("button", { name: "Skip" }).click();

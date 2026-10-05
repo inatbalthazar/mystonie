@@ -43,7 +43,7 @@ test("quick add: a finished movie in 3 taps, shown at once, then edited and remo
   await page.goto("/");
   await navIsland(page).getByRole("link", { name: "Add a title" }).click(); // tap 1
   await pickResult(page, "Dune Part", "Dune: Part Two"); // tap 2
-  await page.getByRole("button", { name: "Finished", exact: true }).click(); // tap 3
+  await page.getByRole("button", { name: "Finished today", exact: true }).click(); // tap 3
   await expect(rows(page).first()).toContainText("Dune: Part Two");
   await expect(rows(page).first()).toContainText("Saving…");
   release();
@@ -105,6 +105,52 @@ test("quick add: a finished movie in 3 taps, shown at once, then edited and remo
   expect((await removed).ok()).toBe(true);
   await page.reload();
   await expect(rows(page)).toHaveCount(1);
+});
+
+test("quick add: filling in the past, one title after another without a celebration (ADR 0096)", async ({ page, request }) => {
+  test.skip(!(await mailpitUp(request)) || !canSeed(), "local Supabase (Mailpit, service role key) is not available");
+  await seedTitles(request, TITLES);
+  await mockSearch(page, TITLES);
+  await signUp(page, request, "backfill");
+  const sheet = page.getByRole("dialog", { name: "Add a title" });
+
+  // The sheet says the past counts, and offers an import.
+  await openQuickAdd(page);
+  await expect(sheet.getByLabel("Search movies, series, books, manga and games")).toHaveAttribute("placeholder", "What have you finished?");
+  await expect(sheet.getByRole("link", { name: "Coming from another app? Import your history" })).toBeVisible();
+
+  // Years ago: only the year, first guessed from the title's.
+  await pickResult(page, "Parasite", "Parasite");
+  await expect(sheet.getByRole("button", { name: "Finished today", exact: true })).toBeVisible();
+  await sheet.getByRole("button", { name: "Years ago" }).click();
+  await expect(sheet.getByLabel("Year")).toHaveValue("2019");
+  await sheet.getByLabel("Year").selectOption("2020");
+  await expect(sheet.getByText("Counted on 1 January of that year.")).toBeVisible();
+  let added = saved(page);
+  await sheet.getByRole("button", { name: "Finished in 2020", exact: true }).click();
+  expect((await added).ok()).toBe(true);
+  // No celebration: back to the search, counting.
+  await expect(sheet.getByRole("status")).toContainText("1 pasted in");
+  await expect(sheet.getByLabel("Search movies, series, books, manga and games")).toHaveValue("");
+  await expect(page.getByRole("heading", { name: /You finished/ })).toHaveCount(0);
+
+  // The next one keeps the choice; a picked day two years back is the past too.
+  await pickResult(page, "Dune Part", "Dune: Part Two");
+  await expect(sheet.getByRole("button", { name: "Years ago" })).toHaveAttribute("aria-pressed", "true");
+  await sheet.getByRole("button", { name: "Pick a day" }).click();
+  await sheet.getByLabel("Finished on").fill("2024-05-01");
+  added = saved(page);
+  await sheet.getByRole("button", { name: "Finished on May 1, 2024", exact: true }).click();
+  expect((await added).ok()).toBe(true);
+  await expect(sheet.getByRole("status")).toContainText("2 pasted in");
+  await sheet.getByRole("button", { name: "Done" }).click();
+  await expect(sheet).toBeHidden();
+  await expect(page.getByRole("heading", { name: /You finished/ })).toHaveCount(0);
+
+  await page.reload();
+  await expect(rows(page)).toHaveCount(2);
+  await expect(page.getByRole("button", { name: "Edit Dune: Part Two" })).toContainText("Finished May 1, 2024");
+  await expect(page.getByRole("button", { name: "Edit Parasite" })).toContainText("Finished Jan 1, 2020");
 });
 
 test("the collection needs an account", async ({ page }) => {

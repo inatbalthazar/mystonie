@@ -64,7 +64,7 @@ test("the nav island: the lit tab, ➕ from anywhere and in place on the collect
     .click();
   // The celebration outlives the refresh that follows the save (it used to remount the page once `?add=1` was gone).
   const refreshed = page.waitForResponse((r) => new URL(r.url()).pathname === "/collection" && new URL(r.url()).searchParams.has("_rsc"));
-  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  await page.getByRole("button", { name: "Finished today", exact: true }).click();
   const celebration = page.getByRole("dialog", { name: "You finished Parasite!" });
   await expect(celebration).toBeVisible();
   await refreshed;

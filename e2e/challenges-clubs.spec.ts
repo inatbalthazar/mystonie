@@ -44,7 +44,7 @@ async function finishThroughQuickAdd(page: Page, name: string) {
   await openQuickAdd(page);
   await page.getByRole("dialog").getByLabel("Search movies, series, books, manga and games").fill(name);
   await page.getByRole("dialog").getByRole("button", { name: new RegExp(`^${name} Movie`) }).click();
-  await page.getByRole("button", { name: "Finished", exact: true }).click();
+  await page.getByRole("button", { name: "Finished today", exact: true }).click();
 }
 
 test("monthly challenges: joining counts the whole month, a finish completes it, the Challenge card and the patch", async ({ page, request }) => {
