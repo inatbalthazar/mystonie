@@ -96,6 +96,7 @@ One file per decision: `NNNN-short-slug.md`, numbered in order. Write one whenev
 | [0091](0091-card-posters-own-url.md) | Cards draw posters from their own URL (TMDB at w780, AniList's large cover with `?card`), so the copy a list cached without CORS can't blank a card's poster and colours | **Accepted** |
 | [0092](0092-members-write-for-the-journal.md) | Members write for the Journal: articles as rows (`journal_posts`) with what they're about and categories, on the writer's page and followers' feeds; the team features the best from `/admin/journal` (`ADMIN_EMAILS`), and the Journal filters and sorts | **Accepted** |
 | [0093](0093-quote-of-the-day.md) | Movie lines on Home: short famous lines from a curated list, written in and swapped for a random one every 10 s, under the date and linking to the movie; the greeting makes room for a long one | **Accepted** |
+| [0095](0095-shelf-top-ten.md) | The Shelf's top ten: up to 10 favourites, numbered on the Shelf, and a Shelf card (a wooden bookcase) to share them from Me | **Accepted** |
 | [0094](0094-quiz-rewards.md) | Warnings quiz rewards: Spotter, Sentinel, Lighthouse, Final Say and On Duty stickers from the user's own answers, a lookout log with a day streak, rounds of five with a stamp on each answer and a summary | **Accepted** |
 | [0021](0021-collection-tables-rules-in-the-database.md) | Collection tables enforce the day-one rules in the DB: UUID v7 check, no client DELETE, column grants, composite FKs for card ownership, public-profile reads via `private.is_public_profile` | **Accepted** |
 

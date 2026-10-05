@@ -62,6 +62,11 @@ export type CardData = {
    */
   atlas?: CardAtlas | null;
   /**
+   * Set on a Shelf card (ADR 0095): the Shelf's first titles, favourites first. `name` is the card's label and
+   * `posterUrl` is always empty (the posters are in `shelf.titles`).
+   */
+  shelf?: CardShelf | null;
+  /**
    * Set on a Survived card (S2 content warnings): the scare DTDD says the movie or series has ("Survived the jump
    * scares"). Only with the `survived` template, on a finish.
    */
@@ -215,6 +220,15 @@ export type CardAtlas = { countries: string[]; stories: number; regions?: CardAt
 
 export type CardAtlasRegions = { country: string; kind: string; total: number; ids: string[] };
 
+/**
+ * A Shelf card (ADR 0095): up to `SHELF_CARD_MAX` titles as they stand on the Shelf, the first `pinned` of them the
+ * owner's favourites, and how many titles the Shelf holds in all.
+ */
+export type CardShelf = { titles: RecapCollageTitle[]; pinned: number; total: number };
+
+/** Titles on a Shelf card: the top ten (the most favourites the Shelf pins). */
+export const SHELF_CARD_MAX = 10;
+
 export type RecapCollageTitle = { name: string; kind: TitleKind; posterUrl: string | null };
 
 export const RECAP_COLLAGE_MAX = 4;
@@ -232,6 +246,7 @@ export const CARD_KINDS = [
   "challenge",
   "reel",
   "atlas",
+  "shelf",
 ] as const;
 export type CardKind = (typeof CARD_KINDS)[number];
 

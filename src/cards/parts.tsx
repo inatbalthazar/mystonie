@@ -117,6 +117,7 @@ export function useCardName(data: CardData): string {
   // A country's Atlas card is called by the country, in the viewer's language (ADR 0060).
   if (data.atlas?.regions) return countryName(data.atlas.regions.country, locale);
   if (data.atlas) return t("atlasName");
+  if (data.shelf) return t("shelfName");
   return data.recap ? range : data.challenge ? challenge : data.name;
 }
 
@@ -224,6 +225,7 @@ export function useStats(data: CardData): { value: string; label: string }[] {
     ];
     return stories > 0 ? [...figures, { value: format.number(stories), label: t("atlasStories", { count: stories }) }] : figures;
   }
+  if (data.shelf) return [{ value: format.number(data.shelf.total), label: t("shelfTotal", { count: data.shelf.total }) }];
   if (data.recap) {
     return recapFigures(data.recap, { time: hidden.has("time"), episodes: hidden.has("episodes") }).map(({ key, value }) => ({
       value: format.number(value),
@@ -305,6 +307,8 @@ export function useHeadline(data: CardData): string {
   if (data.milestone) return t("milestoneHeadline", { ...data.milestone, count: format.number(data.milestone.value) });
   if (data.challenge) return t("challengeHeadline");
   if (data.reel) return t("reelHeadline");
+  // "My top 10" when every title on it is a favourite, else "On my shelf" (ADR 0095).
+  if (data.shelf) return t("shelfHeadline", { count: data.shelf.titles.length, top: String(data.shelf.pinned === data.shelf.titles.length) });
   if (data.atlas) return t("atlasHeadline");
   // "Imported 312 films", "Imported 48 books" (S2 Letterboxd import, S3 import & export).
   if (data.recap?.imported) return t("importHeadline", { count: data.recap.titleCount, unit: data.recap.importedUnit ?? "film" });
@@ -372,7 +376,7 @@ export function footerUser(data: CardData): { username: string | null; avatarUrl
  */
 export function cardFinishShare(data: CardData): number | null {
   if (!isRare(data.finishShare) || data.hide?.includes("finisher")) return null;
-  return data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas ? null : data.finishShare;
+  return data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas || data.shelf ? null : data.finishShare;
 }
 
 /**

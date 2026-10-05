@@ -540,3 +540,35 @@ describe("Atlas cards (stage 4, ADR 0059)", () => {
     }
   });
 });
+
+describe("Shelf cards (ADR 0095)", () => {
+  const poster = "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg";
+  const titles = Array.from({ length: 10 }, (_, i) => ({ name: `Title ${i + 1}`, kind: "movie", posterUrl: i ? poster : null }));
+  const shelf = { titles, pinned: 4, total: 120 };
+  const shelfData = { kind: "movie", name: "My Shelf", finishedOn: "2026-10-05", posterUrl: null, shelf };
+  const save = { id: ID, kind: "shelf", templateId: "shelf", size: "story", data: shelfData, share: true };
+
+  it("takes up to ten titles, as a Shelf card or its sticker", () => {
+    expect(parseCardSave(save)).toMatchObject({ kind: "shelf", templateId: "shelf", data: { shelf: { pinned: 4, total: 120 } } });
+    expect(parseCardSave({ ...save, kind: "sticker", templateId: "sticker" })).toMatchObject({ kind: "sticker" });
+    expect(defaultTemplate("shelf", "movie")).toBe("shelf");
+  });
+
+  it("rejects too many or no titles, odd counts, other posters, and mixing", () => {
+    for (const bad of [
+      { ...shelf, titles: [] },
+      { ...shelf, titles: [...titles, titles[0]] },
+      { ...shelf, pinned: 11 },
+      { ...shelf, total: 9 },
+      { ...shelf, titles: [{ name: "X", kind: "movie", posterUrl: "https://evil.example/x.jpg" }], total: 1, pinned: 0 },
+      { ...shelf, titles: [{ name: "", kind: "movie", posterUrl: null }], total: 1, pinned: 0 },
+    ]) {
+      expect(parseCardData({ ...shelfData, shelf: bad }), JSON.stringify(bad)).toBeNull();
+    }
+    expect(parseCardData({ ...shelfData, posterUrl: poster })).toBeNull();
+    expect(parseCardData({ ...shelfData, atlas: { countries: ["TH"], stories: 0 } })).toBeNull();
+    expect(parseCardSave({ ...save, kind: "stats", templateId: "boldStats" })).toBeNull();
+    expect(parseCardSave({ ...save, data: { ...shelfData, shelf: null } })).toBeNull();
+    expect(parseCardSave({ ...save, templateId: "atlas" })).toBeNull();
+  });
+});

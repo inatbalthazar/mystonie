@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseShelfPins, SHELF_PINS_MAX, shelfItems, type ShelfTitle } from "./shelf";
+import { parseShelfPins, SHELF_PINS_MAX, shelfCard, shelfItems, type ShelfTitle } from "./shelf";
 import type { StatsEntry } from "./stats/summary";
 
 const title = (id: string, kind: ShelfTitle["kind"] = "movie"): ShelfTitle => ({ id, kind, name: id.toUpperCase(), posterUrl: null });
@@ -45,19 +45,31 @@ describe("shelfItems", () => {
 });
 
 describe("parseShelfPins", () => {
-  const id = (n: number) => `00000000-0000-4000-8000-00000000000${n}`;
+  const id = (n: number) => `00000000-0000-4000-8000-0000000000${String(n).padStart(2, "0")}`;
 
-  it("takes up to four title ids and drops repeats", () => {
+  it("takes up to ten title ids and drops repeats", () => {
     expect(parseShelfPins([])).toEqual([]);
     expect(parseShelfPins([id(1), id(2), id(1)])).toEqual([id(1), id(2)]);
-    expect(parseShelfPins([1, 2, 3, 4].map(id))).toHaveLength(SHELF_PINS_MAX);
+    expect(parseShelfPins([1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(id))).toHaveLength(SHELF_PINS_MAX);
   });
 
   it("rejects anything else", () => {
-    expect(parseShelfPins([1, 2, 3, 4, 5].map(id))).toBeNull();
+    expect(parseShelfPins([1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11].map(id))).toBeNull();
     expect(parseShelfPins(["not-a-uuid"])).toBeNull();
     expect(parseShelfPins(["0000000A-0000-4000-8000-00000000000B"])).toBeNull();
     expect(parseShelfPins(id(1))).toBeNull();
     expect(parseShelfPins([null])).toBeNull();
+  });
+});
+
+describe("shelfCard", () => {
+  it("takes the first ten as they stand, favourites counted, and the whole Shelf's size (ADR 0095)", () => {
+    const items = Array.from({ length: 12 }, (_, i) => title(`t${i}`));
+    expect(shelfCard({ items, pinned: 3, more: 30 })).toEqual({
+      titles: items.slice(0, 10).map(({ name, kind, posterUrl }) => ({ name, kind, posterUrl })),
+      pinned: 3,
+      total: 42,
+    });
+    expect(shelfCard({ items: [], pinned: 0, more: 0 })).toBeNull();
   });
 });

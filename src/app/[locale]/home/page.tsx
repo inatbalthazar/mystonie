@@ -238,7 +238,7 @@ export default async function HomePage({ params }: PageProps<"/[locale]/home">) 
               const image = (
                 <SharedCardImage
                   imageUrl={card.imageUrl}
-                  alt={t("cardAlt", { name: card.data.reel ? t("reelCard", { number: card.data.reel.number }) : card.data.atlas?.regions ? t("atlasRegionsCard", { country: card.data.name }) : card.data.atlas ? t("atlasCard", { count: card.data.atlas.countries.length }) : card.data.milestone ? t("milestoneCard") : card.data.recap?.highlights ? t("yearCard") : card.data.recap ? t("recapCard") : card.data.name })}
+                  alt={t("cardAlt", { name: card.data.reel ? t("reelCard", { number: card.data.reel.number }) : card.data.atlas?.regions ? t("atlasRegionsCard", { country: card.data.name }) : card.data.atlas ? t("atlasCard", { count: card.data.atlas.countries.length }) : card.data.shelf ? t("shelfCard", { count: card.data.shelf.titles.length }) : card.data.milestone ? t("milestoneCard") : card.data.recap?.highlights ? t("yearCard") : card.data.recap ? t("recapCard") : card.data.name })}
                   templateId={card.templateId}
                   size={card.size}
                   data={card.data}

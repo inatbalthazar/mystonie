@@ -1,6 +1,6 @@
 # ADR 0069: The album as its owner arranges it
 
-**Status:** Accepted, the card gallery removed by [ADR 0076](0076-cards-tab.md) · **Date:** 2026-10-02
+**Status:** Accepted, the card gallery removed by [ADR 0076](0076-cards-tab.md), up to 10 favourites since [ADR 0095](0095-shelf-top-ten.md) · **Date:** 2026-10-02
 
 ## Context
 The album (`/u/[username]`, and Me's Album tab) grew section by section: the numbers, Right now, the Atlas, Saved to read, Stickers, Challenge patches, Clubs, The shelf, and last the Card gallery. On a 360 px phone the cards, the reason people visit, sat several screens down, under the map and the shelf.

@@ -1,12 +1,13 @@
 // The Shelf on public profiles (S3 badges & shelf): every live finish, newest first, after the owner's favourites
 // (ADR 0069).
+import { SHELF_CARD_MAX, type CardShelf } from "./cards/types";
 import type { TitleKind } from "./catalog/types";
 import type { StatsEntry } from "./stats/summary";
 
 export type ShelfTitle = { id: string; kind: TitleKind; name: string; posterUrl: string | null };
 
-/** How many favourites the owner can pin at the front of their Shelf: one row on any phone (ADR 0069). */
-export const SHELF_PINS_MAX = 4;
+/** How many favourites the owner can pin at the front of their Shelf: a top ten (ADR 0069, ADR 0095). */
+export const SHELF_PINS_MAX = 10;
 
 const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 
@@ -42,4 +43,14 @@ export function shelfItems(
   const rest = finished.filter((t) => !favourites.includes(t));
   const items = [...favourites, ...rest].slice(0, max);
   return { items, pinned: Math.min(favourites.length, max), more: Math.max(0, finished.length - max) };
+}
+
+/**
+ * A Shelf card's titles (ADR 0095): the Shelf's first `SHELF_CARD_MAX`, favourites first, and how many it holds in
+ * all. Null for an empty Shelf.
+ */
+export function shelfCard(shelf: { items: readonly ShelfTitle[]; pinned: number; more: number }): CardShelf | null {
+  const titles = shelf.items.slice(0, SHELF_CARD_MAX).map(({ name, kind, posterUrl }) => ({ name, kind, posterUrl }));
+  if (titles.length === 0) return null;
+  return { titles, pinned: Math.min(shelf.pinned, titles.length), total: shelf.items.length + shelf.more };
 }

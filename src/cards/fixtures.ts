@@ -274,6 +274,36 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
       },
     },
   },
+  // The Shelf card (ADR 0095): a full top ten (one without a poster, a long name) and three newest, no favourites.
+  {
+    id: "shelf-ten",
+    data: {
+      kind: "movie", name: "My Shelf", posterUrl: null, finishedOn: "2026-10-05", username: "maya", avatarUrl: PHOTO,
+      shelf: {
+        pinned: 10,
+        total: 148,
+        titles: [
+          { name: "Stranger Things", kind: "series", posterUrl: "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg" },
+          { name: "Parasite", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" },
+          { name: "Dr. Strangelove", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/gHm96BRW4GoI339rF1vYoYTB6Qe.jpg" },
+          { name: "Spirited Away", kind: "book", posterUrl: "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg" },
+          { name: "The Long Goodbye of a Very Long Title", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" },
+          { name: "Up", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/gHm96BRW4GoI339rF1vYoYTB6Qe.jpg" },
+          { name: "Arrival", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg" },
+          { name: "Coco", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" },
+          { name: "Heat", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/gHm96BRW4GoI339rF1vYoYTB6Qe.jpg" },
+          { name: "Alien", kind: "movie", posterUrl: null },
+        ],
+      },
+    },
+  },
+  {
+    id: "shelf-three",
+    data: {
+      kind: "movie", name: "My Shelf", posterUrl: null, finishedOn: "2026-10-05", username: "a_very_long_username_here",
+      shelf: { pinned: 0, total: 3, titles: [{ name: "Parasite", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" }, { name: "Up", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/gHm96BRW4GoI339rF1vYoYTB6Qe.jpg" }, { name: "Heat", kind: "movie", posterUrl: null }] },
+    },
+  },
   {
     id: "bare",
     data: { kind: "movie", name: "M", finishedOn: "2026-09-26" },

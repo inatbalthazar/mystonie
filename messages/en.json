@@ -100,7 +100,8 @@
       "clubs": "Clubs",
       "reel": "Reel",
       "people": "Find people"
-    }
+    },
+    "shelfCard": "Shelf, top {count}"
   },
   "Install": {
     "title": "Put Mystonie on your home screen",
@@ -194,7 +195,8 @@
       "premiere": "Premiere",
       "gilded": "Gilded",
       "arcade": "Arcade",
-      "lineup": "Lineup"
+      "lineup": "Lineup",
+      "shelf": "Bookcase"
     },
     "sizes": {
       "story": "Story 9:16",
@@ -274,7 +276,11 @@
     "atlasContinents": "{count, plural, one {continent} other {continents}}",
     "atlasStories": "{count, plural, one {country} other {countries}} in my stories",
     "atlasRegionsOf": "of {total} {many}",
-    "atlasRegionsShare": "of {country}"
+    "atlasRegionsShare": "of {country}",
+    "shelfName": "My Shelf",
+    "shelfHeadline": "{top, select, true {My top {count}} other {On my shelf}}",
+    "shelfTotal": "{count, plural, one {title on my shelf} other {titles on my shelf}}",
+    "shelfRank": "{rank}."
   },
   "SignUp": {
     "heading": "Keep everything you finish in one collection.",
@@ -798,7 +804,8 @@
     "shareOffline": "Share once you're online",
     "areaTitle": "{area, select, watch {Everything you've watched} read {Everything you've read} play {Everything you've played} other {Your collection}}, {range}",
     "atlasCardTitle": "{count, plural, one {# country} other {# countries}} on your Atlas",
-    "atlasRegionCardTitle": "{done} of {total} {many} in {country}"
+    "atlasRegionCardTitle": "{done} of {total} {many} in {country}",
+    "shelfCardTitle": "Your shelf's top {count}"
   },
   "SharedCard": {
     "notFoundTitle": "Card not found · Mystonie",
@@ -818,7 +825,8 @@
     "byUserLink": "From <link>@{username}</link>'s collection",
     "importLine": "{unit, select, book {{count, plural, one {# book} other {# books}}} series {{count, plural, one {# show} other {# shows}}} manga {{count, plural, other {# manga}}} game {{count, plural, one {# game} other {# games}}} title {{count, plural, one {# title} other {# titles}}} other {{count, plural, one {# film} other {# films}}}} imported, {range}",
     "atlasLine": "An Atlas of {count, plural, one {# country} other {# countries}}",
-    "atlasRegionsLine": "{done} of {total} {many} of {country}"
+    "atlasRegionsLine": "{done} of {total} {many} of {country}",
+    "shelfLine": "A shelf's top {count}"
   },
   "Recap": {
     "pageTitle": "Your recap",
@@ -947,7 +955,8 @@
     "meJournalEmpty": "You haven’t written an article yet. Review a favourite, make a list, or tell the story of a trip.",
     "writeFirst": "Write your first article",
     "journalEmpty": "@{username} hasn’t published an article yet.",
-    "journalMetaTitle": "{name}’s Journal"
+    "journalMetaTitle": "{name}’s Journal",
+    "shelfCard": "Shelf, top {count}"
   },
   "Album": {
     "arrange": "Arrange",
@@ -965,14 +974,15 @@
     "resetDone": "Back to the default order",
     "favourites": "Pick favourites",
     "favouritesTitle": "Favourites on your shelf",
-    "favouritesHint": "Pin up to {max}. They stand first on your shelf, with a star.",
+    "favouritesHint": "Pin up to {max}: your top {max}. They stand first on your shelf, numbered.",
     "favouritesFull": "That's {max}. Unpin one to pick another.",
     "favouritesSearch": "Search your finishes",
     "favouritesNone": "Nothing matches.",
     "save": "Save",
     "saving": "Saving…",
     "failed": "Couldn't save. Try again.",
-    "close": "Close"
+    "close": "Close",
+    "shareShelf": "Share my shelf"
   },
   "Social": {
     "follow": "Follow",

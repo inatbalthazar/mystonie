@@ -17,7 +17,7 @@ import { localizedPath } from "@/core/auth";
 import { isVisited, type Place } from "@/core/atlas";
 import { albumBadges, BADGES, evaluateBadges } from "@/core/badges";
 import type { ClubSlug } from "@/core/clubs";
-import { shelfItems } from "@/core/shelf";
+import { shelfCard, shelfItems } from "@/core/shelf";
 import { weekStartFor } from "@/core/stats/period";
 import { collectionAreaTotals, collectionCards } from "@/core/stats/report";
 import { userPlaces } from "@/data/atlas";
@@ -37,6 +37,7 @@ import { profileTabHref, type ProfileTab } from "@/lib/profile-tabs";
 import { ProfileTabs } from "./me-tabs";
 import { Shelf } from "./shelf";
 import { ShelfFavourites } from "./shelf-favourites";
+import { ShareShelf } from "./share-shelf";
 
 const WATCHING_MAX = 6;
 const SHELF_MAX = 48;
@@ -115,6 +116,8 @@ export async function ProfileAlbum({
   // Only awarded stickers (the server's record), in album order.
   const stickers = albumBadges(evaluateBadges([], [], "UTC"), awarded, () => null).filter((b) => b.earnedAt !== null);
   const shelf = shelfItems(rows.titles, rows.entries, SHELF_MAX, layout.shelfPins);
+  // The Shelf card (ADR 0095): its top ten, for the owner to share from Me.
+  const shelfShare = me ? shelfCard(shelf) : null;
   const host = siteUrl().host;
   const areaCards = isOwner
     ? // eslint-disable-next-line react-hooks/purity -- a server render, once per request
@@ -147,7 +150,14 @@ export async function ProfileAlbum({
         items={shelf.items}
         pinned={shelf.pinned}
         more={shelf.more}
-        favourites={me && <ShelfFavourites titles={shelfItems(rows.titles, rows.entries, Infinity).items} pins={layout.shelfPins} />}
+        favourites={
+          me && (
+            <div className="flex flex-wrap items-center gap-x-5">
+              <ShelfFavourites titles={shelfItems(rows.titles, rows.entries, Infinity).items} pins={layout.shelfPins} />
+              {shelfShare && <ShareShelf shelf={shelfShare} username={profile.username} host={host} />}
+            </div>
+          )
+        }
       />
     ),
 

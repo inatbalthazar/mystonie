@@ -27,9 +27,9 @@ select throws_ok(
   '23514', null, 'the Atlas hides with its own switch'
 );
 select throws_ok(
-  $$ update public.profiles set shelf_pins = array[gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid(), gen_random_uuid()]
+  $$ update public.profiles set shelf_pins = array(select gen_random_uuid() from generate_series(1, 11))
      where id = '00000000-0000-7000-8000-000000000ac1' $$,
-  '23514', null, 'at most 4 favourites'
+  '23514', null, 'at most 10 favourites (ADR 0095)'
 );
 select throws_ok(
   $$ update public.profiles set shelf_pins = array[null]::uuid[] where id = '00000000-0000-7000-8000-000000000ac1' $$,

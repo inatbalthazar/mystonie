@@ -99,7 +99,8 @@
       "clubs": "คลับ",
       "reel": "Reel",
       "people": "หาคน"
-    }
+    },
+    "shelfCard": "ชั้น ท็อป {count}"
   },
   "Install": {
     "title": "เพิ่ม Mystonie ไว้บนหน้าจอโฮม",
@@ -193,7 +194,8 @@
       "premiere": "รอบปฐมทัศน์",
       "gilded": "ฉบับปกทอง",
       "arcade": "ตู้เกม",
-      "lineup": "ไลน์อัป"
+      "lineup": "ไลน์อัป",
+      "shelf": "ตู้หนังสือ"
     },
     "sizes": {
       "story": "สตอรี่ 9:16",
@@ -272,7 +274,11 @@
     "atlasContinents": "ทวีป",
     "atlasStories": "ประเทศในเรื่องที่ดู",
     "atlasRegionsOf": "จาก {total} {many}",
-    "atlasRegionsShare": "ของ{country}"
+    "atlasRegionsShare": "ของ{country}",
+    "shelfName": "ชั้นของฉัน",
+    "shelfHeadline": "{top, select, true {ท็อป {count} ของฉัน} other {บนชั้นของฉัน}}",
+    "shelfTotal": "เรื่องบนชั้นของฉัน",
+    "shelfRank": "{rank}."
   },
   "SignUp": {
     "heading": "เก็บทุกเรื่องที่ดูจบไว้ในคอลเลกชันเดียว",
@@ -703,7 +709,8 @@
     "shareOffline": "แชร์ได้เมื่อกลับมาออนไลน์",
     "areaTitle": "{area, select, watch {ทุกเรื่องที่คุณดู} read {ทุกเล่มที่คุณอ่าน} play {ทุกเกมที่คุณเล่น} other {คอลเลกชันของคุณ}}, {range}",
     "atlasCardTitle": "{count} ประเทศใน Atlas ของคุณ",
-    "atlasRegionCardTitle": "{country}: {done} จาก {total} {many}"
+    "atlasRegionCardTitle": "{country}: {done} จาก {total} {many}",
+    "shelfCardTitle": "ท็อป {count} บนชั้นของคุณ"
   },
   "SharedCard": {
     "notFoundTitle": "ไม่พบการ์ด · Mystonie",
@@ -723,7 +730,8 @@
     "byUserLink": "จากคอลเลกชันของ <link>@{username}</link>",
     "importLine": "นำเข้า{unit, select, book {หนังสือ {count, plural, other {# เล่ม}}} series {ซีรีส์ {count, plural, other {# เรื่อง}}} manga {มังงะ {count, plural, other {# เรื่อง}}} game {เกม {count, plural, other {# เกม}}} title {{count, plural, other {# เรื่อง}}} other {หนัง {count, plural, other {# เรื่อง}}}} {range}",
     "atlasLine": "Atlas {count} ประเทศ",
-    "atlasRegionsLine": "{country}: เคยไป {done} จาก {total} {many}"
+    "atlasRegionsLine": "{country}: เคยไป {done} จาก {total} {many}",
+    "shelfLine": "ท็อป {count} บนชั้น"
   },
   "Recap": {
     "pageTitle": "การ์ดสรุป",
@@ -852,7 +860,8 @@
     "meJournalEmpty": "คุณยังไม่ได้เขียนบทความ ลองรีวิวเรื่องโปรด ทำลิสต์ หรือเล่าเรื่องทริปดูสิ",
     "writeFirst": "เขียนบทความแรก",
     "journalEmpty": "@{username} ยังไม่ได้เผยแพร่บทความ",
-    "journalMetaTitle": "Journal ของ {name}"
+    "journalMetaTitle": "Journal ของ {name}",
+    "shelfCard": "ชั้น ท็อป {count}"
   },
   "Album": {
     "arrange": "จัดเรียง",
@@ -870,14 +879,15 @@
     "resetDone": "กลับไปใช้ลำดับเริ่มต้นแล้ว",
     "favourites": "เลือกเรื่องโปรด",
     "favouritesTitle": "เรื่องโปรดบนชั้นสะสม",
-    "favouritesHint": "ปักได้สูงสุด {max} เรื่อง จะตั้งอยู่หน้าสุดของชั้นพร้อมดาว",
+    "favouritesHint": "ปักได้สูงสุด {max} เรื่อง เป็นท็อป {max} ของคุณ จะตั้งอยู่หน้าสุดของชั้นพร้อมลำดับ",
     "favouritesFull": "ครบ {max} เรื่องแล้ว เอาออกหนึ่งเรื่องก่อนจึงเลือกเรื่องใหม่ได้",
     "favouritesSearch": "ค้นหาเรื่องที่จบแล้ว",
     "favouritesNone": "ไม่พบเรื่องที่ตรงกัน",
     "save": "บันทึก",
     "saving": "กำลังบันทึก…",
     "failed": "บันทึกไม่สำเร็จ ลองอีกครั้ง",
-    "close": "ปิด"
+    "close": "ปิด",
+    "shareShelf": "แชร์ชั้นของฉัน"
   },
   "Social": {
     "follow": "ติดตาม",

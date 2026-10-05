@@ -57,7 +57,9 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
           ? t("atlasRegionsCard", { country: card.data.name })
           : card.data.atlas
             ? t("atlasCard", { count: card.data.atlas.countries.length })
-            : card.data.milestone
+            : card.data.shelf
+              ? t("shelfCard", { count: card.data.shelf.titles.length })
+              : card.data.milestone
               ? t("milestoneCard")
               : card.data.recap?.highlights
                 ? t("yearCard")

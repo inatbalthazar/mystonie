@@ -32,6 +32,7 @@ import {
   MILESTONES,
   RECAP_COLLAGE_MAX,
   RECAP_FAVOURITES_MAX,
+  SHELF_CARD_MAX,
   REVIEW_MAX_CHARS,
   STATS_PERIODS,
   type CardAtlas,
@@ -44,6 +45,7 @@ import {
   type CardReading,
   type CardReel,
   type CardRecap,
+  type CardShelf,
   type CardSize,
   type CollectionArea,
   type ImportUnit,
@@ -282,6 +284,21 @@ function parseAtlas(v: unknown): CardAtlas | null | undefined {
   return { ...atlas, regions: { country, kind, total: total as number, ids: ids as string[] } };
 }
 
+/** A Shelf card's titles (ADR 0095): 1 to `SHELF_CARD_MAX`, catalog posters only. `undefined` = invalid; null = none. */
+function parseShelf(v: unknown): CardShelf | null | undefined {
+  if (v === undefined || v === null) return null;
+  if (!isObject(v)) return undefined;
+  const { titles, pinned, total } = v;
+  if (!Array.isArray(titles) || titles.length < 1 || titles.length > SHELF_CARD_MAX) return undefined;
+  if (!int(pinned, 0, titles.length) || !int(total, titles.length, 100_000)) return undefined;
+  const shelf: CardShelf["titles"] = [];
+  for (const t of titles) {
+    if (!isObject(t) || !text(t.name, 300) || !isTitleKind(t.kind) || !isPoster(t.posterUrl)) return undefined;
+    shelf.push({ name: (t.name as string).trim(), kind: t.kind as CardData["kind"], posterUrl: orNull(t.posterUrl as string | null | undefined) });
+  }
+  return { titles: shelf, pinned: pinned as number, total: total as number };
+}
+
 /** A Milestone card's milestone. `undefined` = invalid; null = none. */
 function parseMilestone(v: unknown): CardMilestone | null | undefined {
   if (v === undefined || v === null) return null;
@@ -353,14 +370,15 @@ export function parseCardData(v: unknown): CardData | null {
   const challenge = parseChallenge(v.challenge);
   const reel = parseReel(v.reel);
   const atlas = parseAtlas(v.atlas);
-  if (milestone === undefined || challenge === undefined || reel === undefined || atlas === undefined) return null;
-  if (num(progress, reading, recap, milestone, challenge, reel, atlas) > 1) return null;
-  // A reel card never shows the movie; an Atlas card is about no title.
-  if ((reel || atlas) && (kind !== "movie" || posterUrl)) return null;
+  const shelf = parseShelf(v.shelf);
+  if (milestone === undefined || challenge === undefined || reel === undefined || atlas === undefined || shelf === undefined) return null;
+  if (num(progress, reading, recap, milestone, challenge, reel, atlas, shelf) > 1) return null;
+  // A reel card never shows the movie; Atlas and Shelf cards are about no one title.
+  if ((reel || atlas || shelf) && (kind !== "movie" || posterUrl)) return null;
   const survived = v.survived ?? null;
   if (
     survived !== null &&
-    (!isSurvivedKey(survived) || (kind !== "movie" && kind !== "series") || num(progress, reading, recap, milestone, challenge, reel, atlas) > 0)
+    (!isSurvivedKey(survived) || (kind !== "movie" && kind !== "series") || num(progress, reading, recap, milestone, challenge, reel, atlas, shelf) > 0)
   ) {
     return null;
   }
@@ -368,7 +386,7 @@ export function parseCardData(v: unknown): CardData | null {
   const finishShare = v.finishShare ?? null;
   if (
     finishShare !== null &&
-    (typeof finishShare !== "number" || !(finishShare > 0 && finishShare <= 1) || num(progress, reading, recap, milestone, challenge, reel, atlas) > 0)
+    (typeof finishShare !== "number" || !(finishShare > 0 && finishShare <= 1) || num(progress, reading, recap, milestone, challenge, reel, atlas, shelf) > 0)
   )
     return null;
   return {
@@ -396,6 +414,7 @@ export function parseCardData(v: unknown): CardData | null {
     challenge,
     ...(reel ? { reel } : {}),
     ...(atlas ? { atlas } : {}),
+    ...(shelf ? { shelf } : {}),
     survived: survived as SurvivedKey | null,
     finishShare: finishShare as number | null,
     hide: [...new Set((hide as CardHideable[] | undefined) ?? [])],
@@ -418,7 +437,7 @@ export function parseCardSave(body: unknown): CardSave | null {
   const data = parseCardData(body.data);
   if (!data || !templateFits(templateId, kind as CardKind, size, data.kind)) return null;
   const reading = data.kind === "book" || data.kind === "manga";
-  if (kind === "finish" && (!entryId || data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas))
+  if (kind === "finish" && (!entryId || data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas || data.shelf))
     return null;
   if (kind === "progress" && !(reading ? data.reading : data.progress && data.kind === "series")) return null;
   if (episodeLogId && !data.progress) return null;
@@ -434,6 +453,8 @@ export function parseCardSave(body: unknown): CardSave | null {
   if (data.reel && kind !== "reel" && kind !== "sticker") return null;
   if (kind === "atlas" && (!data.atlas || sourced || recapId)) return null;
   if (data.atlas && kind !== "atlas" && kind !== "sticker") return null;
+  if (kind === "shelf" && (!data.shelf || sourced || recapId)) return null;
+  if (data.shelf && kind !== "shelf" && kind !== "sticker") return null;
   // A Survived card is a finish on the Survived template, and that template draws nothing else.
   if (!!data.survived !== isSurvivedTemplate(templateId) || (data.survived && kind !== "finish")) return null;
   // Highlights belong to a Year in Review; a recap id to a weekly or monthly recap.

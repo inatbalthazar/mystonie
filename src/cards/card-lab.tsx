@@ -16,6 +16,7 @@ function labKind(data: CardData): CardKind {
   if (data.challenge) return "challenge";
   if (data.reel) return "reel";
   if (data.atlas) return "atlas";
+  if (data.shelf) return "shelf";
   if (data.recap?.highlights) return "year_review";
   if (data.recap?.period === "month") return "monthly_recap";
   if (data.recap) return "weekly_recap";

@@ -54,6 +54,8 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
         ? t("reelHeadline")
         : data.atlas
           ? t("atlasHeadline")
+          : data.shelf
+            ? t("shelfHeadline", { count: data.shelf.titles.length, top: String(data.shelf.pinned === data.shelf.titles.length) })
           : data.milestone
             ? t("milestoneHeadline", { ...data.milestone, count: data.milestone.value.toLocaleString("en") })
             : recap?.imported
@@ -97,6 +99,8 @@ export default async function Image({ params }: { params: Promise<{ locale: stri
       ]
     : data?.atlas
       ? [`${data.atlas.countries.length} ${t("atlasCountries", { count: data.atlas.countries.length })}`]
+      : data?.shelf
+        ? [`${data.shelf.total} ${t("shelfTotal", { count: data.shelf.total })}`]
       : data?.reel
         ? [
             `${data.reel.solved ? data.reel.results.length : "X"}/${REEL_GUESSES}`,

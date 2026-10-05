@@ -38,7 +38,7 @@ export type CelebrationSource =
   | { kind: "finish"; entryId: string; ready: boolean }
   | { kind: "progress"; episodeLogId: string | null; readingLogId?: string | null; ready: boolean }
   | { kind: "weekly_recap" | "monthly_recap"; recapId: string; ready: boolean }
-  | { kind: "stats" | "milestone" | "challenge" | "year_review" | "reel" | "atlas"; ready: boolean };
+  | { kind: "stats" | "milestone" | "challenge" | "year_review" | "reel" | "atlas" | "shelf"; ready: boolean };
 
 type Props = {
   data: CardData;
@@ -247,9 +247,9 @@ export function Celebration({ data, source, animate = false, username, host, onC
     setHide((cur) => (cur.includes(item) ? cur.filter((h) => h !== item) : [...cur, item]));
   }
   const read = isReadingKind(data.kind);
-  // Milestone, Challenge, Reel of the Day and Atlas cards have only the username to hide; a book's Finish card has no time on it, and a game's
+  // Milestone, Challenge, Reel of the Day, Atlas and Shelf cards have only the username to hide; a book's Finish card has no time on it, and a game's
   // has one only with its hours (the player's or the average).
-  const onlyUser = !!(data.milestone || data.challenge || data.reel || data.atlas);
+  const onlyUser = !!(data.milestone || data.challenge || data.reel || data.atlas || data.shelf);
   const noTime = data.recap ? false : (read && !data.reading) || (data.kind === "game" && !gameHours(card));
   const hideable: CardHideable[] = [
     ...(username ? (["username"] as const) : []),
@@ -269,6 +269,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
       return t("atlasRegionCardTitle", { done: format.number(ids.length), total, many: atlasT("kindMany", { kind }), country: data.name });
     }
     if (data.atlas) return t("atlasCardTitle", { count: data.atlas.countries.length });
+    if (data.shelf) return t("shelfCardTitle", { count: data.shelf.titles.length });
     if (source.kind === "year_review" && data.recap) return t("yearTitle", { year: data.recap.from.slice(0, 4) });
     if (source.kind === "finish") {
       return read

@@ -22,6 +22,7 @@ async function cardLine(card: SharedCard, locale: Locale): Promise<string> {
     return t("atlasRegionsLine", { done: ids.length, total, many: atlas("kindMany", { kind }), country: countryName(country, locale) });
   }
   if (card.data.atlas) return t("atlasLine", { count: card.data.atlas.countries.length });
+  if (card.data.shelf) return t("shelfLine", { count: card.data.shelf.titles.length });
   const recap = card.data.recap;
   if (recap) {
     const format = await getFormatter({ locale });

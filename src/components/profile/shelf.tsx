@@ -1,4 +1,3 @@
-import { StarIcon } from "lucide-react";
 import Image from "next/image";
 import { getTranslations } from "next-intl/server";
 import type { ReactNode } from "react";
@@ -21,12 +20,12 @@ function hash(id: string): number {
  * and series face out as cases (their posters), books and manga show their spines, and games stand as game cases
  * (their key art under a platform band, S3 games). Rows are fixed-height slots
  * with a plank drawn under each by the background, so the planks line up however the items wrap. The owner's pinned
- * favourites (the first `pinned` items) lead with a star (ADR 0069); two shelves show until "Show all".
+ * favourites (the first `pinned` items) lead, numbered (ADR 0069, ADR 0095); two shelves show until "Show all".
  * `favourites`: the owner's "Pick favourites", on Me.
  */
 export async function Shelf({ items, pinned = 0, more, favourites }: { items: ShelfTitle[]; pinned?: number; more: number; favourites?: ReactNode }) {
   const t = await getTranslations("Profile");
-  // A star over a favourite's top edge: `height` is the item's, standing on the 112px row's floor.
+  // A favourite's place (1 to 10, ADR 0095) over its top edge: `height` is the item's, standing on the 112px row's floor.
   const star = (i: number, height: number) =>
     i < pinned && (
       <>
@@ -34,9 +33,9 @@ export async function Shelf({ items, pinned = 0, more, favourites }: { items: Sh
         <span
           aria-hidden="true"
           style={{ top: `${Math.max(0, 112 - height - 8)}px` }}
-          className="absolute left-1/2 z-10 flex size-4 -translate-x-1/2 items-center justify-center rounded-full bg-brand text-brand-foreground ring-2 ring-background"
+          className="absolute left-1/2 z-10 flex size-[18px] -translate-x-1/2 items-center justify-center rounded-full bg-brand text-[10px] leading-none font-extrabold text-brand-foreground tabular-nums ring-2 ring-background"
         >
-          <StarIcon className="size-2.5 fill-current" />
+          {i + 1}
         </span>
       </>
     );

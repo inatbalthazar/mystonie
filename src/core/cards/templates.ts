@@ -46,6 +46,8 @@ export const TEMPLATE_META = [
   { id: "reel", kinds: ["reel"], sizes: BOTH_SIZES, tier: "free" },
   // Stage 4 Atlas: the world map with the countries you've been to coloured in, like a scratch map.
   { id: "atlas", kinds: ["atlas"], sizes: BOTH_SIZES, tier: "free" },
+  // The Shelf's top ten (ADR 0095): posters standing on wooden shelves, numbered, favourites first.
+  { id: "shelf", kinds: ["shelf"], sizes: BOTH_SIZES, tier: "free" },
   { id: "sticker", kinds: ["sticker"], sizes: BOTH_SIZES, tier: "free" },
   // More Pro (ADR 0084), one for each kind of card, last on the swipe. Opening night: the poster in a gold case ringed
   // with bulbs, the title on the lit letter board. Movies and series.
@@ -108,6 +110,7 @@ export function defaultTemplate(kind: CardKind, titleKind: TitleKind): TemplateI
   if (kind === "year_review") return "yearbook";
   if (kind === "reel") return "reel";
   if (kind === "atlas") return "atlas";
+  if (kind === "shelf") return "shelf";
   if (titleKind === "manga") return "mangaPanel";
   if (titleKind === "book") return "spine";
   if (titleKind === "game" && kind === "finish") return "cartridge";

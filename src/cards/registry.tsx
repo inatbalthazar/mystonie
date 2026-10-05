@@ -14,6 +14,7 @@ import { MangaPanelCard } from "./templates/manga-panel";
 import { PolaroidCard } from "./templates/polaroid";
 import { PremiereCard } from "./templates/premiere";
 import { ReelCard } from "./templates/reel";
+import { ShelfCard } from "./templates/shelf";
 import { SpineCard } from "./templates/spine";
 import { StoneCard } from "./templates/stone";
 import { StickerCard } from "./templates/sticker";
@@ -43,6 +44,7 @@ const COMPONENTS: Record<TemplateId, ComponentType<TemplateProps>> = {
   reel: ReelCard,
   sticker: StickerCard,
   atlas: AtlasCard,
+  shelf: ShelfCard,
   premiere: PremiereCard,
   gilded: GildedCard,
   arcade: ArcadeCard,
