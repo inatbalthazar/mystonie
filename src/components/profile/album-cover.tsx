@@ -1,27 +1,43 @@
 import { SettingsIcon } from "lucide-react";
 import { useFormatter, useTranslations } from "next-intl";
+import { CountView } from "@/components/social/count-view";
 import { FollowButton } from "@/components/social/follow-button";
+import { OfficialLabel } from "@/components/social/official-label";
+import type { Official } from "@/core/official";
 import { Link } from "@/i18n/navigation";
 
-export type AlbumProfile = { id: string; username: string; displayName: string | null; bio: string | null; avatarUrl: string | null; joinedAt: string };
+export type AlbumProfile = {
+  id: string;
+  username: string;
+  displayName: string | null;
+  bio: string | null;
+  avatarUrl: string | null;
+  joinedAt: string;
+  /** Stonie's or the team's label (ADR 0098). */
+  official?: Official | null;
+};
 export type AlbumCounts = { followers: number; following: number; iFollow: boolean };
 
 /**
  * The album's cover (S1 profile & privacy): a taped-in photo, the name and a handwritten "since", the bio (ADR 0057,
  * plain text: never linked), then followers and following. The owner gets Settings and Find people, a visitor Follow (`follow`). On Me it tops both tabs, Album and
- * Stats (ADR 0053), so switching tabs leaves it where it was.
+ * Stats (ADR 0053), so switching tabs leaves it where it was. The owner also sees how many visited this week (`visits`),
+ * and a visitor's visit is counted (ADR 0098).
  */
 export function AlbumCover({
   profile,
   owner,
   counts,
   follow,
+  visits,
 }: {
   profile: AlbumProfile;
   owner: boolean;
   counts: AlbumCounts | null;
   /** A visitor's Follow: whether they're signed in, and the page sign-in comes back to. */
   follow?: { signedIn: boolean; next: string };
+  /** The owner's visitors in the last 7 days (ADR 0098). */
+  visits?: number;
 }) {
   const t = useTranslations("Profile");
   const format = useFormatter();
@@ -46,6 +62,7 @@ export function AlbumCover({
             className={`font-display leading-tight font-extrabold tracking-[-0.03em] break-words ${[...name].length > 14 ? "text-2xl" : "text-3xl"}`}
           >
             {name}
+            <OfficialLabel official={profile.official} className="ml-2 -translate-y-0.5" />
           </h1>
           <p className="text-sm font-medium text-muted-foreground">{t("handle", { username: profile.username })}</p>
           <p className="font-hand text-xl leading-tight text-muted-foreground">
@@ -65,6 +82,14 @@ export function AlbumCover({
       </header>
 
       {profile.bio && <p className="-mt-3 text-[15px] leading-snug break-words whitespace-pre-line">{profile.bio}</p>}
+
+      {owner && visits !== undefined && visits > 0 && (
+        <p className="-mt-4 flex flex-wrap items-baseline gap-x-1.5 text-sm text-muted-foreground">
+          <span>{t.rich("visitsWeek", { count: visits, b: (chunks) => <strong className="font-bold text-foreground tabular-nums">{chunks}</strong> })}</span>
+          <span className="text-xs">{t("visitsHint")}</span>
+        </p>
+      )}
+      {!owner && <CountView subject="profile" id={profile.id} />}
 
       {(counts || !owner) && (
         <div className="-mt-4 flex flex-wrap items-center justify-between gap-3">

@@ -45,3 +45,19 @@ Thumbs.db
 
 .vercel
 .env*
+
+# android (ADR 0097): the signing key and its passwords never go in the repo; build outputs neither
+*.keystore
+*.jks
+android/.gradle/
+android/app/build/
+android/build/
+android/local.properties
+*.aab
+*.apk
+*.idsig
+key.properties
+*.p12
+
+# the owner's own notes (interview prep and the like): kept in the folder, never pushed
+/private/

@@ -20,9 +20,10 @@ export type AnalyticsEvents = {
   import_done: { source: "letterboxd" | "goodreads" | "mal" | "tvtime" | "mystonie"; titles: number; auto: number; added: number };
   /**
    * Someone was followed (S3 social): from their profile, a people search, the activity list ("Follow back"), or
-   * again from the Following list on /people after unfollowing.
+   * again from the Following list on /people after unfollowing; from an invite page (`join`) or the team's welcome
+   * desk (`welcome`, ADR 0098).
    */
-  followed: { via: "profile" | "search" | "activity" | "people" | "suggested" };
+  followed: { via: "profile" | "search" | "activity" | "people" | "suggested" | "join" | "welcome" };
   /** A Stamp on someone's finish in the Following feed. */
   stamped: Record<string, never>;
   /** A badge (sticker) was announced after a save (S3 badges & shelf): its catalogue slug. */
@@ -70,6 +71,10 @@ export type AnalyticsEvents = {
   article_saved: { place: ArticlePlace };
   /** A Journal article shared: the share sheet, or its link copied. */
   article_shared: { place: ArticlePlace; channel: "share_sheet" | "copy" };
+  /** An invite link shared (ADR 0098): the share sheet or copied, and from where. */
+  invite_shared: { channel: "share_sheet" | "copy"; place: "people" | "me" | "join" };
+  /** A new account accepted the invite it came from (ADR 0098): it and the inviter now follow each other. */
+  invite_accepted: Record<string, never>;
 };
 
 /** Where a Journal article's Stamp, Save or Share was tapped: its page, the feed (and the Journal), or a profile's Journal tab (ADR 0092). */

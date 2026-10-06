@@ -11,6 +11,7 @@ import { Byline } from "@/components/journal/byline";
 import { SpoilerGate } from "@/components/journal/spoiler-gate";
 import { SubjectStrip } from "@/components/journal/subject-strip";
 import { ReportButton } from "@/components/report-button";
+import { CountView } from "@/components/social/count-view";
 import { localizedPath } from "@/core/auth";
 import { isUuidV7 } from "@/core/ids";
 import { parseWriterBody } from "@/core/journal";
@@ -150,6 +151,8 @@ export default async function MemberArticlePage({ params }: PageProps<"/[locale]
         <ArticleActionsBar slug={post.id} title={post.title} next={localizedPath(path, locale, routing.defaultLocale)} />
       )}
       {!owner && <ReportButton targetKind="article" targetId={post.id} className="self-start" />}
+      {/* Its writer sees how many read it, never who (ADR 0098). */}
+      {!owner && post.publishedAt && <CountView subject="post" id={post.id} />}
     </main>
   );
 }

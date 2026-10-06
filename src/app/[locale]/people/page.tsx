@@ -3,6 +3,7 @@ import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { BlockButton } from "@/components/social/block-button";
 import { FollowButton } from "@/components/social/follow-button";
+import { InviteCard } from "@/components/social/invite-card";
 import { PeopleSearch } from "@/components/social/people-search";
 import { PersonRow } from "@/components/social/person-row";
 import { SuggestedPeople } from "@/components/social/suggested-people";
@@ -31,11 +32,12 @@ export default async function PeoplePage({ params }: PageProps<"/[locale]/people
   const userId = data?.claims.sub;
   if (!supabase || !userId) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
-  const [following, blocked, suggested, t] = await Promise.all([
+  const [following, blocked, suggested, t, { data: me }] = await Promise.all([
     myFollowing(supabase),
     myBlocks(supabase),
     suggestedPeople(supabase),
     getTranslations("Social"),
+    supabase.from("profiles").select("username").eq("id", userId).maybeSingle(),
   ]);
 
   return (
@@ -46,6 +48,9 @@ export default async function PeoplePage({ params }: PageProps<"/[locale]/people
       </header>
 
       <PeopleSearch />
+
+      {/* Bring real friends in: you'll follow each other (ADR 0098). Above the suggestions, which can run long. */}
+      {me && <InviteCard username={me.username} place="people" />}
 
       {suggested.length > 0 && <SuggestedPeople people={suggested} />}
 
@@ -66,6 +71,7 @@ export default async function PeoplePage({ params }: PageProps<"/[locale]/people
             ))}
           </ul>
         )}
+        {following.some((p) => p.official) && <p className="text-xs text-muted-foreground">{t("officialFollowNote")}</p>}
       </section>
 
       {blocked.length > 0 && (

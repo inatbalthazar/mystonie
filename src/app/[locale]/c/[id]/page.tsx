@@ -4,6 +4,7 @@ import type { Locale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
 import { ReportButton } from "@/components/report-button";
 import { RememberCardVisit, SharedCardImage } from "@/components/shared-card";
+import { CountView } from "@/components/social/count-view";
 import { countryName } from "@/core/countries";
 import type { SharedCard } from "@/data/cards";
 import { Link } from "@/i18n/navigation";
@@ -154,6 +155,8 @@ export default async function SharedCardPage({ params }: PageProps<"/[locale]/c/
       </section>
       <ReportButton targetKind="card" targetId={card.id} className="self-center" />
       <RememberCardVisit tpl={card.templateId} />
+      {/* Its maker sees how many people saw it, never who (ADR 0098). */}
+      <CountView subject="card" id={card.id} />
     </main>
   );
 }

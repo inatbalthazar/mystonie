@@ -24,9 +24,9 @@ export type BadgeRule =
   | { type: "challenges"; target: number; of: "all" | "months" | "oneMonth" }
   /**
    * `target` of something done: counted warnings-quiz answers, quiz answers that settled a question, reviews, Journal
-   * articles, support (Pro or a tip).
+   * articles, support (Pro or a tip), friends who joined from your invite (ADR 0098).
    */
-  | { type: "times"; target: number; of: "quiz" | "quizSettles" | "reviews" | "articles" | "support" }
+  | { type: "times"; target: number; of: "quiz" | "quizSettles" | "reviews" | "articles" | "support" | "invites" }
   /** Counted warnings-quiz answers on `target` local days in a row. */
   | { type: "quizStreak"; target: number };
 
@@ -79,6 +79,8 @@ export const BADGES = [
   { id: "byline", rule: { type: "times", target: 1, of: "articles" } },
   // Supporting Mystonie: Pro, or a Buy Me a Coffee tip with the account's email.
   { id: "supporter", rule: { type: "times", target: 1, of: "support" } },
+  // A friend who joined from your invite link (ADR 0098).
+  { id: "plus-one", rule: { type: "times", target: 1, of: "invites" } },
 ] as const satisfies readonly { id: string; rule: BadgeRule }[];
 
 export type BadgeId = (typeof BADGES)[number]["id"];
@@ -112,9 +114,11 @@ export type BadgeActivity = {
   articles: readonly number[];
   /** When they supported Mystonie (a Pro subscription that was paid for). */
   support: readonly number[];
+  /** When each friend joined from their invite (ADR 0098). */
+  invites: readonly number[];
 };
 
-export const NO_ACTIVITY: BadgeActivity = { reel: [], challenges: [], quiz: [], quizSettles: [], reviews: [], articles: [], support: [] };
+export const NO_ACTIVITY: BadgeActivity = { reel: [], challenges: [], quiz: [], quizSettles: [], reviews: [], articles: [], support: [], invites: [] };
 
 const matches = (rule: Extract<BadgeRule, { type: "count" }>, f: Finish): boolean => fitsFilter(rule, f.title, f.genres);
 

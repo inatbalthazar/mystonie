@@ -9,6 +9,7 @@ import { Link } from "@/i18n/navigation";
 import { formatShare } from "@/lib/share";
 import { Sticker } from "../badges/sticker";
 import { Avatar } from "./avatar";
+import { OfficialLabel } from "./official-label";
 import { StampButton } from "./stamp-button";
 
 const TILTS = ["rotate-[-0.6deg]", "rotate-[0.5deg]", "rotate-[-0.3deg]", "rotate-[0.7deg]"];
@@ -33,7 +34,10 @@ export function FeedEntry({ item, now, index, readOnly = false }: { item: FeedIt
         <Link href={`/u/${item.user.username}`} className="flex min-w-0 flex-1 items-center gap-3 rounded-xl hover:opacity-90">
           <Avatar name={name} url={item.user.avatarUrl} />
           <span className="flex min-w-0 flex-col">
-            <span className="truncate font-semibold">{item.mine ? t("you") : name}</span>
+            <span className="flex min-w-0 items-center gap-1.5">
+              <span className="truncate font-semibold">{item.mine ? t("you") : name}</span>
+              <OfficialLabel official={item.user.official} />
+            </span>
             <span className="text-xs text-muted-foreground">
               {t("finishedWhen", { when: format.relativeTime(new Date(item.finishedAt), now) })}
             </span>

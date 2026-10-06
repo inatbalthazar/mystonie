@@ -530,7 +530,8 @@
     "photoAnother": "เลือกรูปอื่น",
     "photoCancel": "ยกเลิก",
     "photoUnreadable": "เบราว์เซอร์นี้เปิดไฟล์นี้ไม่ได้ ลองใช้ไฟล์ JPEG หรือ PNG",
-    "photoError": "บันทึกรูปไม่สำเร็จ ลองอีกครั้งในอีกสักครู่"
+    "photoError": "บันทึกรูปไม่สำเร็จ ลองอีกครั้งในอีกสักครู่",
+    "teamWelcome": "โต๊ะต้อนรับ (ทีม)"
   },
   "Collection": {
     "title": "คอลเลกชันของคุณ",
@@ -869,7 +870,10 @@
     "writeFirst": "เขียนบทความแรก",
     "journalEmpty": "@{username} ยังไม่ได้เผยแพร่บทความ",
     "journalMetaTitle": "Journal ของ {name}",
-    "shelfCard": "ชั้น ท็อป {count}"
+    "shelfCard": "ชั้น ท็อป {count}",
+    "visitsWeek": "สัปดาห์นี้มีคนเข้าชม <b>{count}</b> คน",
+    "visitsHint": "· เห็นแค่คุณ ไม่บอกว่าใคร",
+    "cardSeen": "มีคนเห็น {count} คน"
   },
   "Album": {
     "arrange": "จัดเรียง",
@@ -960,7 +964,19 @@
     "friendFinished": "<b>{name}</b> ดู <b>{title}</b> จบแล้ว",
     "rareFinish": "จบแบบหายาก · {share}",
     "toChallenges": "ชาเลนจ์",
-    "toClubs": "คลับ"
+    "toClubs": "คลับ",
+    "activityInvite": "<b>{name}</b> สมัคร Mystonie จากลิงก์ชวนของคุณ ตอนนี้คุณ follow กันและกันแล้ว",
+    "mascotFirstFinish": "<b>{name}</b> กด Stamp ให้เรื่องแรกที่คุณดูจบ <b>{title}</b> ยินดีต้อนรับสู่อัลบั้ม!",
+    "mascotCount": "<b>{name}</b> กด Stamp ให้ <b>{title}</b> เรื่องที่ {count} ในอัลบั้มของคุณ!",
+    "mascotFirstKind": "<b>{name}</b> กด Stamp ให้ <b>{title}</b> {kind, select, movie {หนังเรื่องแรก} series {ซีรีส์เรื่องแรก} book {หนังสือเล่มแรก} manga {มังงะเรื่องแรก} game {เกมแรก} other {เรื่องแรก}}ของคุณ!",
+    "officialFollowNote": "สมาชิกใหม่จะ follow Stonie และทีมงานไว้ก่อน เลิก follow ได้ทุกเมื่อ",
+    "inviteTitle": "ชวนเพื่อน",
+    "inviteBody": "เมื่อเพื่อนสมัครจากลิงก์ของคุณ คุณจะ follow กันและกัน และคุณได้สติกเกอร์ Plus One",
+    "inviteButton": "แชร์ลิงก์ชวนเพื่อน",
+    "inviteCopied": "คัดลอกลิงก์แล้ว",
+    "inviteShareText": "มาเก็บเรื่องที่ดูจบด้วยกันบน Mystonie",
+    "inviteAccepted": "คุณกับ <b>{name}</b> follow กันและกันแล้ว",
+    "inviteAcceptedClose": "ปิด"
   },
   "Board": {
     "title": "กระดาน",
@@ -1158,6 +1174,10 @@
       "supporter": {
         "name": "Supporter",
         "how": "สนับสนุน Mystonie ด้วย Pro หรือเลี้ยงกาแฟ"
+      },
+      "plus-one": {
+        "name": "Plus One",
+        "how": "ชวนเพื่อนมาสมัคร Mystonie สำเร็จ 1 คน"
       }
     },
     "album": "สมุดสติกเกอร์",
@@ -2105,7 +2125,8 @@
     "edit": "แก้ไข",
     "yourArticle": "บทความของคุณ",
     "privatePage": "หน้าของคุณเป็นส่วนตัว บทความจึงเห็นได้แค่คุณ เปิดเป็นสาธารณะได้ที่ Settings",
-    "writeAbout": "เขียนถึงเรื่องนี้"
+    "writeAbout": "เขียนถึงเรื่องนี้",
+    "readers": "ผู้อ่าน {count} คน"
   },
   "JournalWrite": {
     "newTitle": "เขียนบทความ",
@@ -2155,5 +2176,41 @@
     "privatePage": "หน้าของคุณเป็นส่วนตัว บทความที่เผยแพร่จะเห็นได้แค่คุณจนกว่าจะเปิดเป็นสาธารณะใน<settings>Settings</settings>",
     "error": "{problem, select, title {ใส่ชื่อบทความไม่เกิน 120 ตัวอักษร} description {บรรทัดใต้ชื่อไม่เกิน 200 ตัวอักษร} body {ยาวเกิน 20,000 ตัวอักษร} short {เขียนอย่างน้อย 100 ตัวอักษรก่อนเผยแพร่} links {มีที่อยู่เว็บมากเกินไป ลิงก์จะไม่แสดงอยู่แล้ว เอาออกได้เลย} tags {เลือก 1 ถึง 3 หมวดก่อนเผยแพร่} subjects {หาเรื่องหนึ่งไม่เจอ เอาออกแล้วเลือกใหม่} limit {วันนี้เขียนเยอะแล้ว ลองใหม่พรุ่งนี้} other {บันทึกไม่ได้ ลองใหม่อีกครู่}}",
     "modeLabel": "เขียนหรือดูตัวอย่าง"
+  },
+  "Official": {
+    "mascot": "มาสคอต",
+    "team": "ทีมงาน",
+    "mascotHint": "Stonie คือมาสคอตของ Mystonie ไม่ใช่คน มันกด Stamp ให้เรื่องแรกและเป้าหมายต่างๆ ของคุณเอง",
+    "teamHint": "คนจากทีมที่สร้าง Mystonie"
+  },
+  "Join": {
+    "metaTitle": "{name} ชวนคุณมาใช้ Mystonie",
+    "metaDescription": "Mystonie คืออัลบั้มฟรีสำหรับหนัง ซีรีส์ หนังสือ มังงะ และเกมที่คุณจบแล้ว",
+    "kicker": "คุณได้รับคำชวน",
+    "title": "{name} ชวนคุณมาใช้ Mystonie",
+    "body": "บันทึกเรื่องที่จบ ได้การ์ดสวยๆ ทุกเรื่อง และเห็นว่า {name} จบอะไรบ้าง เมื่อสมัครแล้ว คุณจะ follow กันและกัน",
+    "cta": "เริ่มเก็บคอลเลกชันฟรี",
+    "seeAlbum": "ดูอัลบั้มของ {name}",
+    "signedInTitle": "คุณอยู่บน Mystonie แล้ว",
+    "signedInBody": "Follow {name} เพื่อดูว่าเขาจบอะไรบ้าง",
+    "ownTitle": "นี่คือลิงก์ชวนของคุณ",
+    "ownBody": "แชร์ได้เลย เพื่อนที่สมัครจากลิงก์นี้จะ follow คุณ และคุณ follow เขา",
+    "unknownTitle": "มาใช้ Mystonie กัน",
+    "unknownBody": "อัลบั้มสำหรับหนัง ซีรีส์ หนังสือ มังงะ และเกมที่คุณจบแล้ว"
+  },
+  "Welcome": {
+    "title": "โต๊ะต้อนรับ",
+    "intro": "สมาชิกใหม่ใน 30 วันที่ผ่านมา ล่าสุดก่อน กด Stamp หรือ follow จากบัญชีของคุณเอง เพราะเป็นคุณจริงๆ จึงเป็นของจริง",
+    "labelTitle": "ป้ายทีมงาน",
+    "labelOn": "บัญชีของคุณมีป้าย Team ข้างชื่อ และสมาชิกใหม่จะ follow คุณไว้ก่อน (เลิก follow ได้)",
+    "labelOff": "เพิ่มป้าย Team ข้างชื่อ ให้คนรู้ว่าคุณเป็นคนทำ Mystonie สมาชิกใหม่จะ follow คุณไว้ก่อน (เลิก follow ได้)",
+    "labelAdd": "แสดงป้าย Team",
+    "labelRemove": "เอาป้าย Team ออก",
+    "labelError": "บันทึกไม่สำเร็จ ลองอีกครั้ง",
+    "newTitle": "สมาชิกใหม่",
+    "joined": "สมัคร{when}",
+    "finished": "{count, plural, =0 {ยังไม่มีเรื่องที่จบ} other {จบแล้ว # เรื่อง}}",
+    "latest": "ล่าสุด: {title}",
+    "nobody": "ยังไม่มีสมาชิกใหม่"
   }
 }

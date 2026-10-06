@@ -3,6 +3,10 @@
 import type { BadgeId } from "./badges";
 import type { TitleKind } from "./catalog/types";
 import { isUuid } from "./email/unsubscribe";
+import type { MascotCheer, Official } from "./official";
+
+/** Someone shown by name: their page, photo and, for Stonie and the team, their label (ADR 0098). */
+export type PersonRef = { id: string; username: string; displayName: string | null; avatarUrl: string | null; official: Official | null };
 
 /** A finish in the Following feed. */
 export type FeedItem = {
@@ -10,7 +14,7 @@ export type FeedItem = {
   finishedAt: string;
   rating: number | null;
   review: string | null;
-  user: { id: string; username: string; displayName: string | null; avatarUrl: string | null };
+  user: PersonRef;
   title: { id: string; kind: TitleKind; externalId: string; name: string; year: number | null; posterUrl: string | null };
   stampCount: number;
   stamped: boolean;
@@ -24,21 +28,22 @@ export type FeedItem = {
   finishShare: number | null;
 };
 
-/** Something that happened to the viewer: a Stamp on one of their finishes, or a new follower. */
+/**
+ * Something that happened to the viewer: a Stamp on one of their finishes, a new follower, or a friend who joined
+ * from their invite (ADR 0098).
+ */
 export type ActivityItem = {
-  kind: "stamp" | "follow";
+  kind: "stamp" | "follow" | "invite";
   at: string;
-  user: { id: string; username: string; displayName: string | null; avatarUrl: string | null };
+  user: PersonRef;
+  /** Stonie's Stamp: the milestone that finish reached (ADR 0098). */
+  cheer: MascotCheer | null;
   /** Whether the viewer follows them (a "Follow back" button when not). */
   iFollow: boolean;
   titleName: string | null;
 };
 
-export type Person = {
-  id: string;
-  username: string;
-  displayName: string | null;
-  avatarUrl: string | null;
+export type Person = PersonRef & {
   finished: number;
   iFollow: boolean;
 };
@@ -95,11 +100,7 @@ export function normalizePeopleQuery(raw: string | null): string | null {
 }
 
 /** Someone suggested on Find people (ADR 0083), with what they have in common with the viewer. */
-export type SuggestedPerson = {
-  id: string;
-  username: string;
-  displayName: string | null;
-  avatarUrl: string | null;
+export type SuggestedPerson = PersonRef & {
   finished: number;
   /** Titles both have in their collections, and one of them by name. */
   shared: number;

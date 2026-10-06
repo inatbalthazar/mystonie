@@ -39,6 +39,7 @@ import {
   HeartIcon,
   JoystickIcon,
   TvIcon,
+  UserPlusIcon,
   type LucideIcon,
 } from "lucide-react";
 import type { BadgeId } from "@/core/badges";
@@ -89,6 +90,7 @@ const ART: Record<BadgeId, { icon: LucideIcon; color: string; rare?: boolean }> 
   critic: { icon: PenLineIcon, color: "#9b1c4c" },
   byline: { icon: NewspaperIcon, color: "#37474f" },
   supporter: { icon: CoffeeIcon, color: "#8b4513" },
+  "plus-one": { icon: UserPlusIcon, color: "#00897b" },
 };
 
 const SIZES = {

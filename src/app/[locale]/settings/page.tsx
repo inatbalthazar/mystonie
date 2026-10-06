@@ -20,6 +20,7 @@ import { isAdminEmail } from "@/core/journal-posts";
 import { pushConfig } from "@/data/push";
 import { getProState } from "@/data/subscriptions";
 import { SupportLink } from "@/components/support-link";
+import { NotInAndroidApp } from "@/components/pwa/not-in-android-app";
 import { TmdbAttribution } from "@/components/tmdb-attribution";
 import { userClient } from "@/data/supabase-server";
 import { avoidTopicIds } from "@/data/warnings";
@@ -161,11 +162,14 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
           {pro?.pro ? t("proManage") : t("proLink")}
         </Link>
       </PaperCard>
-      <PaperCard>
-        <h2 className="font-display text-lg font-bold">{t("supportTitle")}</h2>
-        <p className="mt-1 text-sm text-muted-foreground">{t("supportBody")}</p>
-        <SupportLink place="settings" />
-      </PaperCard>
+      {/* Tips stay on the web: Google Play wants payments in an app through its own billing (ADR 0097). */}
+      <NotInAndroidApp>
+        <PaperCard>
+          <h2 className="font-display text-lg font-bold">{t("supportTitle")}</h2>
+          <p className="mt-1 text-sm text-muted-foreground">{t("supportBody")}</p>
+          <SupportLink place="settings" />
+        </PaperCard>
+      </NotInAndroidApp>
       {/* What a website keeps in its footer; signed in, the footer only credits the data (ADR 0065). */}
       <PaperCard>
         <h2 className="font-display text-lg font-bold">{t("aboutTitle")}</h2>
@@ -175,7 +179,13 @@ export default async function SettingsPage({ params }: PageProps<"/[locale]/sett
               ["/privacy", tl("privacy")],
               ["/terms", tl("terms")],
               // The team's review of members' Journal articles (ADR 0092), for ADMIN_EMAILS accounts only.
-              ...(team ? ([["/admin/journal", t("teamReview")]] as const) : []),
+              // The team's welcome desk and Team label (ADR 0098).
+              ...(team
+                ? ([
+                    ["/admin/journal", t("teamReview")],
+                    ["/admin/members", t("teamWelcome")],
+                  ] as const)
+                : []),
             ] as const
           ).map(([href, label]) => (
             <Link key={href} href={href} className="flex h-12 items-center justify-between gap-3 font-semibold hover:text-brand">

@@ -13,5 +13,5 @@ export const LEGAL = {
   teamInbox: "inatbalthazar@gmail.com",
   operatorSite: "https://www.codenat.me/",
   /** Bump when the policy text changes (shown as "Last updated"). */
-  updatedOn: "2026-10-03",
+  updatedOn: "2026-10-06",
 } as const;

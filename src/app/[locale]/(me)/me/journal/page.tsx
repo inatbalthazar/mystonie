@@ -1,4 +1,4 @@
-import { PenLineIcon } from "lucide-react";
+import { EyeIcon, PenLineIcon } from "lucide-react";
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
@@ -7,8 +7,10 @@ import { SwipeArea } from "@/components/motion/swipe-area";
 import { localizedPath } from "@/core/auth";
 import { articlePath } from "@/core/journal-feed";
 import type { PostState } from "@/core/journal-posts";
+import { viewsOf } from "@/core/views";
 import { myPosts } from "@/data/journal-posts";
 import { userClient } from "@/data/supabase-server";
+import { myViews } from "@/data/views";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { cn } from "@/lib/utils";
@@ -42,7 +44,13 @@ export default async function MyJournalPage({ params }: PageProps<"/[locale]/me/
   const userId = data?.claims.sub;
   if (!db || !userId) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
-  const [posts, t, tp, format] = await Promise.all([myPosts(db, userId), getTranslations("Journal"), getTranslations("Profile"), getFormatter()]);
+  const [posts, t, tp, format, views] = await Promise.all([
+    myPosts(db, userId),
+    getTranslations("Journal"),
+    getTranslations("Profile"),
+    getFormatter(),
+    myViews(db),
+  ]);
 
   return (
     <>
@@ -63,9 +71,16 @@ export default async function MyJournalPage({ params }: PageProps<"/[locale]/me/
               <li key={p.id} className="relative flex flex-col gap-1.5 py-4">
                 <div className="flex items-center justify-between gap-3">
                   <span className={cn("rounded-full px-2.5 py-0.5 font-display text-xs font-extrabold", STATE_STYLE[p.state])}>{t("state", { state: p.state })}</span>
-                  <time dateTime={p.updatedAt} className="text-xs text-muted-foreground">
-                    {format.relativeTime(new Date(p.updatedAt))}
-                  </time>
+                  <span className="flex items-center gap-3 text-xs text-muted-foreground">
+                    {/* How many people read it, never who (ADR 0098). */}
+                    {viewsOf(views, "post", p.id).total > 0 && (
+                      <span className="flex items-center gap-1 font-semibold">
+                        <EyeIcon className="size-3.5" aria-hidden="true" />
+                        {t("readers", { count: viewsOf(views, "post", p.id).total })}
+                      </span>
+                    )}
+                    <time dateTime={p.updatedAt}>{format.relativeTime(new Date(p.updatedAt))}</time>
+                  </span>
                 </div>
                 <h2 className="font-display text-xl leading-tight font-extrabold tracking-[-0.02em] break-words">
                   <Link

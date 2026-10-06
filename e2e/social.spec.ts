@@ -58,12 +58,15 @@ test("follow, the Following feed, Stamps and blocks", async ({ page, request, br
     await main.getByLabel("Search people").fill(`@${kim}`);
     await expect(main.getByText(`@${kim}`)).toBeVisible({ timeout: 3000 });
   }).toPass();
-  await main.getByRole("button", { name: "Follow", exact: true }).click();
-  await expect(main.getByRole("button", { name: "Following" })).toHaveAttribute("aria-pressed", "true");
+  // The search's row (Kim may be among the suggested people below it too, ADR 0083).
+  const kimRow = main.getByRole("listitem").filter({ hasText: `@${kim}` }).first();
+  await kimRow.getByRole("button", { name: "Follow", exact: true }).click();
+  await expect(kimRow.getByRole("button", { name: "Following" })).toHaveAttribute("aria-pressed", "true");
   const events = () => page.evaluate(() => window.__mystonieEvents?.map(([name]) => name) ?? []);
   await expect.poll(events).toContain("followed");
   await page.reload();
-  await expect(main.getByRole("heading", { name: "You follow 1" })).toBeVisible();
+  // Kim, and Stonie, whom every new member follows (ADR 0098).
+  await expect(main.getByRole("heading", { name: "You follow 2" })).toBeVisible();
 
   // Kim's finish is in Sam's feed; Sam stamps it.
   await page.goto("/feed");
@@ -74,7 +77,8 @@ test("follow, the Following feed, Stamps and blocks", async ({ page, request, br
   await finish.getByRole("button", { name: "Stamp", exact: true }).click();
   expect((await stamped).ok()).toBe(true);
   await expect(finish.getByRole("button", { name: "Take back your Stamp" })).toHaveAttribute("aria-pressed", "true");
-  await expect(finish.getByText("1 Stamp", { exact: true })).toBeVisible();
+  // Sam's, and Stonie's on Kim's first finish (ADR 0098).
+  await expect(finish.getByText("2 Stamps", { exact: true })).toBeVisible();
   await expect.poll(events).toContain("stamped");
 
   // Kim's Feed tab gets a dot (ADR 0054, ADR 0074): Sam's Stamp and follow came after Kim's device first asked. Kim

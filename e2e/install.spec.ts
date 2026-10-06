@@ -193,3 +193,20 @@ test.describe("in Safari 26 on an iPhone", () => {
     await expect(page.getByRole("button", { name: "Install Mystonie" })).toBeVisible();
   });
 });
+
+test("the Android app (ADR 0097): Digital Asset Links, and no tip link inside the app", async ({ page, request }) => {
+  const links = await request.get("/.well-known/assetlinks.json");
+  expect(links.status()).toBe(200);
+  expect(Array.isArray(await links.json())).toBe(true);
+
+  const tip = page.getByRole("link", { name: /Buy Stonie a coffee/ });
+  await page.goto("/privacy");
+  await expect(tip).toBeVisible();
+  // The app's first page says so; the pages after it in the same session remember.
+  await page.goto("/privacy?source=twa");
+  await expect(page.getByRole("link", { name: "Terms" }).first()).toBeVisible();
+  await expect(tip).toHaveCount(0);
+  await page.goto("/terms");
+  await expect(page.getByRole("link", { name: "Privacy" }).first()).toBeVisible();
+  await expect(tip).toHaveCount(0);
+});

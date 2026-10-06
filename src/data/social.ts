@@ -5,9 +5,11 @@ import { posterUrl } from "@/core/catalog/images";
 import type { TitleKind } from "@/core/catalog/types";
 import { shownShare } from "@/core/finish-share";
 import { uuidv7 } from "@/core/ids";
-import { FEED_PAGE, type ActivityItem, type FeedCursor, type FeedItem, type Person, type SuggestedPerson } from "@/core/social";
+import { MASCOT_ID, mascotCheer, type MascotCheer } from "@/core/official";
+import { FEED_PAGE, type ActivityItem, type FeedCursor, type FeedItem, type Person, type PersonRef, type SuggestedPerson } from "@/core/social";
 import { publicImageUrl } from "./cards";
 import type { Database, TablesInsert } from "./database.types";
+import { officialAccounts, officialOf } from "./official";
 import type { UserClient } from "./supabase-server";
 
 /** The outcome of a follow, stamp or block write: "not_found" when the target isn't (or is no longer) allowed. */
@@ -32,14 +34,14 @@ export type FeedRow = Database["public"]["Functions"]["following_feed"]["Returns
 
 /** Feed rows as feed items, with the stickers each finish earned. */
 export async function feedItems(db: UserClient, viewerId: string, data: readonly FeedRow[]): Promise<FeedItem[]> {
-  const earned = await feedBadges(db, data);
+  const [earned, officials] = await Promise.all([feedBadges(db, data), officialAccounts(db)]);
   // Generated types say non-null; display names, ratings, reviews, years, posters and cards may be null.
   return data.map((r) => ({
     entryId: r.entry_id,
     finishedAt: new Date(r.finished_at).toISOString(),
     rating: r.rating === null ? null : Number(r.rating),
     review: r.review ?? null,
-    user: { id: r.user_id, username: r.username, displayName: r.display_name ?? null, avatarUrl: r.avatar_url ?? null },
+    user: { id: r.user_id, username: r.username, displayName: r.display_name ?? null, avatarUrl: r.avatar_url ?? null, official: officialOf(officials, r.user_id) },
     title: {
       id: r.title_id,
       kind: r.title_kind as TitleKind,
@@ -84,17 +86,49 @@ async function feedBadges(db: UserClient, rows: readonly { user_id: string; titl
   return earned;
 }
 
-/** Stamps on the viewer's finishes and new followers, newest first. */
+/** Stamps on the viewer's finishes, new followers and friends who joined from their invite, newest first. */
 export async function myActivity(db: UserClient, limit = 20): Promise<ActivityItem[]> {
   const { data, error } = await db.rpc("my_activity", { p_limit: limit });
   if (error) throw new Error(`my_activity failed: ${error.message}`);
+  const [officials, cheers] = await Promise.all([
+    officialAccounts(db),
+    mascotCheers(db, data.flatMap((r) => (r.kind === "stamp" && r.user_id === MASCOT_ID && r.entry_id ? [r.entry_id] : []))),
+  ]);
   return data.map((r) => ({
-    kind: r.kind === "stamp" ? "stamp" : "follow",
+    kind: r.kind === "stamp" || r.kind === "invite" ? r.kind : "follow",
     at: new Date(r.at).toISOString(),
-    user: { id: r.user_id, username: r.username, displayName: r.display_name ?? null, avatarUrl: r.avatar_url ?? null },
+    user: person(r, officials),
+    cheer: r.kind === "stamp" && r.user_id === MASCOT_ID && r.entry_id ? (cheers.get(r.entry_id) ?? null) : null,
     iFollow: r.i_follow,
     titleName: r.title_name ?? null,
   }));
+}
+
+/** Why Stonie stamped these finishes of the viewer's (ADR 0098), by entry id. A failure only leaves the reason off. */
+async function mascotCheers(db: UserClient, entryIds: string[]): Promise<Map<string, MascotCheer>> {
+  const cheers = new Map<string, MascotCheer>();
+  if (entryIds.length === 0) return cheers;
+  const { data, error } = await db.from("mascot_milestones").select("entry_id, milestone").in("entry_id", entryIds).limit(200);
+  if (error) {
+    console.error(`mascot_milestones read failed: ${error.message}`);
+    return cheers;
+  }
+  const byEntry = new Map<string, string[]>();
+  for (const row of data) if (row.entry_id) byEntry.set(row.entry_id, [...(byEntry.get(row.entry_id) ?? []), row.milestone]);
+  for (const [entryId, milestones] of byEntry) {
+    const cheer = mascotCheer(milestones);
+    if (cheer) cheers.set(entryId, cheer);
+  }
+  return cheers;
+}
+
+/** A person from an RPC row (`id` or `user_id`), with their label. */
+function person(
+  r: { id?: string; user_id?: string; username: string; display_name: string | null; avatar_url: string | null },
+  officials: Awaited<ReturnType<typeof officialAccounts>>,
+): PersonRef {
+  const id = (r.id ?? r.user_id)!;
+  return { id, username: r.username, displayName: r.display_name ?? null, avatarUrl: r.avatar_url ?? null, official: officialOf(officials, id) };
 }
 
 /** Follower and following counts of a profile the viewer can see, and whether they follow it; null otherwise. */
@@ -112,11 +146,9 @@ export async function followCounts(
 export async function searchPeople(db: UserClient, query: string): Promise<Person[]> {
   const { data, error } = await db.rpc("search_people", { p_query: query });
   if (error) throw new Error(`search_people failed: ${error.message}`);
+  const officials = await officialAccounts(db);
   return data.map((r) => ({
-    id: r.id,
-    username: r.username,
-    displayName: r.display_name ?? null,
-    avatarUrl: r.avatar_url ?? null,
+    ...person(r, officials),
     finished: r.finished,
     iFollow: r.i_follow,
   }));
@@ -132,11 +164,9 @@ export async function suggestedPeople(db: UserClient, limit = 10): Promise<Sugge
     console.error(`suggested_people failed: ${error.message}`);
     return [];
   }
+  const officials = await officialAccounts(db);
   return data.map((r) => ({
-    id: r.id,
-    username: r.username,
-    displayName: r.display_name ?? null,
-    avatarUrl: r.avatar_url ?? null,
+    ...person(r, officials),
     finished: r.finished,
     shared: r.shared,
     sharedTitle: r.shared_title ?? null,
@@ -146,13 +176,14 @@ export async function suggestedPeople(db: UserClient, limit = 10): Promise<Sugge
   }));
 }
 
-export type FollowedPerson = { id: string; username: string; displayName: string | null; avatarUrl: string | null };
+export type FollowedPerson = PersonRef;
 
 /** The people the viewer follows, newest first. */
 export async function myFollowing(db: UserClient): Promise<FollowedPerson[]> {
   const { data, error } = await db.rpc("my_following");
   if (error) throw new Error(`my_following failed: ${error.message}`);
-  return data.map((r) => ({ id: r.id, username: r.username, displayName: r.display_name ?? null, avatarUrl: r.avatar_url ?? null }));
+  const officials = await officialAccounts(db);
+  return data.map((r) => person(r, officials));
 }
 
 /** The people the viewer blocked, newest first. */

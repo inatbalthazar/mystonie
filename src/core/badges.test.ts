@@ -189,9 +189,10 @@ describe("activity badges (ADR 0063)", () => {
     expect(get(all, "season-pass")).toMatchObject({ progress: 2, earnedAt: null });
   });
 
-  it("counts quiz answers, reviews, articles and support", () => {
+  it("counts quiz answers, reviews, articles, support and invites", () => {
     const tens = Array.from({ length: 10 }, (_, i) => at(10 - i));
-    const all = activity({ quiz: tens, reviews: tens.slice(1), articles: [at(7)], support: [at(9), at(4)] });
+    const all = activity({ quiz: tens, reviews: tens.slice(1), articles: [at(7)], support: [at(9), at(4)], invites: [at(6), at(3)] });
+    expect(get(all, "plus-one")).toMatchObject({ earnedAt: at(3), titleId: null });
     expect(get(all, "lookout")).toMatchObject({ progress: 10, earnedAt: at(10) });
     expect(get(all, "guardian")).toMatchObject({ progress: 10, earnedAt: null });
     expect(get(all, "critic")).toMatchObject({ progress: 9, earnedAt: null });

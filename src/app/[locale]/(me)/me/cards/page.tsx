@@ -1,3 +1,4 @@
+import { EyeIcon } from "lucide-react";
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -5,8 +6,10 @@ import { FreshPage } from "@/components/motion/fresh-page";
 import { SwipeArea } from "@/components/motion/swipe-area";
 import { SharedCardImage } from "@/components/shared-card";
 import { localizedPath } from "@/core/auth";
+import { viewsOf } from "@/core/views";
 import { recentCards, type UserCard } from "@/data/cards";
 import { userClient } from "@/data/supabase-server";
+import { myViews } from "@/data/views";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
 import { siteUrl } from "@/lib/site";
@@ -41,10 +44,12 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
   const userId = data?.claims.sub;
   if (!db || !userId) return redirect({ href: { pathname: "/auth", query: { next: self } }, locale });
 
-  const [cards, t] = await Promise.all([
+  const [cards, t, views] = await Promise.all([
     // One more than shown, to know whether there are more.
     recentCards(db, userId, steps * STEP + 1),
     getTranslations("Profile"),
+    // How many people saw each shared card (ADR 0098).
+    myViews(db),
   ]);
   const shown = cards.slice(0, steps * STEP);
   const more = cards.length > shown.length;
@@ -106,12 +111,20 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
                     style={{ ["--grow-delay" as string]: `${(i % 3) * 80}ms` }}
                   >
                     {card.sharedAt ? (
-                      <Link
-                        href={`/c/${card.id}`}
-                        className="block rounded-lg shadow-[0_2px_4px_rgb(0_0_0/0.08),0_14px_28px_-16px_rgb(0_0_0/0.45)] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-ring"
-                      >
-                        {image}
-                      </Link>
+                      <>
+                        <Link
+                          href={`/c/${card.id}`}
+                          className="block rounded-lg shadow-[0_2px_4px_rgb(0_0_0/0.08),0_14px_28px_-16px_rgb(0_0_0/0.45)] transition-transform hover:-translate-y-0.5 focus-visible:outline-2 focus-visible:outline-ring"
+                        >
+                          {image}
+                        </Link>
+                        {viewsOf(views, "card", card.id).total > 0 && (
+                          <p className="mt-2 flex items-center justify-center gap-1 text-xs font-semibold text-muted-foreground">
+                            <EyeIcon className="size-3.5" aria-hidden="true" />
+                            {t("cardSeen", { count: viewsOf(views, "card", card.id).total })}
+                          </p>
+                        )}
+                      </>
                     ) : (
                       <div className="relative rounded-lg shadow-[0_2px_4px_rgb(0_0_0/0.08),0_14px_28px_-16px_rgb(0_0_0/0.45)]">
                         {image}

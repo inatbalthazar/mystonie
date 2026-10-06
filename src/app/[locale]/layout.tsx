@@ -16,6 +16,7 @@ import { SyncProvider } from "@/components/offline/sync-provider";
 import { SyncStatus } from "@/components/offline/sync-status";
 import { PwaListener } from "@/components/pwa/browser";
 import { InstallSheet } from "@/components/pwa/install-sheet";
+import { InviteAccept } from "@/components/social/invite-accept";
 import { PrepaintScript } from "@/components/prepaint-script";
 import { RawgAttribution } from "@/components/rawg-attribution";
 import { SupportLink } from "@/components/support-link";
@@ -139,6 +140,8 @@ export default async function LocaleLayout({ children, params }: LayoutProps<"/[
           <NavIsland />
           {/* New accounts: the getting-started checklist behind a round progress button, just above the island (ADR 0056). */}
           <GettingStartedButton />
+          {/* The invite a new account came from: it and the inviter follow each other (ADR 0098). */}
+          <InviteAccept />
           {/* Visitors on a phone: put Mystonie on the home screen, before any sign-up (ADR 0085). */}
           <InstallSheet />
         </NextIntlClientProvider>

@@ -489,6 +489,42 @@ export type Database = {
           },
         ]
       }
+      invites: {
+        Row: {
+          created_at: string
+          id: string
+          invitee_id: string
+          inviter_id: string
+        }
+        Insert: {
+          created_at?: string
+          id: string
+          invitee_id: string
+          inviter_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          invitee_id?: string
+          inviter_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invites_invitee_id_fkey"
+            columns: ["invitee_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "invites_inviter_id_fkey"
+            columns: ["inviter_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       journal_marks: {
         Row: {
           created_at: string
@@ -601,6 +637,45 @@ export type Database = {
           },
         ]
       }
+      mascot_milestones: {
+        Row: {
+          created_at: string
+          entry_id: string | null
+          id: string
+          milestone: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          entry_id?: string | null
+          id: string
+          milestone: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          entry_id?: string | null
+          id?: string
+          milestone?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "mascot_milestones_entry_id_fkey"
+            columns: ["entry_id"]
+            isOneToOne: false
+            referencedRelation: "entries"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "mascot_milestones_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       place_regions: {
         Row: {
           country: string
@@ -694,6 +769,7 @@ export type Database = {
           id: string
           locale: string
           milestones_seen: Json
+          official: string | null
           reel_reminded_on: string | null
           reel_reminders: boolean
           shelf_pins: string[]
@@ -717,6 +793,7 @@ export type Database = {
           id: string
           locale?: string
           milestones_seen?: Json
+          official?: string | null
           reel_reminded_on?: string | null
           reel_reminders?: boolean
           shelf_pins?: string[]
@@ -740,6 +817,7 @@ export type Database = {
           id?: string
           locale?: string
           milestones_seen?: Json
+          official?: string | null
           reel_reminded_on?: string | null
           reel_reminders?: boolean
           shelf_pins?: string[]
@@ -1661,6 +1739,59 @@ export type Database = {
           },
         ]
       }
+      view_counts: {
+        Row: {
+          day: string
+          owner_id: string
+          subject: string
+          subject_id: string
+          views: number
+        }
+        Insert: {
+          day: string
+          owner_id: string
+          subject: string
+          subject_id: string
+          views?: number
+        }
+        Update: {
+          day?: string
+          owner_id?: string
+          subject?: string
+          subject_id?: string
+          views?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "view_counts_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      view_marks: {
+        Row: {
+          day: string
+          subject: string
+          subject_id: string
+          visitor: string
+        }
+        Insert: {
+          day: string
+          subject: string
+          subject_id: string
+          visitor: string
+        }
+        Update: {
+          day?: string
+          subject?: string
+          subject_id?: string
+          visitor?: string
+        }
+        Relationships: []
+      }
       waitlist: {
         Row: {
           consent_at: string
@@ -1834,6 +1965,14 @@ export type Database = {
       _table_privs: { Args: never; Returns: unknown[] }
       _temptypes: { Args: { "": string }; Returns: string }
       _todo: { Args: never; Returns: string }
+      accept_invite: {
+        Args: { p_username: string }
+        Returns: {
+          display_name: string
+          id: string
+          username: string
+        }[]
+      }
       avoid_warnings: {
         Args: { p_title_ids: string[] }
         Returns: {
@@ -2080,8 +2219,41 @@ export type Database = {
           username: string
         }[]
       }
+      my_views: {
+        Args: { p_days?: number }
+        Returns: {
+          recent: number
+          subject: string
+          subject_id: string
+          total: number
+        }[]
+      }
+      newest_members: {
+        Args: { p_limit?: number; p_viewer: string }
+        Returns: {
+          avatar_url: string
+          display_name: string
+          entry_id: string
+          finished: number
+          i_follow: boolean
+          id: string
+          joined_at: string
+          stamp_count: number
+          stamped: boolean
+          title_name: string
+          username: string
+        }[]
+      }
       no_plan: { Args: never; Returns: boolean[] }
       num_failed: { Args: never; Returns: number }
+      official_accounts: {
+        Args: never
+        Returns: {
+          id: string
+          official: string
+          username: string
+        }[]
+      }
       os_name: { Args: never; Returns: string }
       pass:
         | { Args: never; Returns: string }
@@ -2116,6 +2288,15 @@ export type Database = {
         Returns: boolean
       }
       rate_limits_prune: { Args: never; Returns: undefined }
+      record_view: {
+        Args: {
+          p_subject: string
+          p_subject_id: string
+          p_viewer?: string
+          p_visitor: string
+        }
+        Returns: boolean
+      }
       reel_reminders_due: {
         Args: { p_day: string; p_limit: number }
         Returns: {

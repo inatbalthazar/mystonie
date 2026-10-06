@@ -316,7 +316,7 @@
       },
       "account": {
         "title": "Your account",
-        "body": "If you create an account, we store your email address, a username (made from your name or email; you can change it), the language and time zone you signed up with, and, if you sign in with a social account (Google, Apple, Facebook, X or Discord), the name and profile picture it shares with us. Profile photo: we keep a copy of that picture, or a photo you upload in Settings, in our storage, cropped and resized to 320 pixels; you can change or remove it in Settings at any time, and it is deleted with your account. Sign-in happens through Supabase Auth: we never see or store a password, and each sign-in code is emailed to you and works once. We use this to run your account and to send you sign-in codes. Your page: while your collection is public (the default), anyone with its link can see your display name, username, profile picture, bio, the cards you shared, your collection totals and what you're watching. You can make it private in Settings; cards you shared stay viewable by their link. A card shows your username and profile photo unless you hide them on it. Totals across everyone include private collections, but never who: how many people finished a title (and what share of everyone on Mystonie had finished it when you did) and what's trending on Mystonie, which lists a title only once at least 3 people logged it that week. The same goes for how many people are in a fandom club or joined a monthly challenge, and what a club's members are on lately. While your collection is public, the clubs you joined and the challenges you completed show on your page, and your finishes of titles that fit a club you joined show on that club's page. While you're signed in, a small cookie remembers your chosen language and theme, and it's removed when you sign out. You can download all your data as a file in Settings (Export my data), and your collection as spreadsheets that import back into Mystonie (Export as CSV). You can delete your account at any time in Settings, which immediately removes your profile and everything you've logged."
+        "body": "If you create an account, we store your email address, a username (made from your name or email; you can change it), the language and time zone you signed up with, and, if you sign in with a social account (Google, Apple, Facebook, X or Discord), the name and profile picture it shares with us. Profile photo: we keep a copy of that picture, or a photo you upload in Settings, in our storage, cropped and resized to 320 pixels; you can change or remove it in Settings at any time, and it is deleted with your account. Sign-in happens through Supabase Auth: we never see or store a password, and each sign-in code is emailed to you and works once. We use this to run your account and to send you sign-in codes. Your page: while your collection is public (the default), anyone with its link can see your display name, username, profile picture, bio, the cards you shared, your collection totals and what you're watching. You can make it private in Settings; cards you shared stay viewable by their link. A card shows your username and profile photo unless you hide them on it. Totals across everyone include private collections, but never who: how many people finished a title (and what share of everyone on Mystonie had finished it when you did) and what's trending on Mystonie, which lists a title only once at least 3 people logged it that week. The same goes for how many people are in a fandom club or joined a monthly challenge, and what a club's members are on lately. While your collection is public, the clubs you joined and the challenges you completed show on your page, and your finishes of titles that fit a club you joined show on that club's page. While you're signed in, a small cookie remembers your chosen language and theme, and it's removed when you sign out. You can download all your data as a file in Settings (Export my data), and your collection as spreadsheets that import back into Mystonie (Export as CSV). You can delete your account at any time in Settings, which immediately removes your profile and everything you've logged. Official accounts: Stonie, the mascot, and the Mystonie team have accounts that always carry a Mascot or Team label; they never pose as other members. A new account follows them to start, and you can unfollow or block them. Stonie stamps your first finishes and milestones by itself. Visits: when someone opens your public page, a card you shared or an article you published, we count it once a day per visitor, using a one-way, salted hash of their account id (or of their IP address and browser when signed out) that changes every day and is deleted within two days. Only you see the counts, never who visited. Invites: if you open a friend's invite link, your browser remembers whose link it was for up to 7 days; when you make an account, we store who invited you, you follow each other, and they see that you joined from their invite."
       },
       "collect": {
         "title": "What we collect",
@@ -336,7 +336,7 @@
       },
       "retention": {
         "title": "How long we keep it",
-        "body": "Account data is kept until you delete your account (Settings → Delete account), which removes it straight away. Waitlist emails are kept until you unsubscribe or ask us to delete them, or until we stop the waitlist; deleting your account removes a waitlist entry with the same email too. Every marketing email we send has an unsubscribe link. Request counters are deleted within a day. Analytics and error data are kept for a limited period set in those services."
+        "body": "Account data is kept until you delete your account (Settings → Delete account), which removes it straight away. Waitlist emails are kept until you unsubscribe or ask us to delete them, or until we stop the waitlist; deleting your account removes a waitlist entry with the same email too. Every marketing email we send has an unsubscribe link. Request counters are deleted within a day, and the visitor hashes behind visit counts within two days. Analytics and error data are kept for a limited period set in those services."
       },
       "rights": {
         "title": "Your rights",
@@ -625,7 +625,8 @@
     "photoCancel": "Cancel",
     "photoUnreadable": "That file isn't a photo this browser can open. Try a JPEG or PNG.",
     "photoError": "The photo couldn't be saved. Try again in a moment.",
-    "teamReview": "Journal review (team)"
+    "teamReview": "Journal review (team)",
+    "teamWelcome": "Welcome desk (team)"
   },
   "Collection": {
     "title": "Your collection",
@@ -964,7 +965,10 @@
     "writeFirst": "Write your first article",
     "journalEmpty": "@{username} hasn’t published an article yet.",
     "journalMetaTitle": "{name}’s Journal",
-    "shelfCard": "Shelf, top {count}"
+    "shelfCard": "Shelf, top {count}",
+    "visitsWeek": "{count, plural, one {<b>#</b> visitor this week} other {<b>#</b> visitors this week}}",
+    "visitsHint": "· only you see this, never who",
+    "cardSeen": "{count, plural, one {Seen by # person} other {Seen by # people}}"
   },
   "Album": {
     "arrange": "Arrange",
@@ -1055,7 +1059,19 @@
     "friendFinished": "<b>{name}</b> finished <b>{title}</b>",
     "rareFinish": "Rare finish · {share}",
     "toChallenges": "Challenges",
-    "toClubs": "Clubs"
+    "toClubs": "Clubs",
+    "activityInvite": "<b>{name}</b> joined Mystonie from your invite. You follow each other now.",
+    "mascotFirstFinish": "<b>{name}</b> stamped your very first finish, <b>{title}</b>. Welcome to the album!",
+    "mascotCount": "<b>{name}</b> stamped <b>{title}</b>: finish number {count} in your album!",
+    "mascotFirstKind": "<b>{name}</b> stamped <b>{title}</b>, your first {kind, select, movie {movie} series {series} book {book} manga {manga} game {game} other {title}}!",
+    "officialFollowNote": "New members follow Stonie and the team to start. Unfollow them any time.",
+    "inviteTitle": "Invite friends",
+    "inviteBody": "When a friend joins from your link, you follow each other, and you get the Plus One sticker.",
+    "inviteButton": "Share my invite link",
+    "inviteCopied": "Link copied",
+    "inviteShareText": "Join me on Mystonie, the album for what you finish.",
+    "inviteAccepted": "You and <b>{name}</b> follow each other now.",
+    "inviteAcceptedClose": "Close"
   },
   "Board": {
     "title": "The board",
@@ -1253,6 +1269,10 @@
       "supporter": {
         "name": "Supporter",
         "how": "Support Mystonie with Pro or a coffee."
+      },
+      "plus-one": {
+        "name": "Plus One",
+        "how": "Invite a friend who joins Mystonie."
       }
     },
     "album": "Sticker album",
@@ -2200,7 +2220,8 @@
     "edit": "Edit",
     "yourArticle": "Your article",
     "privatePage": "Your page is private, so only you can see your articles. Make it public in Settings.",
-    "writeAbout": "Write about it"
+    "writeAbout": "Write about it",
+    "readers": "{count, plural, one {# reader} other {# readers}}"
   },
   "JournalWrite": {
     "newTitle": "Write an article",
@@ -2268,5 +2289,41 @@
     "reports": "{count, plural, one {# report} other {# reports}}",
     "report": "{reason}: {note}",
     "by": "by @{username}"
+  },
+  "Official": {
+    "mascot": "Mascot",
+    "team": "Team",
+    "mascotHint": "Stonie is Mystonie's mascot, not a person. It stamps first finishes and milestones by itself.",
+    "teamHint": "Someone from the team that makes Mystonie."
+  },
+  "Join": {
+    "metaTitle": "{name} invited you to Mystonie",
+    "metaDescription": "Mystonie is a free album for the movies, series, books, manga and games you finish.",
+    "kicker": "You're invited",
+    "title": "{name} invited you to Mystonie",
+    "body": "Log what you finish, get a card for each one, and see what {name} finishes too. When you join, you'll follow each other.",
+    "cta": "Start your collection, free",
+    "seeAlbum": "See {name}'s album",
+    "signedInTitle": "You're already on Mystonie",
+    "signedInBody": "Follow {name} to see what they finish.",
+    "ownTitle": "This is your invite link",
+    "ownBody": "Share it: friends who join from it follow you, and you follow them.",
+    "unknownTitle": "Join Mystonie",
+    "unknownBody": "The album for the movies, series, books, manga and games you finish."
+  },
+  "Welcome": {
+    "title": "Welcome desk",
+    "intro": "New members from the last 30 days, newest first. Stamp a finish or follow someone from your own account: it's really you, so it's real.",
+    "labelTitle": "The Team label",
+    "labelOn": "Your account shows a Team label next to your name, and new members follow you to start (they can unfollow).",
+    "labelOff": "Add a Team label next to your name, so people know you make Mystonie. New members will follow you to start (they can unfollow).",
+    "labelAdd": "Show the Team label",
+    "labelRemove": "Remove the Team label",
+    "labelError": "Couldn't save. Try again.",
+    "newTitle": "New members",
+    "joined": "Joined {when}",
+    "finished": "{count, plural, =0 {No finishes yet} one {# finish} other {# finishes}}",
+    "latest": "Latest: {title}",
+    "nobody": "Nobody new yet."
   }
 }

@@ -87,7 +87,18 @@ export async function badgeActivity(db: UserClient, userId: string): Promise<Bad
     // The team's articles naming the writer, and their own published ones (ADR 0092).
     articles: [...(profile.data?.username ? await journalBy(profile.data.username) : []), ...(await postTimes(db, userId))],
     support: times((subs.data ?? []).map((sub) => sub.created_at)),
+    invites: await inviteTimes(db, userId),
   };
+}
+
+/** When friends joined from the user's invite (ADR 0098). A database without invites yet just has none. */
+async function inviteTimes(db: UserClient, userId: string): Promise<number[]> {
+  const { data, error } = await db.from("invites").select("created_at").eq("inviter_id", userId).order("created_at").limit(10);
+  if (error) {
+    console.error(`invites read failed: ${error.message}`);
+    return [];
+  }
+  return times(data.map((i) => i.created_at));
 }
 
 /**

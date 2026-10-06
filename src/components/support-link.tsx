@@ -5,11 +5,15 @@ import { useTranslations } from "next-intl";
 import { track } from "@/lib/analytics";
 import { SUPPORT_URL } from "@/lib/site";
 import { cn } from "@/lib/utils";
+import { useAndroidApp } from "./pwa/browser";
 
 // A tip for the maker (ADR 0049): a plain link to Buy Me a Coffee, never a gate. The footer shows a small text link,
-// Settings a button.
+// Settings a button. Not in the Android app (ADR 0097): Google Play wants payments in an app through its own billing,
+// and a tip brings the Supporter sticker.
 export function SupportLink({ place }: { place: "footer" | "settings" }) {
   const t = useTranslations("Support");
+  const androidApp = useAndroidApp();
+  if (androidApp) return null;
   return (
     <a
       href={SUPPORT_URL}

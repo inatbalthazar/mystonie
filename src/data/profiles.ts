@@ -2,6 +2,8 @@
 import { collectPages } from "@/core/account";
 import { albumLayout, statsHidden, type AlbumLayout, type StatsSection } from "@/core/album";
 import { posterUrl } from "@/core/catalog/images";
+import type { Official } from "@/core/official";
+import { officialAccounts, officialOf } from "./official";
 import type { UserClient } from "./supabase-server";
 
 export type PublicProfile =
@@ -19,6 +21,8 @@ export type PublicProfile =
       layout: AlbumLayout;
       /** The Stats tab's parts its owner keeps from visitors (ADR 0077). */
       statsHidden: StatsSection[];
+      /** Stonie's or the team's label (ADR 0098). */
+      official: Official | null;
     };
 
 /** The safe subset of a profile by username (`public_profile()`), or null when nobody has that name. */
@@ -55,6 +59,7 @@ export async function publicProfile(db: UserClient, username: string): Promise<P
     joinedAt: row.created_at,
     layout: albumLayout(row.album_order, row.album_hidden, row.shelf_pins),
     statsHidden: statsHidden(row.stats_hidden),
+    official: officialOf(await officialAccounts(db), row.id),
   };
 }
 

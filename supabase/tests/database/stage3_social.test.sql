@@ -3,6 +3,10 @@
 begin;
 select plan(34);
 
+-- Without Stonie (ADR 0098, tested in stage4_lively_album.test.sql), whose welcome follows and milestone Stamps would
+-- be in every count here. The rollback brings it back.
+delete from auth.users where id = '5707e000-0000-4000-8000-000000000001';
+
 -- s1 and s2 are public, s3 is private.
 insert into auth.users (id, email) values
   ('00000000-0000-7000-8000-0000000005a1', 's1@example.com'),

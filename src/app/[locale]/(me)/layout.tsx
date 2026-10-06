@@ -4,8 +4,11 @@ import { Suspense, type ReactNode } from "react";
 import { AlbumCover } from "@/components/profile/album-cover";
 import { MeTabPage, MeTabs } from "@/components/profile/me-tabs";
 import { CoverBones } from "@/components/skeleton";
+import { RECENT_VIEW_DAYS, viewsOf } from "@/core/views";
+import { officialAccounts, officialOf } from "@/data/official";
 import { followCounts } from "@/data/social";
 import { userClient } from "@/data/supabase-server";
+import { myViews } from "@/data/views";
 
 /**
  * Me (ADR 0081): the album's cover and Me's tabs (Album `/me`, Stats `/stats`, Cards `/me/cards`) around the open tab's
@@ -36,12 +39,14 @@ async function MeCover() {
   const { data } = db ? await db.auth.getClaims() : { data: null };
   const userId = data?.claims.sub;
   if (!db || !userId) return null;
-  const [{ data: profile, error }, counts] = await Promise.all([
+  const [{ data: profile, error }, counts, officials, views] = await Promise.all([
     db.from("profiles").select("id, username, display_name, bio, avatar_url, created_at").eq("id", userId).single(),
     followCounts(db, userId).catch((error: unknown) => {
       console.error(error);
       return null;
     }),
+    officialAccounts(db),
+    myViews(db, RECENT_VIEW_DAYS),
   ]);
   if (error) throw new Error(`profile read failed: ${error.message}`);
   return (
@@ -53,9 +58,11 @@ async function MeCover() {
         bio: profile.bio,
         avatarUrl: profile.avatar_url,
         joinedAt: profile.created_at,
+        official: officialOf(officials, profile.id),
       }}
       owner
       counts={counts}
+      visits={viewsOf(views, "profile", profile.id).recent}
     />
   );
 }

@@ -153,6 +153,17 @@ From the owner's notes at the end of [brief.th.md](brief.th.md). Each task write
   1. Apply `20261024090000_stage4_community_journal.sql` to the remote project (SQL Editor or MCP), then `get_advisors`.
   2. In Vercel, add `ADMIN_EMAILS` with the address you sign in with (not secret).
   3. After the deploy, sign in and check Settings → About Mystonie → "Journal review (team)".
+- [x] **A lively album, honestly** (the owner, 2026-10-06: make the app feel busy so people feel noticed; bot accounts posing as members were turned down, the honest version built in full; [ADR 0098](decisions/0098-a-lively-album-honestly.md)):
+  - Stonie's own labelled account Stamps first finishes and milestones.
+  - The team's own accounts carry a Team label.
+  - New members follow both.
+  - Owners see visits to their page, cards and articles, never who.
+  - Invite links make two people follow each other (Plus One sticker).
+  - The team's welcome desk is at `/admin/members`.
+  - · ⚡ high · **Done 2026-10-06** ([spec](product/features/S4-lively-album.md)). Migration `20261027090000_stage4_lively_album.sql`.
+- [ ] 🧑 **After deploying the lively album:**
+  1. ~~Apply the migrations to the remote project~~ (done 2026-10-06: the first three were already on it, `20261027090000_stage4_lively_album.sql` went through the MCP; `get_advisors` showed nothing new beyond the intended patterns).
+  2. Sign in, open Settings → About Mystonie → "Welcome desk (team)" and tap "Show the Team label", so new members follow you too.
 - Comments on articles and a feed of everyone's long reviews still wait for their gate ([later/long-reviews.md](product/later/long-reviews.md)). Sponsored articles aren't planned: the Journal is the team's and its members' own writing, no ads (2026-10-01).
 
 **Revenue plan** (the owner's question of 2026-09-30, [ADR 0049](decisions/0049-revenue-plan.md): tips at launch, then Pro and affiliate links, no banner ads)
@@ -169,7 +180,7 @@ These cost money, face outward or need new accounts, so they wait for the owner'
 
 | Feature | Why it waits |
 |---|---|
-| Native app (Expo), widgets, direct IG Stories share | App Store / Play fees and a new runtime (ADR needed) |
+| Native app (Expo), widgets, direct IG Stories share | App Store / Play fees and a new runtime (ADR needed). Google Play itself is under way as a Trusted Web Activity of the site (the owner, 2026-10-06, [ADR 0097](decisions/0097-android-app-twa.md)): the store account, signing and release are owner tasks in `android/README.md` |
 | Gems, lucky wheel, merch store | A virtual economy and physical goods; Pro comes first |
 | Native ads, affiliate links (and the banner/video ads on Add the owner suggested on 2026-09-30, see stage 4) | Outward-facing; hurts the polish before launch; ads make the app commercial (Vercel Pro, TMDB and DTDD licences) and need consent |
 | AI assistant | A paid API per use |

@@ -12,6 +12,8 @@ import { ArticlesSeen, FeedDot, FollowingSeen } from "@/components/social/feed-n
 import { PageTransition } from "@/components/motion/page-transition";
 import { SwipeArea } from "@/components/motion/swipe-area";
 import { FollowButton } from "@/components/social/follow-button";
+import { OfficialLabel } from "@/components/social/official-label";
+import type { ReactNode } from "react";
 import { localizedPath } from "@/core/auth";
 import { FEED_ARTICLES, feedTabs, pickFeedTab, type FeedArticle, type FeedTab } from "@/core/journal-feed";
 import { filterArticles, parseJournalFilters, sortArticles, type JournalFilters as Filters } from "@/core/journal-posts";
@@ -138,18 +140,25 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
                       <ul className="flex flex-col divide-y divide-dashed divide-brand/20">
                         {activity.map((a) => {
                           const name = a.user.displayName || a.user.username;
+                          const rich = { name, title: a.titleName ?? "", b: (chunks: ReactNode) => <strong className="font-semibold">{chunks}</strong> };
                           return (
                             <li key={`${a.kind}-${a.user.id}-${a.at}`} className="flex items-center gap-3 py-2">
                               <Link href={`/u/${a.user.username}`} className="shrink-0">
                                 <Avatar name={name} url={a.user.avatarUrl} className="size-9" />
                               </Link>
                               <p className="min-w-0 flex-1 text-sm">
-                                {t.rich(a.kind === "stamp" ? "activityStamp" : "activityFollow", {
-                                  name,
-                                  title: a.titleName ?? "",
-                                  b: (chunks) => <strong className="font-semibold">{chunks}</strong>,
-                                })}
-                                <span className="block text-xs text-muted-foreground">{format.relativeTime(new Date(a.at), now)}</span>
+                                {/* Stonie's Stamp says which milestone it was (ADR 0098). */}
+                                {a.kind === "stamp" && a.cheer?.type === "count" && a.cheer.count === 1
+                                  ? t.rich("mascotFirstFinish", rich)
+                                  : a.kind === "stamp" && a.cheer?.type === "count"
+                                    ? t.rich("mascotCount", { ...rich, count: a.cheer.count })
+                                    : a.kind === "stamp" && a.cheer?.type === "first"
+                                      ? t.rich("mascotFirstKind", { ...rich, kind: a.cheer.kind })
+                                      : t.rich(a.kind === "stamp" ? "activityStamp" : a.kind === "invite" ? "activityInvite" : "activityFollow", rich)}
+                                <span className="mt-0.5 flex items-center gap-1.5 text-xs text-muted-foreground">
+                                  <OfficialLabel official={a.user.official} />
+                                  {format.relativeTime(new Date(a.at), now)}
+                                </span>
                               </p>
                               {a.kind === "follow" && !a.iFollow && <FollowButton userId={a.user.id} following={false} via="activity" />}
                             </li>

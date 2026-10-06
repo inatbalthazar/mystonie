@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useSyncExternalStore } from "react";
+import { isAndroidAppLaunch } from "@/core/android";
 import { isIosDevice } from "@/core/install";
 
 // Browser-side PWA state (ADR 0028): is the app installed, can it be installed, can it get notifications.
@@ -57,10 +58,37 @@ export function PwaListener() {
   return null;
 }
 
-/** Opened from the home screen (or as a desktop app), not in a browser tab. */
+/** Opened from the home screen (or as a desktop app, or as the Android app), not in a browser tab. */
 export function isStandalone(): boolean {
-  return window.matchMedia("(display-mode: standalone)").matches || (navigator as Navigator & { standalone?: boolean }).standalone === true;
+  return (
+    window.matchMedia("(display-mode: standalone)").matches ||
+    (navigator as Navigator & { standalone?: boolean }).standalone === true ||
+    isAndroidApp()
+  );
 }
+
+const ANDROID_APP = "mystonie.androidApp";
+
+/**
+ * Inside the Android app from Google Play (ADR 0097), a Trusted Web Activity: its first page says so (`?source=twa`
+ * or Chrome's `android-app://` referrer), and the app's session remembers it for the pages after.
+ */
+export function isAndroidApp(): boolean {
+  const launch = isAndroidAppLaunch(window.location.search, document.referrer);
+  try {
+    if (launch) window.sessionStorage.setItem(ANDROID_APP, "1");
+    return launch || window.sessionStorage.getItem(ANDROID_APP) === "1";
+  } catch {
+    return launch;
+  }
+}
+
+/** `isAndroidApp` for rendering: false on the server and in the first render, so hydration matches. */
+export function useAndroidApp(): boolean {
+  return useSyncExternalStore(noSubscribe, isAndroidApp, () => false);
+}
+
+const noSubscribe = () => () => {};
 
 /** iPhone or iPad (iPadOS reports itself as a Mac with touch), where installing is "Share → Add to Home Screen". */
 export function isIos(): boolean {
