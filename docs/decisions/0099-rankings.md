@@ -95,7 +95,7 @@ The owner's decisions (2026-10-21/22):
   - **One feed RPC with both kinds of rows:** the finish rows carry Stamps, ratings and stickers that a ranking has none of, and paging would have to cross two tables.
   - **Stamps on rankings:** Stamps belong to finishes (`stamps.entry_id`); "Rank these your way" is a ranking's reply. Revisit with the feed's numbers.
   - **A dot on Feed for new rankings:** the dots count finishes and articles (ADR 0074); rankings show up with them.
-- **Migration** `20261029090000_stage4_rankings_feed.sql` (the function and an index of shared rankings). Without it on the remote project the feed still loads, without rankings (the read failing is logged).
+- **Migration** `20261029090000_stage4_rankings_feed.sql` (the function and an index of shared rankings). On the remote project through the MCP on 2026-10-22. Without it the feed would still load, without rankings (the failing read is logged).
 
 ## Step 4: remix (2026-10-22)
 - A shared ranking's page offers **Rank these your way**, to `/rank?from=<id>`. The page reads the shared card (`loadCard`, the same read as `/c/<id>`) and passes its list through `remixRanking`: the same name, things, order and rows, without its maker's ✓ marks and notes.

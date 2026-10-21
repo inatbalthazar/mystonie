@@ -178,7 +178,7 @@ From the owner's notes at the end of [brief.th.md](brief.th.md). Each task write
   - Tier board (free, coloured sticky notes) and Gold tiers (Pro, the Hall of Fame's velvet, gold plaques and PRO seal).
   - · **Done 2026-10-22** (card lab checked; the maker not yet run, no local database). Same migration.
 - [x] **Step 3, in the feed:** the rankings and tier lists shared by the people you follow (and yours) in Following, by date among the finishes, with "Rank these your way"; a filter: All · Finishes · Rankings (`?show=`). · **Done 2026-10-22**. Migration `20261029090000_stage4_rankings_feed.sql`.
-- [ ] 🧑 Step 3 before deploying: apply `20261029090000_stage4_rankings_feed.sql` to the remote project (an agent can, when asked). Without it the feed still works, just without rankings.
+- [x] 🧑 Step 3 before deploying: apply `20261029090000_stage4_rankings_feed.sql` to the remote project (done 2026-10-22 through the MCP; `get_advisors` lists `following_rankings` as callable by signed-in users, intended like `following_feed`, and not by anon).
 - [x] **Step 4, remix:** "Rank these your way" on a shared ranking or tier list (`/c/<id>`) opens `/rank?from=<id>` (through sign-in when signed out) with the same name, things and rows, without its maker's ✓ marks and notes. Event `ranking_remixed`. · **Done 2026-10-22**.
 
 - Comments on articles and a feed of everyone's long reviews still wait for their gate ([later/long-reviews.md](product/later/long-reviews.md)). Sponsored articles aren't planned: the Journal is the team's and its members' own writing, no ads (2026-10-01).
