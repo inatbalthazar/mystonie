@@ -8,6 +8,7 @@ import { CARD_FIXTURES } from "./fixtures";
 import { templatesFor } from "@/core/cards/templates";
 import type { TemplateId } from "./registry";
 import { usePosterPalette } from "./use-poster-palette";
+import { paletteSource } from "@/core/cards/edit";
 import type { CardData, CardKind } from "@/core/cards/types";
 
 /** Which card a fixture is: its template list comes from the card kind. */
@@ -17,6 +18,7 @@ function labKind(data: CardData): CardKind {
   if (data.reel) return "reel";
   if (data.atlas) return "atlas";
   if (data.shelf) return "shelf";
+  if (data.ranking) return data.ranking.tiers ? "tier_list" : "ranking";
   if (data.recap?.highlights) return "year_review";
   if (data.recap?.period === "month") return "monthly_recap";
   if (data.recap) return "weekly_recap";
@@ -63,6 +65,6 @@ export function CardLab({ host }: { host: string }) {
 }
 
 function LabCard(props: { template: TemplateId; size: CardSize; data: CardData; host: string }) {
-  const palette = usePosterPalette(props.data.posterUrl);
+  const palette = usePosterPalette(paletteSource(props.data));
   return <CardPreview {...props} palette={palette} />;
 }

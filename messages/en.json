@@ -196,7 +196,11 @@
       "gilded": "Gilded",
       "arcade": "Arcade",
       "lineup": "Lineup",
-      "shelf": "Bookcase"
+      "shelf": "Bookcase",
+      "countdown": "Countdown",
+      "hallOfFame": "Hall of Fame",
+      "tierBoard": "Tier board",
+      "tierGold": "Gold tiers"
     },
     "sizes": {
       "story": "Story 9:16",
@@ -280,7 +284,10 @@
     "shelfName": "My Shelf",
     "shelfHeadline": "{top, select, true {My top {count}} other {On my shelf}}",
     "shelfTotal": "{count, plural, one {title on my shelf} other {titles on my shelf}}",
-    "shelfRank": "{rank}."
+    "shelfRank": "{rank}.",
+    "rankHeadline": "Top {count}",
+    "tierHeadline": "Tier list",
+    "proSeal": "PRO"
   },
   "SignUp": {
     "heading": "Keep everything you finish in one collection.",
@@ -792,7 +799,7 @@
     "publishError": "Couldn't publish the card link. Try again, or use Download.",
     "linkCopied": "Link copied. Paste it anywhere.",
     "hideOnCard": "Hide on card",
-    "hideItem": "{item, select, username {@{username}} time {{shelf, select, read {Reading time} play {Play time} other {Watch time}}} episodes {{shelf, select, read {Progress} other {Episodes}}} finisher {Rare finish} photo {Photo} other {Seasons}}",
+    "hideItem": "{item, select, username {@{username}} time {{shelf, select, read {Reading time} play {Play time} other {Watch time}}} episodes {{shelf, select, read {Progress} other {Episodes}}} finisher {Rare finish} photo {Photo} done {✓ marks} notes {Notes} other {Seasons}}",
     "notesTitle": "Rate it? (optional)",
     "recapTitle": "{period, select, month {Your month} year {Your year} all {Your watching so far} other {Your week}}, {range}",
     "finishedReadTitle": "You finished {name}!",
@@ -814,7 +821,8 @@
     "areaTitle": "{area, select, watch {Everything you've watched} read {Everything you've read} play {Everything you've played} other {Your collection}}, {range}",
     "atlasCardTitle": "{count, plural, one {# country} other {# countries}} on your Atlas",
     "atlasRegionCardTitle": "{done} of {total} {many} in {country}",
-    "shelfCardTitle": "Your shelf's top {count}"
+    "shelfCardTitle": "Your shelf's top {count}",
+    "rankCardTitle": "{name}"
   },
   "SharedCard": {
     "notFoundTitle": "Card not found · Mystonie",
@@ -828,6 +836,9 @@
     "ctaTitle": "Finished something good?",
     "ctaBody": "Pick a title and get a card like this in seconds. Free, no account needed.",
     "makeYourOwn": "Make your own card",
+    "rankCtaTitle": "Would you rank them differently?",
+    "rankCtaBody": "Start from this list, move things around and make it yours. Free.",
+    "rankRemix": "Rank these your way",
     "startCollection": "Start your collection",
     "recapLine": "{period, select, month {A month of watching} year {A year of watching} all {Watching so far} other {A week of watching}}, {range}",
     "reelLine": "Reel of the Day #{number}",
@@ -835,7 +846,9 @@
     "importLine": "{unit, select, book {{count, plural, one {# book} other {# books}}} series {{count, plural, one {# show} other {# shows}}} manga {{count, plural, other {# manga}}} game {{count, plural, one {# game} other {# games}}} title {{count, plural, one {# title} other {# titles}}} other {{count, plural, one {# film} other {# films}}}} imported, {range}",
     "atlasLine": "An Atlas of {count, plural, one {# country} other {# countries}}",
     "atlasRegionsLine": "{done} of {total} {many} of {country}",
-    "shelfLine": "A shelf's top {count}"
+    "shelfLine": "A shelf's top {count}",
+    "rankLine": "Top {count}: {name}",
+    "tierLine": "Tier list: {name}"
   },
   "Recap": {
     "pageTitle": "Your recap",
@@ -968,7 +981,9 @@
     "shelfCard": "Shelf, top {count}",
     "visitsWeek": "{count, plural, one {<b>#</b> visitor this week} other {<b>#</b> visitors this week}}",
     "visitsHint": "· only you see this, never who",
-    "cardSeen": "{count, plural, one {Seen by # person} other {Seen by # people}}"
+    "cardSeen": "{count, plural, one {Seen by # person} other {Seen by # people}}",
+    "makeRanking": "Make a ranking",
+    "makeRankingHint": "A top 3, 5 or 10, or a tier list, of anything"
   },
   "Album": {
     "arrange": "Arrange",
@@ -1071,7 +1086,18 @@
     "inviteCopied": "Link copied",
     "inviteShareText": "Join me on Mystonie, the album for what you finish.",
     "inviteAccepted": "You and <b>{name}</b> follow each other now.",
-    "inviteAcceptedClose": "Close"
+    "inviteAcceptedClose": "Close",
+    "showLabel": "Show",
+    "showAll": "All",
+    "showFinishes": "Finishes",
+    "showRankings": "Rankings",
+    "rankingsEmpty": "No rankings from the people you follow yet",
+    "makeRanking": "Make a ranking",
+    "rankedWhen": "{type, select, tier {Tier list} other {Top {count}}} · {when}",
+    "rankingLabel": "{type, select, tier {Tier list} other {Top {count}}}",
+    "rankingAlt": "The card: {name}",
+    "rankingMore": "and {count} more",
+    "rankRemix": "Rank these your way"
   },
   "Board": {
     "title": "The board",
@@ -2325,5 +2351,60 @@
     "finished": "{count, plural, =0 {No finishes yet} one {# finish} other {# finishes}}",
     "latest": "Latest: {title}",
     "nobody": "Nobody new yet."
+  },
+  "Rank": {
+    "kicker": "Top lists and tier lists",
+    "title": "Make a ranking",
+    "intro": "Rank anything: films, series, books, manga, games, countries or places. Seen it or not, it's your list.",
+    "modeLabel": "What to make",
+    "modeTop": "Top list",
+    "modeTier": "Tier list",
+    "tierNamePlaceholder": "Studio Ghibli films, sorted",
+    "tierDefaultName": "My tier list",
+    "rowLabel": "Name of row {row}",
+    "rowAdd": "Add to {tier}",
+    "rowEmpty": "Nothing here yet",
+    "addRow": "Add a row",
+    "removeRow": "Remove row {tier}",
+    "tierCount": "{count} of {max}",
+    "tierHint": "Tap a poster to move it to another row or along its row.",
+    "moveTo": "Move to",
+    "moveLeft": "Move {name} left",
+    "moveRight": "Move {name} right",
+    "deselect": "Done",
+    "tierFull": "That's {max}, the most a tier list holds.",
+    "nameLabel": "Name your list (optional)",
+    "namePlaceholder": "My top {count} of all time",
+    "defaultName": "My top {count}",
+    "sizeLabel": "How many",
+    "size": "Top {count}",
+    "slotEmpty": "Add #{rank}",
+    "addMore": "Add one more",
+    "moveUp": "Move {name} up",
+    "moveDown": "Move {name} down",
+    "remove": "Take {name} off",
+    "addNote": "+ Add a line about it",
+    "noteLabel": "A line about {name} (optional)",
+    "notePlaceholder": "Why it's here",
+    "finished": "You finished it",
+    "beenThere": "You've been there",
+    "kind": "{kind, select, movie {Movie} series {Series} book {Book} manga {Manga} game {Game} country {Country} other {Place}}",
+    "doneHint": "A ✓ marks what you've finished or been to. You can hide it on the card.",
+    "make": "Make the card",
+    "clear": "Start over",
+    "pickTitle": "Add #{rank}",
+    "close": "Close",
+    "tabTitles": "Titles",
+    "tabPlaces": "Places",
+    "searchLabel": "Search films, series, books, manga and games",
+    "searchPlaceholder": "Search anything",
+    "placesLabel": "Search countries",
+    "placesPlaceholder": "A country",
+    "regions": "Places in it",
+    "openRegions": "Places in {country}",
+    "allCountries": "All countries",
+    "regionsSearch": "Search {country}",
+    "loading": "Loading…",
+    "loadError": "Couldn't load this map. Check your connection and try again."
   }
 }

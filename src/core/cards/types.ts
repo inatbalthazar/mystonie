@@ -2,6 +2,7 @@ import type { CreditRole } from "../catalog/credits";
 import type { SurvivedKey } from "../catalog/dtdd";
 import type { TitleKind } from "../catalog/types";
 import type { ReadingUnit } from "../collection/reading";
+import type { CardRanking } from "../rankings";
 
 export type CardSize = "story" | "feed";
 
@@ -67,6 +68,11 @@ export type CardData = {
    */
   shelf?: CardShelf | null;
   /**
+   * Set on a ranking card (ADR 0099): a Top 3/5/10 of titles and places, in order. `name` is the list's title and
+   * `posterUrl` is always empty (the posters are in `ranking.items`).
+   */
+  ranking?: CardRanking | null;
+  /**
    * Set on a Survived card (S2 content warnings): the scare DTDD says the movie or series has ("Survived the jump
    * scares"). Only with the `survived` template, on a finish.
    */
@@ -88,8 +94,11 @@ export type CardData = {
   hide?: CardHideable[];
 };
 
-/** Things a user can hide on a card (S1 share artwork: "hide username or any stat"; the profile photo, ADR 0068). */
-export const CARD_HIDEABLE = ["username", "photo", "time", "episodes", "seasons", "finisher"] as const;
+/**
+ * Things a user can hide on a card (S1 share artwork: "hide username or any stat"; the profile photo, ADR 0068; a
+ * ranking's ✓ marks and notes, ADR 0099).
+ */
+export const CARD_HIDEABLE = ["username", "photo", "time", "episodes", "seasons", "finisher", "done", "notes"] as const;
 export type CardHideable = (typeof CARD_HIDEABLE)[number];
 
 export type CardProgress = {
@@ -247,6 +256,8 @@ export const CARD_KINDS = [
   "reel",
   "atlas",
   "shelf",
+  "ranking",
+  "tier_list",
 ] as const;
 export type CardKind = (typeof CARD_KINDS)[number];
 

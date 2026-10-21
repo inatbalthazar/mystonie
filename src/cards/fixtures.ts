@@ -3,6 +3,13 @@ import type { CardData } from "@/core/cards/types";
 /** A profile photo for the footer (ADR 0068); real ones live in the avatars bucket. */
 const PHOTO = "/journal/authors/stonie.svg";
 
+/** Posters the tier list fixtures share. */
+const TIER_POSTERS = [
+  "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg",
+  "https://image.tmdb.org/t/p/w342/gHm96BRW4GoI339rF1vYoYTB6Qe.jpg",
+  "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg",
+];
+
 /** Hard cases for the card lab and screenshot tests: long titles, every script, missing data. */
 export const CARD_FIXTURES: { id: string; data: CardData }[] = [
   {
@@ -302,6 +309,74 @@ export const CARD_FIXTURES: { id: string; data: CardData }[] = [
     data: {
       kind: "movie", name: "My Shelf", posterUrl: null, finishedOn: "2026-10-05", username: "a_very_long_username_here",
       shelf: { pinned: 0, total: 3, titles: [{ name: "Parasite", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" }, { name: "Up", kind: "movie", posterUrl: "https://image.tmdb.org/t/p/w342/gHm96BRW4GoI339rF1vYoYTB6Qe.jpg" }, { name: "Heat", kind: "movie", posterUrl: null }] },
+    },
+  },
+  // Rankings (ADR 0099): a full top ten of every kind with places, notes and ✓ marks, and a top three of places.
+  {
+    id: "rank-ten",
+    data: {
+      kind: "movie", name: "Best of everything, ever, in my humble opinion", posterUrl: null, finishedOn: "2026-10-22", username: "maya", avatarUrl: PHOTO,
+      ranking: {
+        items: [
+          { ref: "tmdb:series:66732", kind: "series", name: "Stranger Things", year: 2016, posterUrl: "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg", note: "Grew up with these kids", done: true },
+          { ref: "tmdb:movie:496243", kind: "movie", name: "Parasite", year: 2019, posterUrl: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg", note: "The stairs!", done: true },
+          { ref: "country:JP", kind: "country", name: "Japan", note: "Kyoto in autumn", done: true },
+          { ref: "tmdb:movie:935", kind: "movie", name: "Dr. Strangelove or: How I Learned to Stop Worrying and Love the Bomb", year: 1964, posterUrl: "https://image.tmdb.org/t/p/w342/gHm96BRW4GoI339rF1vYoYTB6Qe.jpg" },
+          { ref: "region:TH-50", kind: "region", name: "Chiang Mai" },
+          { ref: "tmdb:movie:14160", kind: "movie", name: "Up", year: 2009, posterUrl: "https://image.tmdb.org/t/p/w342/gHm96BRW4GoI339rF1vYoYTB6Qe.jpg", done: true },
+          { ref: "tmdb:movie:329865", kind: "movie", name: "Arrival", year: 2016, posterUrl: "https://image.tmdb.org/t/p/w342/uOOtwVbSr4QDjAGIifLDwpb2Pdl.jpg" },
+          { ref: "country:BR", kind: "country", name: "Brazil" },
+          { ref: "tmdb:movie:949", kind: "movie", name: "Heat", year: 1995, posterUrl: null },
+          { ref: "tmdb:movie:348", kind: "movie", name: "Alien", year: 1979, posterUrl: "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg" },
+        ],
+      },
+    },
+  },
+  {
+    id: "rank-three",
+    data: {
+      kind: "movie", name: "Top 3 trips", posterUrl: null, finishedOn: "2026-10-22", username: "a_very_long_username_here",
+      ranking: {
+        items: [
+          { ref: "country:IT", kind: "country", name: "Italy", note: "Pasta, then more pasta", done: true },
+          { ref: "region:JP-13", kind: "region", name: "Tokyo", done: true },
+          { ref: "country:CL", kind: "country", name: "Chile" },
+        ],
+      },
+    },
+  },
+  // Tier lists (ADR 0099, step 2): thirty things on six rows with long row names, and five on three rows with one left empty.
+  {
+    id: "tier-full",
+    data: {
+      kind: "movie", name: "Every film I saw this year, ranked without mercy", posterUrl: null, finishedOn: "2026-10-22", username: "maya", avatarUrl: PHOTO,
+      ranking: {
+        tiers: ["S", "A", "B", "C", "Never again", "Skip"],
+        items: Array.from({ length: 30 }, (_, i) => ({
+          ref: i === 4 ? "country:JP" : i === 9 ? "region:TH-50" : `tmdb:movie:${1000 + i}`,
+          kind: (i === 4 ? "country" : i === 9 ? "region" : "movie") as "movie",
+          name: i === 4 ? "Japan" : i === 9 ? "Chiang Mai" : i % 7 === 3 ? "A film without a poster" : `Film ${i + 1}`,
+          posterUrl: i === 4 || i === 9 || i % 7 === 3 ? null : TIER_POSTERS[i % 3],
+          done: i % 4 === 0,
+          tier: [0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 5, 5, 5, 5, 5][i],
+        })),
+      },
+    },
+  },
+  {
+    id: "tier-small",
+    data: {
+      kind: "movie", name: "Ghibli", posterUrl: null, finishedOn: "2026-10-22", username: "a_very_long_username_here",
+      ranking: {
+        tiers: ["S", "A", "B", "C", "D"],
+        items: [
+          { ref: "tmdb:movie:129", kind: "movie", name: "Spirited Away", posterUrl: TIER_POSTERS[0], done: true, tier: 0 },
+          { ref: "tmdb:movie:128", kind: "movie", name: "Princess Mononoke", posterUrl: TIER_POSTERS[1], tier: 0 },
+          { ref: "tmdb:movie:8392", kind: "movie", name: "My Neighbor Totoro", posterUrl: TIER_POSTERS[2], done: true, tier: 1 },
+          { ref: "country:JP", kind: "country", name: "Japan", tier: 3 },
+          { ref: "tmdb:movie:37933", kind: "movie", name: "Tales from Earthsea", posterUrl: null, tier: 4 },
+        ],
+      },
     },
   },
   {

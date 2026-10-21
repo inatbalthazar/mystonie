@@ -310,6 +310,9 @@ export function useHeadline(data: CardData): string {
   // "My top 10" when every title on it is a favourite, else "On my shelf" (ADR 0095).
   if (data.shelf) return t("shelfHeadline", { count: data.shelf.titles.length, top: String(data.shelf.pinned === data.shelf.titles.length) });
   if (data.atlas) return t("atlasHeadline");
+  // "Top 5", or "Tier list" (ADR 0099).
+  if (data.ranking?.tiers) return t("tierHeadline");
+  if (data.ranking) return t("rankHeadline", { count: data.ranking.items.length });
   // "Imported 312 films", "Imported 48 books" (S2 Letterboxd import, S3 import & export).
   if (data.recap?.imported) return t("importHeadline", { count: data.recap.titleCount, unit: data.recap.importedUnit ?? "film" });
   // "All I've watched" (Share my collection, stage 4): one area's all-time card.
@@ -376,7 +379,7 @@ export function footerUser(data: CardData): { username: string | null; avatarUrl
  */
 export function cardFinishShare(data: CardData): number | null {
   if (!isRare(data.finishShare) || data.hide?.includes("finisher")) return null;
-  return data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas || data.shelf ? null : data.finishShare;
+  return data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas || data.shelf || data.ranking ? null : data.finishShare;
 }
 
 /**

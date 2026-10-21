@@ -195,7 +195,11 @@
       "gilded": "ฉบับปกทอง",
       "arcade": "ตู้เกม",
       "lineup": "ไลน์อัป",
-      "shelf": "ตู้หนังสือ"
+      "shelf": "ตู้หนังสือ",
+      "countdown": "Countdown",
+      "hallOfFame": "Hall of Fame",
+      "tierBoard": "Tier board",
+      "tierGold": "Gold tiers"
     },
     "sizes": {
       "story": "สตอรี่ 9:16",
@@ -278,7 +282,10 @@
     "shelfName": "ชั้นของฉัน",
     "shelfHeadline": "{top, select, true {ท็อป {count} ของฉัน} other {บนชั้นของฉัน}}",
     "shelfTotal": "เรื่องบนชั้นของฉัน",
-    "shelfRank": "{rank}."
+    "shelfRank": "{rank}.",
+    "rankHeadline": "Top {count}",
+    "tierHeadline": "Tier list",
+    "proSeal": "PRO"
   },
   "SignUp": {
     "heading": "เก็บทุกเรื่องที่ดูจบไว้ในคอลเลกชันเดียว",
@@ -697,7 +704,7 @@
     "publishError": "เผยแพร่ลิงก์การ์ดไม่สำเร็จ ลองอีกครั้ง หรือกดดาวน์โหลด",
     "linkCopied": "คัดลอกลิงก์แล้ว วางได้ทุกที่",
     "hideOnCard": "ซ่อนบนการ์ด",
-    "hideItem": "{item, select, username {@{username}} time {{shelf, select, read {เวลาที่อ่าน} play {เวลาที่เล่น} other {เวลาที่ดู}}} episodes {{shelf, select, read {ความคืบหน้า} other {จำนวนตอน}}} finisher {จบแบบหายาก} photo {รูปโปรไฟล์} other {ซีซัน}}",
+    "hideItem": "{item, select, username {@{username}} time {{shelf, select, read {เวลาที่อ่าน} play {เวลาที่เล่น} other {เวลาที่ดู}}} episodes {{shelf, select, read {ความคืบหน้า} other {จำนวนตอน}}} finisher {จบแบบหายาก} photo {รูปโปรไฟล์} done {เครื่องหมาย ✓} notes {โน้ต} other {ซีซัน}}",
     "notesTitle": "ให้คะแนนไหม? (ไม่บังคับ)",
     "recapTitle": "{period, select, month {เดือนของคุณ} year {ปีของคุณ} all {ที่ดูมาทั้งหมด} other {สัปดาห์ของคุณ}} {range}",
     "finishedReadTitle": "อ่าน {name} จบแล้ว!",
@@ -719,7 +726,8 @@
     "areaTitle": "{area, select, watch {ทุกเรื่องที่คุณดู} read {ทุกเล่มที่คุณอ่าน} play {ทุกเกมที่คุณเล่น} other {คอลเลกชันของคุณ}}, {range}",
     "atlasCardTitle": "{count} ประเทศใน Atlas ของคุณ",
     "atlasRegionCardTitle": "{country}: {done} จาก {total} {many}",
-    "shelfCardTitle": "ท็อป {count} บนชั้นของคุณ"
+    "shelfCardTitle": "ท็อป {count} บนชั้นของคุณ",
+    "rankCardTitle": "{name}"
   },
   "SharedCard": {
     "notFoundTitle": "ไม่พบการ์ด · Mystonie",
@@ -733,6 +741,9 @@
     "ctaTitle": "ดูเรื่องดีๆ จบมาเหมือนกันไหม?",
     "ctaBody": "เลือกเรื่อง แล้วได้การ์ดแบบนี้ในไม่กี่วินาที ฟรี ไม่ต้องมีบัญชี",
     "makeYourOwn": "ทำการ์ดของคุณ",
+    "rankCtaTitle": "คุณจะจัดอันดับต่างจากนี้ไหม",
+    "rankCtaBody": "เริ่มจากลิสต์นี้ สลับที่ เพิ่มหรือตัดออก ให้เป็นของคุณเอง ฟรี",
+    "rankRemix": "จัดอันดับในแบบของคุณ",
     "startCollection": "เริ่มคอลเลกชันของคุณ",
     "recapLine": "{period, select, month {หนึ่งเดือนของการดู} year {หนึ่งปีของการดู} all {ที่ดูมาทั้งหมด} other {หนึ่งสัปดาห์ของการดู}} {range}",
     "reelLine": "Reel of the Day #{number}",
@@ -740,7 +751,9 @@
     "importLine": "นำเข้า{unit, select, book {หนังสือ {count, plural, other {# เล่ม}}} series {ซีรีส์ {count, plural, other {# เรื่อง}}} manga {มังงะ {count, plural, other {# เรื่อง}}} game {เกม {count, plural, other {# เกม}}} title {{count, plural, other {# เรื่อง}}} other {หนัง {count, plural, other {# เรื่อง}}}} {range}",
     "atlasLine": "Atlas {count} ประเทศ",
     "atlasRegionsLine": "{country}: เคยไป {done} จาก {total} {many}",
-    "shelfLine": "ท็อป {count} บนชั้น"
+    "shelfLine": "ท็อป {count} บนชั้น",
+    "rankLine": "Top {count}: {name}",
+    "tierLine": "Tier list: {name}"
   },
   "Recap": {
     "pageTitle": "การ์ดสรุป",
@@ -873,7 +886,9 @@
     "shelfCard": "ชั้น ท็อป {count}",
     "visitsWeek": "สัปดาห์นี้มีคนเข้าชม <b>{count}</b> คน",
     "visitsHint": "· เห็นแค่คุณ ไม่บอกว่าใคร",
-    "cardSeen": "มีคนเห็น {count} คน"
+    "cardSeen": "มีคนเห็น {count} คน",
+    "makeRanking": "จัดอันดับ",
+    "makeRankingHint": "Top 3, 5, 10 หรือ tier list ของอะไรก็ได้ เป็นการ์ด"
   },
   "Album": {
     "arrange": "จัดเรียง",
@@ -976,7 +991,18 @@
     "inviteCopied": "คัดลอกลิงก์แล้ว",
     "inviteShareText": "มาเก็บเรื่องที่ดูจบด้วยกันบน Mystonie",
     "inviteAccepted": "คุณกับ <b>{name}</b> follow กันและกันแล้ว",
-    "inviteAcceptedClose": "ปิด"
+    "inviteAcceptedClose": "ปิด",
+    "showLabel": "แสดง",
+    "showAll": "ทั้งหมด",
+    "showFinishes": "ดูจบ",
+    "showRankings": "จัดอันดับ",
+    "rankingsEmpty": "คนที่คุณติดตามยังไม่ได้แชร์การจัดอันดับ",
+    "makeRanking": "จัดอันดับของคุณเอง",
+    "rankedWhen": "{type, select, tier {Tier list} other {Top {count}}} · {when}",
+    "rankingLabel": "{type, select, tier {Tier list} other {Top {count}}}",
+    "rankingAlt": "การ์ด: {name}",
+    "rankingMore": "และอีก {count}",
+    "rankRemix": "จัดอันดับในแบบของคุณ"
   },
   "Board": {
     "title": "กระดาน",
@@ -2212,5 +2238,60 @@
     "finished": "{count, plural, =0 {ยังไม่มีเรื่องที่จบ} other {จบแล้ว # เรื่อง}}",
     "latest": "ล่าสุด: {title}",
     "nobody": "ยังไม่มีสมาชิกใหม่"
+  },
+  "Rank": {
+    "kicker": "Top list และ Tier list",
+    "title": "จัดอันดับ",
+    "intro": "จัดอันดับอะไรก็ได้ หนัง ซีรีส์ หนังสือ มังงะ เกม ประเทศ หรือจังหวัด ดูแล้วหรือยังก็ได้ เป็นลิสต์ของคุณ",
+    "modeLabel": "จะทำแบบไหน",
+    "modeTop": "Top list",
+    "modeTier": "Tier list",
+    "tierNamePlaceholder": "หนังจิบลิ จัดเทียร์",
+    "tierDefaultName": "Tier list ของฉัน",
+    "rowLabel": "ชื่อแถวที่ {row}",
+    "rowAdd": "เพิ่มในแถว {tier}",
+    "rowEmpty": "ยังว่างอยู่",
+    "addRow": "เพิ่มแถว",
+    "removeRow": "ลบแถว {tier}",
+    "tierCount": "{count} จาก {max}",
+    "tierHint": "แตะโปสเตอร์เพื่อย้ายไปแถวอื่น หรือเลื่อนซ้ายขวาในแถว",
+    "moveTo": "ย้ายไปแถว",
+    "moveLeft": "เลื่อน {name} ไปทางซ้าย",
+    "moveRight": "เลื่อน {name} ไปทางขวา",
+    "deselect": "เสร็จ",
+    "tierFull": "ครบ {max} แล้ว ใส่ได้เท่านี้ใน tier list เดียว",
+    "nameLabel": "ตั้งชื่อลิสต์ (ไม่ใส่ก็ได้)",
+    "namePlaceholder": "Top {count} ตลอดกาลของฉัน",
+    "defaultName": "Top {count} ของฉัน",
+    "sizeLabel": "จำนวน",
+    "size": "Top {count}",
+    "slotEmpty": "เพิ่มอันดับ {rank}",
+    "addMore": "เพิ่มอีกหนึ่ง",
+    "moveUp": "เลื่อน {name} ขึ้น",
+    "moveDown": "เลื่อน {name} ลง",
+    "remove": "เอา {name} ออก",
+    "addNote": "+ เขียนสั้นๆ ถึงเรื่องนี้",
+    "noteLabel": "ข้อความสั้นๆ ถึง {name} (ไม่ใส่ก็ได้)",
+    "notePlaceholder": "ทำไมถึงติดอันดับ",
+    "finished": "คุณดูจบแล้ว",
+    "beenThere": "คุณเคยไปแล้ว",
+    "kind": "{kind, select, movie {หนัง} series {ซีรีส์} book {หนังสือ} manga {มังงะ} game {เกม} country {ประเทศ} other {สถานที่}}",
+    "doneHint": "✓ คือสิ่งที่คุณดูจบหรือเคยไปแล้ว ซ่อนบนการ์ดได้",
+    "make": "สร้างการ์ด",
+    "clear": "เริ่มใหม่",
+    "pickTitle": "เพิ่มอันดับ {rank}",
+    "close": "ปิด",
+    "tabTitles": "เรื่อง",
+    "tabPlaces": "สถานที่",
+    "searchLabel": "ค้นหาหนัง ซีรีส์ หนังสือ มังงะ และเกม",
+    "searchPlaceholder": "ค้นหาอะไรก็ได้",
+    "placesLabel": "ค้นหาประเทศ",
+    "placesPlaceholder": "ประเทศ",
+    "regions": "จังหวัด/รัฐ",
+    "openRegions": "สถานที่ใน{country}",
+    "allCountries": "ทุกประเทศ",
+    "regionsSearch": "ค้นหาใน{country}",
+    "loading": "กำลังโหลด…",
+    "loadError": "โหลดแผนที่ไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่"
   }
 }

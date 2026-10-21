@@ -164,6 +164,23 @@ From the owner's notes at the end of [brief.th.md](brief.th.md). Each task write
 - [ ] 🧑 **After deploying the lively album:**
   1. ~~Apply the migrations to the remote project~~ (done 2026-10-06: the first three were already on it, `20261027090000_stage4_lively_album.sql` went through the MCP; `get_advisors` showed nothing new beyond the intended patterns).
   2. Sign in, open Settings → About Mystonie → "Welcome desk (team)" and tap "Show the Team label", so new members follow you too.
+**Rankings** (the owner, 2026-10-21: Top 3, 5, 10 and tier lists of anything as cards, for engagement and people's own content; built in steps, [ADR 0099](decisions/0099-rankings.md), [spec](product/features/S4-rankings.md)):
+- [x] **Step 1, top lists:** `/rank` (Me → Cards):
+  - 1–10 titles of every kind and countries or their regions, ordered, with optional notes;
+  - a ✓ from the server for what you finished or have been to, hideable;
+  - Countdown (free) and Hall of Fame (Pro, gold PRO seal).
+  - · ⚡ high · **Done 2026-10-22**. Migration `20261028090000_stage4_rankings.sql`.
+- [ ] 🧑 Steps 1, 2 and 4 before deploying: ~~apply `20261028090000_stage4_rankings.sql` to the remote project~~ (done 2026-10-22 through the MCP; `get_advisors` showed nothing new). ~~Reinstall Docker Desktop~~ (done 2026-10-22, its data in `D:\DockerData`; pgTAP and `e2e/rank.spec.ts` pass, and `/rank` was checked at 360px, light and dark, in a browser). Left: try `/rank` in both modes on a real phone after deploying.
+- [x] **Step 2, tier lists:** a "Top list | Tier list" switch on `/rank`:
+  - 1–6 rows, S A B C D to start, each renamable (12 characters) and removable when empty;
+  - up to 30 titles and places; tap one to move it to another row or along its row, or take it off;
+  - empty rows left off the card; the same server-set ✓ marks, hideable;
+  - Tier board (free, coloured sticky notes) and Gold tiers (Pro, the Hall of Fame's velvet, gold plaques and PRO seal).
+  - · **Done 2026-10-22** (card lab checked; the maker not yet run, no local database). Same migration.
+- [x] **Step 3, in the feed:** the rankings and tier lists shared by the people you follow (and yours) in Following, by date among the finishes, with "Rank these your way"; a filter: All · Finishes · Rankings (`?show=`). · **Done 2026-10-22**. Migration `20261029090000_stage4_rankings_feed.sql`.
+- [ ] 🧑 Step 3 before deploying: apply `20261029090000_stage4_rankings_feed.sql` to the remote project (an agent can, when asked). Without it the feed still works, just without rankings.
+- [x] **Step 4, remix:** "Rank these your way" on a shared ranking or tier list (`/c/<id>`) opens `/rank?from=<id>` (through sign-in when signed out) with the same name, things and rows, without its maker's ✓ marks and notes. Event `ranking_remixed`. · **Done 2026-10-22**.
+
 - Comments on articles and a feed of everyone's long reviews still wait for their gate ([later/long-reviews.md](product/later/long-reviews.md)). Sponsored articles aren't planned: the Journal is the team's and its members' own writing, no ads (2026-10-01).
 
 **Revenue plan** (the owner's question of 2026-09-30, [ADR 0049](decisions/0049-revenue-plan.md): tips at launch, then Pro and affiliate links, no banner ads)

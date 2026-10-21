@@ -281,13 +281,15 @@ describe("templates", () => {
   });
 
   it("has a Pro style for each kind of card, last on the swipe and never the one a card opens on (ADR 0084)", () => {
-    expect(TEMPLATE_IDS.filter(isProTemplate)).toEqual(["filmStrip", "premiere", "gilded", "arcade", "lineup"]);
+    expect(TEMPLATE_IDS.filter(isProTemplate)).toEqual(["filmStrip", "premiere", "gilded", "arcade", "lineup", "hallOfFame", "tierGold"]);
     const lastIsPro = (ids: string[]) => ids.at(-1);
     expect(lastIsPro(templatesFor("finish", "series"))).toBe("premiere");
     expect(lastIsPro(templatesFor("progress", "book"))).toBe("gilded");
     expect(lastIsPro(templatesFor("finish", "manga"))).toBe("gilded");
     expect(lastIsPro(templatesFor("finish", "game"))).toBe("arcade");
     for (const kind of ["weekly_recap", "monthly_recap", "stats", "year_review"] as const) expect(lastIsPro(templatesFor(kind, "book"))).toBe("lineup");
+    expect(lastIsPro(templatesFor("ranking", "movie"))).toBe("hallOfFame");
+    expect(lastIsPro(templatesFor("tier_list", "movie"))).toBe("tierGold");
     // Each draws only its own kind of title and card.
     expect(templateFits("premiere", "finish", "feed", "book")).toBe(false);
     expect(templateFits("gilded", "finish", "story", "movie")).toBe(false);
@@ -570,5 +572,46 @@ describe("Shelf cards (ADR 0095)", () => {
     expect(parseCardSave({ ...save, kind: "stats", templateId: "boldStats" })).toBeNull();
     expect(parseCardSave({ ...save, data: { ...shelfData, shelf: null } })).toBeNull();
     expect(parseCardSave({ ...save, templateId: "atlas" })).toBeNull();
+  });
+});
+
+describe("ranking cards (ADR 0099)", () => {
+  const poster = "https://image.tmdb.org/t/p/w342/7IiTTgloJzvGI1TAYymCfbfl3vT.jpg";
+  const ranking = {
+    items: [
+      { ref: "tmdb:movie:496243", kind: "movie", name: "Parasite", year: 2019, posterUrl: poster, note: "The stairs" },
+      { ref: "country:JP", kind: "country", name: "Japan" },
+      { ref: "region:TH-10", kind: "region", name: "Bangkok" },
+    ],
+  };
+  const data = { kind: "movie", name: "My top 3", finishedOn: "2026-10-22", posterUrl: null, ranking, hide: ["done", "notes"] };
+  const save = { id: ID, kind: "ranking", templateId: "countdown", size: "story", data, share: true };
+
+  it("takes a ranking on its own templates, free and Pro, with its marks and notes hideable", () => {
+    expect(parseCardSave(save)).toMatchObject({ kind: "ranking", templateId: "countdown", data: { name: "My top 3", hide: ["done", "notes"] } });
+    expect(parseCardSave({ ...save, templateId: "hallOfFame", size: "feed" })).toMatchObject({ templateId: "hallOfFame" });
+    expect(defaultTemplate("ranking", "movie")).toBe("countdown");
+  });
+
+  it("is only ever a ranking card, about no one title, with a short name", () => {
+    expect(parseCardSave({ ...save, kind: "sticker", templateId: "sticker" })).toBeNull();
+    expect(parseCardSave({ ...save, templateId: "shelf" })).toBeNull();
+    expect(parseCardSave({ ...save, data: { ...data, ranking: null } })).toBeNull();
+    expect(parseCardData({ ...data, posterUrl: poster })).toBeNull();
+    expect(parseCardData({ ...data, name: "x".repeat(61) })).toBeNull();
+    expect(parseCardData({ ...data, shelf: { titles: [{ name: "X", kind: "movie", posterUrl: null }], pinned: 0, total: 1 } })).toBeNull();
+    expect(parseCardData({ ...data, ranking: { items: [] } })).toBeNull();
+  });
+
+  it("takes a tier list as its own kind, on its own templates (step 2)", () => {
+    const tiered = { ...data, name: "Tiers", hide: ["done"], ranking: { tiers: ["S", "A"], items: ranking.items.map((i, n) => ({ ...i, note: null, tier: n % 2 })) } };
+    const tierSave = { ...save, kind: "tier_list", templateId: "tierBoard", data: tiered };
+    expect(parseCardSave(tierSave)).toMatchObject({ kind: "tier_list", templateId: "tierBoard", data: { ranking: { tiers: ["S", "A"] } } });
+    expect(parseCardSave({ ...tierSave, templateId: "tierGold", size: "feed" })).toMatchObject({ templateId: "tierGold" });
+    expect(defaultTemplate("tier_list", "movie")).toBe("tierBoard");
+    // A tier list isn't a top list, nor the other way round.
+    expect(parseCardSave({ ...tierSave, kind: "ranking", templateId: "countdown" })).toBeNull();
+    expect(parseCardSave({ ...save, kind: "tier_list", templateId: "tierBoard" })).toBeNull();
+    expect(parseCardSave({ ...tierSave, templateId: "countdown" })).toBeNull();
   });
 });

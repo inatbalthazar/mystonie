@@ -24,6 +24,8 @@ async function cardLine(card: SharedCard, locale: Locale): Promise<string> {
   }
   if (card.data.atlas) return t("atlasLine", { count: card.data.atlas.countries.length });
   if (card.data.shelf) return t("shelfLine", { count: card.data.shelf.titles.length });
+  if (card.data.ranking?.tiers) return t("tierLine", { name: card.data.name });
+  if (card.data.ranking) return t("rankLine", { count: card.data.ranking.items.length, name: card.data.name });
   const recap = card.data.recap;
   if (recap) {
     const format = await getFormatter({ locale });
@@ -141,13 +143,14 @@ export default async function SharedCardPage({ params }: PageProps<"/[locale]/c/
       </div>
 
       <section className="flex flex-col gap-3 rounded-3xl border-2 border-dashed border-border px-5 py-6 text-center">
-        <p className="font-display text-xl font-extrabold">{t("ctaTitle")}</p>
-        <p className="text-sm text-muted-foreground">{t("ctaBody")}</p>
+        {/* A ranking asks to be argued with: start from its list (ADR 0099, step 4). Signed out, sign-in comes first. */}
+        <p className="font-display text-xl font-extrabold">{t(data.ranking ? "rankCtaTitle" : "ctaTitle")}</p>
+        <p className="text-sm text-muted-foreground">{t(data.ranking ? "rankCtaBody" : "ctaBody")}</p>
         <Link
-          href={{ pathname: "/", query: { ref: "card", tpl: card.templateId } }}
+          href={data.ranking ? { pathname: "/rank", query: { from: card.id } } : { pathname: "/", query: { ref: "card", tpl: card.templateId } }}
           className="flex h-12 items-center justify-center rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press"
         >
-          {t("makeYourOwn")}
+          {t(data.ranking ? "rankRemix" : "makeYourOwn")}
         </Link>
         <Link href="/auth" className="flex h-11 items-center justify-center rounded-full font-semibold ring-1 ring-border hover:bg-muted press">
           {t("startCollection")}

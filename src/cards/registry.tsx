@@ -7,8 +7,10 @@ import { BoldStatsCard } from "./templates/bold-stats";
 import { CalendarCard } from "./templates/calendar";
 import { CartridgeCard } from "./templates/cartridge";
 import { CollageCard } from "./templates/collage";
+import { CountdownCard } from "./templates/countdown";
 import { FilmStripCard } from "./templates/film-strip";
 import { GildedCard } from "./templates/gilded";
+import { HallOfFameCard } from "./templates/hall-of-fame";
 import { LineupCard } from "./templates/lineup";
 import { MangaPanelCard } from "./templates/manga-panel";
 import { PolaroidCard } from "./templates/polaroid";
@@ -20,6 +22,8 @@ import { StoneCard } from "./templates/stone";
 import { StickerCard } from "./templates/sticker";
 import { SurvivedCard } from "./templates/survived";
 import { TicketCard } from "./templates/ticket";
+import { TierBoardCard } from "./templates/tier-board";
+import { TierGoldCard } from "./templates/tier-gold";
 import { YearbookCard } from "./templates/yearbook";
 
 export type { TemplateId };
@@ -49,6 +53,10 @@ const COMPONENTS: Record<TemplateId, ComponentType<TemplateProps>> = {
   gilded: GildedCard,
   arcade: ArcadeCard,
   lineup: LineupCard,
+  countdown: CountdownCard,
+  hallOfFame: HallOfFameCard,
+  tierBoard: TierBoardCard,
+  tierGold: TierGoldCard,
 };
 
 export const TEMPLATES = TEMPLATE_META;

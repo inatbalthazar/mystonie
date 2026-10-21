@@ -1,5 +1,5 @@
 import { FreshPage } from "@/components/motion/fresh-page";
-import { LogInIcon, UsersIcon } from "lucide-react";
+import { ListOrderedIcon, LogInIcon, UsersIcon } from "lucide-react";
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getFormatter, getTranslations, setRequestLocale } from "next-intl/server";
@@ -17,16 +17,19 @@ import type { ReactNode } from "react";
 import { localizedPath } from "@/core/auth";
 import { FEED_ARTICLES, feedTabs, pickFeedTab, type FeedArticle, type FeedTab } from "@/core/journal-feed";
 import { filterArticles, parseJournalFilters, sortArticles, type JournalFilters as Filters } from "@/core/journal-posts";
-import { nextFeedCursor } from "@/core/social";
+import { FEED_SHOWS, nextFeedCursor, parseFeedShow, type FeedShow } from "@/core/social";
 import { newestArticleKey } from "@/data/journal";
 import { journalFeed } from "@/data/journal-feed";
+import { FEED_RANKINGS, FEED_RANKINGS_ONLY, followingRankings } from "@/data/rankings";
 import { followingFeed, myActivity } from "@/data/social";
 import { userClient } from "@/data/supabase-server";
 import { Link, redirect } from "@/i18n/navigation";
 import { routing } from "@/i18n/routing";
+import { cn } from "@/lib/utils";
 
 const ACTIVITY = 8;
 const TAB_NAMES = { following: "tabFollowing", articles: "tabArticles", saved: "tabSaved" } as const;
+const SHOW_NAMES = { all: "showAll", finishes: "showFinishes", rankings: "showRankings" } as const;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Social");
@@ -39,7 +42,8 @@ export async function generateMetadata(): Promise<Metadata> {
  * **Following**, the default, is what the people you follow finished and your own finishes, newest first, each with a
  * Stamp, with the Journal's newest articles among them by date (ADR 0052), under the latest Stamps on your finishes
  * and new followers ("Follow back"); **Articles** is every article, For you first (articles about the titles in your
- * collection, saying why); **Saved** shows once you saved one. The community pages are on Home (ADR 0078). Visitors
+ * collection, saying why); **Saved** shows once you saved one. Following also has the rankings and tier lists the
+ * people you follow shared (ADR 0099), and a filter (`?show=`): everything, only finishes, or only rankings. The community pages are on Home (ADR 0078). Visitors
  * get the articles, newest first, and a way to sign in. Following and Articles carry dots for what's new on them;
  * opening a tab clears its dot (ADR 0054, ADR 0074).
  */
@@ -58,9 +62,16 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
   const following = !!supabase && !!userId && wanted === "following";
   // The Journal's categories, kinds and order (ADR 0092).
   const filters = parseJournalFilters(query, !!userId);
+  const show = parseFeedShow(query.show);
 
-  const [items, activity, journal, newestArticle, t, format] = await Promise.all([
-    following ? followingFeed(supabase, userId, null) : [],
+  const [items, rankings, activity, journal, newestArticle, t, format] = await Promise.all([
+    following && show !== "rankings" ? followingFeed(supabase, userId, null) : [],
+    following && show !== "finishes"
+      ? followingRankings(supabase, userId, show === "rankings" ? FEED_RANKINGS_ONLY : FEED_RANKINGS).catch((error: unknown) => {
+          console.error(error);
+          return [];
+        })
+      : [],
     following
       ? myActivity(supabase, ACTIVITY).catch((error: unknown) => {
           console.error(error);
@@ -84,7 +95,9 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
   if (tab !== wanted) return redirect({ href: "/feed", locale });
   // eslint-disable-next-line react-hooks/purity -- a server render, once per request
   const now = Date.now();
-  const friends = items.some((i) => !i.mine);
+  const friends = items.some((i) => !i.mine) || rankings.some((r) => !r.mine);
+  // Articles go in with everything; the filters show only their own kind.
+  const articles = show === "all" ? journal?.articles : undefined;
   const href = (value: FeedTab) => (value === tabs[0] ? "/feed" : { pathname: "/feed", query: { tab: value } });
   // Swiping sideways opens the tab next to this one (ADR 0070).
   const at = tabs.indexOf(tab);
@@ -168,7 +181,19 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
                     </section>
                   )}
 
-                  {!friends && (
+                  <ShowFilter show={show} label={t("showLabel")} names={(value) => t(SHOW_NAMES[value])} />
+
+                  {show === "rankings" && rankings.length === 0 && (
+                    <section className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-8 text-center">
+                      <p className="font-hand text-2xl text-muted-foreground">{t("rankingsEmpty")}</p>
+                      <Link href="/rank" className="flex h-12 items-center gap-2 rounded-full bg-brand px-5 font-bold text-brand-foreground shadow-sm hover:bg-brand/90 press">
+                        <ListOrderedIcon className="size-5" aria-hidden="true" />
+                        {t("makeRanking")}
+                      </Link>
+                    </section>
+                  )}
+
+                  {!friends && show !== "rankings" && (
                     <section className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-8 text-center">
                       <p className="font-hand text-2xl text-muted-foreground">{t("feedEmpty")}</p>
                       <Link
@@ -181,8 +206,9 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
                     </section>
                   )}
 
-                  {(items.length > 0 || (journal?.articles.length ?? 0) > 0) && (
-                    <FeedList items={items} next={nextFeedCursor(items)} now={now} articles={journal?.articles} />
+                  {(items.length > 0 || rankings.length > 0 || (articles?.length ?? 0) > 0) && (
+                    // A new key per filter, so the list starts over with the filter's first page.
+                    <FeedList key={show} items={items} next={nextFeedCursor(items)} now={now} articles={articles} rankings={rankings} />
                   )}
                 </>
               ) : (
@@ -193,6 +219,29 @@ export default async function FeedPage({ params, searchParams }: PageProps<"/[lo
         </SwipeArea>
       </div>
     </main>
+  );
+}
+
+/** The Following tab's filter (ADR 0099, step 3): everything, only finishes, or only rankings, kept in the address. */
+function ShowFilter({ show, label, names }: { show: FeedShow; label: string; names: (value: FeedShow) => string }) {
+  return (
+    <nav aria-label={label} className="-mt-2 flex gap-2">
+      {FEED_SHOWS.map((value) => (
+        <Link
+          key={value}
+          href={value === "all" ? "/feed" : { pathname: "/feed", query: { show: value } }}
+          replace
+          scroll={false}
+          aria-current={show === value ? "true" : undefined}
+          className={cn(
+            "flex h-9 shrink-0 items-center rounded-full px-4 text-sm font-bold whitespace-nowrap ring-1 transition-colors",
+            show === value ? "bg-foreground text-background ring-foreground" : "bg-card ring-border hover:ring-brand/50",
+          )}
+        >
+          {names(value)}
+        </Link>
+      ))}
+    </nav>
   );
 }
 

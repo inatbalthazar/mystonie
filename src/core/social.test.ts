@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { nextFeedCursor, normalizePeopleQuery, parseFeedCursor, parseStamp, parseUserToggle, suggestionReason } from "./social";
+import { mergeByTime, nextFeedCursor, normalizePeopleQuery, parseFeedCursor, parseFeedShow, parseStamp, parseUserToggle, suggestionReason } from "./social";
 
 const id = "01926000-0000-7000-8000-0000000000A1";
 
@@ -90,5 +90,23 @@ describe("suggestionReason", () => {
     expect(suggestionReason({ ...none, finished: 12 })).toEqual({ kind: "active", finished: 12 });
     // A shared title without its name (not expected) is not a reason on its own.
     expect(suggestionReason({ ...none, shared: 2, finished: 4 })).toEqual({ kind: "active", finished: 4 });
+  });
+});
+
+describe("rankings in the feed (ADR 0099, step 3)", () => {
+  it("reads the Following tab's filter", () => {
+    expect(parseFeedShow("rankings")).toBe("rankings");
+    expect(parseFeedShow("finishes")).toBe("finishes");
+    expect(parseFeedShow(undefined)).toBe("all");
+    expect(parseFeedShow(["rankings"])).toBe("all");
+    expect(parseFeedShow("articles")).toBe("all");
+  });
+
+  it("puts rankings among the finishes by time, holding older ones until the feed is complete", () => {
+    const at = (t: number) => t;
+    expect(mergeByTime([9, 6, 3], [10, 7, 2], at, false)).toEqual([10, 9, 7, 6, 3]);
+    expect(mergeByTime([9, 6, 3], [10, 7, 2], at, true)).toEqual([10, 9, 7, 6, 3, 2]);
+    expect(mergeByTime([], [5, 4], at, true)).toEqual([5, 4]);
+    expect(mergeByTime([], [5, 4], at, false)).toEqual([]);
   });
 });

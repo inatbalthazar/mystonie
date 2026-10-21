@@ -3,14 +3,20 @@
 import { useTranslations } from "next-intl";
 import { useState } from "react";
 import { ArticleRow } from "@/components/journal/article-row";
-import { interleaveArticles, type FeedArticle } from "@/core/journal-feed";
-import type { FeedCursor, FeedItem } from "@/core/social";
+import { articleFeedTime, interleaveArticles, type FeedArticle, type FeedSlot } from "@/core/journal-feed";
+import { mergeByTime, type FeedCursor, type FeedItem, type FeedRanking } from "@/core/social";
 import { FeedEntry } from "./feed-entry";
+import { FeedRankingPost } from "./feed-ranking";
+
+type Slot = FeedSlot<FeedItem, FeedArticle> | { type: "ranking"; ranking: FeedRanking };
+
+const slotTime = (slot: Slot) =>
+  slot.type === "entry" ? Date.parse(slot.item.finishedAt) : slot.type === "article" ? articleFeedTime(slot.article) : Date.parse(slot.ranking.sharedAt);
 
 /**
  * The Following feed: the first page comes from the server, "Load more" fetches the next ones (GET /api/feed). A club
- * page passes its items with no `next`, and `readOnly` for signed-out visitors. `articles`, the Journal's newest, go
- * in by their date as the pages load (ADR 0052).
+ * page passes its items with no `next`, and `readOnly` for signed-out visitors. `articles`, the Journal's newest, and
+ * `rankings`, the newest shared by the people followed (ADR 0099), go in by their date as the pages load (ADR 0052).
  */
 export function FeedList({
   items: first,
@@ -18,12 +24,14 @@ export function FeedList({
   now,
   readOnly = false,
   articles = [],
+  rankings = [],
 }: {
   items: FeedItem[];
   next: FeedCursor | null;
   now: number;
   readOnly?: boolean;
   articles?: FeedArticle[];
+  rankings?: FeedRanking[];
 }) {
   const t = useTranslations("Social");
   const [items, setItems] = useState(first);
@@ -51,10 +59,19 @@ export function FeedList({
   return (
     <div className="flex flex-col gap-6">
       <ul className="stagger flex flex-col gap-6">
-        {interleaveArticles(items, articles, next === null).map((slot, i) =>
+        {mergeByTime<Slot>(
+          interleaveArticles(items, articles, next === null),
+          rankings.map((ranking) => ({ type: "ranking", ranking })),
+          slotTime,
+          next === null,
+        ).map((slot, i) =>
           slot.type === "entry" ? (
             <li key={slot.item.entryId}>
               <FeedEntry item={slot.item} now={now} index={i} readOnly={readOnly} />
+            </li>
+          ) : slot.type === "ranking" ? (
+            <li key={`ranking-${slot.ranking.cardId}`}>
+              <FeedRankingPost ranking={slot.ranking} now={now} index={i} />
             </li>
           ) : (
             <li key={`journal-${slot.article.slug}`}>

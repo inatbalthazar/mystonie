@@ -48,6 +48,10 @@ export const TEMPLATE_META = [
   { id: "atlas", kinds: ["atlas"], sizes: BOTH_SIZES, tier: "free" },
   // The Shelf's top ten (ADR 0095): posters standing on wooden shelves, numbered, favourites first.
   { id: "shelf", kinds: ["shelf"], sizes: BOTH_SIZES, tier: "free" },
+  // Rankings (ADR 0099): a Top 3/5/10 as a countdown torn out of a notebook, number one up top with its poster big.
+  { id: "countdown", kinds: ["ranking"], sizes: BOTH_SIZES, tier: "free" },
+  // Tier lists (ADR 0099, step 2): coloured row labels down the side, the posters (or places) wrapping along each row.
+  { id: "tierBoard", kinds: ["tier_list"], sizes: BOTH_SIZES, tier: "free" },
   { id: "sticker", kinds: ["sticker"], sizes: BOTH_SIZES, tier: "free" },
   // More Pro (ADR 0084), one for each kind of card, last on the swipe. Opening night: the poster in a gold case ringed
   // with bulbs, the title on the lit letter board. Movies and series.
@@ -58,6 +62,10 @@ export const TEMPLATE_META = [
   { id: "arcade", kinds: ["finish"], sizes: BOTH_SIZES, tier: "pro", titleKinds: ["game"] },
   // The period as a festival poster: duotone print, the most watched title headlining, the numbers on a ticket stub.
   { id: "lineup", kinds: ["weekly_recap", "monthly_recap", "stats", "year_review"], sizes: BOTH_SIZES, tier: "pro" },
+  // A ranking's Pro style (ADR 0099): a hall of fame in black velvet and gold, laurels on number one, a Pro seal.
+  { id: "hallOfFame", kinds: ["ranking"], sizes: BOTH_SIZES, tier: "pro" },
+  // A tier list's Pro style: engraved gold plaques on velvet, the posters in gold frames, the gold Pro seal.
+  { id: "tierGold", kinds: ["tier_list"], sizes: BOTH_SIZES, tier: "pro" },
 ] as const satisfies readonly TemplateMeta[];
 
 export type TemplateId = (typeof TEMPLATE_META)[number]["id"];
@@ -111,6 +119,8 @@ export function defaultTemplate(kind: CardKind, titleKind: TitleKind): TemplateI
   if (kind === "reel") return "reel";
   if (kind === "atlas") return "atlas";
   if (kind === "shelf") return "shelf";
+  if (kind === "ranking") return "countdown";
+  if (kind === "tier_list") return "tierBoard";
   if (titleKind === "manga") return "mangaPanel";
   if (titleKind === "book") return "spine";
   if (titleKind === "game" && kind === "finish") return "cartridge";

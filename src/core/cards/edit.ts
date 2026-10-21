@@ -1,4 +1,9 @@
-import { REVIEW_MAX_CHARS } from "./types";
+import { REVIEW_MAX_CHARS, type CardData } from "./types";
+
+/** The poster a card takes its colours from: its own, or a ranking's first (ADR 0099). */
+export function paletteSource(data: CardData): string | null {
+  return data.posterUrl ?? data.ranking?.items.find((i) => i.posterUrl)?.posterUrl ?? null;
+}
 
 /**
  * Star tap: a new star sets a full rating, tapping the current full star makes it a half star,

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { CardPreview } from "@/cards/card-preview";
 import { usePosterPalette } from "@/cards/use-poster-palette";
+import { paletteSource } from "@/core/cards/edit";
 import type { TemplateId } from "@/core/cards/templates";
 import type { CardData, CardSize } from "@/core/cards/types";
 import { track } from "@/lib/analytics";
@@ -30,7 +31,7 @@ export function SharedCardImage({
   lazy?: boolean;
 }) {
   const [broken, setBroken] = useState(false);
-  const palette = usePosterPalette(data.posterUrl);
+  const palette = usePosterPalette(paletteSource(data));
   if (imageUrl && !broken) {
     return (
       // eslint-disable-next-line @next/next/no-img-element -- a user PNG from Storage, shown as is

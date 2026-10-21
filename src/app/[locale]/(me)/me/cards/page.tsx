@@ -1,4 +1,4 @@
-import { EyeIcon } from "lucide-react";
+import { EyeIcon, ListOrderedIcon } from "lucide-react";
 import type { Metadata } from "next";
 import type { Locale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
@@ -64,6 +64,8 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
             ? t("atlasCard", { count: card.data.atlas.countries.length })
             : card.data.shelf
               ? t("shelfCard", { count: card.data.shelf.titles.length })
+              : card.data.ranking
+              ? card.data.name
               : card.data.milestone
               ? t("milestoneCard")
               : card.data.recap?.highlights
@@ -84,6 +86,19 @@ export default async function MyCardsPage({ params, searchParams }: PageProps<"/
             </h2>
             <p className="text-sm text-muted-foreground">{t("cardsIntro")}</p>
           </div>
+          {/* A Top 3, 5 or 10 of anything (ADR 0099). */}
+          <Link
+            href="/rank"
+            className="flex min-h-16 items-center gap-3 rounded-2xl bg-brand-soft/60 p-3 pr-4 ring-1 ring-brand/30 hover:bg-brand-soft dark:bg-brand/10"
+          >
+            <span aria-hidden="true" className="flex size-11 shrink-0 rotate-[-6deg] items-center justify-center rounded-xl bg-card font-display text-lg font-extrabold text-brand shadow-sm ring-1 ring-brand/20">
+              <ListOrderedIcon className="size-5" />
+            </span>
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="font-display font-extrabold">{t("makeRanking")}</span>
+              <span className="text-sm text-muted-foreground">{t("makeRankingHint")}</span>
+            </span>
+          </Link>
           {shown.length === 0 ? (
             <div className="flex flex-col items-center gap-3 rounded-3xl border-2 border-dashed border-border px-6 py-8 text-center">
               <p className="font-hand text-2xl text-muted-foreground">{t("cardsEmpty")}</p>

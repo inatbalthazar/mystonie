@@ -8,6 +8,7 @@ import type { CardData, CardKind, CardSize } from "@/core/cards/types";
 import { isCountryCode } from "@/core/countries";
 import { shownShare } from "@/core/finish-share";
 import { userPlaces, userRegions } from "./atlas";
+import { rankingDone } from "./rankings";
 import { linkRecapCard } from "./recaps";
 import { adminClient } from "./supabase-admin";
 import { publicSupabaseEnv, type UserClient } from "./supabase-server";
@@ -37,19 +38,20 @@ export function publicImageUrl(path: string): string | null {
  * A share also returns a signed URL the browser uploads the PNG to (the bucket has no client write access).
  */
 export async function saveCard(db: UserClient, userId: string, save: CardSave): Promise<{ uploadUrl: string | null } | null> {
-  const [{ data: profile, error: profileError }, finishShare, completed, played, mapped] = await Promise.all([
+  const [{ data: profile, error: profileError }, finishShare, completed, played, mapped, ranking] = await Promise.all([
     db.from("profiles").select("username, avatar_url").eq("id", userId).single(),
     cardFinishShare(db, userId, save),
     completedChallenge(db, userId, save),
     playedReel(db, userId, save),
     ownAtlas(db, userId, save),
+    rankingDone(db, userId, save.data.ranking),
   ]);
   if (profileError) throw new Error(`profiles read failed: ${profileError.message}`);
   if (!completed || !played || !mapped) return null;
   const hideName = save.data.hide?.includes("username");
   const storage = publicSupabaseEnv()?.url;
   const photo = !hideName && !save.data.hide?.includes("photo") && storage && isOwnAvatar(profile.avatar_url, userId, storage) ? profile.avatar_url : null;
-  const params = { ...save.data, username: hideName ? null : profile.username, avatarUrl: photo, finishShare };
+  const params = { ...save.data, username: hideName ? null : profile.username, avatarUrl: photo, finishShare, ...(ranking ? { ranking } : {}) };
   const path = cardImagePath(userId, save.id);
 
   const { data: existing, error: readError } = await db.from("cards").select("id, shared_at").eq("id", save.id).maybeSingle();

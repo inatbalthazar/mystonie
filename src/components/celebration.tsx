@@ -15,7 +15,7 @@ import { useMyPhoto } from "@/cards/use-my-photo";
 import { usePosterPalette } from "@/cards/use-poster-palette";
 import { isSurvivedKey, type SurvivedKey } from "@/core/catalog/dtdd";
 import type { TmdbKind } from "@/core/catalog/tmdb";
-import { cardShareUrl, clampReview, cycle, finalReview } from "@/core/cards/edit";
+import { cardShareUrl, clampReview, cycle, finalReview, paletteSource } from "@/core/cards/edit";
 import { gameHours } from "@/core/cards/text";
 import { defaultTemplate, isProTemplate, templatesFor } from "@/core/cards/templates";
 import type { CardData, CardHideable, CardSize } from "@/core/cards/types";
@@ -38,7 +38,7 @@ export type CelebrationSource =
   | { kind: "finish"; entryId: string; ready: boolean }
   | { kind: "progress"; episodeLogId: string | null; readingLogId?: string | null; ready: boolean }
   | { kind: "weekly_recap" | "monthly_recap"; recapId: string; ready: boolean }
-  | { kind: "stats" | "milestone" | "challenge" | "year_review" | "reel" | "atlas" | "shelf"; ready: boolean };
+  | { kind: "stats" | "milestone" | "challenge" | "year_review" | "reel" | "atlas" | "shelf" | "ranking" | "tier_list"; ready: boolean };
 
 type Props = {
   data: CardData;
@@ -124,7 +124,8 @@ export function Celebration({ data, source, animate = false, username, host, onC
     hide,
     survived: templateId === "survived" ? survived : null,
   };
-  const palette = usePosterPalette(data.posterUrl);
+  // A ranking takes its colours from its first poster (ADR 0099).
+  const palette = usePosterPalette(paletteSource(data));
   const cardRef = useRef<HTMLDivElement>(null);
   const png = usePrerenderedCard(cardRef, size, JSON.stringify([templateId, size, card, palette]));
   const locked = isProTemplate(templateId) && !pro?.pro;
@@ -249,7 +250,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
   const read = isReadingKind(data.kind);
   // Milestone, Challenge, Reel of the Day, Atlas and Shelf cards have only the username to hide; a book's Finish card has no time on it, and a game's
   // has one only with its hours (the player's or the average).
-  const onlyUser = !!(data.milestone || data.challenge || data.reel || data.atlas || data.shelf);
+  const onlyUser = !!(data.milestone || data.challenge || data.reel || data.atlas || data.shelf || data.ranking);
   const noTime = data.recap ? false : (read && !data.reading) || (data.kind === "game" && !gameHours(card));
   const hideable: CardHideable[] = [
     ...(username ? (["username"] as const) : []),
@@ -257,6 +258,9 @@ export function Celebration({ data, source, animate = false, username, host, onC
     ...(onlyUser || noTime ? [] : (["time"] as const)),
     ...(!onlyUser && (data.recap ? data.recap.episodes > 0 : data.kind === "series" || read) ? (["episodes"] as const) : []),
     ...(source.kind === "finish" && isRare(data.finishShare) ? (["finisher"] as const) : []),
+    // A ranking's ✓ marks and notes, when it has any (ADR 0099).
+    ...(data.ranking?.items.some((i) => i.done) ? (["done"] as const) : []),
+    ...(data.ranking?.items.some((i) => i.note) ? (["notes"] as const) : []),
   ];
 
   /** The line under the stamp: what this card celebrates. */
@@ -270,6 +274,7 @@ export function Celebration({ data, source, animate = false, username, host, onC
     }
     if (data.atlas) return t("atlasCardTitle", { count: data.atlas.countries.length });
     if (data.shelf) return t("shelfCardTitle", { count: data.shelf.titles.length });
+    if (data.ranking) return t("rankCardTitle", { name: data.name });
     if (source.kind === "year_review" && data.recap) return t("yearTitle", { year: data.recap.from.slice(0, 4) });
     if (source.kind === "finish") {
       return read
@@ -389,16 +394,19 @@ export function Celebration({ data, source, animate = false, username, host, onC
           {canShare ? <Share2Icon className="size-5" aria-hidden="true" /> : <LinkIcon className="size-5" aria-hidden="true" />}
           {!ready && !locked ? (online ? t("preparing") : t("shareOffline")) : canShare ? t("share") : t("shareLink")}
         </button>
-        <div className="grid grid-cols-3 gap-2">
+        <div className={cn("grid gap-2", data.ranking ? "grid-cols-2" : "grid-cols-3")}>
           <SecondaryAction onClick={() => download()} disabled={!png || locked} icon={<DownloadIcon className="size-5" aria-hidden="true" />}>
             {t("download")}
           </SecondaryAction>
           <SecondaryAction onClick={() => changeStyle()} disabled={styles.length < 2} icon={<PaletteIcon className="size-5" aria-hidden="true" />}>
             {t("changeStyle")}
           </SecondaryAction>
-          <SecondaryAction onClick={() => setSticker((s) => !s)} pressed={sticker} icon={<StickerIcon className="size-5" aria-hidden="true" />}>
-            {t("sticker")}
-          </SecondaryAction>
+          {/* A ranking has no sticker: the sticker draws numbers, and a ranking has none. */}
+          {!data.ranking && (
+            <SecondaryAction onClick={() => setSticker((s) => !s)} pressed={sticker} icon={<StickerIcon className="size-5" aria-hidden="true" />}>
+              {t("sticker")}
+            </SecondaryAction>
+          )}
         </div>
         <p role="status" className="min-h-5 text-center text-sm text-muted-foreground [overflow-wrap:anywhere]">
           {notice}

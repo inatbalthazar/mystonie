@@ -133,3 +133,42 @@ export function suggestionReason(p: Pick<SuggestedPerson, "finished" | "shared" 
   if (p.mutuals === 1) return { kind: "mutuals", count: 1 };
   return { kind: "active", finished: p.finished };
 }
+
+/** A ranking or tier list card shared by someone the viewer follows, or by the viewer (ADR 0099, step 3). */
+export type FeedRanking = {
+  cardId: string;
+  type: "top" | "tier";
+  sharedAt: string;
+  /** The card's PNG. */
+  imageUrl: string;
+  /** The list's name and how many things are on it. */
+  name: string;
+  count: number;
+  /** The first few things, top first, for the line under the card. */
+  preview: string[];
+  user: PersonRef;
+  mine: boolean;
+};
+
+/** What the Following tab shows: everything, only finishes (no rankings or articles), or only rankings. */
+export const FEED_SHOWS = ["all", "finishes", "rankings"] as const;
+export type FeedShow = (typeof FEED_SHOWS)[number];
+
+/** The `?show=` of the Following tab; anything else is everything. */
+export const parseFeedShow = (v: unknown): FeedShow => (FEED_SHOWS.includes(v as FeedShow) ? (v as FeedShow) : "all");
+
+/**
+ * Merges dated extras (rankings) into the feed's slots, newest first, both lists already newest first. An extra older
+ * than the last slot waits for the next page, unless the feed has no more (`complete`).
+ */
+export function mergeByTime<T>(slots: readonly T[], extras: readonly T[], time: (t: T) => number, complete: boolean): T[] {
+  const out: T[] = [];
+  let next = 0;
+  for (const slot of slots) {
+    const at = time(slot);
+    while (next < extras.length && time(extras[next]!) >= at) out.push(extras[next++]!);
+    out.push(slot);
+  }
+  if (complete) out.push(...extras.slice(next));
+  return out;
+}

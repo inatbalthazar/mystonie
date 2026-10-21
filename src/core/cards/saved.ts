@@ -20,6 +20,7 @@ import {
 } from "../collection/reading";
 import { COUNTRY_CODES, isCountryCode } from "../countries";
 import { isUuidV7 } from "../ids";
+import { parseRanking, RANK_TITLE_MAX } from "../rankings";
 import { REEL_GUESSES, reelNumber } from "../reel";
 import { reviewLength } from "./edit";
 import { isSurvivedTemplate, isTemplateId, templateFits, type TemplateId } from "./templates";
@@ -371,14 +372,18 @@ export function parseCardData(v: unknown): CardData | null {
   const reel = parseReel(v.reel);
   const atlas = parseAtlas(v.atlas);
   const shelf = parseShelf(v.shelf);
-  if (milestone === undefined || challenge === undefined || reel === undefined || atlas === undefined || shelf === undefined) return null;
-  if (num(progress, reading, recap, milestone, challenge, reel, atlas, shelf) > 1) return null;
-  // A reel card never shows the movie; Atlas and Shelf cards are about no one title.
-  if ((reel || atlas || shelf) && (kind !== "movie" || posterUrl)) return null;
+  const ranking = parseRanking(v.ranking);
+  if (milestone === undefined || challenge === undefined || reel === undefined || atlas === undefined || shelf === undefined || ranking === undefined)
+    return null;
+  if (num(progress, reading, recap, milestone, challenge, reel, atlas, shelf, ranking) > 1) return null;
+  // A reel card never shows the movie; Atlas, Shelf and ranking cards are about no one title.
+  if ((reel || atlas || shelf || ranking) && (kind !== "movie" || posterUrl)) return null;
+  // A ranking's name is its title (ADR 0099).
+  if (ranking && (name as string).length > RANK_TITLE_MAX) return null;
   const survived = v.survived ?? null;
   if (
     survived !== null &&
-    (!isSurvivedKey(survived) || (kind !== "movie" && kind !== "series") || num(progress, reading, recap, milestone, challenge, reel, atlas, shelf) > 0)
+    (!isSurvivedKey(survived) || (kind !== "movie" && kind !== "series") || num(progress, reading, recap, milestone, challenge, reel, atlas, shelf, ranking) > 0)
   ) {
     return null;
   }
@@ -386,7 +391,7 @@ export function parseCardData(v: unknown): CardData | null {
   const finishShare = v.finishShare ?? null;
   if (
     finishShare !== null &&
-    (typeof finishShare !== "number" || !(finishShare > 0 && finishShare <= 1) || num(progress, reading, recap, milestone, challenge, reel, atlas, shelf) > 0)
+    (typeof finishShare !== "number" || !(finishShare > 0 && finishShare <= 1) || num(progress, reading, recap, milestone, challenge, reel, atlas, shelf, ranking) > 0)
   )
     return null;
   return {
@@ -415,6 +420,7 @@ export function parseCardData(v: unknown): CardData | null {
     ...(reel ? { reel } : {}),
     ...(atlas ? { atlas } : {}),
     ...(shelf ? { shelf } : {}),
+    ...(ranking ? { ranking } : {}),
     survived: survived as SurvivedKey | null,
     finishShare: finishShare as number | null,
     hide: [...new Set((hide as CardHideable[] | undefined) ?? [])],
@@ -437,7 +443,7 @@ export function parseCardSave(body: unknown): CardSave | null {
   const data = parseCardData(body.data);
   if (!data || !templateFits(templateId, kind as CardKind, size, data.kind)) return null;
   const reading = data.kind === "book" || data.kind === "manga";
-  if (kind === "finish" && (!entryId || data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas || data.shelf))
+  if (kind === "finish" && (!entryId || data.progress || data.reading || data.recap || data.milestone || data.challenge || data.reel || data.atlas || data.shelf || data.ranking))
     return null;
   if (kind === "progress" && !(reading ? data.reading : data.progress && data.kind === "series")) return null;
   if (episodeLogId && !data.progress) return null;
@@ -455,6 +461,11 @@ export function parseCardSave(body: unknown): CardSave | null {
   if (data.atlas && kind !== "atlas" && kind !== "sticker") return null;
   if (kind === "shelf" && (!data.shelf || sourced || recapId)) return null;
   if (data.shelf && kind !== "shelf" && kind !== "sticker") return null;
+  // A ranking is only ever its own card (no sticker: the sticker draws numbers, and a ranking has none).
+  if (kind === "ranking" && (!data.ranking || data.ranking.tiers || sourced || recapId)) return null;
+  // A tier list is a ranking with rows (ADR 0099, step 2).
+  if (kind === "tier_list" && (!data.ranking?.tiers || sourced || recapId)) return null;
+  if (data.ranking && kind !== "ranking" && kind !== "tier_list") return null;
   // A Survived card is a finish on the Survived template, and that template draws nothing else.
   if (!!data.survived !== isSurvivedTemplate(templateId) || (data.survived && kind !== "finish")) return null;
   // Highlights belong to a Year in Review; a recap id to a weekly or monthly recap.

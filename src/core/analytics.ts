@@ -75,6 +75,10 @@ export type AnalyticsEvents = {
   invite_shared: { channel: "share_sheet" | "copy"; place: "people" | "me" | "join" };
   /** A new account accepted the invite it came from (ADR 0098): it and the inviter now follow each other. */
   invite_accepted: Record<string, never>;
+  /** A ranking made into a card (ADR 0099): a top list or a tier list, and how many things are on it. Shares show as `card_shared` (`card`: ranking or tier_list). */
+  ranking_made: { count: number; type: "top" | "tier" };
+  /** Someone started their own from a shared ranking (`/rank?from=`, ADR 0099 step 4). */
+  ranking_remixed: { type: "top" | "tier" };
 };
 
 /** Where a Journal article's Stamp, Save or Share was tapped: its page, the feed (and the Journal), or a profile's Journal tab (ADR 0092). */
