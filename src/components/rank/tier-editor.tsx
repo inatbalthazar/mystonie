@@ -6,13 +6,15 @@ import { TIER_COLOURS } from "@/cards/rank-parts";
 import { ROW_NAMES, TIER_ITEMS_MAX, TIER_LABEL_MAX, TIERS_MAX, type RankItem } from "@/core/rankings";
 import { cn } from "@/lib/utils";
 import { IconButton, Thumb } from "./rank-bits";
+import { under, useDrag } from "./use-drag";
 
 /** A row's label as shown: what the owner typed, or the row's default letter while it's blank. */
 export const rowName = (tiers: readonly string[], row: number) => tiers[row]?.trim() || ROW_NAMES[row] || String(row + 1);
 
 /**
  * The tier list being made (ADR 0099, step 2): a row per tier with its colour and a label to rename, its things as small
- * posters and a ＋ to add more. Tap a poster for its tools: another row, left or right in its row, or off the list.
+ * posters and a ＋ to add more. Drag a poster to another row or along its row (ADR 0100; a finger holds it a moment
+ * first), or tap it for its tools: another row, left or right in its row, or off the list.
  */
 export function TierEditor({
   tiers,
@@ -26,6 +28,7 @@ export function TierEditor({
   onPick,
   onMoveTo,
   onShift,
+  onPlace,
   onRemove,
 }: {
   tiers: readonly string[];
@@ -39,10 +42,32 @@ export function TierEditor({
   onPick: (row: number) => void;
   onMoveTo: (ref: string, row: number) => void;
   onShift: (ref: string, by: 1 | -1) => void;
+  /** Dragged into `row`, before `before` (another of its things) or at its end. */
+  onPlace: (ref: string, row: number, before: string | null) => void;
   onRemove: (ref: string) => void;
 }) {
   const t = useTranslations("Rank");
   const full = items.length >= TIER_ITEMS_MAX;
+  const drag = useDrag({
+    onMove: (ref, x, y) => {
+      const rowEl = under(x, y, "[data-tier-row]");
+      if (!rowEl) return;
+      const row = Number(rowEl.dataset.tierRow);
+      const poster = under(x, y, "[data-tier-item]");
+      const over = poster?.dataset.tierItem;
+      if (over === ref) return;
+      // Over the row but no poster: to its end, from another row.
+      if (!poster || !over) {
+        if (items.find((i) => i.ref === ref)?.tier !== row) onPlace(ref, row, null);
+        return;
+      }
+      // Before the poster it's over, or after it from past its middle.
+      const rect = poster.getBoundingClientRect();
+      if (x < rect.left + rect.width / 2) return onPlace(ref, row, over);
+      const others = items.filter((i) => i.tier === row && i.ref !== ref);
+      onPlace(ref, row, others[others.findIndex((i) => i.ref === over) + 1]?.ref ?? null);
+    },
+  });
 
   return (
     <div className="flex flex-col gap-2">
@@ -52,7 +77,7 @@ export function TierEditor({
           const chosen = inRow.find((i) => i.ref === selected);
           const name = rowName(tiers, row);
           return (
-            <li key={row} className="flex flex-col gap-2 rounded-2xl bg-card p-1.5 shadow-sm ring-1 ring-border">
+            <li key={row} data-tier-row={row} className="flex flex-col gap-2 rounded-2xl bg-card p-1.5 shadow-sm ring-1 ring-border">
               <div className="flex items-stretch gap-2">
                 <label className="flex w-16 shrink-0 items-center rounded-xl px-1 shadow-sm" style={{ background: TIER_COLOURS[row % TIER_COLOURS.length] }}>
                   <span className="sr-only">{t("rowLabel", { row: row + 1 })}</span>
@@ -75,10 +100,16 @@ export function TierEditor({
                     <button
                       key={item.ref}
                       type="button"
+                      data-tier-item={item.ref}
+                      {...drag.bind(item.ref)}
                       aria-pressed={selected === item.ref}
                       aria-label={item.name}
                       onClick={() => onSelect(selected === item.ref ? null : item.ref)}
-                      className="relative rounded-md outline-offset-2 aria-pressed:outline-[3px] aria-pressed:outline-brand"
+                      className={cn(
+                        "relative cursor-grab rounded-md outline-offset-2 select-none [-webkit-touch-callout:none] aria-pressed:outline-[3px] aria-pressed:outline-brand",
+                        // Where it will land, while its copy is under the finger.
+                        drag.dragging === item.ref && "opacity-35",
+                      )}
                     >
                       <Thumb item={item} />
                       {done.has(item.ref) && (
@@ -134,6 +165,10 @@ export function TierEditor({
         {" · "}
         {t("tierHint")}
       </p>
+      {drag.ghost((ref) => {
+        const item = items.find((i) => i.ref === ref);
+        return item && <Thumb item={item} className="size-full rounded-md ring-2 ring-brand" />;
+      })}
     </div>
   );
 }

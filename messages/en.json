@@ -723,7 +723,8 @@
     "areaWatched": "Watched",
     "areaRead": "Read",
     "areaPlayed": "Played",
-    "areaFinished": "{count, plural, one {# finished} other {# finished}}"
+    "areaFinished": "{count, plural, one {# finished} other {# finished}}",
+    "rankLink": "Or make a ranking: a top 10 or a tier list"
   },
   "Series": {
     "backToCollection": "← Your collection",
@@ -2367,7 +2368,7 @@
     "addRow": "Add a row",
     "removeRow": "Remove row {tier}",
     "tierCount": "{count} of {max}",
-    "tierHint": "Tap a poster to move it to another row or along its row.",
+    "tierHint": "Hold a poster and drag it to another row or along its row, or tap it for more.",
     "moveTo": "Move to",
     "moveLeft": "Move {name} left",
     "moveRight": "Move {name} right",
@@ -2376,10 +2377,7 @@
     "nameLabel": "Name your list (optional)",
     "namePlaceholder": "My top {count} of all time",
     "defaultName": "My top {count}",
-    "sizeLabel": "How many",
-    "size": "Top {count}",
     "slotEmpty": "Add #{rank}",
-    "addMore": "Add one more",
     "moveUp": "Move {name} up",
     "moveDown": "Move {name} down",
     "remove": "Take {name} off",
@@ -2405,6 +2403,9 @@
     "allCountries": "All countries",
     "regionsSearch": "Search {country}",
     "loading": "Loading…",
-    "loadError": "Couldn't load this map. Check your connection and try again."
+    "loadError": "Couldn't load this map. Check your connection and try again.",
+    "dragHandle": "Move {name}: drag it, or use the arrow keys",
+    "dragHint": "Drag ⋮⋮ to change the order, or hold a row and drag it.",
+    "topFull": "That's {max}, the most a top list holds."
   }
 }

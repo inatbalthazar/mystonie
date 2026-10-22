@@ -628,7 +628,8 @@
     "areaWatched": "ดู",
     "areaRead": "อ่าน",
     "areaPlayed": "เล่น",
-    "areaFinished": "จบ {count} เรื่อง"
+    "areaFinished": "จบ {count} เรื่อง",
+    "rankLink": "หรือจัดอันดับ: Top 10 หรือ tier list"
   },
   "Series": {
     "backToCollection": "← คอลเลกชันของคุณ",
@@ -2254,7 +2255,7 @@
     "addRow": "เพิ่มแถว",
     "removeRow": "ลบแถว {tier}",
     "tierCount": "{count} จาก {max}",
-    "tierHint": "แตะโปสเตอร์เพื่อย้ายไปแถวอื่น หรือเลื่อนซ้ายขวาในแถว",
+    "tierHint": "กดค้างที่โปสเตอร์แล้วลากไปแถวอื่นหรือเลื่อนในแถว หรือแตะเพื่อดูตัวเลือก",
     "moveTo": "ย้ายไปแถว",
     "moveLeft": "เลื่อน {name} ไปทางซ้าย",
     "moveRight": "เลื่อน {name} ไปทางขวา",
@@ -2263,10 +2264,7 @@
     "nameLabel": "ตั้งชื่อลิสต์ (ไม่ใส่ก็ได้)",
     "namePlaceholder": "Top {count} ตลอดกาลของฉัน",
     "defaultName": "Top {count} ของฉัน",
-    "sizeLabel": "จำนวน",
-    "size": "Top {count}",
     "slotEmpty": "เพิ่มอันดับ {rank}",
-    "addMore": "เพิ่มอีกหนึ่ง",
     "moveUp": "เลื่อน {name} ขึ้น",
     "moveDown": "เลื่อน {name} ลง",
     "remove": "เอา {name} ออก",
@@ -2292,6 +2290,9 @@
     "allCountries": "ทุกประเทศ",
     "regionsSearch": "ค้นหาใน{country}",
     "loading": "กำลังโหลด…",
-    "loadError": "โหลดแผนที่ไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่"
+    "loadError": "โหลดแผนที่ไม่ได้ ตรวจอินเทอร์เน็ตแล้วลองใหม่",
+    "dragHandle": "ย้าย {name}: ลาก หรือใช้ปุ่มลูกศร",
+    "dragHint": "ลาก ⋮⋮ เพื่อเปลี่ยนลำดับ หรือกดค้างที่แถวแล้วลาก",
+    "topFull": "ครบ {max} แล้ว ท็อปลิสต์ใส่ได้เท่านี้"
   }
 }

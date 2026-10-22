@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { markDone, moveItem, moveToTier, parseRanking, parseRef, remixRanking, removeTier, shiftInTier, tierPosterHeight, tierRows, titleRef } from "./rankings";
+import { markDone, moveItem, moveToTier, parseRanking, parseRef, placeInTier, remixRanking, removeTier, shiftInTier, tierPosterHeight, tierRows, titleRef } from "./rankings";
 
 const POSTER = "https://image.tmdb.org/t/p/w342/abc.jpg";
 const dune = { ref: "tmdb:movie:438631", kind: "movie", name: "Dune", year: 2021, posterUrl: POSTER };
@@ -136,6 +136,20 @@ describe("tier lists (ADR 0099, step 2)", () => {
     expect(row(shiftInTier(list, "tmdb:movie:3", -1))).toEqual(["3@0", "2@1", "1@0"]);
     expect(row(shiftInTier(list, "tmdb:movie:3", 1))).toEqual(["1@0", "2@1", "3@0"]);
     expect(row(shiftInTier(list, "tmdb:movie:2", -1))).toEqual(["1@0", "2@1", "3@0"]);
+  });
+
+  it("places a dragged item before another in a row, or at a row's end (ADR 0100)", () => {
+    expect(row(placeInTier(list, "tmdb:movie:3", 0, "tmdb:movie:1"))).toEqual(["3@0", "1@0", "2@1"]);
+    expect(row(placeInTier(list, "tmdb:movie:1", 1, "tmdb:movie:2"))).toEqual(["1@1", "2@1", "3@0"]);
+    expect(row(placeInTier(list, "tmdb:movie:1", 1, null))).toEqual(["2@1", "1@1", "3@0"]);
+    expect(row(placeInTier(list, "tmdb:movie:2", 0, null))).toEqual(["1@0", "3@0", "2@0"]);
+    // Onto an empty row, and "before" an item of another row: its end.
+    expect(row(placeInTier(list, "tmdb:movie:1", 2, null))).toEqual(["2@1", "3@0", "1@2"]);
+    expect(row(placeInTier(list, "tmdb:movie:2", 0, "tmdb:movie:2"))).toEqual(["1@0", "2@1", "3@0"]);
+    // Nothing moves: the same list back.
+    expect(placeInTier(list, "tmdb:movie:3", 0, null)).toBe(list);
+    expect(placeInTier(list, "tmdb:movie:1", 0, "tmdb:movie:3")).toBe(list);
+    expect(placeInTier(list, "tmdb:movie:9", 0, null)).toBe(list);
   });
 
   it("removes only an empty row, moving the rows below up", () => {

@@ -1,8 +1,8 @@
 "use client";
 
-import { ArrowDownIcon, ArrowUpIcon, CheckIcon, PlusIcon, SparklesIcon, XIcon } from "lucide-react";
+import { ArrowDownIcon, ArrowUpIcon, CheckIcon, GripVerticalIcon, PlusIcon, SparklesIcon, XIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type Dispatch, type SetStateAction } from "react";
 import { Celebration } from "@/components/celebration";
 import { loadRegionMap } from "@/components/atlas/region-map";
 import { loadWorldMap } from "@/components/atlas/world-map";
@@ -15,7 +15,6 @@ import {
   DEFAULT_TIERS,
   RANK_MAX,
   RANK_NOTE_MAX,
-  RANK_SIZES,
   RANK_TITLE_MAX,
   ROW_NAMES,
   TIER_ITEMS_MAX,
@@ -24,6 +23,7 @@ import {
   moveToTier,
   parseRanking,
   parseRef,
+  placeInTier,
   removeTier,
   shiftInTier,
   titleRef,
@@ -35,6 +35,7 @@ import { cn } from "@/lib/utils";
 import { PlacePicker } from "./place-picker";
 import { IconButton, Thumb } from "./rank-bits";
 import { TierEditor, rowName } from "./tier-editor";
+import { under, useDrag } from "./use-drag";
 import { Sheet } from "../sheet";
 import { MIN_SEARCH_CHARS, PosterButton, SearchStatus, useTitleSearch } from "../title-search";
 
@@ -43,7 +44,7 @@ const DRAFT = "mystonie.rankDraft";
 type Mode = "top" | "tier";
 
 /** What's being made, kept on this device: both lists, so switching between them loses neither. */
-type Draft = { mode: Mode; name: string; size: number; items: RankItem[]; tiers: string[]; tierItems: RankItem[] };
+type Draft = { mode: Mode; name: string; items: RankItem[]; tiers: string[]; tierItems: RankItem[] };
 
 function readDraft(): Draft | null {
   try {
@@ -60,7 +61,6 @@ function readDraft(): Draft | null {
     return {
       mode: raw.mode === "tier" ? "tier" : "top",
       name: typeof raw.name === "string" ? raw.name.slice(0, RANK_TITLE_MAX) : "",
-      size: typeof raw.size === "number" && raw.size >= 1 && raw.size <= RANK_MAX ? raw.size : 5,
       items: ranking?.items ?? [],
       tiers,
       tierItems: tierRanking?.items ?? [],
@@ -89,9 +89,9 @@ function writeDraft(draft: Draft | null) {
 }
 
 /**
- * Make a ranking (ADR 0099): a top list or a tier list. Name it if you like, then either pick Top 3, 5 or 10 and fill
- * the places with anything (titles from every catalog, countries and their regions; seen or not), order them with the
- * arrows and add a line to any; or fill a tier list's rows, rename them, and move things between them. The lists are
+ * Make a ranking (ADR 0099): a top list or a tier list. Name it if you like, then either add things one by one with ＋
+ * (titles from every catalog, countries and their regions; seen or not), drag them into order (ADR 0100) and add a
+ * line to any; or fill a tier list's rows, rename them, and drag things between them. The lists are
  * kept on this device until the card is made. The ✓ marks come from the server. `remix`, a shared ranking (step 4),
  * replaces the list of its kind; the other list stays as it was.
  */
@@ -99,7 +99,6 @@ export function RankMaker({ username, host, remix = null }: { username: string |
   const t = useTranslations("Rank");
   const [mode, setMode] = useState<Mode>("top");
   const [name, setName] = useState("");
-  const [size, setSize] = useState(5);
   const [items, setItems] = useState<RankItem[]>([]);
   const [tiers, setTiers] = useState<string[]>([...DEFAULT_TIERS]);
   const [tierItems, setTierItems] = useState<RankItem[]>([]);
@@ -120,7 +119,6 @@ export function RankMaker({ username, host, remix = null }: { username: string |
       if (draft) {
         setMode(draft.mode);
         setName(draft.name);
-        setSize(Math.max(draft.size, draft.items.length));
         setItems(draft.items);
         setTiers(draft.tiers);
         setTierItems(draft.tierItems);
@@ -137,7 +135,6 @@ export function RankMaker({ username, host, remix = null }: { username: string |
         } else {
           setMode("top");
           setItems(from);
-          setSize(RANK_SIZES.find((n) => n >= from.length) ?? RANK_MAX);
         }
         loadPlaceMaps(from);
         track("ranking_remixed", { type: rows ? "tier" : "top" });
@@ -149,11 +146,10 @@ export function RankMaker({ username, host, remix = null }: { username: string |
     return () => clearTimeout(timer);
   }, [remix]);
   useEffect(() => {
-    if (loaded) writeDraft(items.length || tierItems.length || name ? { mode, name, size, items, tiers, tierItems } : null);
-  }, [loaded, mode, name, size, items, tiers, tierItems]);
+    if (loaded) writeDraft(items.length || tierItems.length || name ? { mode, name, items, tiers, tierItems } : null);
+  }, [loaded, mode, name, items, tiers, tierItems]);
 
-  const slots = Math.max(size, items.length);
-  const listName = name.trim() || (tier ? t("tierDefaultName") : t("defaultName", { count: items.length || size }));
+  const listName = name.trim() || (tier ? t("tierDefaultName") : t("defaultName", { count: items.length }));
 
   /** Switches between a top list and a tier list. An empty one starts from the other's things. */
   function switchMode(next: Mode) {
@@ -163,7 +159,6 @@ export function RankMaker({ username, host, remix = null }: { username: string |
     if (next === "top" && items.length === 0 && tierItems.length > 0) {
       const sorted = [...tierItems].sort((a, b) => (a.tier ?? 0) - (b.tier ?? 0)).slice(0, RANK_MAX);
       setItems(sorted.map((i) => ({ ...i, tier: undefined })));
-      setSize(RANK_SIZES.find((n) => n >= sorted.length) ?? RANK_MAX);
     }
     setMode(next);
   }
@@ -216,7 +211,7 @@ export function RankMaker({ username, host, remix = null }: { username: string |
         <input
           value={name}
           onChange={(e) => setName(e.target.value.slice(0, RANK_TITLE_MAX))}
-          placeholder={tier ? t("tierNamePlaceholder") : t("namePlaceholder", { count: size })}
+          placeholder={tier ? t("tierNamePlaceholder") : t("namePlaceholder", { count: items.length || 10 })}
           maxLength={RANK_TITLE_MAX}
           className="h-12 rounded-xl border border-input bg-card px-4 text-base shadow-sm outline-none placeholder:text-muted-foreground focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-ring/20"
         />
@@ -239,69 +234,19 @@ export function RankMaker({ username, host, remix = null }: { username: string |
           onPick={setPicking}
           onMoveTo={(ref, row) => setTierItems((cur) => moveToTier(cur, ref, row))}
           onShift={(ref, by) => setTierItems((cur) => shiftInTier(cur, ref, by))}
+          onPlace={(ref, row, before) => setTierItems((cur) => placeInTier(cur, ref, row, before))}
           onRemove={(ref) => {
             setTierItems((cur) => cur.filter((i) => i.ref !== ref));
             setSelected(null);
           }}
         />
       ) : (
-        <>
-          <div role="group" aria-label={t("sizeLabel")} className="grid grid-cols-3 gap-1 rounded-full bg-muted p-1">
-            {RANK_SIZES.map((n) => (
-              <button
-                key={n}
-                type="button"
-                aria-pressed={size === n}
-                disabled={items.length > n}
-                onClick={() => setSize(n)}
-                className="min-h-10 rounded-full text-sm font-semibold text-muted-foreground transition-colors aria-pressed:bg-card aria-pressed:text-foreground aria-pressed:shadow-sm aria-pressed:ring-1 aria-pressed:ring-brand/60 disabled:opacity-40"
-              >
-                {t("size", { count: n })}
-              </button>
-            ))}
-          </div>
-
-          <ol className="flex flex-col gap-2">
-            {Array.from({ length: slots }, (_, i) => {
-              const item = items[i];
-              if (!item) {
-                return (
-                  <li key={`empty-${i}`}>
-                    <button
-                      type="button"
-                      onClick={() => setPicking(i)}
-                      disabled={i > items.length}
-                      className="flex min-h-16 w-full items-center gap-3 rounded-2xl border-2 border-dashed border-border px-4 text-left font-semibold text-muted-foreground hover:border-brand/50 hover:text-brand disabled:opacity-40"
-                    >
-                      <Rank n={i + 1} muted />
-                      <PlusIcon className="size-5" aria-hidden="true" />
-                      {t("slotEmpty", { rank: i + 1 })}
-                    </button>
-                  </li>
-                );
-              }
-              return (
-                <Row
-                  key={item.ref}
-                  item={item}
-                  rank={i + 1}
-                  done={done.has(item.ref)}
-                  first={i === 0}
-                  last={i === items.length - 1}
-                  onMove={(by) => setItems((cur) => moveItem(cur, i, i + by))}
-                  onRemove={() => setItems((cur) => cur.filter((x) => x.ref !== item.ref))}
-                  onNote={(note) => setItems((cur) => cur.map((x) => (x.ref === item.ref ? { ...x, note } : x)))}
-                />
-              );
-            })}
-          </ol>
-          {items.length < RANK_MAX && items.length >= size && (
-            <button type="button" onClick={() => setPicking(items.length)} className="-mt-3 flex min-h-11 items-center gap-2 self-start text-sm font-semibold text-brand">
-              <PlusIcon className="size-4" aria-hidden="true" />
-              {t("addMore")}
-            </button>
-          )}
-        </>
+        <TopList
+          items={items}
+          done={done}
+          onItems={setItems}
+          onAdd={() => setPicking(items.length)}
+        />
       )}
 
       <div className="flex items-start gap-3">
@@ -368,12 +313,100 @@ function Rank({ n, muted = false }: { n: number; muted?: boolean }) {
   );
 }
 
+/**
+ * The top list being made: its things in order and one ＋ at the end for the next (ADR 0100). A thing is dragged into
+ * place by its grip, or anywhere on it with a finger held a moment; on the grip, the arrow keys move it too.
+ */
+function TopList({
+  items,
+  done,
+  onItems,
+  onAdd,
+}: {
+  items: RankItem[];
+  done: ReadonlySet<string>;
+  onItems: Dispatch<SetStateAction<RankItem[]>>;
+  onAdd: () => void;
+}) {
+  const t = useTranslations("Rank");
+  const drag = useDrag({
+    onMove: (ref, x, y) => {
+      const row = under(x, y, "[data-rank-row]");
+      if (!row) return;
+      const to = Number(row.dataset.rankRow);
+      const rect = row.getBoundingClientRect();
+      const middle = rect.top + rect.height / 2;
+      // Past the middle of the row it's over, so rows of different heights don't swap back and forth.
+      onItems((cur) => {
+        const from = cur.findIndex((i) => i.ref === ref);
+        if (from < 0 || from === to || (to > from ? y < middle : y > middle)) return cur;
+        return moveItem(cur, from, to);
+      });
+    },
+  });
+  const move = (from: number, by: 1 | -1) => onItems((cur) => moveItem(cur, from, from + by));
+
+  return (
+    <div className="flex flex-col gap-2">
+      {items.length > 0 && (
+        <ol className="flex flex-col gap-2">
+          {items.map((item, i) => (
+            <Row
+              key={item.ref}
+              item={item}
+              rank={i + 1}
+              done={done.has(item.ref)}
+              first={i === 0}
+              last={i === items.length - 1}
+              dragged={drag.dragging === item.ref}
+              bind={drag.bind}
+              onMove={(by) => move(i, by)}
+              onRemove={() => onItems((cur) => cur.filter((x) => x.ref !== item.ref))}
+              onNote={(note) => onItems((cur) => cur.map((x) => (x.ref === item.ref ? { ...x, note } : x)))}
+            />
+          ))}
+        </ol>
+      )}
+      {items.length < RANK_MAX ? (
+        <button
+          type="button"
+          onClick={onAdd}
+          className="flex min-h-16 w-full items-center gap-3 rounded-2xl border-2 border-dashed border-brand/40 px-4 text-left font-semibold text-brand hover:border-brand hover:bg-brand-soft/40 press"
+        >
+          <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-brand text-brand-foreground">
+            <PlusIcon className="size-5" strokeWidth={2.6} aria-hidden="true" />
+          </span>
+          {t("slotEmpty", { rank: items.length + 1 })}
+        </button>
+      ) : (
+        <p className="text-sm text-muted-foreground">{t("topFull", { max: RANK_MAX })}</p>
+      )}
+      {items.length > 1 && <p className="text-sm text-muted-foreground">{t("dragHint")}</p>}
+      {drag.ghost((ref) => {
+        const at = items.findIndex((i) => i.ref === ref);
+        const item = items[at];
+        return (
+          item && (
+            <div className="flex size-full items-center gap-1 rounded-2xl bg-card p-2 pl-8 ring-2 ring-brand">
+              <Rank n={at + 1} />
+              <Thumb item={item} />
+              <span className="ml-1 truncate font-semibold">{item.name}</span>
+            </div>
+          )
+        );
+      })}
+    </div>
+  );
+}
+
 function Row({
   item,
   rank,
   done,
   first,
   last,
+  dragged,
+  bind,
   onMove,
   onRemove,
   onNote,
@@ -383,6 +416,8 @@ function Row({
   done: boolean;
   first: boolean;
   last: boolean;
+  dragged: boolean;
+  bind: ReturnType<typeof useDrag>["bind"];
   onMove: (by: 1 | -1) => void;
   onRemove: () => void;
   onNote: (note: string) => void;
@@ -391,11 +426,33 @@ function Row({
   const place = item.kind === "country" || item.kind === "region";
   const [noting, setNoting] = useState(!!item.note);
   return (
-    <li className="flex flex-col gap-2 rounded-2xl bg-card p-2 pr-1 shadow-sm ring-1 ring-border">
-      <div className="flex items-center gap-2">
+    <li
+      data-rank-row={rank - 1}
+      {...bind(item.ref)}
+      className={cn(
+        "flex flex-col gap-2 rounded-2xl bg-card py-2 pr-1 shadow-sm ring-1 ring-border select-none [-webkit-touch-callout:none]",
+        // Where it will land, while its copy is under the finger.
+        dragged && "opacity-35 ring-2 ring-brand",
+      )}
+    >
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          data-drag-handle
+          {...bind(item.ref, { handle: true })}
+          aria-label={t("dragHandle", { name: item.name })}
+          onKeyDown={(e) => {
+            if (e.key !== "ArrowUp" && e.key !== "ArrowDown") return;
+            e.preventDefault();
+            if (e.key === "ArrowUp" ? !first : !last) onMove(e.key === "ArrowUp" ? -1 : 1);
+          }}
+          className="flex h-12 w-8 shrink-0 cursor-grab touch-none items-center justify-center rounded-lg text-muted-foreground/70 hover:text-foreground active:cursor-grabbing"
+        >
+          <GripVerticalIcon className="size-5" aria-hidden="true" />
+        </button>
         <Rank n={rank} />
         <Thumb item={item} />
-        <span className="flex min-w-0 flex-1 flex-col">
+        <span className="ml-1 flex min-w-0 flex-1 flex-col">
           <span className="flex min-w-0 items-center gap-1.5 font-semibold">
             <span className="truncate">{item.name}</span>
             {done && (
@@ -410,10 +467,11 @@ function Row({
             {item.year ? ` · ${item.year}` : ""}
           </span>
         </span>
-        <IconButton label={t("moveUp", { name: item.name })} disabled={first} onClick={() => onMove(-1)}>
+        {/* For screen readers, which can't drag; shown when reached with the keyboard. */}
+        <IconButton label={t("moveUp", { name: item.name })} disabled={first} onClick={() => onMove(-1)} className="sr-only focus-visible:not-sr-only">
           <ArrowUpIcon className="size-4" aria-hidden="true" />
         </IconButton>
-        <IconButton label={t("moveDown", { name: item.name })} disabled={last} onClick={() => onMove(1)}>
+        <IconButton label={t("moveDown", { name: item.name })} disabled={last} onClick={() => onMove(1)} className="sr-only focus-visible:not-sr-only">
           <ArrowDownIcon className="size-4" aria-hidden="true" />
         </IconButton>
         <IconButton label={t("remove", { name: item.name })} onClick={onRemove}>
@@ -427,10 +485,10 @@ function Row({
           aria-label={t("noteLabel", { name: item.name })}
           placeholder={t("notePlaceholder")}
           maxLength={RANK_NOTE_MAX}
-          className="mr-1 ml-10 h-10 rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-ring/20"
+          className="mr-1 ml-[4.5rem] h-10 rounded-lg border border-input bg-background px-3 text-sm outline-none focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-ring/20"
         />
       ) : (
-        <button type="button" onClick={() => setNoting(true)} className="ml-10 flex min-h-9 items-center self-start text-xs font-semibold text-muted-foreground hover:text-brand">
+        <button type="button" onClick={() => setNoting(true)} className="ml-[4.5rem] flex min-h-9 items-center self-start text-xs font-semibold text-muted-foreground hover:text-brand">
           {t("addNote")}
         </button>
       )}

@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftIcon, CloudOffIcon, SearchIcon } from "lucide-react";
+import { ArrowLeftIcon, CloudOffIcon, ListOrderedIcon, SearchIcon } from "lucide-react";
 import Image from "next/image";
 import { useFormatter, useTranslations } from "next-intl";
 import { useId, useState } from "react";
@@ -167,6 +167,11 @@ function QuickAddSteps({
           {/* A long history comes faster from the app it's in (ADR 0041). */}
           <Link href="/settings/import" className="inline-flex min-h-11 items-center self-start text-sm font-semibold text-brand underline-offset-4 hover:underline">
             {t("importLink")}
+          </Link>
+          {/* Rankings take anything, finished or not, so they start here too (ADR 0100). */}
+          <Link href="/rank" className="-mt-3 inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-brand underline-offset-4 hover:underline">
+            <ListOrderedIcon className="size-4" aria-hidden="true" />
+            {t("rankLink")}
           </Link>
         </>
       )}

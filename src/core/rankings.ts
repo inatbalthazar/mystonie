@@ -18,9 +18,6 @@ export const TIER_LABEL_MAX = 12;
 /** The rows a new tier list starts with. */
 export const DEFAULT_TIERS = ["S", "A", "B", "C", "D"] as const;
 
-/** The lengths offered first. Any length from 1 to `RANK_MAX` makes a card. */
-export const RANK_SIZES = [3, 5, 10] as const;
-
 /** A place on a ranking: a whole country (ISO 3166-1 alpha-2) or one of its regions (ISO 3166-2-like ids). */
 export type PlaceKind = "country" | "region";
 
@@ -211,6 +208,25 @@ export function shiftInTier(items: readonly RankItem[], ref: string, by: 1 | -1)
   const next = [...items];
   [next[from], next[to]] = [next[to]!, next[from]!];
   return next;
+}
+
+/**
+ * Puts an item into a row of a tier list where it was dragged (ADR 0100): just before `before`, another item of that
+ * row, or at the row's end when `before` is null (or not in that row). The other items keep their order, and the same
+ * list comes back when nothing moves, so a drag that hovers in place changes nothing.
+ */
+export function placeInTier(items: RankItem[], ref: string, tier: number, before: string | null): RankItem[] {
+  const item = items.find((i) => i.ref === ref);
+  if (!item || before === ref) return items;
+  const rest = items.filter((i) => i.ref !== ref);
+  let at = before === null ? -1 : rest.findIndex((i) => i.ref === before && i.tier === tier);
+  if (at < 0) {
+    const last = rest.findLastIndex((i) => i.tier === tier);
+    at = last < 0 ? rest.length : last + 1;
+  }
+  const next = [...rest.slice(0, at), item.tier === tier ? item : { ...item, tier }, ...rest.slice(at)];
+  const inRow = (list: RankItem[]) => list.flatMap((i) => (i.tier === tier ? [i.ref] : [])).join("|");
+  return item.tier === tier && inRow(next) === inRow(items) ? items : next;
 }
 
 /** Takes an empty row off a tier list: the rows below move up. A row that still holds items stays. */

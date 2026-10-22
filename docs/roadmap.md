@@ -180,6 +180,7 @@ From the owner's notes at the end of [brief.th.md](brief.th.md). Each task write
 - [x] **Step 3, in the feed:** the rankings and tier lists shared by the people you follow (and yours) in Following, by date among the finishes, with "Rank these your way"; a filter: All · Finishes · Rankings (`?show=`). · **Done 2026-10-22**. Migration `20261029090000_stage4_rankings_feed.sql`.
 - [x] 🧑 Step 3 before deploying: apply `20261029090000_stage4_rankings_feed.sql` to the remote project (done 2026-10-22 through the MCP; `get_advisors` lists `following_rankings` as callable by signed-in users, intended like `following_feed`, and not by anon).
 - [x] **Step 4, remix:** "Rank these your way" on a shared ranking or tier list (`/c/<id>`) opens `/rank?from=<id>` (through sign-in when signed out) with the same name, things and rows, without its maker's ✓ marks and notes. Event `ranking_remixed`. · **Done 2026-10-22**.
+- [x] **Simpler** (the owner, 2026-10-22: "ranking should be simpler, the ＋ has to be there, drag and drop"; [ADR 0100](decisions/0100-drag-to-rank.md)): one ＋ at the end of a top list instead of Top 3/5/10, drag and drop on both kinds of list (no package), and "Or make a ranking" in the ➕ sheet. · ⚡ small · **Done 2026-10-22**. No migration.
 
 - Comments on articles and a feed of everyone's long reviews still wait for their gate ([later/long-reviews.md](product/later/long-reviews.md)). Sponsored articles aren't planned: the Journal is the team's and its members' own writing, no ads (2026-10-01).
 
