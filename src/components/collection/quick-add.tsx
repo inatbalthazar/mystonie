@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeftIcon, CloudOffIcon, ListOrderedIcon, SearchIcon } from "lucide-react";
+import { ArrowLeftIcon, ChevronRightIcon, CloudOffIcon, ListOrderedIcon, SearchIcon } from "lucide-react";
 import Image from "next/image";
 import { useFormatter, useTranslations } from "next-intl";
 import { useId, useState } from "react";
@@ -164,14 +164,23 @@ function QuickAddSteps({
       {query.trim().length < MIN_SEARCH_CHARS && (
         <>
           <p className="text-sm text-muted-foreground">{t("addHint")}</p>
-          {/* A long history comes faster from the app it's in (ADR 0041). */}
-          <Link href="/settings/import" className="inline-flex min-h-11 items-center self-start text-sm font-semibold text-brand underline-offset-4 hover:underline">
-            {t("importLink")}
+          {/* Rankings take anything, finished or not, so they start here too, ahead of the import (ADR 0100). */}
+          <Link
+            href="/rank"
+            className="mt-1 flex min-h-16 items-center gap-3 rounded-2xl bg-card p-3 shadow-sm ring-1 ring-border transition-colors hover:ring-brand/50 press"
+          >
+            <span className="flex size-11 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand">
+              <ListOrderedIcon className="size-5" aria-hidden="true" />
+            </span>
+            <span className="flex min-w-0 flex-1 flex-col">
+              <span className="font-bold">{t("rankTitle")}</span>
+              <span className="text-sm text-muted-foreground">{t("rankText")}</span>
+            </span>
+            <ChevronRightIcon className="size-5 shrink-0 text-muted-foreground" aria-hidden="true" />
           </Link>
-          {/* Rankings take anything, finished or not, so they start here too (ADR 0100). */}
-          <Link href="/rank" className="-mt-3 inline-flex min-h-11 items-center gap-1.5 self-start text-sm font-semibold text-brand underline-offset-4 hover:underline">
-            <ListOrderedIcon className="size-4" aria-hidden="true" />
-            {t("rankLink")}
+          {/* A long history comes faster from the app it's in (ADR 0041). */}
+          <Link href="/settings/import" className="inline-flex min-h-11 items-center self-start text-xs font-semibold text-muted-foreground underline-offset-4 hover:text-foreground hover:underline">
+            {t("importLink")}
           </Link>
         </>
       )}

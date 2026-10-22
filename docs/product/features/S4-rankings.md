@@ -12,7 +12,7 @@ Make a Top 3, 5 or 10 of anything: films, series, books, manga, games, countries
 4. **Remix:** "Rank these your way" from someone's list (built).
 
 ## Behaviour (step 1)
-- **Where:** `/rank`, from "Make a ranking" at the top of Me → Cards, or "Or make a ranking" in the ➕ sheet (under the search). Signed in only.
+- **Where:** `/rank`, from "Make a ranking" at the top of Me → Cards, or the "Make a ranking" card in the ➕ sheet (under the search, above the smaller import link). Signed in only.
 - **Making it:**
   - Name the list, optional: "My top 5" when empty, 60 characters at most.
   - One **＋ Add #n** at the end of the list adds the next thing, up to 10 ("That's 10, the most a top list holds"). The card says "Top n" from how many there are.

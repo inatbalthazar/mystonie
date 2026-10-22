@@ -23,7 +23,7 @@ The first version ([ADR 0099](0099-rankings.md)) asked people to choose Top 3, 5
   - drops still find rows half hidden behind the sticky "Make the card" button or the island.
 - **Accessibility:** the grip moves its row with the arrow keys. Move up and down buttons stay for screen readers, hidden until focused.
 
-**The ➕ sheet links to it.** Under the search, "Or make a ranking: a top 10 or a tier list" opens `/rank`. Rankings take anything, finished or not, so they start from the same place as adding a title.
+**The ➕ sheet links to it.** Under the search, a card, "Make a ranking: a top 10 or a tier list of anything, seen or not", opens `/rank`. Rankings take anything, finished or not, so they start from the same place as adding a title. The owner (2026-10-22) wants it to stand out more than the import, so the import below it is a small grey link.
 
 **No package.** The drag is about 150 lines of pointer events in `src/components/rank/use-drag.tsx`, not dnd-kit or a similar library ([ADR 0006](0006-single-nextjs-app.md)).
 - Placing a dragged poster in a row is `placeInTier` in `src/core/rankings.ts`, with tests.

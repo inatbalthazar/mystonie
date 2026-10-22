@@ -724,7 +724,8 @@
     "areaRead": "Read",
     "areaPlayed": "Played",
     "areaFinished": "{count, plural, one {# finished} other {# finished}}",
-    "rankLink": "Or make a ranking: a top 10 or a tier list"
+    "rankTitle": "Make a ranking",
+    "rankText": "A top 10 or a tier list of anything, seen or not"
   },
   "Series": {
     "backToCollection": "← Your collection",

@@ -629,7 +629,8 @@
     "areaRead": "อ่าน",
     "areaPlayed": "เล่น",
     "areaFinished": "จบ {count} เรื่อง",
-    "rankLink": "หรือจัดอันดับ: Top 10 หรือ tier list"
+    "rankTitle": "จัดอันดับ",
+    "rankText": "Top 10 หรือ tier list ของอะไรก็ได้ ดูแล้วหรือยังก็ได้"
   },
   "Series": {
     "backToCollection": "← คอลเลกชันของคุณ",
